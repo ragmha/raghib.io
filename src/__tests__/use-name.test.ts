@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react'
-import { useName } from '../use-name'
+import { useName } from '@/hooks/use-name'
 
 it('returns username ', () => {
   const { result } = renderHook(useName)
