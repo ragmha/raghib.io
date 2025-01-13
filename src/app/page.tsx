@@ -1,10 +1,9 @@
-import Link from 'next/link'
+import { Header } from '@/components/ui/header'
 
 export default function Home() {
   return (
     <div>
-      <h1>Home</h1>
-      <Link href="/about">About</Link>
+      <Header />
     </div>
   )
 }
