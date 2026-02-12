@@ -23,7 +23,7 @@ export function CtaSection() {
       </Link>
 
       {/* Quick info stats */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="text-center p-4 bg-base rounded-md border border-surface0">
           <span className="block text-3xl font-bold text-yellow mb-1">4</span>
           <span className="text-xs text-overlay1 uppercase tracking-wider">
