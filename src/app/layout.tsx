@@ -1,10 +1,15 @@
 import type { Metadata } from 'next'
-import { JetBrains_Mono } from 'next/font/google'
+import { Inter, IBM_Plex_Mono } from 'next/font/google'
 import '@/styles/globals.css'
 import { cn } from '@/lib/utils'
 import { ThemeProvider } from '@/components/theme-provider'
 
-const fontMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono' })
+const fontSans = Inter({ subsets: ['latin'], variable: '--font-sans' })
+const fontMono = IBM_Plex_Mono({
+  weight: ['400', '500', '700'],
+  subsets: ['latin'],
+  variable: '--font-mono',
+})
 
 export const metadata: Metadata = {
   title: 'Raghib Hasan',
@@ -20,7 +25,8 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          'min-h-screen bg-background font-mono antialiased',
+          'min-h-screen bg-background font-sans antialiased',
+          fontSans.variable,
           fontMono.variable
         )}
       >
