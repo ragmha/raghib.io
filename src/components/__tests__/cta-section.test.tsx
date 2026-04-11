@@ -11,7 +11,7 @@ describe('CtaSection', () => {
   it('links to /blog', () => {
     const { container } = render(<CtaSection />)
     const link = container.querySelector('a')
-    expect(link?.getAttribute('href')).toBe('/blog')
+    expect(link?.getAttribute('href')).toBe('/writing')
   })
 
   it('renders all three stat cards', () => {

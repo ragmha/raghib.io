@@ -72,7 +72,7 @@ describe('Terminal', () => {
     fireEvent.change(input, { target: { value: 'hello' } })
     fireEvent.keyDown(input, { key: 'Enter' })
 
-    expect(screen.getByText('Available: /linkedin')).toBeDefined()
+    expect(screen.getByText('Available: /linkedin, /projects, /writing')).toBeDefined()
   })
 
   it('has responsive body sizing', () => {

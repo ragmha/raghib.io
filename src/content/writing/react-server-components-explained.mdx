@@ -1,0 +1,115 @@
+---
+title: "React Server Components Explained"
+description: "A practical guide to understanding RSC — what they are, why they matter, and how to use them"
+date: "2026-03-28"
+tags: ["react", "nextjs", "rsc"]
+published: true
+---
+
+## What Are Server Components?
+
+React Server Components (RSC) let you write components that run exclusively on the server. They never ship JavaScript to the browser. This is a fundamental shift in how React applications are built.
+
+```tsx
+// This component runs on the server only
+// No JavaScript is sent to the client for this code
+async function RecentPosts() {
+  const posts = await db.query('SELECT * FROM posts ORDER BY date DESC LIMIT 5')
+
+  return (
+    <ul>
+      {posts.map(post => (
+        <li key={post.id}>{post.title}</li>
+      ))}
+    </ul>
+  )
+}
+```
+
+## Server vs Client Components
+
+The mental model is straightforward:
+
+### Server Components (default)
+- Run on the server during rendering
+- Can directly access databases, filesystems, and APIs
+- Cannot use hooks (`useState`, `useEffect`)
+- Cannot add event handlers (`onClick`, `onChange`)
+- Zero bundle size impact
+
+### Client Components (`'use client'`)
+- Run in the browser (and on the server for SSR)
+- Can use hooks and interactivity
+- Add to the JavaScript bundle
+- Declared with the `'use client'` directive at the top of the file
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+
+export function LikeButton() {
+  const [likes, setLikes] = useState(0)
+  return (
+    <button onClick={() => setLikes(l => l + 1)}>
+      ♥ {likes}
+    </button>
+  )
+}
+```
+
+## The Composition Pattern
+
+The real power of RSC comes from composing server and client components together. Server components can import and render client components, but not the other way around.
+
+```tsx
+// Server Component — fetches data
+async function PostPage({ id }: { id: string }) {
+  const post = await getPost(id)
+
+  return (
+    <article>
+      <h1>{post.title}</h1>
+      <p>{post.content}</p>
+      {/* Client component for interactivity */}
+      <LikeButton postId={id} />
+      <CommentSection postId={id} />
+    </article>
+  )
+}
+```
+
+<Callout type="info">
+Think of Server Components as the "static" shell and Client Components as the "interactive" islands. This is similar to the Islands Architecture pattern, but built into React itself.
+</Callout>
+
+## When to Use What
+
+Here's my decision framework:
+
+- **Need database access?** → Server Component
+- **Need user interactivity?** → Client Component
+- **Rendering a list of items?** → Server Component
+- **Managing form state?** → Client Component
+- **Displaying static content?** → Server Component
+
+<Callout type="warn">
+Don't make everything a Client Component "just in case." Start with Server Components and add the `'use client'` directive only when you need interactivity.
+</Callout>
+
+## Performance Wins
+
+The performance benefits are real:
+
+1. **Smaller bundles** — server-only code never reaches the browser
+2. **Faster initial load** — less JavaScript to parse and execute
+3. **Direct data access** — no API layer needed for server-side data
+4. **Streaming** — components can stream in as they resolve
+
+This blog itself is built with RSC. The post content is rendered on the server, while interactive elements like the terminal and tag filters are client components.
+
+## Resources
+
+- [React Server Components RFC](https://github.com/reactjs/rfcs/blob/main/text/0188-server-components.md)
+- [Next.js App Router docs](https://nextjs.org/docs/app)
+- [Dan Abramov's RSC series on overreacted.io](https://overreacted.io)

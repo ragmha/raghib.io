@@ -5,7 +5,7 @@ export function CtaSection() {
     <div className="flex flex-col gap-8">
       {/* CTA Button */}
       <Link
-        href="/blog"
+        href="/writing"
         className="group flex items-center gap-4 p-5 rounded-lg border-2 border-blue bg-gradient-to-br from-mantle to-base transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(137,180,250,0.3)] hover:border-green no-underline"
       >
         <span className="text-3xl">👨‍💻</span>

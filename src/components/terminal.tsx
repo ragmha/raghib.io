@@ -10,6 +10,8 @@ const SLASH_COMMANDS: Record<string, string[]> = {}
 
 const LINK_COMMANDS: Record<string, string> = {
   '/linkedin': 'https://www.linkedin.com/in/ragmha/',
+  '/projects': '/projects',
+  '/writing': '/writing',
 }
 
 // Microsoft logo as colored block pairs
@@ -96,11 +98,21 @@ export function Terminal() {
 
     if (LINK_COMMANDS[trimmed]) {
       const url = LINK_COMMANDS[trimmed]
+      const isInternal = url.startsWith('/')
       setHistory((h) => [
         ...h,
-        { type: 'output', text: `Opening ${url} ...` },
+        {
+          type: 'output',
+          text: isInternal
+            ? `Navigating to ${url} ...`
+            : `Opening ${url} ...`,
+        },
       ])
-      window.open(url, '_blank')
+      if (isInternal) {
+        window.location.href = url
+      } else {
+        window.open(url, '_blank')
+      }
       return
     }
 
@@ -117,14 +129,14 @@ export function Terminal() {
       setHistory((h) => [
         ...h,
         { type: 'output', text: `Unknown command: ${trimmed}` },
-        { type: 'output', text: 'Available: /linkedin' },
+        { type: 'output', text: 'Available: /linkedin, /projects, /writing' },
       ])
       return
     }
 
     setHistory((h) => [
       ...h,
-      { type: 'output', text: 'Available: /linkedin' },
+      { type: 'output', text: 'Available: /linkedin, /projects, /writing' },
     ])
   }
 
@@ -249,7 +261,7 @@ export function Terminal() {
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
                   className="bg-transparent text-text outline-none w-full caret-green placeholder:text-subtext0"
-                  placeholder="Type /linkedin"
+                  placeholder="Type / for commands"
                   autoFocus
                   spellCheck={false}
                   aria-label="Terminal input"

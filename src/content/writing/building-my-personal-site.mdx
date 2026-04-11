@@ -1,0 +1,58 @@
+---
+title: "Building My Personal Site with Next.js"
+description: "How I built raghib.io — a terminal-themed portfolio with GitHub integration"
+date: "2026-04-10"
+tags: ["react", "nextjs", "portfolio"]
+published: true
+---
+
+## The Vision
+
+I wanted a personal site that felt different. Not another generic portfolio with a hero section and a grid of cards. I wanted something that reflected how I actually work — in the terminal.
+
+The result is [raghib.io](https://raghib.io) — a site where the homepage is an interactive terminal, the blog looks like filesystem output, and every page feels like you're `ssh`-ing into my brain.
+
+## Tech Stack
+
+Here's what powers this site:
+
+- **Next.js 16** with the App Router and React Server Components
+- **Tailwind CSS 4** with a custom Catppuccin Mocha color theme
+- **MDX** for writing blog posts with embedded React components
+- **Shiki** for syntax highlighting that matches the terminal aesthetic
+- **GitHub API** for auto-populating the projects page
+
+## The Terminal Component
+
+The heart of the homepage is the interactive terminal. It supports slash commands, autocomplete, and a typewriter greeting animation:
+
+```typescript
+const LINK_COMMANDS: Record<string, string> = {
+  '/linkedin': 'https://www.linkedin.com/in/ragmha/',
+  '/projects': '/projects',
+  '/writing': '/writing',
+}
+```
+
+Every command is either a navigation link or a text output. The autocomplete shows when you type `/` and supports keyboard navigation.
+
+## Embedding Project Cards
+
+One of the cool features of this blog is that I can embed live GitHub project cards directly in posts:
+
+<RepoCard
+  name="raghib.io"
+  description="My personal portfolio and blog — built with Next.js, Tailwind, and a terminal aesthetic"
+  url="https://github.com/ragmha/raghib.io"
+  homepage="https://raghib.io"
+  language="TypeScript"
+  topics="nextjs, react, tailwind"
+/>
+
+## What's Next
+
+I'm planning to add more interactive elements — maybe a `git log` style changelog, or an embedded code playground. The terminal theme has so much potential.
+
+<Callout type="info">
+This site is open source! Check out the code on [GitHub](https://github.com/ragmha/raghib.io).
+</Callout>

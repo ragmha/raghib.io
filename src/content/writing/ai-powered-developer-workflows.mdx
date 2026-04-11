@@ -1,0 +1,77 @@
+---
+title: "AI-Powered Developer Workflows"
+description: "How GitHub Copilot and AI tools are changing the way I build software"
+date: "2026-04-05"
+tags: ["ai", "copilot", "dx"]
+published: true
+---
+
+## The Shift
+
+Developer tools are going through a revolution. GitHub Copilot, Cursor, and other AI-powered tools aren't just autocomplete — they're changing how we think about writing code.
+
+Here's what my workflow looks like now.
+
+## Pair Programming with Copilot
+
+I use GitHub Copilot as a pair programmer. Not a replacement — a collaborator. The key is knowing when to accept suggestions and when to think deeper.
+
+```python
+# Before AI: I'd google "python read csv and group by column"
+# Now: I describe intent, Copilot handles the boilerplate
+
+import pandas as pd
+
+def analyze_sales(filepath: str) -> dict:
+    """Read sales data and return monthly totals by region."""
+    df = pd.read_csv(filepath)
+    return (
+        df.groupby(["region", df["date"].dt.to_period("M")])["amount"]
+        .sum()
+        .to_dict()
+    )
+```
+
+The speed improvement is real, but the bigger win is staying in flow state.
+
+## The Tools That Matter
+
+After trying dozens of AI tools, here's what stuck:
+
+### GitHub Copilot
+Best for inline code completion and chat-driven development. The context awareness keeps getting better.
+
+### Copilot CLI
+Terminal-first AI assistance. I use it for explaining commands, generating scripts, and debugging build failures.
+
+<Callout type="warn">
+AI tools are powerful but not infallible. Always review generated code — especially for security-sensitive operations.
+</Callout>
+
+## The Productivity Paradox
+
+Here's the thing nobody talks about: AI tools can make you *faster* at writing code, but they can also make you *lazier* about understanding it.
+
+The best developers I know use AI to handle the boring parts so they can focus on architecture and design decisions.
+
+```typescript
+// AI generates the implementation
+async function fetchUserProfile(id: string): Promise<UserProfile> {
+  const res = await fetch(`/api/users/${id}`)
+  if (!res.ok) throw new Error(`Failed to fetch user: ${res.status}`)
+  return res.json()
+}
+
+// You focus on the hard questions:
+// - What's the caching strategy?
+// - How do we handle token refresh?
+// - What's the retry policy for failures?
+```
+
+## Looking Forward
+
+The pace of change is wild. Features that were cutting-edge six months ago are now table stakes. The developers who thrive will be the ones who learn to collaborate effectively with AI — not fight against it.
+
+<Callout type="info">
+I'm currently exploring how AI can improve developer onboarding at scale. More on that soon.
+</Callout>
