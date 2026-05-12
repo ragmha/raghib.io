@@ -1,0 +1,186 @@
+---
+title: "Sharing AI Customisations with Plugins and Marketplaces"
+description: "How to package and distribute Copilot CLI agents, skills, and hooks across your team"
+date: "2026-05-11"
+tags: ["ai", "copilot", "cli", "plugins"]
+published: true
+---
+
+## The "can I have that?" moment
+
+You write a skill that explains your weird deployment script. A teammate sees you use it and asks for a copy. You DM the file over, walk them through where to drop it, and a week later you've changed it and now four people have stale versions.
+
+This is where personal AI customisations stop scaling — and where plugins start being interesting.
+
+## Where customisations live today
+
+In GitHub Copilot CLI, customisations are just files on disk. There are roughly three places they can live:
+
+- **Local** — `~/.copilot/skills/`, `~/.copilot/agents/`. Great for your machine. Invisible to everyone else.
+- **Repo-level** — `.github/skills/`, `.github/agents/` committed alongside the project. Anyone who clones the repo gets them for free.
+- **Everywhere else** — if you work across five repos, you're now copy-pasting and wishing you weren't.
+
+Local solves the "me" problem. Repo-level solves the "this project" problem. Neither solves the "my whole team, across every project" problem.
+
+That's the gap plugins fill.
+
+## Plugins: a portable bundle
+
+A plugin is just a directory with a manifest. It bundles agents, skills, hooks, and MCP server configs into a single thing you can version and install.
+
+```text
+acme-backend/
+├── plugin.json          # required manifest
+├── agents/              # *.agent.md files
+│   └── backend.agent.md
+├── skills/              # SKILL.md per skill
+│   └── spring-boot/
+│       └── SKILL.md
+└── hooks.json           # optional
+```
+
+The only file you really have to write is `plugin.json`:
+
+```json
+{
+  "name": "acme-backend",
+  "description": "Backend development utilities for Acme",
+  "version": "1.0.0",
+  "author": {
+    "name": "Acme Engineering",
+    "email": "engineering@acme.dev"
+  },
+  "agents": "agents/",
+  "skills": ["skills/"],
+  "hooks": "hooks.json"
+}
+```
+
+That's it. A name, a version, and pointers to the directories that hold your customisations.
+
+## Marketplaces: an app store for plugins
+
+A plugin on its own is still a thing you have to find. A **marketplace** is a registry that lists plugins and tells Copilot CLI where to fetch them. In practice, it's a Git repo with one extra file: `.github/plugin/marketplace.json`.
+
+```text
+acme-marketplace/
+├── .github/plugin/
+│   └── marketplace.json
+└── plugins/
+    ├── acme-ci-cd/
+    │   └── plugin.json
+    └── acme-backend/
+        └── plugin.json
+```
+
+The manifest itself is mostly a list:
+
+```json
+{
+  "name": "acme-marketplace",
+  "owner": { "name": "Acme", "email": "engineering@acme.dev" },
+  "metadata": {
+    "description": "Internal Copilot CLI plugins for Acme teams",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "acme-backend",
+      "description": "Backend development utilities for Acme",
+      "version": "1.0.0",
+      "source": "./plugins/acme-backend"
+    }
+  ]
+}
+```
+
+Host it on GitHub, GitLab, an internal Git server, or even a shared file system — it doesn't really matter. If Copilot CLI can `git clone` it, it can use it.
+
+## Installing a plugin end-to-end
+
+Here's the loop, top to bottom. Start an interactive session and add the marketplace:
+
+```bash
+/plugin marketplace add acme/acme-marketplace
+```
+
+```text
+Marketplace "acme-marketplace" added successfully.
+```
+
+List what's in it:
+
+```bash
+/plugin marketplace browse acme-marketplace
+```
+
+```text
+Plugins in "acme-marketplace":
+  • acme-ci-cd        Pipeline helpers and quality gates
+  • acme-backend      Backend dev skills and agents
+  • acme-secrets      Detect and prevent secret leaks
+```
+
+Install the ones you want, qualifying with the marketplace name after `@`:
+
+```bash
+/plugin install acme-backend@acme-marketplace
+```
+
+Copilot CLI drops the plugin into `~/.copilot/installed-plugins/acme-marketplace/` and loads its agents, skills, and hooks into the current session immediately. No restart, no path fiddling.
+
+Verify it took:
+
+```bash
+/plugin list
+```
+
+```text
+Installed Plugins:
+  • acme-backend@acme-marketplace v1.0.0
+```
+
+The plugin's agents now show up under `/agent`, its skills under `/skills`, and any hooks fire at the lifecycle events they subscribe to.
+
+<Callout type="info">
+The "install" step is really just `git clone` + read some JSON. Nothing magic. That's why the same model works for a public marketplace, a private one behind SSO, or one sitting on a shared drive.
+</Callout>
+
+## Keeping plugins up to date
+
+When you ship a fix, bump the plugin's `version` in the marketplace's `marketplace.json`:
+
+```json
+{
+  "name": "acme-backend",
+  "version": "1.0.1",
+  "source": "./plugins/acme-backend"
+}
+```
+
+Push, and your teammates pull the new version with one command:
+
+```bash
+/plugin update acme-backend
+```
+
+```text
+Plugin "acme-backend" updated successfully (v1.0.0 → v1.0.1).
+```
+
+That's the whole upgrade story. No package registry account, no publish step, no token to rotate.
+
+## Wrapping up
+
+What I like about this design is how little machinery there is. A plugin is a directory with a JSON file. A marketplace is a directory with a slightly bigger JSON file. Put either in Git, point Copilot CLI at it, and you have a real distribution channel.
+
+It turns "useful one-off skills I wrote at 11pm" into something a whole team can install, update, and rely on — without spinning up a service or learning a new tool.
+
+If you've already got a folder of agents and skills you keep meaning to share, this is the path of least resistance.
+
+## References
+
+- [About plugins for GitHub Copilot CLI](https://docs.github.com/en/copilot/concepts/agents/about-plugins)
+- [Creating a plugin for GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli/extend-copilot-cli/create-a-plugin)
+- [Creating a plugin marketplace for GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli/extend-copilot-cli/create-a-plugin-marketplace)
+- [Finding and installing plugins for GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli/extend-copilot-cli/find-and-install-plugins)

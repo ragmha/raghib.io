@@ -56,6 +56,11 @@ body {
   font-family: var(--font-sans);
 }
 
+@keyframes caret {
+  0%, 100% { opacity: 0.85; }
+  50%      { opacity: 0; }
+}
+
 @keyframes ring-close-outer {
   from { stroke-dasharray: 1 999; }
   to { stroke-dasharray: 725 999; }

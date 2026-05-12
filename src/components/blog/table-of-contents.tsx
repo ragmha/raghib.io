@@ -9,36 +9,23 @@ export function TableOfContents({ headings }: { headings: TocItem[] }) {
 
   return (
     <nav
-      className="mb-8 border border-surface0 rounded-lg bg-mantle p-4 font-mono text-sm"
+      className="my-6 border-y border-surface0 py-3 font-mono text-xs"
       aria-label="Table of contents"
     >
-      <div className="text-overlay1 mb-2 text-xs uppercase tracking-wider">
-        ./ contents
+      <div className="text-overlay1 mb-1.5 uppercase tracking-wider">
+        contents
       </div>
-      <ul className="space-y-1">
-        {headings.map((heading, index) => {
-          const isLast = index === headings.length - 1
-          const nextIsChild =
-            !isLast && headings[index + 1].level > heading.level
-          const prefix =
-            heading.level === 2
-              ? isLast
-                ? '└── '
-                : '├── '
-              : '│   ' + (isLast ? '└── ' : '├── ')
-
-          return (
-            <li key={heading.id}>
-              <a
-                href={`#${heading.id}`}
-                className="text-subtext1 hover:text-blue transition-colors"
-              >
-                <span className="text-surface2 select-none">{prefix}</span>
-                {heading.text}
-              </a>
-            </li>
-          )
-        })}
+      <ul className="space-y-0.5">
+        {headings.map((heading) => (
+          <li key={heading.id} className={heading.level === 3 ? 'pl-4' : ''}>
+            <a
+              href={`#${heading.id}`}
+              className="text-subtext1 hover:text-text underline-offset-4 hover:underline transition-colors"
+            >
+              {heading.text}
+            </a>
+          </li>
+        ))}
       </ul>
     </nav>
   )

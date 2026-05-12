@@ -4,13 +4,13 @@ import Link from 'next/link'
 import { MDXRemote } from 'next-mdx-remote/rsc'
 import rehypePrettyCode from 'rehype-pretty-code'
 import rehypeSlug from 'rehype-slug'
-import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import { getPostBySlug, getAllSlugs, formatPostDate } from '@/lib/blog'
-import { TerminalShell } from '@/components/blog/terminal-shell'
 import {
   TableOfContents,
   extractHeadings,
 } from '@/components/blog/table-of-contents'
+import { WritingHeader } from '@/components/blog/writing-header'
+import { Divider } from '@/components/blog/divider'
 import { getMDXComponents } from '@/components/blog/mdx-components'
 
 type Props = {
@@ -49,103 +49,95 @@ export default async function PostPage({ params }: Props) {
   const components = getMDXComponents()
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-base to-mantle px-4 sm:px-6 md:px-8 py-12 md:py-20">
-      <div className="max-w-3xl mx-auto">
-        <div className="mb-8">
-          <Link
-            href="/writing"
-            className="inline-flex items-center gap-1.5 text-sm text-overlay1 hover:text-green transition-colors font-mono"
-          >
-            <span className="text-green">$</span> cd ~/writing
-          </Link>
-        </div>
+    <main className="min-h-screen px-6 sm:px-8 py-10 md:py-14">
+      <div className="max-w-2xl mx-auto">
+        <WritingHeader
+          path={[
+            { label: '~', href: '/' },
+            { label: 'writing', href: '/writing' },
+            { label: `${slug}.mdx` },
+          ]}
+        />
 
-        <TerminalShell title={`~/writing/${slug}.mdx`}>
-          <div className="p-4 sm:p-6">
-            {/* Prompt */}
-            <div className="text-green mb-4">
-              <span className="text-green font-bold">$</span>{' '}
-              <span className="text-text">
-                cat ~/writing/{slug}.mdx
+        <article className="font-mono">
+          <header className="mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold text-text leading-tight tracking-tight">
+              {post.frontmatter.title}
+            </h1>
+
+            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-overlay1">
+              <time dateTime={post.frontmatter.date}>
+                {formatPostDate(post.frontmatter.date)}
+              </time>
+              <span aria-hidden="true" className="text-surface2">
+                ·
               </span>
-            </div>
-
-            {/* Post header */}
-            <div className="border border-surface0 rounded-lg bg-mantle p-4 mb-8 font-mono text-sm">
-              <div className="text-surface2 select-none mb-2">
-                ┌──────────────────────────────────
-              </div>
-              <div className="space-y-1 pl-1">
-                <div>
-                  <span className="text-overlay1">title:</span>{' '}
-                  <span className="text-text font-bold text-lg">
-                    {post.frontmatter.title}
+              <span>{post.readingTime}</span>
+              {post.frontmatter.tags?.length > 0 && (
+                <>
+                  <span aria-hidden="true" className="text-surface2">
+                    ·
                   </span>
-                </div>
-                <div>
-                  <span className="text-overlay1">author:</span>{' '}
-                  <span className="text-subtext1">Raghib Hasan</span>
-                </div>
-                <div>
-                  <span className="text-overlay1">date:</span>{' '}
-                  <span className="text-subtext1">
-                    {formatPostDate(post.frontmatter.date)}
-                  </span>
-                  <span className="text-surface2 mx-2">|</span>
-                  <span className="text-subtext1">{post.readingTime}</span>
-                </div>
-                {post.frontmatter.tags?.length > 0 && (
-                  <div>
-                    <span className="text-overlay1">tags:</span>{' '}
+                  <span className="flex flex-wrap gap-x-2">
                     {post.frontmatter.tags.map((tag) => (
-                      <span key={tag} className="text-mauve mr-2">
-                        --{tag}
+                      <span key={tag} className="text-mauve/80">
+                        #{tag}
                       </span>
                     ))}
-                  </div>
-                )}
-              </div>
-              <div className="text-surface2 select-none mt-2">
-                └──────────────────────────────────
-              </div>
+                  </span>
+                </>
+              )}
             </div>
 
-            {/* Table of contents */}
-            <TableOfContents headings={headings} />
+            {post.frontmatter.description && (
+              <p className="mt-4 text-sm text-subtext0 leading-relaxed">
+                {post.frontmatter.description}
+              </p>
+            )}
+          </header>
 
-            {/* MDX content */}
-            <article>
-              <MDXRemote
-                source={post.content}
-                components={components}
-                options={{
-                  mdxOptions: {
-                    rehypePlugins: [
-                      rehypeSlug,
-                      [
-                        rehypePrettyCode,
-                        {
-                          theme: 'catppuccin-mocha',
-                        },
-                      ],
-                      [rehypeAutolinkHeadings, { behavior: 'wrap' }],
+          <Divider />
+
+          <TableOfContents headings={headings} />
+
+          <div>
+            <MDXRemote
+              source={post.content}
+              components={components}
+              options={{
+                mdxOptions: {
+                  rehypePlugins: [
+                    rehypeSlug,
+                    [
+                      rehypePrettyCode,
+                      {
+                        theme: 'catppuccin-mocha',
+                      },
                     ],
-                  },
-                }}
-              />
-            </article>
-
-            {/* Footer */}
-            <div className="mt-12 pt-6 border-t border-surface0 font-mono text-sm">
-              <Link
-                href="/writing"
-                className="text-overlay1 hover:text-green transition-colors"
-              >
-                <span className="text-green">$</span> cd ~/writing
-              </Link>
-            </div>
+                  ],
+                },
+              }}
+            />
           </div>
-        </TerminalShell>
+
+          <Divider />
+
+          <footer className="font-mono text-xs text-overlay1 flex items-center justify-between pb-6">
+            <Link
+              href="/writing"
+              className="hover:text-text transition-colors"
+            >
+              ← back to writing
+            </Link>
+            <a
+              href="#top"
+              className="hover:text-text transition-colors"
+              aria-label="Back to top"
+            >
+              top ↑
+            </a>
+          </footer>
+        </article>
       </div>
     </main>
   )
