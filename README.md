@@ -47,6 +47,16 @@ Use [nvm-windows](https://github.com/coreybutler/nvm-windows) or run in WSL2 as 
 
 ---
 
+## Apple Health step counter (`/health`)
+
+The site has an automated daily step counter at `/health`. To set it up,
+follow [`docs/getting-started.md`](docs/getting-started.md) — it's a
+~20-minute one-time setup that wires an iPhone Shortcut, a GitHub PAT, and
+three gh-aw workflows together. The privacy invariants are documented in
+[`docs/security-model.md`](docs/security-model.md).
+
+---
+
 Feel free to open issues or contribute!
 
 ## License

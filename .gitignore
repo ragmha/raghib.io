@@ -34,3 +34,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# apple health raw exports — never commit
+*.zip
+export.xml
+apple_health_export/

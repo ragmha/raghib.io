@@ -1,0 +1,11 @@
+[project]
+name = "raghib-io-health-scripts"
+version = "0.1.0"
+description = "Backfill helper that converts an Apple Health export.zip to daily step totals."
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "apple-health-parser>=0.5.0",
+]
+
+[tool.uv]
+package = false
