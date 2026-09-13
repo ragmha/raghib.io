@@ -1,58 +1,108 @@
 ---
-title: "Building My Personal Site with Next.js"
-description: "How I built raghib.io — a terminal-themed portfolio with GitHub integration"
-date: "2026-04-10"
-tags: ["react", "nextjs", "portfolio"]
+title: "Why I Rebuilt My Developer Portfolio as a Writing Site"
+description: "The design decisions behind turning raghib.io from an interactive terminal into a clearer home for ideas, experiments, and engineering judgment"
+date: "2026-09-13"
+tags: ["design", "astro", "writing"]
 published: true
 ---
 
-## The Vision
+My first version of this site behaved like an interactive terminal. It had slash commands, a typewriter greeting, animated status rings, and a blog styled like filesystem output. It was technically playful, but it created the wrong first question.
 
-I wanted a personal site that felt different. Not another generic portfolio with a hero section and a grid of cards. I wanted something that reflected how I actually work — in the terminal.
+Visitors had to work out how the interface operated before they could understand what I did.
 
-The result is [raghib.io](https://raghib.io) — a site where the homepage is an interactive terminal, the blog looks like filesystem output, and every page feels like you're `ssh`-ing into my brain.
+That is a poor trade for a writing site. A reader should not need to interpret
+a terminal metaphor before finding an idea worth considering. Someone looking
+for an architecture post should not need to discover a hidden command. The
+presentation had become more memorable than the thinking.
 
-## Tech Stack
+So I rebuilt the site around a simpler rule:
 
-Here's what powers this site:
+> Make the idea clear, then make the evidence easy to inspect.
 
-- **Next.js 16** with the App Router and React Server Components
-- **Tailwind CSS 4** with a custom Catppuccin Mocha color theme
-- **MDX** for writing blog posts with embedded React components
-- **Shiki** for syntax highlighting that matches the terminal aesthetic
-- **GitHub API** for auto-populating the projects page
+## What Was Broken
 
-## The Terminal Component
+The old design optimized for novelty. That produced three practical problems:
 
-The heart of the homepage is the interactive terminal. It supports slash commands, autocomplete, and a typewriter greeting animation:
+1. **Navigation required interpretation.** Visitors had to understand that commands such as `/writing` and `/projects` were links.
+2. **The homepage did not explain the site's point of view.** It introduced a
+   personality, but not the questions, systems, or ideas behind the writing.
+3. **Long-form posts inherited the terminal metaphor.** Code belongs in a technical article. The entire article does not need to pretend it is code.
 
-```typescript
-const LINK_COMMANDS: Record<string, string> = {
-  '/linkedin': 'https://www.linkedin.com/in/ragmha/',
-  '/projects': '/projects',
-  '/writing': '/writing',
-}
-```
+None of those issues were implementation failures. They were failures of information architecture.
 
-Every command is either a navigation link or a text output. The autocomplete shows when you type `/` and supports keyboard navigation.
+## The New Content Model
 
-## Embedding Project Cards
+The new site has three direct paths:
 
-One of the cool features of this blog is that I can embed live GitHub project cards directly in posts:
+- **Writing** contains essays, technical explorations, and experiments.
+- **Projects** connects those explanations to working software and source code.
+- **About** explains the questions and themes behind the site.
 
-<RepoCard
-  name="raghib.io"
-  description="My personal portfolio and blog — built with Next.js, Tailwind, and a terminal aesthetic"
-  url="https://github.com/ragmha/raghib.io"
-  homepage="https://raghib.io"
-  language="TypeScript"
-  topics="nextjs, react, tailwind"
-/>
+The homepage states the intellectual focus and what a reader can expect from the
+writing. It gives newcomers a useful orientation while letting technical readers
+move directly into implementation detail.
 
-## What's Next
+## Designing for Technical Reading
 
-I'm planning to add more interactive elements — maybe a `git log` style changelog, or an embedded code playground. The terminal theme has so much potential.
+The article layout now treats a post as an engineering document rather than a themed window.
 
-<Callout type="info">
-This site is open source! Check out the code on [GitHub](https://github.com/ragmha/raghib.io).
-</Callout>
+The reading column stays narrow enough to scan comfortably. Metadata is visible but secondary. Headings establish a clear outline, code remains visually distinct, and the table of contents is available without competing with the opening.
+
+The visual system is deliberately small:
+
+- near-black background;
+- warm white primary text;
+- muted green links;
+- one-pixel dividers;
+- sans-serif body type;
+- monospace reserved for code and technical identifiers.
+
+Removing decoration made hierarchy more important. Spacing, line length, link treatment, and heading rhythm now carry responsibilities that were previously hidden by containers and effects.
+
+## What a Useful Technology Post Should Do
+
+The redesign also creates a better default structure for future articles:
+
+1. Start with a question or problem that matters beyond one organization.
+2. Explain why the existing process fails.
+3. Show the smallest useful architecture.
+4. Keep deterministic systems in control where correctness matters.
+5. Make permissions, policies, and blast radius visible.
+6. Demonstrate the result with real artifacts.
+7. State what changes when the design moves from a small experiment to a
+   production environment.
+
+This structure makes a post useful across contexts. Developers can reproduce
+the implementation. Leaders can evaluate the operating model. Readers in other
+industries can separate the enduring idea from the particular tools used to
+demonstrate it.
+
+## The Technical Changes
+
+The underlying publishing stack remains intentionally conventional:
+
+- Astro statically generates the site.
+- MDX keeps articles close to source control.
+- Shiki handles syntax highlighting during the build.
+- A curated project snapshot keeps the projects page available without a runtime API.
+- RSS provides a platform-independent subscription path.
+
+The redesign removed the interactive terminal, replaced the projects grid with
+a readable index, and created a shared header and footer across the site. The
+published pages require no client-side framework or application server.
+
+> The redesign did not require a component library. The important work was
+> deciding what the site should communicate and removing everything that
+> delayed that message.
+
+## The Result
+
+The site is less theatrical and more representative of the ideas I want to
+publish.
+
+The broader lesson applies well beyond personal websites: a technically
+impressive interface is not automatically an effective one. Good design makes
+the reader's next decision easier. Here, that decision is simple—find an idea,
+decide whether it matters, and inspect the evidence.
+
+The source remains available on [GitHub](https://github.com/ragmha/raghib.io).

@@ -9,16 +9,15 @@
 # testing
 /coverage
 
-# next.js
+# Astro
+/.astro/
+/dist/
 /.next/
-/out/
-
-# production
-/build
 
 # misc
 .DS_Store
 *.pem
+/.impeccable/hook.cache.json
 
 # debug
 npm-debug.log*
@@ -33,4 +32,3 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
