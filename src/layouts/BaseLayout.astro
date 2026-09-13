@@ -1,0 +1,34 @@
+---
+import '../styles/global.css'
+
+interface Props {
+  title?: string
+  description?: string
+}
+
+const {
+  title = 'Raghib Hasan',
+  description = 'Independent writing on software, AI, systems, and the ideas shaping how technology is built and used.',
+} = Astro.props
+
+const pageTitle =
+  title === 'Raghib Hasan' ? title : `${title} · Raghib Hasan`
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <link rel="alternate" type="application/rss+xml" href="/writing/feed.xml" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <div class="page">
+      <slot />
+    </div>
+  </body>
+</html>

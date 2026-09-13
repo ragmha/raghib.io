@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Header from '../components/Header.astro'
+import Footer from '../components/Footer.astro'
+import { projectSnapshot } from '../content/project-snapshot'
+---
+
+<BaseLayout
+  title="Projects"
+  description="Open-source projects and technical demonstrations by Raghib Hasan."
+>
+  <Header />
+  <main>
+    <header class="page-heading">
+      <h1>Projects</h1>
+      <p>
+        Selected open-source work, technical demonstrations, and reference
+        implementations.
+      </p>
+    </header>
+
+    <div class="project-list">
+      {
+        projectSnapshot.map((project) => (
+          <article class="project-row">
+            <h2>{project.name}</h2>
+            <p>{project.description}</p>
+            <div class="meta">
+              {project.language && <span>{project.language}</span>}
+              <a href={project.url}>Source ↗</a>
+              {project.homepage && <a href={project.homepage}>Live ↗</a>}
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

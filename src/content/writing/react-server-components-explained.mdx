@@ -79,9 +79,9 @@ async function PostPage({ id }: { id: string }) {
 }
 ```
 
-<Callout type="info">
-Think of Server Components as the "static" shell and Client Components as the "interactive" islands. This is similar to the Islands Architecture pattern, but built into React itself.
-</Callout>
+> Think of Server Components as the "static" shell and Client Components as
+> the "interactive" islands. This is similar to the Islands Architecture
+> pattern, but built into React itself.
 
 ## When to Use What
 
@@ -93,9 +93,9 @@ Here's my decision framework:
 - **Managing form state?** → Client Component
 - **Displaying static content?** → Server Component
 
-<Callout type="warn">
-Don't make everything a Client Component "just in case." Start with Server Components and add the `'use client'` directive only when you need interactivity.
-</Callout>
+> Don't make everything a Client Component "just in case." Start with Server
+> Components and add the `'use client'` directive only when you need
+> interactivity.
 
 ## Performance Wins
 
@@ -106,7 +106,8 @@ The performance benefits are real:
 3. **Direct data access** — no API layer needed for server-side data
 4. **Streaming** — components can stream in as they resolve
 
-This blog itself is built with RSC. The post content is rendered on the server, while interactive elements like the terminal and tag filters are client components.
+This site now uses Astro, but the same architectural question still matters in
+React applications: ship client JavaScript only where interaction requires it.
 
 ## Resources
 
