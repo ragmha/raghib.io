@@ -1,0 +1,228 @@
+---
+title: "Deployed, Not Live: Why Your Domain Still Points at the Host You Left"
+description: "A migration moves your files. It does not move the authority that decides who answers for your domain, and that gap is where most cutovers quietly fail"
+date: "2026-09-18"
+tags: ["dns", "infrastructure", "migration", "operations"]
+published: true
+---
+
+A deploy pipeline reported success. The build artifacts were correct. The hosting
+platform showed the site as live. Visiting the domain returned a 404 served by a
+company I had stopped using months earlier.
+
+Nothing was broken in the way the tooling could see. Every system was reporting
+accurately about the part of the problem it owned, and no system owned the part
+that was actually wrong.
+
+This failure is not specific to one stack or one vendor. It appears whenever an
+organization migrates between providers, and it is worth understanding precisely,
+because the reasoning generalizes far beyond DNS.
+
+## The Mental Model That Causes It
+
+Most people hold a two-step model of how a domain works:
+
+> I bought the domain from a registrar, so I configure the domain at the registrar.
+
+That model is wrong in a specific and consequential way. Buying a domain and
+answering for a domain are separate responsibilities, and they are routinely held
+by different companies.
+
+The real path from a typed URL to a served page has five links:
+
+1. **The registrar** — where the domain is purchased and renewed.
+2. **The delegation** — a pointer, stored at the top-level domain, naming which
+   nameservers are authoritative.
+3. **The zone** — the actual records, held by whoever the delegation names.
+4. **The origin** — the platform that serves the bytes.
+5. **TLS and routing** — certificate issuance and the relationship between the
+   apex domain and `www`.
+
+A migration that moves link 4 while leaving link 2 behind produces exactly the
+symptom above: a healthy deploy that nobody can reach.
+
+## Why the Control Panel Misleads You
+
+Here is the part that costs people an afternoon.
+
+When a domain's delegation points somewhere else, the registrar's DNS editor
+typically becomes hidden or inert. It does not explain that it has been overruled.
+It simply stops being the thing that matters, while continuing to look like the
+place where domains are configured.
+
+So the operator edits records at the registrar, sees no change, and reaches for
+the two most available explanations — propagation delay or caching. Both are real
+phenomena. Neither is the cause. The records they edited were never consulted by
+anyone, because a third party held the authority to answer.
+
+> The interface you are editing and the system that is consulted are not
+> guaranteed to be the same system. Verify authority before you change configuration.
+
+That sentence is the transferable lesson, and it is not really about DNS.
+
+## Ask One Question First
+
+Before changing anything, establish who is authoritative. One command:
+
+```bash
+dig +short NS example.com
+```
+
+In the case that prompted this post, the answer was immediate and complete:
+
+```
+ns1.vercel-dns.com
+ns2.vercel-dns.com
+```
+
+The site was building and deploying to GitHub Pages. The domain was delegated to
+a platform I had migrated away from. Every subsequent observation was a consequence
+of that single fact, and no amount of editing records elsewhere would have changed
+anything.
+
+The confirming evidence took two more commands:
+
+```bash
+$ curl -sSI https://raghib.io/ | head -6
+HTTP/2 404
+server: Vercel
+x-vercel-error: DEPLOYMENT_NOT_FOUND
+```
+
+That header pair is unusually informative. `DEPLOYMENT_NOT_FOUND` does not mean
+"page missing". It means a platform received the request, searched for a project
+claiming this hostname, and found none. Traffic was arriving exactly where the
+delegation sent it. The delegation was the defect.
+
+Vendor error vocabularies are worth learning, because each one identifies a
+different failing link:
+
+| Signature | What it proves |
+|---|---|
+| `DEPLOYMENT_NOT_FOUND` | DNS is correct for that vendor; no project claims the name |
+| "There isn't a GitHub Pages site here" | Pages is reachable but has no site for this hostname |
+| Cloudflare error 1000 | A proxied record points at an unresolvable origin |
+| `NoSuchBucket` | The bucket name does not match the hostname |
+| `NXDOMAIN` | No record exists at all |
+| A valid page with a certificate warning | Routing is correct; issuance has not caught up |
+
+A response naming a vendor you no longer use is proof that delegation, not
+records, is the problem.
+
+## Do Not Trust Your Own Resolver
+
+The second discipline matters as much as the first.
+
+A resolver is permitted to serve you a cached answer for the full duration of the
+record's TTL. During a migration this means your own machine will confidently
+report a state of the world that stopped being true some time ago, and it will do
+so consistently enough to feel like evidence.
+
+Ask the authoritative nameserver directly instead:
+
+```bash
+dig +short A example.com @ns1.example-provider.com
+```
+
+That answer is the zone's truth. The difference between it and what a public
+resolver returns is the propagation still outstanding, and it is measured by the
+TTL rather than by intuition.
+
+One caveat worth knowing, because it produces false alarms: many platforms serve
+rotating address pools, so two consecutive queries legitimately return different
+addresses. A single-shot comparison will invent a propagation problem that is not
+happening. Query twice, and only treat a difference as meaningful when both sides
+are stable.
+
+## The Blast Radius Is the TTL
+
+Before a cutover, the TTL is the single most useful number available, because it
+defines how long a mistake persists:
+
+```bash
+dig +noall +answer A example.com
+```
+
+Lowering records to 300 seconds *before* the migration, and waiting for the old
+TTL to elapse, converts a potential day-long outage into a five-minute one. It
+costs nothing and has to happen in advance, which is why it is usually skipped and
+usually regretted.
+
+This is ordinary risk management expressed in infrastructure: reduce the cost of
+being wrong before you take the action that might be wrong.
+
+## What Actually Gets Lost
+
+The visible failure is the website. The expensive failure is everything else in
+the zone.
+
+A zone commonly holds mail routing, sender authentication, and domain-ownership
+proofs for services that have nothing to do with hosting. Repointing delegation
+without carrying those records forward does not produce an error page. It produces
+silence — mail that is quietly rejected, authentication that degrades, third-party
+integrations that stop verifying — and the gap between the change and the
+discovery can be weeks.
+
+Before any cutover, account for:
+
+- Apex and `www` address records
+- `MX`, SPF, DKIM, and `_dmarc`
+- Domain-verification records for every external service
+- Live subdomains such as `api`, `staging`, `docs`, and `status`
+- `CAA`, if the new certificate authority differs
+
+Anything on that list you cannot account for is something you are about to drop.
+
+## Encoding the Procedure
+
+Because this reasoning is mechanical and the cost of skipping a step is high, it
+belongs in a script rather than in memory. I wrote one that walks the chain in
+order — delegation, public resolution, authoritative truth, origin, then the
+carry-over inventory — and refuses to offer an opinion before establishing who is
+authoritative.
+
+Running it against the broken domain produced the diagnosis in a few seconds:
+
+```
+== 1. Delegation (who is authoritative)
+  nameserver             ns1.vercel-dns.com
+  DNS provider           Vercel
+  ! Records must be edited at Vercel. Any other panel is inert.
+
+== 4. Origin (who serves the bytes)
+  ✗ raghib.io — HTTP 404, served by Vercel
+    x-vercel-error: DEPLOYMENT_NOT_FOUND
+  ! Vercel has no deployment for this domain — link 4 (origin).
+```
+
+Building it surfaced two failure modes I would not have predicted and had already
+started to mislead me by hand: the rotating address pools described above, and a
+wildcard record that makes every conceivable subdomain resolve, turning subdomain
+enumeration into pure noise. A checklist in a document would have carried both
+errors forward indefinitely. Executable procedures get corrected, because they can
+be run against a known-good case and observed to lie.
+
+> A checklist tells you what to check. A script tells you what is true, and can be
+> proven wrong.
+
+## The General Case
+
+Strip away the protocol and a reusable pattern remains, applicable to any system
+where configuration and authority can drift apart:
+
+1. **Establish who is authoritative before changing configuration.** The editable
+   surface and the consulted surface are different systems until proven otherwise.
+2. **Read the error vocabulary precisely.** A 404 from a vendor you no longer use
+   is a different fact from a 404 from the vendor you just adopted.
+3. **Distrust your own cached view.** Query the source of truth directly.
+4. **Reduce the blast radius before acting**, not after the incident.
+5. **Inventory the invisible dependencies.** The loud failure is rarely the
+   expensive one.
+6. **Encode the procedure** so it can be corrected by evidence.
+
+Feature flags, identity and access policies, caching layers, service discovery,
+and configuration management all fail this way. Something reports success. The
+edit lands in a real system. That system was simply not the one being consulted.
+
+The durable habit is narrow enough to state in a sentence: before changing a
+configuration, confirm that the thing you are editing is the thing being asked.
