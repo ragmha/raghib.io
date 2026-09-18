@@ -16,6 +16,8 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
+    "playwright": "^1.63.0",
+    "rehype-mermaid": "^3.0.0",
     "typescript": "^5.9.2"
   },
   "engines": {
