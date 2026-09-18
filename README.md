@@ -36,6 +36,18 @@ bun run check # Astro and TypeScript checks
 bun run build # static production build
 ```
 
+## Analytics
+
+The site supports privacy-friendly, cookie-free analytics through [Cloudflare Web Analytics](https://www.cloudflare.com/web-analytics/). Analytics is enabled only when `PUBLIC_CF_ANALYTICS_TOKEN` is set at build time.
+
+For GitHub Pages deployments:
+
+1. Create a Cloudflare Web Analytics site and copy its beacon token.
+2. Add it to the repository as an Actions secret named `CLOUDFLARE_WEB_ANALYTICS_TOKEN`.
+3. The Pages workflow injects it into the production build.
+
+For local builds, set `PUBLIC_CF_ANALYTICS_TOKEN` in a local `.env` file. The token identifies the analytics site and is safe to appear in the generated HTML; never put account credentials in the repository.
+
 ---
 
 Feel free to open issues or contribute!
