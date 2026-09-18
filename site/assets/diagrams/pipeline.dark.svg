@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 225" width="700" height="225" role="img" aria-label="Markdown flows through build.mjs into static HTML">
+<!-- Example Excalidraw-style export. Replace with a real export from excalidraw.com. -->
+<path d="M31.74,70.57 L210.88,71.64 L208.42,150.71 L29.94,149.30 Z" fill="none" stroke="#e7e5dc" stroke-width="1.9"/>
+<path d="M30.93,68.25 L212.07,69.29 L210.99,148.78 L31.97,151.50 Z" fill="none" stroke="#e7e5dc" stroke-width="1.5" opacity="0.55"/>
+<text x="120" y="104" text-anchor="middle" fill="#e7e5dc" font-size="19" font-family="Virgil, 'Comic Sans MS', ui-sans-serif, system-ui, sans-serif">MARKDOWN</text>
+<text x="120" y="126" text-anchor="middle" fill="#918e83" font-size="13" font-family="Virgil, 'Comic Sans MS', ui-sans-serif, system-ui, sans-serif" opacity="0.8">site/content</text>
+<path d="M260.75,70.46 L439.97,71.53 L438.17,148.05 L259.87,149.85 Z" fill="#cede3f" stroke="none"/>
+<path d="M260.75,70.46 L439.97,71.53 L438.17,148.05 L259.87,149.85 Z" fill="none" stroke="#e7e5dc" stroke-width="1.9"/>
+<path d="M259.86,71.39 L442.13,70.37 L438.62,148.01 L259.37,151.27 Z" fill="none" stroke="#e7e5dc" stroke-width="1.5" opacity="0.55"/>
+<text x="350" y="106" text-anchor="middle" fill="#161614" font-size="19" font-family="Virgil, 'Comic Sans MS', ui-sans-serif, system-ui, sans-serif">build.mjs</text>
+<text x="350" y="128" text-anchor="middle" fill="#161614" font-size="13" font-family="Virgil, 'Comic Sans MS', ui-sans-serif, system-ui, sans-serif" opacity="0.8">~400 lines</text>
+<path d="M491.46,70.72 L671.26,72.02 L671.03,148.63 L488.02,151.15 Z" fill="none" stroke="#e7e5dc" stroke-width="1.9"/>
+<path d="M489.80,70.96 L668.18,71.98 L671.77,150.47 L487.90,149.53 Z" fill="none" stroke="#e7e5dc" stroke-width="1.5" opacity="0.55"/>
+<text x="580" y="104" text-anchor="middle" fill="#e7e5dc" font-size="19" font-family="Virgil, 'Comic Sans MS', ui-sans-serif, system-ui, sans-serif">STATIC HTML</text>
+<text x="580" y="126" text-anchor="middle" fill="#918e83" font-size="13" font-family="Virgil, 'Comic Sans MS', ui-sans-serif, system-ui, sans-serif" opacity="0.8">dist/</text>
+<path d="M212,112 C224,104 238,118 256,110" fill="none" stroke="#e7e5dc" stroke-width="1.8" stroke-linecap="round"/>
+<path d="M247,104 L257,110 L246,116" fill="none" stroke="#e7e5dc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M442,112 C454,104 468,118 486,110" fill="none" stroke="#e7e5dc" stroke-width="1.8" stroke-linecap="round"/>
+<path d="M477,104 L487,110 L476,116" fill="none" stroke="#e7e5dc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M300,178 C340,170 380,182 420,174" fill="none" stroke="#918e83" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>
+<text x="360" y="205" text-anchor="middle" fill="#918e83" font-size="14" font-family="Virgil, 'Comic Sans MS', ui-sans-serif, system-ui, sans-serif">no framework, no bundler</text>
+</svg>
