@@ -411,15 +411,10 @@ main {
 
 /* section header:  1 ......... TITLE ......... 1 */
 .part {
-  display: grid;
-  grid-template-columns: 3ch 1fr 3ch;
-  align-items: center;
-  gap: 1rem;
   margin: 4.5rem 0 1.25rem;
 }
 
 .part h2 {
-  grid-column: 2;
   text-align: center;
   margin: 0;
   font-size: 0.95rem;
@@ -428,13 +423,15 @@ main {
   text-transform: uppercase;
 }
 
-.folio {
-  font-size: 0.95rem;
-  color: var(--ink-muted);
+.part-heading {
+  padding: 0.05em 0.28em;
+  background: transparent;
+  color: inherit;
 }
 
-.folio:last-child {
-  text-align: right;
+.part h2:is(:hover, :focus-within) .part-heading {
+  background: var(--mark);
+  color: var(--mark-ink);
 }
 
 /* ------------------------------------------------------------- code */
@@ -652,11 +649,6 @@ main {
     .shell {
       grid-template-columns: minmax(0, 1fr);
     }
-  }
-
-  .part {
-    grid-template-columns: 2ch 1fr 2ch;
-    gap: 0.5rem;
   }
 
   .part h2 {

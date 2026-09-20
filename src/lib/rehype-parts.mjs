@@ -1,40 +1,29 @@
-// Rehype plugin that turns each `## Heading` (h2) into the numbered
-// "part" divider used across the site: a folio number on each side of a
-// centered, highlighted title, followed by a dashed rule. Mirrors the
-// editorial layout ported from the closed static-generator prototype
-// (PR #17) while keeping Astro's own markdown/MDX rendering pipeline.
+// Wrap section headings in an unnumbered divider while preserving their anchors.
 import { visit } from 'unist-util-visit'
 
 export default function rehypeParts() {
   return (tree) => {
-    let count = 0
-
     visit(tree, 'element', (node, index, parent) => {
       if (node.tagName !== 'h2' || !parent || index === null) return
-
-      count += 1
-      const folio = { type: 'element', tagName: 'span', properties: { className: ['folio'], 'aria-hidden': 'true' }, children: [{ type: 'text', value: String(count) }] }
 
       const part = {
         type: 'element',
         tagName: 'div',
-        properties: { className: ['part'], id: node.properties?.id, 'data-part': String(count) },
+        properties: { className: ['part'] },
         children: [
-          folio,
           {
             type: 'element',
             tagName: 'h2',
-            properties: {},
+            properties: { ...node.properties },
             children: [
               {
                 type: 'element',
-                tagName: 'mark',
-                properties: {},
+                tagName: 'span',
+                properties: { className: ['part-heading'] },
                 children: node.children,
               },
             ],
           },
-          { ...folio },
         ],
       }
 
