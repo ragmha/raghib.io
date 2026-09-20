@@ -34,6 +34,9 @@ and Bun.
 bun dev       # local development
 bun run check # Astro and TypeScript checks
 bun run build # static production build
+bun run check:seo # audit the fresh production build (requires Chromium)
+bun run generate:social-card # regenerate public/social-card.png
+bun test --bail # unit and publication-contract tests
 bun run sync:projects # refresh projects from the selected GitHub star list
 ```
 
@@ -94,7 +97,7 @@ The footer sits at the bottom of short pages and follows the content
 on longer pages, without a fixed overlay.
 
 Project writeups are separate from the Writing archive and its RSS feed.
-Each project can have one writeup at `/project/<project-name>/writings`.
+Each project can have one writeup at `/project/<project-name>/writings/`.
 The repository README covers what the project does and how to use it; the
 writeup explains the problem, decisions, alternatives, trade-offs, and lessons.
 
@@ -108,12 +111,49 @@ writeup explains the problem, decisions, alternatives, trade-offs, and lessons.
 Published writeups automatically add **Writeup →** beside the project's
 repository name and optional Live link. Drafts are never linked from Projects, including during
 development. During `bun dev`, open a draft directly at
-`/project/<project-name>/writings` to review it with a visible draft notice
+`/project/<project-name>/writings/` to review it with a visible draft notice
 and `noindex` metadata. Production builds (including
 `bun run preview`) generate neither draft pages nor draft links. Unknown projects
 and duplicate writeups for the same project fail the build. The page reuses
 the editorial theme and contents rail, with links back to Projects and the
 repository README; no GitHub README is fetched or copied automatically.
+
+## SEO readiness before merging
+
+The `SEO readiness` workflow runs on every pull request into `main` and on
+merge-queue builds. Its job name is the required-check identifier: keep it
+stable when editing the workflow. A required status-check rule on `main`
+enforces the gate; merely adding a workflow does not prevent merging.
+The deployment workflow repeats the same checks before uploading the site.
+
+Run the gate locally with:
+
+```bash
+bunx playwright install chromium # once, if the browser is not installed
+bun test --bail
+bun run build
+bun run check:seo
+```
+
+The audit reads the generated HTML in Chromium with page scripts disabled.
+It requires unique titles/descriptions, one H1, canonical and social metadata,
+a real social-preview image, valid author/article schema, working internal links
+and image assets, and correct sitemap/robots/RSS discovery. Every published
+source entry must have a corresponding rendered article with matching metadata;
+drafts must not leak into the build. An intentionally empty writing archive is
+valid. Editable `.excalidraw` originals belong outside `public/`.
+
+Published writing needs a title, description, date, and nonempty body.
+Use `published: false` for writing drafts; project writeups default to unpublished.
+An optional `seoTitle` gives search results a shorter title without changing the
+visible article heading. Shared metadata lives in `SeoHead.astro` and
+`src/lib/seo.ts`; regenerate the social card after changing its text or design.
+No article text or draft is automatically published by the audit.
+
+The gate checks technical readiness, not rankings, keyword demand, factual
+accuracy, or field Core Web Vitals. Those still need editorial review and
+production evidence. After deployment, submit `/sitemap-index.xml` in Search
+Console using an account authorized for the site.
 
 ---
 
