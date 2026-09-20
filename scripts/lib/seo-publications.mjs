@@ -30,7 +30,9 @@ export function readPublication(source, collection, file) {
   }
   const date = new Date(data.date)
   if (!Number.isFinite(date.getTime())) throw new Error(`${file}: invalid publication date`)
-  if (!source.slice(match[0].length).replace(/<!--[\s\S]*?-->/g, '').trim()) {
+  const body = source.slice(match[0].length)
+  const hasBodyContent = body.split(/<!--[\s\S]*?-->/).some((part) => part.trim().length > 0)
+  if (!hasBodyContent) {
     throw new Error(`${file}: published content needs an article body`)
   }
   return {

@@ -49,6 +49,34 @@ test('published content rejects empty bodies and invalid frontmatter instead of 
   assert.throws(() => readPublication(source('title: Duplicate'), 'writing', 'invalid.mdx'), /unique/)
 })
 
+test('published content rejects bodies containing only whitespace and HTML comments', () => {
+  for (const body of [
+    ' \t\r\n ',
+    '<!-- -->',
+    '<!-- An unpublished note. -->',
+    '\n<!-- A multiline\nnote. -->\n<!-- Another note. -->\t',
+    '<!-- First note. --><!-- Second note. -->',
+  ]) {
+    assert.throws(() => readPublication(source('', body), 'writing', 'comments.mdx'), /article body/)
+  }
+})
+
+test('published content accepts text before, between and after HTML comments', () => {
+  for (const body of [
+    'Visible text.<!-- A note. -->',
+    '<!-- A note. -->Visible text.',
+    '<!-- First note. -->\nVisible text.\n<!-- Last note. -->',
+    '<!-- A note. --><p>Visible text.</p>',
+  ]) {
+    assert.ok(readPublication(source('', body), 'writing', 'article.mdx'))
+  }
+})
+
+test('body validation treats comment-delimiter fragments as their original text', () => {
+  const body = '<!<!-- A note. -->--This is not a comment in the source.-->'
+  assert.ok(readPublication(source('', body), 'writing', 'fragments.mdx'))
+})
+
 test('the gate rejects missing publications, leaked drafts and changed metadata', () => {
   const publication = readPublication(source(), 'writing', 'example.mdx')
   assertPublicationsMatch([publication], [{ ...publication }])

@@ -144,6 +144,8 @@ drafts must not leak into the build. An intentionally empty writing archive is
 valid. Editable `.excalidraw` originals belong outside `public/`.
 
 Published writing needs a title, description, date, and nonempty body.
+Whitespace and HTML comments alone do not count as a body. The body check
+looks for content outside comments; it does not sanitize or render HTML.
 Use `published: false` for writing drafts; project writeups default to unpublished.
 An optional `seoTitle` gives search results a shorter title without changing the
 visible article heading. Shared metadata lives in `SeoHead.astro` and
