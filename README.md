@@ -49,7 +49,7 @@ names. The selected list may be private; the CLI account must have access.
 Only this named list is read for publication.
 
 Names, descriptions, source URLs, homepages, and languages come from GitHub.
-Category and short display-description overrides are keyed by `owner/repo` in
+Category, short display-description, demo URL, and extra-link overrides are keyed by `owner/repo` in
 `src/content/project-snapshot.ts` and survive subsequent syncs; writeups remain
 local. Language and category metadata are retained but not displayed.
 Removing a project with an existing writeup requires removing or reassigning
@@ -60,13 +60,33 @@ is bundled into the site, and GitHub outages do not break an ordinary build.
 List changes are not live: run the sync command and deploy to publish them.
 The existing deployment workflow needs no additional credential.
 
+### Project resource links
+
+Each row always includes **Source ↗** linking to its GitHub repository.
+**Live demo ↗** appears when `homepage` is set (from GitHub or a local override).
+Additional resources use named `extraLinks`, rather than a generic "Others"
+destination. For example, an entry in the local `overrides` map can include:
+
+```ts
+homepage: 'https://example.com/demo',
+extraLinks: [
+  { label: 'YouTube', url: 'https://www.youtube.com/watch?v=YOUR_VIDEO_ID' },
+  { label: 'Chrome Web Store', url: 'https://chromewebstore.google.com/detail/YOUR_EXTENSION_ID' },
+],
+```
+
+Replace these illustrative URLs with real destinations before adding them.
+Missing resources are omitted; no placeholder links are rendered. Local
+overrides survive GitHub sync, and invalid URLs or empty labels fail rendering.
+
 ## Project writeups
 
 Projects and Writing share the editorial archive layout. Projects hides its
 visible page title/count and uses compact music-library-style rows: a small
 decorative initials tile, linked repository name, and short muted description.
-Rows have no heavy border or duplicate GitHub buttons, just a subtle hover
-surface. Optional Live and published Writeup links remain plain text.
+Rows have no heavy border or large buttons, just a subtle hover surface.
+Source, optional Live demo, extra resources, and published Writeup links are
+displayed as compact text links beneath the description.
 An accessible page heading remains available to screen readers.
 The footer sits at the bottom of short pages and follows the content
 on longer pages, without a fixed overlay.

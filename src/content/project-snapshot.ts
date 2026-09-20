@@ -8,9 +8,10 @@ export interface Project {
   homepage?: string
   language?: string
   category?: WritingCategory
+  extraLinks?: { label: string; url: string }[]
 }
 
-const overrides: Record<string, Partial<Pick<Project, 'category' | 'description'>>> = {
+const overrides: Record<string, Partial<Pick<Project, 'category' | 'description' | 'homepage' | 'extraLinks'>>> = {
   'ragmha/apple-books-mcp': {
     category: 'AI',
     description: 'Connect AI assistants to your Apple Books library.',

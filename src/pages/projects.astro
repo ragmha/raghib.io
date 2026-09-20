@@ -2,6 +2,7 @@
 import ArchiveLayout from '../layouts/ArchiveLayout.astro'
 import { projectSnapshot } from '../content/project-snapshot'
 import { getVisibleProjectWriteups } from '../lib/project-writeups'
+import { getProjectLinks } from '../lib/project-links'
 
 const writeupLinks = new Map(
   (await getVisibleProjectWriteups())
@@ -29,14 +30,14 @@ const writeupLinks = new Map(
               <a class="project-title-link" href={project.url}>{project.name}</a>
             </h2>
             {project.description && <p class="project-description">{project.description}</p>}
-            {(project.homepage || writeupLinks.has(project.name)) && (
-              <div class="project-links">
-                {project.homepage && <a class="project-extra" href={project.homepage}>Live ↗</a>}
+            <div class="project-links">
+                {getProjectLinks(project).map((link) => (
+                  <a class="project-extra" href={link.url}>{link.label} ↗</a>
+                ))}
                 {writeupLinks.has(project.name) && (
                   <a class="project-extra" href={writeupLinks.get(project.name)?.href}>Writeup →</a>
                 )}
-              </div>
-            )}
+            </div>
           </div>
         </li>
       ))
