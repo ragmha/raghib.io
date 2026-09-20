@@ -166,12 +166,18 @@ mark {
   cursor: pointer;
 }
 
-.contents-toggle svg {
-  transition: transform 180ms ease-out;
+.contents-toggle::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--rule-strong);
 }
 
-.contents-toggle[aria-expanded='true'] svg {
-  transform: rotate(180deg);
+.contents-toggle:is(:hover, :focus-visible, [aria-expanded='true'])::before {
+  background: var(--ink);
 }
 
 main {
@@ -315,8 +321,7 @@ main {
 @media (prefers-reduced-motion: reduce) {
   .parts *,
   .sidebar[data-enhanced] .parts-summary,
-  .sidebar[data-enhanced] .part-title,
-  .contents-toggle svg {
+  .sidebar[data-enhanced] .part-title {
     transition: none;
   }
 }
