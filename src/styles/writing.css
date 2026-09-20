@@ -1,44 +1,25 @@
 @import './fonts.css';
+@import './theme.css';
 
-/* Writing section theme — minimal monospace editorial style.
-   Light = warm paper, dark = ink. Scoped to /writing and its posts only via
-   WritingLayout.astro; the rest of the site keeps its own design.
-   Ported from the closed static-generator prototype (PR #17). */
+/* Writing-specific editorial styles use the shared site palette. */
 
 :root {
-  --paper: #faf9f5;
-  --paper-sunk: #f2f0e7;
-  --ink: #1c1b18;
-  --ink-muted: #6f6d63;
-  --ink-faint: #a5a297;
-  --rule: #dedbcf;
-  --rule-strong: #c9c5b6;
-  --mark: #e9f56c;
-  --mark-ink: #1c1b18;
-  --code-bg: #f1efe6;
-  --selection: #e9f56c;
+  --paper: var(--theme-bg);
+  --paper-sunk: var(--theme-surface);
+  --ink: var(--theme-text);
+  --ink-muted: var(--theme-muted);
+  --ink-faint: var(--theme-faint);
+  --rule: var(--theme-rule);
+  --rule-strong: var(--theme-rule-strong);
+  --mark: var(--theme-highlight);
+  --mark-ink: var(--theme-highlight-text);
+  --code-bg: var(--theme-code-bg);
 
   --measure: 68ch;
   --sidebar: 15rem;
 
-  color-scheme: light;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-}
-
-[data-theme='dark'] {
-  --paper: #161614;
-  --paper-sunk: #1e1e1b;
-  --ink: #e7e5dc;
-  --ink-muted: #918e83;
-  --ink-faint: #5f5d55;
-  --rule: #2d2d28;
-  --rule-strong: #3d3c35;
-  --mark: #cede3f;
-  --mark-ink: #161614;
-  --code-bg: #1e1e1b;
-  --selection: #cede3f;
-  color-scheme: dark;
 }
 
 *,
@@ -74,11 +55,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-::selection {
-  background: var(--selection);
-  color: var(--mark-ink);
-}
-
 a {
   color: inherit;
   text-decoration: none;
@@ -89,12 +65,6 @@ a:hover {
   background: var(--mark);
   color: var(--mark-ink);
   border-bottom-color: transparent;
-}
-
-a:focus-visible,
-button:focus-visible {
-  outline: 2px solid var(--mark);
-  outline-offset: 3px;
 }
 
 mark {

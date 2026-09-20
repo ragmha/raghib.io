@@ -3,17 +3,19 @@ import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import { runInNewContext } from 'node:vm'
 
-const initSource = readFileSync(
+const initComponent = readFileSync(
   new URL('../src/components/ThemeInit.astro', import.meta.url),
   'utf8'
-).match(/<script[^>]*>([\s\S]*?)<\/script>/)[1]
+)
+const initSource = initComponent.match(/<script[^>]*>([\s\S]*?)<\/script>/)[1]
+const pageDefault = initComponent.match(/defaultTheme = '([^']+)'/)[1]
 const controllerSource = readFileSync(
   new URL('../src/scripts/theme.js', import.meta.url),
   'utf8'
 )
 
 function createPage({
-  defaultTheme = 'dark',
+  defaultTheme = pageDefault,
   systemDark = false,
   saved = null,
   storageBlocked = false,
@@ -62,7 +64,8 @@ function createPage({
   }
 }
 
-test('homepage defaults to dark regardless of OS and ignores OS changes', () => {
+test('shared page default is dark regardless of OS and ignores OS changes', () => {
+  assert.equal(pageDefault, 'dark')
   for (const systemDark of [false, true]) {
     const page = createPage({ systemDark })
     assert.equal(page.root.dataset.theme, 'dark')
@@ -97,7 +100,7 @@ test('toggle updates the theme, accessible label, and persisted choice', () => {
   assert.equal(page.stored(), 'dark')
 })
 
-test('Writing follows the OS until the visitor makes a choice', () => {
+test('explicit system mode follows the OS until the visitor makes a choice', () => {
   const page = createPage({ defaultTheme: 'system' })
   assert.equal(page.root.dataset.theme, 'light')
   page.systemChange(true)

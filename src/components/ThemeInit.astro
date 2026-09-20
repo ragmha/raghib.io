@@ -3,7 +3,7 @@ interface Props {
   defaultTheme?: 'dark' | 'system'
 }
 
-const { defaultTheme = 'system' } = Astro.props
+const { defaultTheme = 'dark' } = Astro.props
 ---
 
 <script is:inline define:vars={{ defaultTheme }}>

@@ -1,35 +1,19 @@
 @import './fonts.css';
+@import './theme.css';
 
 body.site-surface {
-  --site-bg: #161614;
-  --site-text: #e7e5dc;
-  --site-muted: #a5a297;
-  --text: var(--site-text);
-  --body: var(--site-text);
-  --muted: var(--site-muted);
-  --line: #2d2d28;
-  --accent: var(--site-text);
-  color-scheme: dark;
-  background: var(--site-bg);
-  color: var(--site-text);
+  --text: var(--theme-text);
+  --body: var(--theme-text);
+  --muted: var(--theme-muted);
+  --line: var(--theme-rule);
+  --accent: var(--theme-text);
+  background: var(--theme-bg);
+  color: var(--theme-text);
   font-family: var(--font-mono);
   font-size: 1rem;
   line-height: 1.6;
   font-variant-ligatures: none;
   -webkit-font-smoothing: antialiased;
-}
-
-[data-theme='light'] body.site-surface {
-  --site-bg: #f7f5f0;
-  --site-text: #111;
-  --site-muted: #6f6d63;
-  --line: #dedbcf;
-  color-scheme: light;
-}
-
-.site-surface ::selection {
-  background: var(--site-text);
-  color: var(--site-bg);
 }
 
 .site-surface .site-page {
