@@ -123,15 +123,21 @@ body.home-surface {
 }
 
 .home-header button {
-  padding: 0;
-  border: 0;
-  background: none;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--home-muted);
+  border-radius: 0;
+  background: var(--home-bg);
   font: inherit;
   cursor: pointer;
 }
 
-.home-nav a:hover,
 .home-header button:hover {
+  border-color: var(--home-text);
+  background: var(--home-text);
+  color: var(--home-bg);
+}
+
+.home-nav a:hover {
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
