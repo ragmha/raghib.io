@@ -1,0 +1,95 @@
+body.home-surface {
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", SFMono-Regular,
+    "IBM Plex Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --accent: #111;
+  color-scheme: light;
+  background: #f7f5f0;
+  color: #111;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  line-height: 1.6;
+  font-variant-ligatures: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+.home-surface .home-page {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Outrank the shared main:not(.home) spacing without affecting other pages. */
+.home-surface .home-matcha {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-content: start;
+  gap: 4rem;
+  width: 100%;
+  max-width: 960px;
+  min-height: 100svh;
+  margin: 0 auto;
+  padding: 7rem 1.25rem 2.5rem;
+}
+
+.home-intro {
+  min-width: 0;
+  padding-top: 1.4rem;
+}
+
+.home-intro h1 {
+  margin: 0 0 0.25rem;
+  color: inherit;
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: normal;
+}
+
+.home-intro p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.home-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  line-height: 2;
+}
+
+.home-nav a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.home-nav a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.home-nav span {
+  color: #777;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 600px) {
+  .home-surface .home-matcha {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+    padding-top: 3rem;
+  }
+
+  .home-intro {
+    padding-top: 0;
+  }
+
+  .home-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+  }
+}
