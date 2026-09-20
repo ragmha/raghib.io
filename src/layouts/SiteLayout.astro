@@ -1,0 +1,39 @@
+---
+import BaseLayout from './BaseLayout.astro'
+import ThemeToggle from '../components/ThemeToggle.astro'
+import '../styles/site.css'
+
+interface Props {
+  title?: string
+  heading: string
+  description: string
+}
+
+const { title, heading, description } = Astro.props
+const currentPath = Astro.url.pathname.replace(/\/$/, '')
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  bodyClass="site-surface"
+  pageClass="site-page"
+  defaultTheme="dark"
+>
+  <header class="site-masthead">
+    <a href="/">Raghib Hasan</a>
+    <ThemeToggle />
+  </header>
+
+  <main class="site-shell">
+    <section class="site-content" aria-labelledby="page-title">
+      <h1 id="page-title">{heading}</h1>
+      <slot />
+    </section>
+
+    <nav class="site-nav" aria-label="Site sections">
+      <a href="/writing">Writing</a>
+      <a href="/projects" aria-current={currentPath === '/projects' ? 'page' : undefined}>Projects</a>
+    </nav>
+  </main>
+</BaseLayout>
