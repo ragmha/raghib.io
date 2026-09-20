@@ -6,7 +6,7 @@
 // /writing and its posts.
 import '../styles/writing.css'
 import ThemeInit from '../components/ThemeInit.astro'
-import ThemeToggle from '../components/ThemeToggle.astro'
+import SiteHeader from '../components/SiteHeader.astro'
 
 interface Props {
   title?: string
@@ -36,15 +36,7 @@ const pageTitle =
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
-    <header class="site-header">
-      <a class="site-name" href="/">Raghib Hasan</a>
-      <nav aria-label="Primary navigation">
-        <a href="/">Home</a>
-        <a href="/writing">Writing</a>
-        <a href="https://github.com/ragmha" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
-        <ThemeToggle />
-      </nav>
-    </header>
+    <SiteHeader />
     <div class="page">
       <slot />
     </div>

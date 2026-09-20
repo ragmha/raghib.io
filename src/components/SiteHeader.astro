@@ -1,0 +1,104 @@
+---
+import ThemeToggle from './ThemeToggle.astro'
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/'
+const writingCurrent = path === '/writing'
+  ? 'page'
+  : path.startsWith('/writing/') ? 'location' : undefined
+---
+
+<header class="site-header">
+  <a class="site-name" href="/">Raghib Hasan</a>
+  <nav aria-label="Primary navigation">
+    <a href="/" aria-current={path === '/' ? 'page' : undefined}>Home</a>
+    <a href="/writing" aria-current={writingCurrent}>Writing</a>
+    <a href="https://github.com/ragmha" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    <ThemeToggle />
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    --header-bg: var(--site-bg, var(--paper));
+    --header-text: var(--site-text, var(--ink));
+    --header-muted: var(--site-muted, var(--ink-muted));
+    --header-rule: var(--line, var(--rule));
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0;
+    padding: 0.9rem clamp(1rem, 4vw, 2.5rem);
+    background: color-mix(in srgb, var(--header-bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--header-rule);
+    color: var(--header-text);
+    font-family: var(--font-mono);
+    line-height: 1.75;
+  }
+
+  .site-name {
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    border-bottom: none;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .site-header nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.25rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+  }
+
+  .site-header nav a {
+    border-bottom: none;
+    color: var(--header-muted);
+    text-decoration: none;
+  }
+
+  .site-header nav a:hover {
+    background: none;
+    color: var(--header-text);
+  }
+
+  .site-header nav a[aria-current] {
+    padding-inline: 0.5rem;
+    background: var(--header-text);
+    color: var(--header-bg);
+    font-weight: 600;
+  }
+
+  .site-header :global(#theme-toggle) {
+    font: inherit;
+    letter-spacing: 0.14em;
+    background: none;
+    border: 1px solid var(--header-rule);
+    border-radius: 0;
+    color: var(--header-muted);
+    padding: 0.25rem 0.6rem;
+    cursor: pointer;
+  }
+
+  .site-header :global(#theme-toggle:hover) {
+    background: var(--header-text);
+    color: var(--header-bg);
+    border-color: transparent;
+  }
+
+  @media print {
+    .site-header {
+      display: none;
+    }
+  }
+</style>

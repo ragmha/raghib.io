@@ -1,6 +1,6 @@
 ---
 import BaseLayout from './BaseLayout.astro'
-import ThemeToggle from '../components/ThemeToggle.astro'
+import SiteHeader from '../components/SiteHeader.astro'
 import '../styles/site.css'
 
 interface Props {
@@ -20,10 +20,7 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '')
   pageClass="site-page"
   defaultTheme="dark"
 >
-  <header class="site-masthead">
-    <a href="/">Raghib Hasan</a>
-    <ThemeToggle />
-  </header>
+  <SiteHeader />
 
   <main class="site-shell">
     <section class="site-content" aria-labelledby="page-title">

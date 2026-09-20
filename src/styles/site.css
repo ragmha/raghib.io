@@ -39,24 +39,6 @@ body.site-surface {
   padding: 0;
 }
 
-.site-masthead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  width: 100%;
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 3rem 1.25rem 0;
-  font-size: 0.85rem;
-  font-weight: 600;
-  line-height: 1.6;
-}
-
-.site-masthead a {
-  text-decoration: none;
-}
-
 /* Outrank the shared main:not(.home) spacing without affecting other pages. */
 .site-surface .site-shell {
   display: grid;
@@ -121,25 +103,9 @@ body.site-surface {
   line-height: 2;
 }
 
-.site-nav a,
-.site-masthead button {
+.site-nav a {
   color: inherit;
   text-decoration: none;
-}
-
-.site-masthead button {
-  padding: 0.35rem 0.75rem;
-  border: 1px solid var(--site-muted);
-  border-radius: 0;
-  background: var(--site-bg);
-  font: inherit;
-  cursor: pointer;
-}
-
-.site-masthead button:hover {
-  border-color: var(--site-text);
-  background: var(--site-text);
-  color: var(--site-bg);
 }
 
 .site-nav a:hover {

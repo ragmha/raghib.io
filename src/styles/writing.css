@@ -117,66 +117,6 @@ mark {
   padding: 0.5rem 0.75rem;
 }
 
-/* ------------------------------------------------------------- top bar */
-
-.site-header {
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.9rem clamp(1rem, 4vw, 2.5rem);
-  background: color-mix(in srgb, var(--paper) 88%, transparent);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--rule);
-}
-
-.site-name {
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  font-size: 0.78rem;
-  border-bottom: none;
-}
-
-.site-header nav {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1.25rem;
-  font-size: 0.7rem;
-  letter-spacing: 0.14em;
-}
-
-.site-header nav a {
-  border-bottom: none;
-  color: var(--ink-muted);
-  text-decoration: none;
-}
-
-.site-header nav a:hover {
-  background: none;
-  color: var(--mark-ink);
-}
-
-#theme-toggle {
-  font: inherit;
-  letter-spacing: 0.14em;
-  background: none;
-  border: 1px solid var(--rule-strong);
-  color: var(--ink-muted);
-  padding: 0.25rem 0.6rem;
-  cursor: pointer;
-}
-
-#theme-toggle:hover {
-  background: var(--mark);
-  color: var(--mark-ink);
-  border-color: transparent;
-}
-
 /* -------------------------------------------------------------- layout */
 
 .page {
