@@ -4,11 +4,15 @@ import '../styles/global.css'
 interface Props {
   title?: string
   description?: string
+  bodyClass?: string
+  pageClass?: string
 }
 
 const {
   title = 'Raghib Hasan',
   description = 'Independent writing on software, AI, systems, and the ideas shaping how technology is built and used.',
+  bodyClass,
+  pageClass,
 } = Astro.props
 
 const pageTitle =
@@ -26,8 +30,8 @@ const pageTitle =
     <meta name="generator" content={Astro.generator} />
     <title>{pageTitle}</title>
   </head>
-  <body>
-    <div class="page">
+  <body class={bodyClass}>
+    <div class:list={['page', pageClass]}>
       <slot />
     </div>
   </body>
