@@ -51,8 +51,7 @@ Only this named list is read for publication.
 Names, descriptions, source URLs, homepages, and languages come from GitHub.
 Category and short display-description overrides are keyed by `owner/repo` in
 `src/content/project-snapshot.ts` and survive subsequent syncs; writeups remain
-local. Language appears in the list's metadata column; categories are retained
-but not displayed.
+local. Language and category metadata are retained but not displayed.
 Removing a project with an existing writeup requires removing or reassigning
 that writeup, otherwise content validation deliberately fails.
 
@@ -64,9 +63,11 @@ The existing deployment workflow needs no additional credential.
 ## Project writeups
 
 Projects and Writing share the editorial archive layout. Projects hides its
-visible page title/count and uses spacious text-only cards with linked names,
-short descriptions, a GitHub button, and language metadata. An accessible page
-heading remains available to screen readers. No placeholder media is displayed.
+visible page title/count and uses compact music-library-style rows: a small
+decorative initials tile, linked repository name, and short muted description.
+Rows have no heavy border or duplicate GitHub buttons, just a subtle hover
+surface. Optional Live and published Writeup links remain plain text.
+An accessible page heading remains available to screen readers.
 The footer sits at the bottom of short pages and follows the content
 on longer pages, without a fixed overlay.
 
