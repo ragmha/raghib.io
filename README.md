@@ -34,12 +34,36 @@ and Bun.
 bun dev       # local development
 bun run check # Astro and TypeScript checks
 bun run build # static production build
+bun run sync:projects # refresh projects from the selected GitHub star list
 ```
+
+## Project list
+
+The Projects page renders the public repositories in
+[`ragmha/blog-projects`](https://github.com/stars/ragmha/lists/blog-projects).
+Run `bun run sync:projects` with an authenticated `gh` CLI to refresh
+`src/content/github-projects.json`, then commit the snapshot and rebuild/deploy.
+The command paginates both lists and repositories, updates the snapshot only
+after a complete fetch, and refuses private repositories or duplicate project
+names. The selected list may be private; the CLI account must have access.
+Only this named list is read for publication.
+
+Names, descriptions, source URLs, homepages, and languages come from GitHub.
+Category overrides are keyed by `owner/repo` in
+`src/content/project-snapshot.ts`; writeups remain local. Repositories without
+an override still render, with their language label when available.
+Removing a project with an existing writeup requires removing or reassigning
+that writeup, otherwise content validation deliberately fails.
+
+Builds and page views use the checked-in snapshot, not the network. No token
+is bundled into the site, and GitHub outages do not break an ordinary build.
+List changes are not live: run the sync command and deploy to publish them.
+The existing deployment workflow needs no additional credential.
 
 ## Project writeups
 
 Projects and Writing share the editorial archive layout and outlined label
-component. Set a project's `category` in `src/content/project-snapshot.ts`;
+component. Set a project's category override in `src/content/project-snapshot.ts`;
 its programming language is displayed as a second label. Labels use the same
 hover-only color treatment as Writing.
 

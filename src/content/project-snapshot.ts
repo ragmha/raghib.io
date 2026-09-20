@@ -1,4 +1,5 @@
 import type { WritingCategory } from '../lib/posts'
+import githubProjects from './github-projects.json'
 
 export interface Project {
   name: string
@@ -9,13 +10,11 @@ export interface Project {
   category?: WritingCategory
 }
 
-export const projectSnapshot: Project[] = [
-  {
-    name: 'apple-books-mcp',
-    category: 'AI',
-    description:
-      'MCP server for Apple Books with read access and a safety-checked write seam.',
-    url: 'https://github.com/ragmha/apple-books-mcp',
-    language: 'TypeScript',
-  },
-]
+const categories: Record<string, WritingCategory> = {
+  'ragmha/apple-books-mcp': 'AI',
+}
+
+export const projectSnapshot: Project[] = githubProjects.map((project) => ({
+  ...project,
+  category: categories[project.repository],
+}))
