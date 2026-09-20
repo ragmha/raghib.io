@@ -1,0 +1,52 @@
+---
+import WritingLayout from './WritingLayout.astro'
+import SiteNav from '../components/SiteNav.astro'
+
+interface Props {
+  title: string
+  description: string
+  count: number
+  itemLabel: string
+}
+
+const { title, description, count, itemLabel } = Astro.props
+---
+
+<WritingLayout title={title} description={description}>
+  <div class="writing-index">
+    <main id="main">
+      <article class="prose">
+        <header class="doc-head">
+          <h1>{title}</h1>
+          <p class="doc-meta">{count} {itemLabel}{count === 1 ? '' : 's'}</p>
+        </header>
+        <slot />
+      </article>
+    </main>
+    <SiteNav />
+  </div>
+</WritingLayout>
+
+<style>
+  .writing-index {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--layout-nav-width);
+    align-content: start;
+    gap: var(--layout-gap);
+    width: 100%;
+    max-width: var(--layout-width);
+    margin: 0 auto;
+    padding: var(--layout-top) var(--layout-gutter) var(--layout-bottom);
+  }
+
+  .writing-index main {
+    max-width: none;
+    padding-top: var(--layout-content-offset);
+  }
+
+  @media (max-width: 600px) {
+    .writing-index {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

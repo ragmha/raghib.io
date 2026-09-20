@@ -1,14 +1,18 @@
+import type { WritingCategory } from '../lib/posts'
+
 export interface Project {
   name: string
   description: string
   url: string
   homepage?: string
   language?: string
+  category?: WritingCategory
 }
 
 export const projectSnapshot: Project[] = [
   {
     name: 'apple-books-mcp',
+    category: 'AI',
     description:
       'MCP server for Apple Books with read access and a safety-checked write seam.',
     url: 'https://github.com/ragmha/apple-books-mcp',
@@ -16,6 +20,7 @@ export const projectSnapshot: Project[] = [
   },
   {
     name: 'five-by-five',
+    category: 'Systems',
     description:
       'Native iOS and watchOS strength tracker with HealthKit sync and an on-device workout assistant.',
     url: 'https://github.com/ragmha/five-by-five',
@@ -23,6 +28,7 @@ export const projectSnapshot: Project[] = [
   },
   {
     name: 'chomp',
+    category: 'Developer Workflow',
     description:
       'A working demonstration of an AI-native SDLC using Copilot CLI, SDK, Actions, and Advanced Security.',
     url: 'https://github.com/ragmha/chomp',
@@ -30,6 +36,7 @@ export const projectSnapshot: Project[] = [
   },
   {
     name: 'modernize-app-with-copilot',
+    category: 'Developer Workflow',
     description:
       'Hands-on ASP.NET and Java modernization using GitHub Copilot, Codespaces, and Actions.',
     url: 'https://github.com/ragmha/modernize-app-with-copilot',
@@ -37,6 +44,7 @@ export const projectSnapshot: Project[] = [
   },
   {
     name: 'copilot-chrome',
+    category: 'AI',
     description:
       'GitHub Copilot in a Chrome side panel with SDK-driven browser automation, MCP, and WebMCP.',
     url: 'https://github.com/ragmha/copilot-chrome',
@@ -44,6 +52,7 @@ export const projectSnapshot: Project[] = [
   },
   {
     name: 'copilot-factory',
+    category: 'Developer Workflow',
     description:
       'A software factory demonstrating issue-to-PR delivery with a human-owned review gate.',
     url: 'https://github.com/ragmha/copilot-factory',
@@ -51,6 +60,7 @@ export const projectSnapshot: Project[] = [
   },
   {
     name: 'helsinki-pulse',
+    category: 'Systems',
     description:
       'Live Helsinki transit digital twin on Microsoft Fabric Real-Time Intelligence.',
     url: 'https://github.com/ragmha/helsinki-pulse',
@@ -58,6 +68,7 @@ export const projectSnapshot: Project[] = [
   },
   {
     name: 'clinic-scheduler',
+    category: 'Web',
     description:
       'Healthcare staff scheduler built with React, TypeScript, and a Microsoft Fabric-oriented data model.',
     url: 'https://github.com/ragmha/clinic-scheduler',

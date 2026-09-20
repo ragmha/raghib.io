@@ -6,9 +6,10 @@ import { getCategoryColor, getTagColor, type WritingCategory } from '../lib/post
 interface Props {
   category?: WritingCategory
   tags?: string[]
+  inferredCategory?: boolean
 }
 
-const { category, tags = [] } = Astro.props
+const { category, tags = [], inferredCategory = true } = Astro.props
 
 // The category is inferred from the tags, so drop any tag that just repeats it.
 const visibleTags = category
@@ -23,7 +24,7 @@ const visibleTags = category
         <li
           class="tag tag-category"
           data-tag-color={getCategoryColor(category)}
-          title="Automatically inferred category"
+          title={inferredCategory ? 'Automatically inferred category' : 'Project category'}
         >
           {category}
         </li>

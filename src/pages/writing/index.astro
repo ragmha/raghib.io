@@ -1,7 +1,6 @@
 ---
-import WritingLayout from '../../layouts/WritingLayout.astro'
+import ArchiveLayout from '../../layouts/ArchiveLayout.astro'
 import PostList from '../../components/PostList.astro'
-import SiteNav from '../../components/SiteNav.astro'
 import {
   formatDate,
   getPostCategory,
@@ -13,56 +12,20 @@ import {
 const posts = await getPublishedPosts()
 ---
 
-<WritingLayout
+<ArchiveLayout
   title="Writing"
+  count={posts.length}
+  itemLabel="piece"
   description="Essays and practical explorations of software, AI, systems, and responsible technology."
 >
-  <div class="writing-index">
-    <main id="main">
-      <article class="prose">
-        <header class="doc-head">
-          <h1>Writing</h1>
-          <p class="doc-meta">
-            {posts.length} {posts.length === 1 ? 'piece' : 'pieces'}
-          </p>
-        </header>
-
-        <PostList
-          posts={posts.map((post) => ({
-            href: `/writing/${getPostSlug(post)}`,
-            date: formatDate(post.data.date),
-            title: post.data.title,
-            description: post.data.description,
-            category: getPostCategory(post),
-            tags: getPostTags(post),
-          }))}
-        />
-      </article>
-    </main>
-    <SiteNav />
-  </div>
-</WritingLayout>
-
-<style>
-  .writing-index {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) var(--layout-nav-width);
-    align-content: start;
-    gap: var(--layout-gap);
-    width: 100%;
-    max-width: var(--layout-width);
-    margin: 0 auto;
-    padding: var(--layout-top) var(--layout-gutter) var(--layout-bottom);
-  }
-
-  .writing-index main {
-    max-width: none;
-    padding-top: var(--layout-content-offset);
-  }
-
-  @media (max-width: 600px) {
-    .writing-index {
-      grid-template-columns: minmax(0, 1fr);
-    }
-  }
-</style>
+  <PostList
+    posts={posts.map((post) => ({
+      href: `/writing/${getPostSlug(post)}`,
+      date: formatDate(post.data.date),
+      title: post.data.title,
+      description: post.data.description,
+      category: getPostCategory(post),
+      tags: getPostTags(post),
+    }))}
+  />
+</ArchiveLayout>

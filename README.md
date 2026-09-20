@@ -38,6 +38,11 @@ bun run build # static production build
 
 ## Project writeups
 
+Projects and Writing share the editorial archive layout and outlined label
+component. Set a project's `category` in `src/content/project-snapshot.ts`;
+its programming language is displayed as a second label. Labels use the same
+hover-only color treatment as Writing.
+
 Project writeups are separate from the Writing archive and its RSS feed.
 Each project can have one writeup at `/project/<project-name>/writings`.
 The repository README covers what the project does and how to use it; the

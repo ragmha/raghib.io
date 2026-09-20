@@ -1,5 +1,6 @@
 ---
-import SiteLayout from '../layouts/SiteLayout.astro'
+import ArchiveLayout from '../layouts/ArchiveLayout.astro'
+import TagList from '../components/TagList.astro'
 import { projectSnapshot } from '../content/project-snapshot'
 import { getVisibleProjectWriteups } from '../lib/project-writeups'
 
@@ -8,26 +9,20 @@ const writeupLinks = new Map(
 )
 ---
 
-<SiteLayout
+<ArchiveLayout
   title="Projects"
-  heading="Projects"
+  count={projectSnapshot.length}
+  itemLabel="project"
   description="Open-source projects and technical demonstrations by Raghib Hasan."
 >
-  <div class="projects-intro">
-    <p>
-      Selected open-source work, technical demonstrations, and reference
-      implementations.
-    </p>
-  </div>
-
-  <div class="project-list">
+  <div class="project-archive">
     {
       projectSnapshot.map((project) => (
-        <article class="project-row">
-          <h2>{project.name}</h2>
-          <p>{project.description}</p>
-          <div class="meta">
-            {project.language && <span>{project.language}</span>}
+        <article class="project-entry">
+          <h2 class="project-heading"><a class="project-title-link" href={project.url}><span class="post-title">{project.name}</span></a></h2>
+          <span class="post-desc">{project.description}</span>
+          <TagList category={project.category} tags={project.language ? [project.language] : []} inferredCategory={false} />
+          <div class="project-links">
             <a href={project.url}>Source ↗</a>
             {project.homepage && <a href={project.homepage}>Live ↗</a>}
             {writeupLinks.has(project.name) && (
@@ -40,10 +35,49 @@ const writeupLinks = new Map(
       ))
     }
   </div>
-</SiteLayout>
+</ArchiveLayout>
 
 <style>
-  .projects-intro {
-    margin: 1rem 0 2.5rem;
+  .project-archive {
+    border-top: 1px solid var(--rule);
+  }
+
+  .project-entry {
+    padding: 1.35rem 0.5rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .project-entry:is(:hover, :focus-within) {
+    background: var(--paper-sunk);
+  }
+
+  .project-heading {
+    margin: 0;
+    font-size: inherit;
+    line-height: inherit;
+  }
+
+  .project-title-link {
+    border: 0;
+    background: none;
+    color: inherit;
+  }
+
+  .project-title-link:is(:hover, :focus-visible) .post-title {
+    background: var(--mark);
+    color: var(--mark-ink);
+  }
+
+  .project-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 0.75rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+  }
+
+  .post-title {
+    overflow-wrap: anywhere;
   }
 </style>
