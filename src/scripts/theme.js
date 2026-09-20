@@ -48,37 +48,3 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e)
     paintToggle()
   }
 })
-
-/* --------------------------------------------------------- scroll spy */
-
-const parts = [...document.querySelectorAll('.part[id]')]
-const partLinks = new Map(
-  [...document.querySelectorAll('[data-part-link]')].map((a) => [
-    a.dataset.partLink,
-    a,
-  ])
-)
-
-if (parts.length && partLinks.size) {
-  let ticking = false
-
-  const sync = () => {
-    ticking = false
-    let active = parts[0]
-    for (const part of parts) {
-      if (part.getBoundingClientRect().top <= 140) active = part
-    }
-    for (const [id, link] of partLinks) link.classList.toggle('is-active', id === active.id)
-  }
-
-  addEventListener(
-    'scroll',
-    () => {
-      if (ticking) return
-      ticking = true
-      requestAnimationFrame(sync)
-    },
-    { passive: true }
-  )
-  sync()
-}

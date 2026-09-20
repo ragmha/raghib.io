@@ -9,19 +9,27 @@ interface Heading {
 
 interface Props {
   headings: Heading[]
+  title: string
+  readingTime: string
 }
 
-const { headings } = Astro.props
-const parts = headings.filter((heading) => heading.depth === 2)
+const { headings, title, readingTime } = Astro.props
+const parts = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 4)
 ---
 
 {
   parts.length > 0 && (
-    <nav class="parts" aria-label="Contents">
-      <h2>Contents</h2>
+    <nav class="parts" aria-label="Contents" data-contents-nav>
+      <div class="parts-rail" aria-hidden="true">
+        <span class="parts-window" data-reading-window></span>
+      </div>
+      <div class="parts-summary">
+        <a class="parts-title" href="#post-title" data-part-link="post-title">{title}</a>
+        <p>{readingTime.toLowerCase()}</p>
+      </div>
       <ol>
         {parts.map((part) => (
-          <li>
+          <li style={{ '--toc-depth': part.depth - 2 }}>
             <a href={`#${part.slug}`} data-part-link={part.slug}>
               <span class="part-title">{part.text}</span>
             </a>
@@ -31,3 +39,5 @@ const parts = headings.filter((heading) => heading.depth === 2)
     </nav>
   )
 }
+
+<script src="../scripts/contents.js"></script>

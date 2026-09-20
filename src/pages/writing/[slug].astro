@@ -26,19 +26,20 @@ interface Props {
 
 const { post } = Astro.props
 const { Content, headings } = await render(post)
+const readingTime = estimateReadingTime(post.body)
 ---
 
 <WritingLayout title={post.data.title} description={post.data.description}>
   <div class="shell">
     <aside class="sidebar">
-      <PartsNav headings={headings} />
+      <PartsNav headings={headings} title={post.data.title} readingTime={readingTime} />
     </aside>
     <main id="main">
       <article class="prose">
         <header class="doc-head">
-          <h1>{post.data.title}</h1>
+          <h1 id="post-title">{post.data.title}</h1>
           <p class="doc-meta">
-            {formatDate(post.data.date)} · {estimateReadingTime(post.body)}
+            {formatDate(post.data.date)} · {readingTime}
           </p>
           <TagList category={getPostCategory(post)} tags={getPostTags(post)} />
         </header>
