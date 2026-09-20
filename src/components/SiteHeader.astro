@@ -64,11 +64,11 @@ import '../styles/layout.css'
     overflow: visible;
     pointer-events: none;
     fill: none;
-    stroke: #ff302b;
+    stroke: currentColor;
     stroke-width: 1.6;
     stroke-linecap: square;
     opacity: 0;
-    filter: drop-shadow(0 1px 3px rgb(255 35 25 / 55%));
+    filter: drop-shadow(0 1px 3px color-mix(in srgb, currentColor 35%, transparent));
     transition: opacity 140ms ease-out;
   }
 
