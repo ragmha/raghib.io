@@ -1,6 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro'
 import SiteHeader from '../components/SiteHeader.astro'
+import SiteNav from '../components/SiteNav.astro'
 import '../styles/site.css'
 
 interface Props {
@@ -10,7 +11,6 @@ interface Props {
 }
 
 const { title, heading, description } = Astro.props
-const currentPath = Astro.url.pathname.replace(/\/$/, '')
 ---
 
 <BaseLayout
@@ -28,9 +28,6 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '')
       <slot />
     </section>
 
-    <nav class="site-nav" aria-label="Site sections">
-      <a href="/writing">Writing</a>
-      <a href="/projects" aria-current={currentPath === '/projects' ? 'page' : undefined}>Projects</a>
-    </nav>
+    <SiteNav />
   </main>
 </BaseLayout>
