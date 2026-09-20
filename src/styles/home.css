@@ -143,11 +143,6 @@ body.home-surface {
   text-underline-offset: 3px;
 }
 
-.home-nav > span {
-  color: var(--home-muted);
-  font-size: 0.8rem;
-}
-
 @media (max-width: 600px) {
   .home-surface .home-matcha {
     grid-template-columns: minmax(0, 1fr);
