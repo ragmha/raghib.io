@@ -8,13 +8,7 @@ import '../styles/layout.css'
     Raghib Hasan
     <svg class="name-taillight" viewBox="0 0 120 12" preserveAspectRatio="none"
       aria-hidden="true" focusable="false">
-      <path class="light-bar" d="M2 3v6h116V3" />
-      <path class="light-segment" style="--light-delay: 0ms" d="m108 2 4 3-4 3" />
-      <path class="light-segment" style="--light-delay: 60ms" d="m100 2 4 3-4 3" />
-      <path class="light-segment" style="--light-delay: 120ms" d="m92 2 4 3-4 3" />
-      <path class="light-segment" style="--light-delay: 240ms" d="m28 2-4 3 4 3" />
-      <path class="light-segment" style="--light-delay: 300ms" d="m20 2-4 3 4 3" />
-      <path class="light-segment" style="--light-delay: 360ms" d="m12 2-4 3 4 3" />
+      <path class="light-bar" d="M2 6H118" />
     </svg>
   </a>
   <div class="header-controls">
@@ -73,7 +67,6 @@ import '../styles/layout.css'
     stroke: #ff302b;
     stroke-width: 1.6;
     stroke-linecap: square;
-    stroke-linejoin: bevel;
     opacity: 0;
     filter: drop-shadow(0 1px 3px rgb(255 35 25 / 55%));
     transition: opacity 140ms ease-out;
@@ -85,10 +78,6 @@ import '../styles/layout.css'
     transform: scaleX(0);
   }
 
-  .light-segment {
-    opacity: 0;
-  }
-
   .site-name:is(:hover, :focus-visible) .name-taillight {
     opacity: 1;
   }
@@ -97,16 +86,8 @@ import '../styles/layout.css'
     animation: light-sweep 440ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
-  .site-name:is(:hover, :focus-visible) .light-segment {
-    animation: light-on 160ms ease-out var(--light-delay) both;
-  }
-
   @keyframes light-sweep {
     to { transform: scaleX(1); }
-  }
-
-  @keyframes light-on {
-    to { opacity: 1; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -119,10 +100,6 @@ import '../styles/layout.css'
       transform: none;
     }
 
-    .site-name:is(:hover, :focus-visible) .light-segment {
-      animation: none;
-      opacity: 1;
-    }
   }
 
   .header-controls {
