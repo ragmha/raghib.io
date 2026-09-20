@@ -9,9 +9,12 @@ import '../styles/layout.css'
     <svg class="name-taillight" viewBox="0 0 120 12" preserveAspectRatio="none"
       aria-hidden="true" focusable="false">
       <path class="light-bar" d="M2 3v6h116V3" />
-      <path class="light-segment segment-inner" d="m28 2-4 3 4 3m64-6 4 3-4 3" />
-      <path class="light-segment segment-middle" d="m20 2-4 3 4 3m80-6 4 3-4 3" />
-      <path class="light-segment segment-outer" d="m12 2-4 3 4 3m96-6 4 3-4 3" />
+      <path class="light-segment" style="--light-delay: 0ms" d="m108 2 4 3-4 3" />
+      <path class="light-segment" style="--light-delay: 60ms" d="m100 2 4 3-4 3" />
+      <path class="light-segment" style="--light-delay: 120ms" d="m92 2 4 3-4 3" />
+      <path class="light-segment" style="--light-delay: 240ms" d="m28 2-4 3 4 3" />
+      <path class="light-segment" style="--light-delay: 300ms" d="m20 2-4 3 4 3" />
+      <path class="light-segment" style="--light-delay: 360ms" d="m12 2-4 3 4 3" />
     </svg>
   </a>
   <div class="header-controls">
@@ -78,17 +81,13 @@ import '../styles/layout.css'
 
   .light-bar {
     transform-box: fill-box;
-    transform-origin: center;
+    transform-origin: right;
     transform: scaleX(0);
   }
 
   .light-segment {
     opacity: 0;
   }
-
-  .segment-inner { --light-delay: 160ms; }
-  .segment-middle { --light-delay: 240ms; }
-  .segment-outer { --light-delay: 320ms; }
 
   .site-name:is(:hover, :focus-visible) .name-taillight {
     opacity: 1;
