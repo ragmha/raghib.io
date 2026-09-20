@@ -1,6 +1,6 @@
+@import './fonts.css';
+
 body.home-surface {
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", SFMono-Regular,
-    "IBM Plex Mono", Menlo, Consolas, "Liberation Mono", monospace;
   --accent: #111;
   color-scheme: light;
   background: #f7f5f0;
