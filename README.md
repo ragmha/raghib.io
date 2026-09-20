@@ -86,7 +86,9 @@ visible page title/count and uses resource-list rows: a small decorative
 repository icon tile, linked name, muted one-line summary, and thin dividers.
 Source, optional Live demo, extra resources, and published Writeup links appear
 as compact pills on the right, wrapping beneath the text on narrower screens.
-Pills are real links, not status indicators; no fabricated status is displayed.
+Pills are small neutral outlined links, not status indicators; no fabricated
+status is displayed. Rows use 32px icon tiles and compact spacing, with no
+hover color or decoration changes. Keyboard focus outlines remain visible.
 An accessible page heading remains available to screen readers.
 The footer sits at the bottom of short pages and follows the content
 on longer pages, without a fixed overlay.
