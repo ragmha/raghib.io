@@ -3,8 +3,6 @@ import ArchiveLayout from '../../layouts/ArchiveLayout.astro'
 import PostList from '../../components/PostList.astro'
 import {
   formatDate,
-  getPostCategory,
-  getPostTags,
   getPostSlug,
   getPublishedPosts,
 } from '../../lib/posts'
@@ -24,8 +22,6 @@ const posts = await getPublishedPosts()
       date: formatDate(post.data.date),
       title: post.data.title,
       description: post.data.description,
-      category: getPostCategory(post),
-      tags: getPostTags(post),
     }))}
   />
 </ArchiveLayout>

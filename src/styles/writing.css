@@ -496,7 +496,7 @@ main {
 
 /* ------------------------------------------------------------ lists */
 
-.post-list,
+.prose .post-list,
 .compact-list {
   list-style: none;
   margin: 0;
@@ -504,7 +504,8 @@ main {
   border-top: 1px solid var(--rule);
 }
 
-.post-list li {
+.prose .post-list > li {
+  margin: 0;
   border-bottom: 1px solid var(--rule);
 }
 
@@ -513,6 +514,10 @@ main {
   display: block;
   padding: 1.35rem 0.5rem;
   border-bottom: none;
+}
+
+.post-list > li > a {
+  padding-inline: 0;
 }
 
 .post-list a:hover,
