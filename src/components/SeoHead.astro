@@ -1,0 +1,43 @@
+---
+import { getSeoMetadata, serializeJsonLd, SITE_NAME, type ArticleMetadata } from '../lib/seo'
+
+interface Props {
+  title?: string
+  description?: string
+  noindex?: boolean
+  article?: ArticleMetadata
+}
+
+const { noindex = false } = Astro.props
+const metadata = getSeoMetadata({ ...Astro.props, url: Astro.url, site: Astro.site })
+---
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width" />
+<title>{metadata.pageTitle}</title>
+<meta name="description" content={metadata.description} />
+<meta name="author" content={SITE_NAME} />
+<link rel="canonical" href={metadata.canonical.href} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+<meta property="og:type" content={metadata.openGraphType} />
+<meta property="og:site_name" content={SITE_NAME} />
+<meta property="og:title" content={metadata.pageTitle} />
+<meta property="og:description" content={metadata.description} />
+<meta property="og:url" content={metadata.canonical.href} />
+<meta property="og:image" content={metadata.image.url.href} />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content={String(metadata.image.width)} />
+<meta property="og:image:height" content={String(metadata.image.height)} />
+<meta property="og:image:alt" content={metadata.image.alt} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={metadata.pageTitle} />
+<meta name="twitter:description" content={metadata.description} />
+<meta name="twitter:image" content={metadata.image.url.href} />
+<meta name="twitter:image:alt" content={metadata.image.alt} />
+{metadata.datePublished && <meta property="article:published_time" content={metadata.datePublished} />}
+{metadata.structuredData && (
+  <script is:inline type="application/ld+json" set:html={serializeJsonLd(metadata.structuredData)} />
+)}
+<link rel="alternate" type="application/rss+xml" href="/writing/feed.xml" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<meta name="generator" content={Astro.generator} />

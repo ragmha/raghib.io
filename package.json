@@ -7,18 +7,23 @@
     "dev": "astro dev",
     "build": "astro check && astro build",
     "check": "astro check",
+    "check:seo": "bun scripts/check-seo.mjs",
+    "generate:social-card": "bun scripts/generate-social-card.mjs",
     "preview": "astro preview",
     "sync:projects": "bun scripts/sync-projects.ts"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.6",
     "@astrojs/rss": "^4.0.12",
+    "@astrojs/sitemap": "^3.7.4",
     "astro": "^5.13.7"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
+    "playwright": "^1.63.0",
     "typescript": "^5.9.2",
-    "unist-util-visit": "^5.1.0"
+    "unist-util-visit": "^5.1.0",
+    "yaml": "^2.8.2"
   },
   "engines": {
     "node": ">=20.0.0"

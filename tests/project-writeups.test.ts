@@ -10,7 +10,7 @@ const entry = (published: boolean, project = 'sample-project', id = 'sample') =>
 test('published writeups use the exact project-specific route and preserve entry content', () => {
   const writeup = entry(true)
   const [result] = indexProjectWriteups([writeup], projects)
-  assert.equal(result.href, '/project/sample-project/writings')
+  assert.equal(result.href, '/project/sample-project/writings/')
   assert.equal(result.writeup, writeup)
   assert.equal(result.project, projects[0])
 })
@@ -23,7 +23,7 @@ test('drafts and projects with no writeup generate no routes or links', () => {
 test('explicit draft preview includes drafts without marking them published', () => {
   const draft = entry(false)
   const [result] = indexProjectWriteups([draft], projects, { includeDrafts: true })
-  assert.equal(result.href, '/project/sample-project/writings')
+  assert.equal(result.href, '/project/sample-project/writings/')
   assert.equal(result.writeup.data.published, false)
   assert.deepEqual(indexProjectWriteups([draft], projects, { includeDrafts: false }), [])
 })
