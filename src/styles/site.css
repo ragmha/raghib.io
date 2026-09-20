@@ -148,6 +148,17 @@ body.site-surface {
   text-underline-offset: 3px;
 }
 
+.site-nav a {
+  padding-inline: 0.5rem;
+}
+
+.site-nav a[aria-current='page'] {
+  background: var(--site-text);
+  color: var(--site-bg);
+  font-weight: 600;
+  text-decoration: none;
+}
+
 @media (max-width: 600px) {
   .site-surface .site-shell {
     grid-template-columns: minmax(0, 1fr);
