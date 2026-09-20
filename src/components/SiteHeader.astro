@@ -1,20 +1,12 @@
 ---
 import ThemeToggle from './ThemeToggle.astro'
-
-const path = Astro.url.pathname.replace(/\/$/, '') || '/'
-const writingCurrent = path === '/writing'
-  ? 'page'
-  : path.startsWith('/writing/') ? 'location' : undefined
 ---
 
 <header class="site-header">
   <a class="site-name" href="/">Raghib Hasan</a>
-  <nav aria-label="Primary navigation">
-    <a href="/" aria-current={path === '/' ? 'page' : undefined}>Home</a>
-    <a href="/writing" aria-current={writingCurrent}>Writing</a>
-    <a href="https://github.com/ragmha" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+  <div class="header-controls">
     <ThemeToggle />
-  </nav>
+  </div>
 </header>
 
 <style>
@@ -52,31 +44,13 @@ const writingCurrent = path === '/writing'
     color: inherit;
   }
 
-  .site-header nav {
+  .header-controls {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 1.25rem;
     font-size: 0.7rem;
     letter-spacing: 0.14em;
-  }
-
-  .site-header nav a {
-    border-bottom: none;
-    color: var(--header-muted);
-    text-decoration: none;
-  }
-
-  .site-header nav a:hover {
-    background: none;
-    color: var(--header-text);
-  }
-
-  .site-header nav a[aria-current] {
-    padding-inline: 0.5rem;
-    background: var(--header-text);
-    color: var(--header-bg);
-    font-weight: 600;
   }
 
   .site-header :global(#theme-toggle) {
