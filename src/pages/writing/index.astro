@@ -16,12 +16,23 @@ const posts = await getPublishedPosts()
   itemLabel="piece"
   description="Essays and practical explorations of software, AI, systems, and responsible technology."
 >
-  <PostList
-    posts={posts.map((post) => ({
-      href: `/writing/${getPostSlug(post)}`,
-      date: formatDate(post.data.date),
-      title: post.data.title,
-      description: post.data.description,
-    }))}
-  />
+  {posts.length > 0 ? (
+    <PostList
+      posts={posts.map((post) => ({
+        href: `/writing/${getPostSlug(post)}`,
+        date: formatDate(post.data.date),
+        title: post.data.title,
+        description: post.data.description,
+      }))}
+    />
+  ) : (
+    <p class="empty-writing">No posts published yet.</p>
+  )}
 </ArchiveLayout>
+
+<style>
+  .prose .empty-writing {
+    color: var(--ink-muted);
+    text-align: center;
+  }
+</style>
