@@ -80,8 +80,10 @@ writeup explains the problem, decisions, alternatives, trade-offs, and lessons.
    `published` values keep the writeup private from the built site.
 
 Published writeups automatically add **Writeup →** beside the project's
-Source/Live links. During `bun dev`, drafts appear as **Writeup (draft) →**
-with a visible draft notice and `noindex` metadata. Production builds (including
+Source/Live links. Drafts are never linked from Projects, including during
+development. During `bun dev`, open a draft directly at
+`/project/<project-name>/writings` to review it with a visible draft notice
+and `noindex` metadata. Production builds (including
 `bun run preview`) generate neither draft pages nor draft links. Unknown projects
 and duplicate writeups for the same project fail the build. The page reuses
 the editorial theme and contents rail, with links back to Projects and the
