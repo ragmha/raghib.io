@@ -46,29 +46,23 @@ const posts = await getPublishedPosts()
 <style>
   .writing-index {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) max-content;
+    grid-template-columns: minmax(0, 1fr) var(--layout-nav-width);
     align-content: start;
-    gap: 4rem;
+    gap: var(--layout-gap);
     width: 100%;
-    max-width: 960px;
+    max-width: var(--layout-width);
     margin: 0 auto;
-    padding: 2.5rem 1.25rem;
+    padding: var(--layout-top) var(--layout-gutter) var(--layout-bottom);
   }
 
   .writing-index main {
     max-width: none;
-    padding-top: 1.4rem;
+    padding-top: var(--layout-content-offset);
   }
 
   @media (max-width: 600px) {
     .writing-index {
       grid-template-columns: minmax(0, 1fr);
-      gap: 2rem;
-      padding-top: 2rem;
-    }
-
-    .writing-index main {
-      padding-top: 0;
     }
   }
 </style>

@@ -42,23 +42,18 @@ body.site-surface {
 /* Outrank the shared main:not(.home) spacing without affecting other pages. */
 .site-surface .site-shell {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) max-content;
+  grid-template-columns: minmax(0, 1fr) var(--layout-nav-width);
   align-content: start;
-  gap: 4rem;
+  gap: var(--layout-gap);
   width: 100%;
-  max-width: 960px;
+  max-width: var(--layout-width);
   margin: 0 auto;
-  padding: 2.5rem 1.25rem;
+  padding: var(--layout-top) var(--layout-gutter) var(--layout-bottom);
 }
 
 .site-content {
   min-width: 0;
-  padding-top: 1.4rem;
-}
-
-.site-surface .site-shell-home {
-  grid-template-columns: minmax(0, 1fr) 6.5rem;
-  padding-top: 2.25rem;
+  padding-top: var(--layout-content-offset);
 }
 
 .site-content h1 {
@@ -102,11 +97,5 @@ body.site-surface {
 @media (max-width: 600px) {
   .site-surface .site-shell {
     grid-template-columns: minmax(0, 1fr);
-    gap: 2rem;
-    padding-top: 2rem;
-  }
-
-  .site-content {
-    padding-top: 0;
   }
 }

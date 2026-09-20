@@ -20,7 +20,6 @@
 
   --measure: 68ch;
   --sidebar: 15rem;
-  --gap: 3.5rem;
 
   color-scheme: light;
   font-synthesis: none;
@@ -128,10 +127,10 @@ mark {
 .shell {
   display: grid;
   grid-template-columns: var(--sidebar) minmax(0, 1fr);
-  gap: var(--gap);
-  max-width: 78rem;
+  gap: var(--layout-gap);
+  max-width: var(--layout-width);
   margin: 0 auto;
-  padding: clamp(2rem, 5vw, 4.5rem) clamp(1rem, 4vw, 2.5rem) 4rem;
+  padding: var(--layout-top) var(--layout-gutter) var(--layout-bottom);
 }
 
 .shell-solo {
@@ -501,9 +500,9 @@ main {
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 1rem;
-  max-width: 78rem;
+  max-width: var(--layout-width);
   margin: 0 auto;
-  padding: 1.25rem clamp(1rem, 4vw, 2.5rem) 2.5rem;
+  padding: 1.25rem var(--layout-gutter) var(--layout-bottom);
   border-top: 1px solid var(--rule);
   font-size: 0.66rem;
   letter-spacing: 0.14em;

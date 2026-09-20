@@ -1,14 +1,9 @@
 ---
 import ThemeToggle from './ThemeToggle.astro'
-
-interface Props {
-  contained?: boolean
-}
-
-const { contained = false } = Astro.props
+import '../styles/layout.css'
 ---
 
-<header class:list={['site-header', { 'site-header-contained': contained }]}>
+<header class="site-header">
   <a class="site-name" href="/">Raghib Hasan</a>
   <div class="header-controls">
     <ThemeToggle />
@@ -30,8 +25,10 @@ const { contained = false } = Astro.props
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    margin: 0;
-    padding: 0.9rem clamp(1rem, 4vw, 2.5rem);
+    width: 100%;
+    max-width: var(--layout-width);
+    margin: 0 auto;
+    padding: var(--layout-header-top) var(--layout-gutter) 0;
     background: color-mix(in srgb, var(--header-bg) 88%, transparent);
     backdrop-filter: blur(8px);
     border-bottom: none;
@@ -49,13 +46,6 @@ const { contained = false } = Astro.props
     text-decoration: none;
     background: transparent;
     color: inherit;
-  }
-
-  .site-header-contained {
-    width: 100%;
-    max-width: 960px;
-    margin-inline: auto;
-    padding: 3rem 1.25rem 0;
   }
 
   .header-controls {

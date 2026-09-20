@@ -11,7 +11,6 @@ interface Props {
 }
 
 const { title, heading, description } = Astro.props
-const isHome = Astro.url.pathname === '/'
 ---
 
 <BaseLayout
@@ -21,9 +20,9 @@ const isHome = Astro.url.pathname === '/'
   pageClass="site-page"
   defaultTheme="dark"
 >
-  <SiteHeader contained={isHome} />
+  <SiteHeader />
 
-  <main class:list={['site-shell', { 'site-shell-home': isHome }]}>
+  <main class="site-shell">
     <section class="site-content" aria-labelledby="page-title">
       <h1 id="page-title">{heading}</h1>
       <slot />
