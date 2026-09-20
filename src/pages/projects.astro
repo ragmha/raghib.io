@@ -1,6 +1,11 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro'
 import { projectSnapshot } from '../content/project-snapshot'
+import { getPublishedProjectWriteups } from '../lib/project-writeups'
+
+const writeupLinks = new Map(
+  (await getPublishedProjectWriteups()).map(({ project, href }) => [project.name, href]),
+)
 ---
 
 <SiteLayout
@@ -25,6 +30,9 @@ import { projectSnapshot } from '../content/project-snapshot'
             {project.language && <span>{project.language}</span>}
             <a href={project.url}>Source ↗</a>
             {project.homepage && <a href={project.homepage}>Live ↗</a>}
+            {writeupLinks.has(project.name) && (
+              <a href={writeupLinks.get(project.name)}>Writeup →</a>
+            )}
           </div>
         </article>
       ))
