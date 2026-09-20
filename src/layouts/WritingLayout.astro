@@ -1,0 +1,52 @@
+---
+// Standalone editorial layout for essays and project writeups.
+// Shared presentation does not merge their content collections or feeds.
+import '../styles/writing.css'
+import ThemeInit from '../components/ThemeInit.astro'
+import SiteHeader from '../components/SiteHeader.astro'
+
+interface Props {
+  title?: string
+  description?: string
+  noindex?: boolean
+}
+
+const {
+  title = 'Raghib Hasan',
+  description = 'Independent writing on software, AI, systems, and the ideas shaping how technology is built and used.',
+  noindex = false,
+} = Astro.props
+
+const pageTitle =
+  title === 'Raghib Hasan' ? title : `${title} · Raghib Hasan`
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="alternate" type="application/rss+xml" href="/writing/feed.xml" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{pageTitle}</title>
+    <ThemeInit />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <SiteHeader />
+    <div class="page">
+      <slot />
+    </div>
+    <footer class="site-footer">
+      <span>© {new Date().getFullYear()} Raghib Hasan</span>
+      <span class="footer-links">
+        <a href="https://github.com/ragmha" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://www.linkedin.com/in/ragmha/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <a href="/writing/feed.xml">RSS</a>
+      </span>
+    </footer>
+  </body>
+</html>

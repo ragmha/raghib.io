@@ -1,14 +1,21 @@
 ---
 import '../styles/global.css'
+import ThemeInit from '../components/ThemeInit.astro'
 
 interface Props {
   title?: string
   description?: string
+  bodyClass?: string
+  pageClass?: string
+  defaultTheme?: 'dark' | 'system'
 }
 
 const {
   title = 'Raghib Hasan',
   description = 'Independent writing on software, AI, systems, and the ideas shaping how technology is built and used.',
+  bodyClass,
+  pageClass,
+  defaultTheme,
 } = Astro.props
 
 const pageTitle =
@@ -25,9 +32,10 @@ const pageTitle =
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="generator" content={Astro.generator} />
     <title>{pageTitle}</title>
+    {defaultTheme && <ThemeInit defaultTheme={defaultTheme} />}
   </head>
-  <body>
-    <div class="page">
+  <body class={bodyClass}>
+    <div class:list={['page', pageClass]}>
       <slot />
     </div>
   </body>

@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config'
 import mdx from '@astrojs/mdx'
 import rehypeMermaid from 'rehype-mermaid'
+import rehypeParts from './src/lib/rehype-parts.mjs'
 
 export default defineConfig({
   site: 'https://raghib.io',
@@ -41,6 +42,7 @@ export default defineConfig({
           },
         },
       ],
+      rehypeParts,
     ],
   },
 })

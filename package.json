@@ -7,7 +7,8 @@
     "dev": "astro dev",
     "build": "astro check && astro build",
     "check": "astro check",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "sync:projects": "bun scripts/sync-projects.ts"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.6",
@@ -18,7 +19,8 @@
     "@astrojs/check": "^0.9.4",
     "playwright": "^1.63.0",
     "rehype-mermaid": "^3.0.0",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "unist-util-visit": "^5.1.0"
   },
   "engines": {
     "node": ">=20.0.0"

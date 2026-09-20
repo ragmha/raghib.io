@@ -1,0 +1,78 @@
+---
+import { render, type CollectionEntry } from 'astro:content'
+import WritingLayout from '../../../layouts/WritingLayout.astro'
+import PartsNav from '../../../components/PartsNav.astro'
+import type { Project } from '../../../content/project-snapshot'
+import { getVisibleProjectWriteups } from '../../../lib/project-writeups'
+import { estimateReadingTime, formatDate } from '../../../lib/posts'
+
+export async function getStaticPaths() {
+  return (await getVisibleProjectWriteups()).map(({ project, writeup }) => ({
+    params: { project: project.name },
+    props: { project, writeup },
+  }))
+}
+
+interface Props {
+  project: Project
+  writeup: CollectionEntry<'projectWriteups'>
+}
+
+const { project, writeup } = Astro.props
+const { Content, headings } = await render(writeup)
+const readingTime = estimateReadingTime(writeup.body)
+---
+
+<WritingLayout title={writeup.data.title} description={writeup.data.description} noindex={!writeup.data.published}>
+  <div class="shell">
+    <aside class="sidebar">
+      <PartsNav headings={headings} title={writeup.data.title} readingTime={readingTime} />
+    </aside>
+    <main id="main">
+      <article class="prose">
+        <header class="doc-head">
+          {!writeup.data.published && (
+            <p class="draft-notice">Draft preview — not published. Review the account and conclusions before publishing.</p>
+          )}
+          <h1 id="post-title">{writeup.data.title}</h1>
+          <p class="doc-meta">{formatDate(writeup.data.date)} · {readingTime}</p>
+          <p class="project-context">
+            <a href="/projects">Projects</a> / {project.name}
+          </p>
+          <p class="project-resources">
+            <a href={project.url}>Repository &amp; README ↗</a>
+            {project.homepage && <a href={project.homepage}>Live ↗</a>}
+          </p>
+        </header>
+
+        <Content />
+
+        <hr class="rule-dotted" />
+        <p class="doc-end"><a href="/projects">← All projects</a></p>
+      </article>
+    </main>
+  </div>
+</WritingLayout>
+
+<style>
+  .draft-notice {
+    padding: 0.75rem;
+    border: 1px solid var(--rule-strong);
+    color: var(--ink-muted);
+    font-size: 0.85rem;
+  }
+
+  .project-context,
+  .project-resources {
+    margin: 1rem 0 0;
+    font-size: 0.85rem;
+    color: var(--ink-muted);
+  }
+
+  .project-resources {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+  }
+</style>

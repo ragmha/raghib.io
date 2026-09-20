@@ -1,0 +1,158 @@
+---
+project: apple-books-mcp
+title: "Apple Books MCP: the boundary matters more than the tools"
+description: "Connecting an AI client to a personal reading library means designing for identity, bounded reads, recoverable writes, and honest failure states."
+date: 2026-09-20
+published: false
+---
+
+{/* Draft reconstructed from the repository at 76ad8d7644e0cf6dbded688c16912f7048069c62. Review the framing before publication; this is not a claim about undocumented personal motivations or development chronology. */}
+
+An AI client can be more useful when it can work with the material a person has
+already read and annotated. But connecting it to a reading library raises a
+different question from connecting it to a disposable demo database:
+
+**What should the system be allowed to change, and what happens when it gets
+partway through an operation and fails?**
+
+Apple Books MCP exposes books, collections, highlights, and notes through the
+Model Context Protocol. The interesting part is not the list of tools. It is
+the boundary between a conversational request and a database that belongs to
+another application.
+
+This writeup examines that boundary. Installation and client configuration
+belong in the [README][readme].
+
+## A local database is not a supported API
+
+The server accesses Apple Books' internal Core Data SQLite stores on macOS.
+The library and annotations live in separate databases, connected through book
+asset identifiers. This is an unofficial integration, not an Apple-supported
+extension point.
+
+That distinction changes the design. A successful SQL statement is not enough:
+the resulting records must still make sense to Core Data and Apple Books.
+Updates need to respect version counters and timestamps; inserts need the
+correct entity metadata and primary-key allocation.
+
+The [schema checks][schema] make these assumptions explicit. They inspect
+required columns and collection entity/allocator metadata rather than assuming
+that a database with a familiar filename is compatible.
+
+Refusing an unrecognized schema is less convenient than attempting a best-effort
+write. It is also a more defensible response when the alternative is changing a
+person's library under assumptions the program cannot verify.
+
+## Reading and writing deserve different paths
+
+The [architecture][architecture] separates read-only database access from
+mutations. Listing or searching the library does not need to participate in the
+same application lifecycle as editing a collection.
+
+Most list and search tools support pagination. That is useful beyond response
+size: an assistant can start with a small result set, resolve a book or
+annotation, and request more evidence as needed. Whole-library exports still
+exist, but they should be deliberate rather than the default retrieval strategy.
+
+Local access is not a promise that information stays local after retrieval.
+Once an MCP client receives a highlight or note, how it handles that content
+depends on the client and its model provider. The access boundary and the
+subsequent data-use boundary are different things.
+
+## Put write safeguards in one place
+
+Each tool could implement its own backup, transaction, and application-control
+logic. That would make every new tool another opportunity to omit a step.
+
+Instead, the implementation puts that lifecycle in
+[`LibraryMutation`][mutation]. A mutation describes the intended database change;
+the shared module owns the surrounding sequence:
+
+- Take a snapshot and verify it.
+- Quit Books.app if it is running.
+- Open the writable database and begin an immediate transaction.
+- Apply the change, then commit or roll back.
+- Relaunch Books after a successful commit, unless restart was explicitly skipped.
+
+The transaction handle also provides helpers for Core Data row bookkeeping.
+Collection and annotation operations do not each need to reinvent those rules.
+
+This introduces friction: a write can interrupt the Books application, and
+snapshotting has a cost. The benefit is a consistent place to enforce the
+conditions under which a write is attempted. It reduces duplicated safeguards;
+it does not make an unsupported database integration risk-free.
+
+## Identity is part of correctness
+
+The tools accept both natural identifiers and internal numeric primary keys.
+That sounds like a convenience feature until a numeric-looking asset identifier
+could also be interpreted as a different row's primary key.
+
+The [identifier resolver][identifiers] checks the natural key first. Only a
+missing natural key permits a positive, safe-integer primary-key fallback.
+Collection and annotation UUIDs can be matched without case sensitivity;
+book asset identifiers remain case-sensitive.
+
+These details matter because an assistant's request can be perfectly reasonable
+while referring to the wrong record. Identity resolution is not a formatting
+step to leave to the language model.
+
+## Failure needs to say what actually happened
+
+There is an important distinction between a failed database mutation and a
+successful commit followed by a failed application restart.
+
+The implementation preserves that distinction. If the commit succeeds but
+Books cannot be relaunched, the result still reports success and asks the user
+to reopen the application. Reporting the whole operation as failed could invite
+a retry of a change that already happened.
+
+Restore has its own constraints. The production restore path uses SQLite-managed
+restoration and an exclusive lock, with a fresh safety snapshot. A backup file
+is not enough by itself: the restore procedure must also account for live
+connections and recovery failures.
+
+Unexpected system errors are logged locally and sanitized in tool responses,
+because database error messages can contain personal data. Sanitizing an error
+does not replace explaining the operation's known outcome.
+
+## Test the boundary, not a real reading library
+
+The project separates storage from Books application control, allowing tests to
+substitute disposable databases and a fake application adapter.
+
+The [mutation tests][tests] cover rollback, snapshot verification, quitting
+before mutation, restart behavior, and Core Data bookkeeping. They also cover
+the less obvious case where relaunch fails after a successful commit.
+
+That is the broader lesson this architecture suggests: for an agent-facing
+integration, reliable behavior depends on the code surrounding the tool call,
+not just the tool's description. The model can choose an operation; deterministic
+code still needs to establish identity, enforce preconditions, and explain
+whether the operation committed.
+
+The remaining limits should stay visible. Apple can change the storage schema.
+The documented restore tool covers the Library, not a general annotation-restore
+workflow. Snapshots and tests reduce particular risks; they do not establish
+compatibility with every macOS release or eliminate the need for user judgment.
+
+## Implementation references
+
+This draft is based on repository revision
+[`76ad8d7`](https://github.com/ragmha/apple-books-mcp/tree/76ad8d7644e0cf6dbded688c16912f7048069c62).
+It describes the design visible in that revision, not an undocumented history
+of how the project evolved.
+
+- [README: scope, operating constraints, and recovery limitations][readme]
+- [Architecture and Core Data conventions][architecture]
+- [Mutation lifecycle and outcomes][mutation]
+- [Schema checks][schema]
+- [Identifier resolution][identifiers]
+- [Mutation regression tests][tests]
+
+[readme]: https://github.com/ragmha/apple-books-mcp/blob/76ad8d7644e0cf6dbded688c16912f7048069c62/README.md
+[architecture]: https://github.com/ragmha/apple-books-mcp/blob/76ad8d7644e0cf6dbded688c16912f7048069c62/CONTEXT.md
+[mutation]: https://github.com/ragmha/apple-books-mcp/blob/76ad8d7644e0cf6dbded688c16912f7048069c62/src/db/library-mutation.ts
+[schema]: https://github.com/ragmha/apple-books-mcp/blob/76ad8d7644e0cf6dbded688c16912f7048069c62/src/db/schema-check.ts
+[identifiers]: https://github.com/ragmha/apple-books-mcp/blob/76ad8d7644e0cf6dbded688c16912f7048069c62/src/db/identifiers.ts
+[tests]: https://github.com/ragmha/apple-books-mcp/blob/76ad8d7644e0cf6dbded688c16912f7048069c62/test/library-mutation.test.ts

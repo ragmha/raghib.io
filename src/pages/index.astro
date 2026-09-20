@@ -1,60 +1,27 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro'
-import Footer from '../components/Footer.astro'
-import { getPublishedPosts, getPostSlug } from '../lib/posts'
-
-const posts = (await getPublishedPosts()).slice(0, 3)
+import SiteLayout from '../layouts/SiteLayout.astro'
 ---
 
-<BaseLayout
+<SiteLayout
+  heading="Ideas on technology and systems"
   description="Independent writing on software, AI, systems, and the ideas shaping how technology is built and used."
 >
-  <!-- THESIS: Ideas should be easy to find and worth returning to. OWN-WORLD: One narrow text column, system sans-serif type, muted green links, and no decorative containers. STORY: Meet the writer, choose an area, follow the thinking. FIRST VIEWPORT: Name, point of view, and direct links. FORM: Personal index based on the supplied matchaonmuffins.dev reference. -->
-  <main class="home">
-    <section class="intro">
-      <p class="name">Raghib Hasan</p>
-      <h1>Ideas on technology and systems</h1>
-      <p>
-        I write about software, AI, and the decisions that turn promising
-        technology into useful, trustworthy systems.
-      </p>
-    </section>
+  <div class="home-about" id="about">
+    <p>
+      I currently work at Microsoft as a Senior Software Solution
+      Engineer, helping enterprises build and ship secure, AI-enabled
+      software with GitHub.
+    </p>
 
-    <nav class="index-links" aria-label="Site sections">
-      <a href="/writing"><span>Writing</span><small>Essays and explorations</small></a>
-      <a href="/projects"><span>Projects</span><small>Ideas made tangible</small></a>
-      <a href="/about"><span>About</span><small>How I think</small></a>
-      <a href="https://github.com/ragmha"><span>GitHub ↗</span><small>Source code</small></a>
-      <a href="https://www.linkedin.com/in/ragmha/"><span>LinkedIn ↗</span><small>Background</small></a>
-    </nav>
+    <p>Previously occupied by:</p>
+    <ul>
+      <li>Scaling online grocery platforms and delivery experiences</li>
+      <li>Validating AI and SaaS ideas through rapid prototyping</li>
+      <li>Building and improving full-stack web and mobile applications</li>
+    </ul>
 
-    <section>
-      <h2>Focus</h2>
-      <ul>
-        <li>How AI changes the way software is designed and built</li>
-        <li>Architecture, platforms, and resilient systems</li>
-        <li>Governance, trust, and responsible technology adoption</li>
-      </ul>
-    </section>
-
-    <section>
-      <div class="section-head">
-        <h2>Latest writing</h2>
-        <a href="/writing">All</a>
-      </div>
-      <div class="compact-list">
-        {
-          posts.map((post) => (
-            <a href={`/writing/${getPostSlug(post)}`}>
-              <span>{post.data.title}</span>
-              <time datetime={post.data.date.toISOString()}>
-                {post.data.date.getFullYear()}
-              </time>
-            </a>
-          ))
-        }
-      </div>
-    </section>
-  </main>
-  <Footer />
-</BaseLayout>
+    <p>
+      You can reach me on <a href="https://www.linkedin.com/in/ragmha/">LinkedIn</a>.
+    </p>
+  </div>
+</SiteLayout>
