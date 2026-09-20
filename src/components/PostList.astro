@@ -1,0 +1,38 @@
+---
+// Post list row: date, title, description — mirrors the closed
+// static-generator prototype's (PR #17) `.post-list` markup.
+import TagList from './TagList.astro'
+import type { WritingCategory } from '../lib/posts'
+
+interface Item {
+  href: string
+  date: string
+  title: string
+  description?: string
+  category?: WritingCategory
+  tags?: string[]
+}
+
+interface Props {
+  posts: Item[]
+}
+
+const { posts } = Astro.props
+---
+
+<ul class="post-list">
+  {
+    posts.map((post) => (
+      <li>
+        <a href={post.href}>
+          <span class="post-date">{post.date}</span>
+          <span class="post-title">{post.title}</span>
+          {post.description && <span class="post-desc">{post.description}</span>}
+          {(post.category || (post.tags && post.tags.length > 0)) && (
+            <TagList category={post.category} tags={post.tags} />
+          )}
+        </a>
+      </li>
+    ))
+  }
+</ul>

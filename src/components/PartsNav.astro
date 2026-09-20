@@ -1,0 +1,33 @@
+---
+// Contents navigation for a single document's own section headings, sourced
+// from Astro's heading extraction.
+interface Heading {
+  slug: string
+  text: string
+  depth: number
+}
+
+interface Props {
+  headings: Heading[]
+}
+
+const { headings } = Astro.props
+const parts = headings.filter((heading) => heading.depth === 2)
+---
+
+{
+  parts.length > 0 && (
+    <nav class="parts" aria-label="Contents">
+      <h2>Contents</h2>
+      <ol>
+        {parts.map((part) => (
+          <li>
+            <a href={`#${part.slug}`} data-part-link={part.slug}>
+              <span class="part-title">{part.text}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
+}

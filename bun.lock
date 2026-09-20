@@ -12,6 +12,7 @@
       "devDependencies": {
         "@astrojs/check": "^0.9.4",
         "typescript": "^5.9.2",
+        "unist-util-visit": "^5.1.0",
       },
     },
   },

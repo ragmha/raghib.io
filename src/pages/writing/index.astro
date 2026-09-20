@@ -1,10 +1,10 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro'
-import Header from '../../components/Header.astro'
-import Footer from '../../components/Footer.astro'
+import WritingLayout from '../../layouts/WritingLayout.astro'
+import PostList from '../../components/PostList.astro'
 import {
-  estimateReadingTime,
   formatDate,
+  getPostCategory,
+  getPostTags,
   getPostSlug,
   getPublishedPosts,
 } from '../../lib/posts'
@@ -12,36 +12,31 @@ import {
 const posts = await getPublishedPosts()
 ---
 
-<BaseLayout
+<WritingLayout
   title="Writing"
   description="Essays and practical explorations of software, AI, systems, and responsible technology."
 >
-  <Header />
-  <main>
-    <header class="page-heading">
-      <h1>Writing</h1>
-      <p>
-        Essays, experiments, and practical explorations of how technology
-        changes the systems and organizations around it.
-      </p>
-    </header>
+  <div class="shell shell-solo">
+    <main id="main">
+      <article class="prose">
+        <header class="doc-head">
+          <h1>Writing</h1>
+          <p class="doc-meta">
+            {posts.length} {posts.length === 1 ? 'piece' : 'pieces'}
+          </p>
+        </header>
 
-    <div class="post-list">
-      {
-        posts.map((post) => (
-          <a class="post-row" href={`/writing/${getPostSlug(post)}`}>
-            <div class="meta">
-              <time datetime={post.data.date.toISOString()}>
-                {formatDate(post.data.date)}
-              </time>
-              <span>{estimateReadingTime(post.body)}</span>
-            </div>
-            <h2>{post.data.title}</h2>
-            <p>{post.data.description}</p>
-          </a>
-        ))
-      }
-    </div>
-  </main>
-  <Footer />
-</BaseLayout>
+        <PostList
+          posts={posts.map((post) => ({
+            href: `/writing/${getPostSlug(post)}`,
+            date: formatDate(post.data.date),
+            title: post.data.title,
+            description: post.data.description,
+            category: getPostCategory(post),
+            tags: getPostTags(post),
+          }))}
+        />
+      </article>
+    </main>
+  </div>
+</WritingLayout>

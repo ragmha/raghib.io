@@ -1,11 +1,13 @@
 ---
 import { render, type CollectionEntry } from 'astro:content'
-import BaseLayout from '../../layouts/BaseLayout.astro'
-import Header from '../../components/Header.astro'
-import Footer from '../../components/Footer.astro'
+import WritingLayout from '../../layouts/WritingLayout.astro'
+import PartsNav from '../../components/PartsNav.astro'
+import TagList from '../../components/TagList.astro'
 import {
   estimateReadingTime,
   formatDate,
+  getPostCategory,
+  getPostTags,
   getPostSlug,
   getPublishedPosts,
 } from '../../lib/posts'
@@ -26,45 +28,26 @@ const { post } = Astro.props
 const { Content, headings } = await render(post)
 ---
 
-<BaseLayout title={post.data.title} description={post.data.description}>
-  <Header />
-  <main>
-    <article>
-      <header class="article-header">
-        <h1>{post.data.title}</h1>
-        <p>{post.data.description}</p>
-        <div class="meta">
-          <span>Raghib Hasan</span>
-          <time datetime={post.data.date.toISOString()}>
-            {formatDate(post.data.date)}
-          </time>
-          <span>{estimateReadingTime(post.body)}</span>
-        </div>
-      </header>
+<WritingLayout title={post.data.title} description={post.data.description}>
+  <div class="shell">
+    <aside class="sidebar">
+      <PartsNav headings={headings} />
+    </aside>
+    <main id="main">
+      <article class="prose">
+        <header class="doc-head">
+          <h1>{post.data.title}</h1>
+          <p class="doc-meta">
+            {formatDate(post.data.date)} · {estimateReadingTime(post.body)}
+          </p>
+          <TagList category={getPostCategory(post)} tags={getPostTags(post)} />
+        </header>
 
-      {
-        headings.length > 0 && (
-          <details class="toc">
-            <summary>On this page</summary>
-            <ol>
-              {headings
-                .filter((heading) => heading.depth <= 3)
-                .map((heading) => (
-                  <li data-depth={heading.depth}>
-                    <a href={`#${heading.slug}`}>{heading.text}</a>
-                  </li>
-                ))}
-            </ol>
-          </details>
-        )
-      }
-
-      <div class="prose">
         <Content />
-      </div>
 
-      <p class="back-link"><a href="/writing">← All writing</a></p>
-    </article>
-  </main>
-  <Footer />
-</BaseLayout>
+        <hr class="rule-dotted" />
+        <p class="doc-end"><a href="/writing">← All writing</a></p>
+      </article>
+    </main>
+  </div>
+</WritingLayout>
