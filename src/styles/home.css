@@ -1,15 +1,30 @@
 @import './fonts.css';
 
 body.home-surface {
-  --accent: #111;
-  color-scheme: light;
-  background: #f7f5f0;
-  color: #111;
+  --home-bg: #161614;
+  --home-text: #e7e5dc;
+  --home-muted: #a5a297;
+  --accent: var(--home-text);
+  color-scheme: dark;
+  background: var(--home-bg);
+  color: var(--home-text);
   font-family: var(--font-mono);
   font-size: 1rem;
   line-height: 1.6;
   font-variant-ligatures: none;
   -webkit-font-smoothing: antialiased;
+}
+
+[data-theme='light'] body.home-surface {
+  --home-bg: #f7f5f0;
+  --home-text: #111;
+  --home-muted: #777;
+  color-scheme: light;
+}
+
+.home-surface ::selection {
+  background: var(--home-text);
+  color: var(--home-bg);
 }
 
 .home-surface .home-page {
@@ -83,19 +98,29 @@ body.home-surface {
   line-height: 2;
 }
 
-.home-nav a {
+.home-nav a,
+.home-nav button {
   color: inherit;
   text-decoration: none;
 }
 
-.home-nav a:hover {
+.home-nav button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+.home-nav a:hover,
+.home-nav button:hover {
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
 }
 
-.home-nav span {
-  color: #777;
+.home-nav > span {
+  color: var(--home-muted);
   font-size: 0.8rem;
 }
 
