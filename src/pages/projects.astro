@@ -14,26 +14,26 @@ const writeupLinks = new Map(
   title="Projects"
   count={projectSnapshot.length}
   itemLabel="project"
+  showHeading={false}
   description="Open-source projects and technical demonstrations by Raghib Hasan."
 >
   <ul class="project-archive" role="list">
     {
       projectSnapshot.map((project) => (
         <li class="project-entry">
-          <span class="project-language">{project.language}</span>
           <div class="project-details">
             <h2 class="project-name">
               <a class="project-title-link" href={project.url}>{project.name}</a>
             </h2>
             {project.description && <p class="project-description">{project.description}</p>}
-            {(project.homepage || writeupLinks.has(project.name)) && (
-              <div class="project-links">
+            <div class="project-links">
+                <a class="project-extra" href={project.url}>GitHub ↗</a>
                 {project.homepage && <a class="project-extra" href={project.homepage}>Live ↗</a>}
                 {writeupLinks.has(project.name) && (
                   <a class="project-extra" href={writeupLinks.get(project.name)?.href}>Writeup →</a>
                 )}
-              </div>
-            )}
+            </div>
+            {project.language && <span class="project-language">{project.language}</span>}
           </div>
         </li>
       ))
@@ -43,6 +43,8 @@ const writeupLinks = new Map(
 
 <style>
   .project-archive {
+    display: grid;
+    gap: 1.5rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -51,18 +53,18 @@ const writeupLinks = new Map(
   }
 
   .project-entry {
-    display: grid;
-    grid-template-columns: 8rem minmax(0, 1fr);
-    align-items: baseline;
-    gap: 2rem;
     margin: 0;
-    padding: 2.25rem 0;
-    border-bottom: 1px dotted var(--rule-strong);
+    padding: clamp(1.25rem, 3vw, 2.5rem);
+    border: 1px solid var(--rule);
+    border-radius: 0.75rem;
+    background: var(--paper-sunk);
     overflow-wrap: anywhere;
   }
 
   .project-language {
-    font-size: 0.85rem;
+    display: block;
+    margin-top: 2rem;
+    font-size: 0.75rem;
     color: var(--ink-muted);
   }
 
@@ -72,8 +74,8 @@ const writeupLinks = new Map(
 
   .project-name {
     margin: 0;
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 1.2rem;
+    font-weight: 700;
     line-height: 1.5;
     letter-spacing: normal;
   }
@@ -109,18 +111,24 @@ const writeupLinks = new Map(
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
-    margin-top: 1rem;
+    margin-top: 1.5rem;
   }
 
   .project-extra {
-    font-size: 0.85em;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.5rem 0.85rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: 0.25rem;
+    background: var(--paper);
+    text-decoration: none;
+    font-size: 0.8rem;
   }
 
-  @media (max-width: 760px) {
-    .project-entry {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 0.6rem;
-      padding-block: 1.75rem;
-    }
+  .project-extra:hover {
+    border-color: var(--ink-muted);
+    color: var(--ink);
+    background: var(--paper-sunk);
   }
 </style>
