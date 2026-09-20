@@ -82,11 +82,11 @@ overrides survive GitHub sync, and invalid URLs or empty labels fail rendering.
 ## Project writeups
 
 Projects and Writing share the editorial archive layout. Projects hides its
-visible page title/count and uses compact music-library-style rows: a small
-decorative initials tile, linked repository name, and short muted description.
-Rows have no heavy border or large buttons, just a subtle hover surface.
-Source, optional Live demo, extra resources, and published Writeup links are
-displayed as compact text links beneath the description.
+visible page title/count and uses resource-list rows: a small decorative
+repository icon tile, linked name, muted one-line summary, and thin dividers.
+Source, optional Live demo, extra resources, and published Writeup links appear
+as compact pills on the right, wrapping beneath the text on narrower screens.
+Pills are real links, not status indicators; no fabricated status is displayed.
 An accessible page heading remains available to screen readers.
 The footer sits at the bottom of short pages and follows the content
 on longer pages, without a fixed overlay.
