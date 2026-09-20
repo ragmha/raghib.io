@@ -90,20 +90,8 @@ a:hover {
   color: #141414;
 }
 
-.home-brand,
-.home-foot,
 .home-nav {
   font-family: var(--font-mono);
-}
-
-.home-brand {
-  position: absolute;
-  top: clamp(2rem, 4vw, 4rem);
-  left: clamp(2rem, 4vw, 4rem);
-  font-size: 0.95rem;
-  font-weight: 700;
-  line-height: 1;
-  text-decoration: none;
 }
 
 .home-intro {
@@ -150,16 +138,6 @@ a:hover {
 
 .home-nav a:hover {
   color: #6f6f6f;
-}
-
-.home-foot {
-  position: absolute;
-  bottom: clamp(2rem, 4vw, 4rem);
-  left: clamp(2rem, 4vw, 4rem);
-  margin: 0;
-  color: #7b7b7b;
-  font-size: 0.85rem;
-  line-height: 1;
 }
 
 .intro {
@@ -487,11 +465,6 @@ main:not(.home) {
     gap: 3rem;
     min-height: 100svh;
     padding: 2rem;
-  }
-
-  .home-brand,
-  .home-foot {
-    position: static;
   }
 
   .home-intro,
