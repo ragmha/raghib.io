@@ -74,31 +74,6 @@ body.home-surface {
   text-underline-offset: 3px;
 }
 
-.home-socials {
-  display: flex;
-  gap: 1rem;
-  margin-top: 2rem;
-}
-
-.home-socials a {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  color: #6f6d63;
-}
-
-.home-socials a:hover {
-  color: #111;
-}
-
-.home-socials svg {
-  width: 40px;
-  height: 40px;
-  fill: currentColor;
-}
-
 .home-nav {
   display: flex;
   flex-direction: column;
