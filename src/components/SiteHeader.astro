@@ -50,6 +50,7 @@ import '../styles/layout.css'
 
   .header-controls {
     display: flex;
+    width: var(--layout-nav-width);
     flex-wrap: wrap;
     align-items: center;
     gap: 1.25rem;
@@ -72,6 +73,12 @@ import '../styles/layout.css'
     background: var(--header-text);
     color: var(--header-bg);
     border-color: transparent;
+  }
+
+  @media (max-width: 600px) {
+    .header-controls {
+      width: auto;
+    }
   }
 
   @media print {
