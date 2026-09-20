@@ -51,6 +51,38 @@ body.home-surface {
   line-height: 1.6;
 }
 
+.home-about {
+  margin-top: 2rem;
+  scroll-margin-top: 2rem;
+}
+
+.home-about h2,
+.home-about h3 {
+  color: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: normal;
+}
+
+.home-about h2 {
+  margin: 0 0 0.5rem;
+}
+
+.home-about h3 {
+  margin: 1.5rem 0 0.5rem;
+}
+
+.home-about ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: inherit;
+}
+
+.home-about li {
+  margin: 0 0 0.75rem;
+}
+
 .home-nav {
   display: flex;
   flex-direction: column;
