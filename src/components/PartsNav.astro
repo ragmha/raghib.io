@@ -19,7 +19,14 @@ const parts = headings.filter((heading) => heading.depth >= 2 && heading.depth <
 
 {
   parts.length > 0 && (
-    <nav class="parts" aria-label="Contents" data-contents-nav>
+    <>
+    <button class="contents-toggle" type="button" data-contents-toggle
+      aria-label="Toggle contents" aria-controls="article-contents" aria-expanded="false" hidden>
+      <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+        <path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+    </button>
+    <nav id="article-contents" class="parts" aria-label="Contents" data-contents-nav>
       <div class="parts-rail" aria-hidden="true">
         <span class="parts-window" data-reading-window></span>
       </div>
@@ -37,6 +44,7 @@ const parts = headings.filter((heading) => heading.depth >= 2 && heading.depth <
         ))}
       </ol>
     </nav>
+    </>
   )
 }
 

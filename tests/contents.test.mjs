@@ -17,9 +17,24 @@ async function page({ hidden = false, missing = false, interacting = false } = {
   const marker = { style: {} }
   let resized
   let context
+  const sidebarEvents = new Map()
+  const navEvents = new Map()
+  const toggleEvents = new Map()
+  const toggle = {
+    hidden: true,
+    attributes: {},
+    focused: false,
+    setAttribute(key, value) { this.attributes[key] = value },
+    addEventListener: (event, handler) => toggleEvents.set(event, handler),
+    focus() { this.focused = true },
+  }
   const sidebar = {
+    dataset: {},
     scrollTop: 0,
     clientHeight: 250,
+    querySelector: () => toggle,
+    addEventListener: (event, handler) => sidebarEvents.set(event, handler),
+    contains: (target) => target === toggle,
     getBoundingClientRect: () => ({ top: 96, bottom: 346 }),
   }
   const navTop = () => Math.max(96, 100 - context.scrollY) - sidebar.scrollTop
@@ -43,6 +58,7 @@ async function page({ hidden = false, missing = false, interacting = false } = {
     querySelectorAll: () => links,
     closest: () => sidebar,
     matches: () => interacting,
+    addEventListener: (event, handler) => navEvents.set(event, handler),
     getBoundingClientRect: () => ({ top: navTop() }),
   }
   const article = { getBoundingClientRect: () => ({ bottom: 2200 - context.scrollY }) }
@@ -87,7 +103,11 @@ async function page({ hidden = false, missing = false, interacting = false } = {
   }
   flush()
   return {
-    nav, links, marker, sidebar, errors, calls, positions, flush,
+    nav, links, marker, sidebar, errors, calls, positions, flush, toggle,
+    togglePanel: () => toggleEvents.get('click')(),
+    escape: () => sidebarEvents.get('keydown')({ key: 'Escape' }),
+    outside: () => events.get('pointerdown')({ target: {} }),
+    followLink: () => navEvents.get('click')({ target: { closest: () => links[1] } }),
     active: () => links.findIndex((link) => link.attributes['aria-current'] === 'location'),
     scroll: (y) => { context.scrollY = y; events.get('scroll')() },
     event: (name) => events.get(name)(),
@@ -167,4 +187,27 @@ test('missing targets report an error and leave the readable fallback uncollapse
   const p = await page({ missing: true })
   assert.equal(p.errors.length, 1)
   assert.equal(p.nav.dataset.enhanced, undefined)
+})
+
+test('rail opens on tap and closes with Escape, an outside tap, or a section link', async () => {
+  const p = await page()
+  assert.equal(p.sidebar.dataset.enhanced, '')
+  assert.equal(p.toggle.hidden, false)
+  for (const close of [p.escape, p.outside, p.followLink]) {
+    p.togglePanel()
+    assert.equal(p.sidebar.dataset.expanded, 'true')
+    assert.equal(p.toggle.attributes['aria-expanded'], 'true')
+    close()
+    assert.equal(p.sidebar.dataset.expanded, 'false')
+    assert.equal(p.toggle.attributes['aria-expanded'], 'false')
+  }
+  assert.equal(p.toggle.focused, true)
+})
+
+test('pinned contents are not scrolled away from the user', async () => {
+  const p = await page()
+  p.togglePanel()
+  p.scroll(1504)
+  p.flush()
+  assert.equal(p.sidebar.scrollTop, 0)
 })

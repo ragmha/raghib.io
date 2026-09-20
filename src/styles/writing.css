@@ -126,21 +126,52 @@ mark {
   padding-top: 0.25rem;
 }
 
-/* Reserve enough outer margin for the full rail without shifting the article. */
-@media (min-width: 96rem) {
-  .shell > main {
-    grid-row: 1;
-  }
+.shell:has(.sidebar[data-enhanced]) > main {
+  grid-row: 1;
+}
 
-  .sidebar {
-    position: sticky;
-    top: 6rem;
-    width: var(--sidebar);
-    max-height: calc(100svh - 6rem - var(--layout-gutter));
-    overflow-y: auto;
-    overflow-x: hidden;
-    transform: translateX(calc(-100% - 2rem));
-  }
+.sidebar[data-enhanced] {
+  position: fixed;
+  z-index: 4;
+  top: 6rem;
+  left: max(0px, calc((100vw - var(--layout-width)) / 2 + var(--layout-gutter) - var(--sidebar) - 2rem));
+  width: 20px;
+  max-height: calc(100svh - 6rem - var(--layout-gutter));
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  padding: 0;
+}
+
+.sidebar[data-enhanced] .parts {
+  width: min(var(--sidebar), calc(100vw - 2 * var(--layout-gutter)));
+}
+
+.sidebar[data-enhanced]:is([data-expanded='true'], :has(.parts:focus-within)) {
+  width: min(var(--sidebar), calc(100vw - 2 * var(--layout-gutter)));
+  background: var(--paper);
+  scrollbar-width: thin;
+}
+
+.contents-toggle {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  width: 20px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.contents-toggle svg {
+  transition: transform 180ms ease-out;
+}
+
+.contents-toggle[aria-expanded='true'] svg {
+  transform: rotate(180deg);
 }
 
 main {
@@ -254,16 +285,28 @@ main {
   color: var(--ink);
 }
 
-@media (min-width: 96rem) and (hover: hover) and (pointer: fine) {
-  .parts[data-enhanced] .parts-summary,
-  .parts[data-enhanced] .part-title {
+.sidebar[data-enhanced] .parts-summary,
+.sidebar[data-enhanced] .part-title {
     opacity: 0;
     transform: translateX(-0.375rem);
     transition: opacity 180ms ease-out, transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sidebar[data-enhanced]:is([data-expanded='true'], :has(.parts:focus-within)) .parts-summary,
+.sidebar[data-enhanced]:is([data-expanded='true'], :has(.parts:focus-within)) .part-title {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sidebar[data-enhanced]:hover {
+    width: min(var(--sidebar), calc(100vw - 2 * var(--layout-gutter)));
+    background: var(--paper);
+    scrollbar-width: thin;
   }
 
-  .parts[data-enhanced]:is(:hover, :focus-within) .parts-summary,
-  .parts[data-enhanced]:is(:hover, :focus-within) .part-title {
+  .sidebar[data-enhanced]:hover .parts-summary,
+  .sidebar[data-enhanced]:hover .part-title {
     opacity: 1;
     transform: translateX(0);
   }
@@ -271,8 +314,9 @@ main {
 
 @media (prefers-reduced-motion: reduce) {
   .parts *,
-  .parts[data-enhanced] .parts-summary,
-  .parts[data-enhanced] .part-title {
+  .sidebar[data-enhanced] .parts-summary,
+  .sidebar[data-enhanced] .part-title,
+  .contents-toggle svg {
     transition: none;
   }
 }

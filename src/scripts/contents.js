@@ -17,7 +17,33 @@ if (nav && article && marker) {
   } else {
     const sidebar = nav.closest('.sidebar')
     const header = document.querySelector('.site-header')
-    const desktop = matchMedia('(min-width: 96rem)')
+    const toggle = sidebar?.querySelector('[data-contents-toggle]')
+
+    function setExpanded(expanded) {
+      sidebar.dataset.expanded = String(expanded)
+      toggle.setAttribute('aria-expanded', String(expanded))
+    }
+
+    if (sidebar && toggle) {
+      sidebar.dataset.enhanced = ''
+      toggle.hidden = false
+      toggle.addEventListener('click', () => {
+        setExpanded(sidebar.dataset.expanded !== 'true')
+      })
+      sidebar.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return
+        setExpanded(false)
+        toggle.focus({ preventScroll: true })
+      })
+      nav.addEventListener('click', (event) => {
+        if (!event.target.closest('[data-part-link]')) return
+        setExpanded(false)
+        toggle.focus({ preventScroll: true })
+      })
+      document.addEventListener('pointerdown', (event) => {
+        if (!sidebar.contains(event.target)) setExpanded(false)
+      })
+    }
     let points = []
     let positions = []
     let active = -1
@@ -56,7 +82,7 @@ if (nav && article && marker) {
         }
 
         // Follow long contents lists without interrupting someone using the nav.
-        if (sidebar && desktop.matches && !nav.matches(':hover, :focus-within')) {
+        if (sidebar && sidebar.dataset.expanded !== 'true' && !nav.matches(':hover, :focus-within')) {
           const linkRect = entries[active].link.getBoundingClientRect()
           const viewport = sidebar.getBoundingClientRect()
           if (linkRect.top < viewport.top || linkRect.bottom > viewport.bottom) {
