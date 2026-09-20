@@ -1,0 +1,9 @@
+[
+  {
+    "name": "apple-books-mcp",
+    "repository": "ragmha/apple-books-mcp",
+    "description": "MCP server for Apple Books — read books, collections, and annotations; write through a single safety-checked seam (snapshot + integrity-check + WAL + transaction). macOS only.",
+    "url": "https://github.com/ragmha/apple-books-mcp",
+    "language": "TypeScript"
+  }
+]

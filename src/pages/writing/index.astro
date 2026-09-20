@@ -1,9 +1,7 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro'
-import Header from '../../components/Header.astro'
-import Footer from '../../components/Footer.astro'
+import ArchiveLayout from '../../layouts/ArchiveLayout.astro'
+import PostList from '../../components/PostList.astro'
 import {
-  estimateReadingTime,
   formatDate,
   getPostSlug,
   getPublishedPosts,
@@ -12,36 +10,29 @@ import {
 const posts = await getPublishedPosts()
 ---
 
-<BaseLayout
+<ArchiveLayout
   title="Writing"
+  count={posts.length}
+  itemLabel="piece"
   description="Essays and practical explorations of software, AI, systems, and responsible technology."
 >
-  <Header />
-  <main>
-    <header class="page-heading">
-      <h1>Writing</h1>
-      <p>
-        Essays, experiments, and practical explorations of how technology
-        changes the systems and organizations around it.
-      </p>
-    </header>
+  {posts.length > 0 ? (
+    <PostList
+      posts={posts.map((post) => ({
+        href: `/writing/${getPostSlug(post)}`,
+        date: formatDate(post.data.date),
+        title: post.data.title,
+        description: post.data.description,
+      }))}
+    />
+  ) : (
+    <p class="empty-writing">No posts published yet.</p>
+  )}
+</ArchiveLayout>
 
-    <div class="post-list">
-      {
-        posts.map((post) => (
-          <a class="post-row" href={`/writing/${getPostSlug(post)}`}>
-            <div class="meta">
-              <time datetime={post.data.date.toISOString()}>
-                {formatDate(post.data.date)}
-              </time>
-              <span>{estimateReadingTime(post.body)}</span>
-            </div>
-            <h2>{post.data.title}</h2>
-            <p>{post.data.description}</p>
-          </a>
-        ))
-      }
-    </div>
-  </main>
-  <Footer />
-</BaseLayout>
+<style>
+  .prose .empty-writing {
+    color: var(--ink-muted);
+    text-align: center;
+  }
+</style>

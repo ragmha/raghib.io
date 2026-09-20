@@ -1,0 +1,33 @@
+---
+import BaseLayout from './BaseLayout.astro'
+import SiteHeader from '../components/SiteHeader.astro'
+import SiteNav from '../components/SiteNav.astro'
+import '../styles/site.css'
+
+interface Props {
+  title?: string
+  heading: string
+  description: string
+}
+
+const { title, heading, description } = Astro.props
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  bodyClass="site-surface"
+  pageClass="site-page"
+  defaultTheme="dark"
+>
+  <SiteHeader />
+
+  <main class="site-shell">
+    <section class="site-content" aria-labelledby="page-title">
+      <h1 id="page-title">{heading}</h1>
+      <slot />
+    </section>
+
+    <SiteNav />
+  </main>
+</BaseLayout>

@@ -1,0 +1,48 @@
+---
+// Contents navigation for a single document's own section headings, sourced
+// from Astro's heading extraction.
+interface Heading {
+  slug: string
+  text: string
+  depth: number
+}
+
+interface Props {
+  headings: Heading[]
+  title: string
+  readingTime: string
+}
+
+const { headings, title, readingTime } = Astro.props
+const parts = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 4)
+---
+
+{
+  parts.length > 0 && (
+    <>
+    <button class="contents-toggle" type="button" data-contents-toggle
+      aria-label="Toggle contents" aria-controls="article-contents" aria-expanded="false" hidden>
+    </button>
+    <nav id="article-contents" class="parts" aria-label="Contents" data-contents-nav>
+      <div class="parts-rail" aria-hidden="true">
+        <span class="parts-window" data-reading-window></span>
+      </div>
+      <div class="parts-summary">
+        <a class="parts-title" href="#post-title" data-part-link="post-title">{title}</a>
+        <p>{readingTime.toLowerCase()}</p>
+      </div>
+      <ol>
+        {parts.map((part) => (
+          <li style={{ '--toc-depth': part.depth - 2 }}>
+            <a href={`#${part.slug}`} data-part-link={part.slug}>
+              <span class="part-title">{part.text}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+    </>
+  )
+}
+
+<script src="../scripts/contents.js"></script>
