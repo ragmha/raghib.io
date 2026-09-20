@@ -56,6 +56,11 @@ body.site-surface {
   padding-top: 1.4rem;
 }
 
+.site-surface .site-shell-home {
+  grid-template-columns: minmax(0, 1fr) 6.5rem;
+  padding-top: 2.25rem;
+}
+
 .site-content h1 {
   margin: 0 0 0.25rem;
   color: inherit;
@@ -104,5 +109,4 @@ body.site-surface {
   .site-content {
     padding-top: 0;
   }
-
 }
