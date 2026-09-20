@@ -10,11 +10,14 @@ export interface Project {
   category?: WritingCategory
 }
 
-const categories: Record<string, WritingCategory> = {
-  'ragmha/apple-books-mcp': 'AI',
+const overrides: Record<string, Partial<Pick<Project, 'category' | 'description'>>> = {
+  'ragmha/apple-books-mcp': {
+    category: 'AI',
+    description: 'Connect AI assistants to your Apple Books library.',
+  },
 }
 
 export const projectSnapshot: Project[] = githubProjects.map((project) => ({
   ...project,
-  category: categories[project.repository],
+  ...overrides[project.repository],
 }))

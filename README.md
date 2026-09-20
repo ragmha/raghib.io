@@ -49,9 +49,10 @@ names. The selected list may be private; the CLI account must have access.
 Only this named list is read for publication.
 
 Names, descriptions, source URLs, homepages, and languages come from GitHub.
-Category overrides are keyed by `owner/repo` in
-`src/content/project-snapshot.ts`; writeups remain local. Category and language
-metadata are retained but not shown in the minimal project list.
+Category and short display-description overrides are keyed by `owner/repo` in
+`src/content/project-snapshot.ts` and survive subsequent syncs; writeups remain
+local. Language appears in the list's metadata column; categories are retained
+but not displayed.
 Removing a project with an existing writeup requires removing or reassigning
 that writeup, otherwise content validation deliberately fails.
 
