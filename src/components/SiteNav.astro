@@ -11,6 +11,10 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '')
   .site-nav {
     --nav-text: var(--theme-text);
     --nav-bg: var(--theme-bg);
+    position: sticky;
+    top: 6rem;
+    max-height: calc(100svh - 6rem - var(--layout-gutter));
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -45,6 +49,9 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '')
 
   @media (max-width: 600px) {
     .site-nav {
+      position: static;
+      max-height: none;
+      overflow-y: visible;
       flex-direction: row;
       flex-wrap: wrap;
       gap: 0.25rem 1rem;
