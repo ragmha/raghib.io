@@ -96,16 +96,19 @@ mark {
 
 .shell {
   display: grid;
-  /* Equal outer tracks keep the article centered independently of the rail. */
-  grid-template-columns: minmax(0, 1fr) minmax(0, var(--measure)) minmax(0, 1fr);
-  gap: clamp(1rem, 2vw, 2rem);
+  grid-template-columns: minmax(0, 1fr) var(--layout-nav-width);
+  gap: var(--layout-gap);
+  width: 100%;
+  max-width: var(--layout-width);
   margin: 0 auto;
   padding: var(--layout-top) var(--layout-gutter) var(--layout-bottom);
 }
 
 .shell > main {
-  grid-column: 2;
-  grid-row: 1;
+  grid-column: 1;
+  grid-row: 2;
+  max-width: none;
+  padding-top: var(--layout-content-offset);
 }
 
 .shell-solo {
@@ -115,16 +118,29 @@ mark {
 .sidebar {
   grid-column: 1;
   grid-row: 1;
-  justify-self: end;
+  justify-self: start;
   min-width: 0;
-  width: min(100%, var(--sidebar));
-  position: sticky;
-  top: 6rem;
+  width: 100%;
+  position: static;
   align-self: start;
-  max-height: calc(100svh - 6rem - var(--layout-gutter));
-  overflow-y: auto;
-  overflow-x: hidden;
   padding-top: 0.25rem;
+}
+
+/* Reserve enough outer margin for the full rail without shifting the article. */
+@media (min-width: 96rem) {
+  .shell > main {
+    grid-row: 1;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 6rem;
+    width: var(--sidebar);
+    max-height: calc(100svh - 6rem - var(--layout-gutter));
+    overflow-y: auto;
+    overflow-x: hidden;
+    transform: translateX(calc(-100% - 2rem));
+  }
 }
 
 main {
@@ -238,7 +254,7 @@ main {
   color: var(--ink);
 }
 
-@media (min-width: 961px) and (hover: hover) and (pointer: fine) {
+@media (min-width: 96rem) and (hover: hover) and (pointer: fine) {
   .parts[data-enhanced] .parts-summary,
   .parts[data-enhanced] .part-title {
     opacity: 0;
@@ -579,29 +595,14 @@ main {
 /* ----------------------------------------------------------- mobile */
 
 @media (max-width: 60rem) {
-  .shell {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 2rem;
-  }
-
-  .sidebar {
-    grid-column: auto;
-    grid-row: auto;
-    justify-self: center;
-    width: 100%;
-    max-width: var(--measure);
-    position: static;
-    max-height: none;
-    padding: 0;
-  }
-
-  .shell > main {
-    grid-column: auto;
-    grid-row: auto;
-  }
-
   .sidebar:empty {
     display: none;
+  }
+
+  @media (max-width: 600px) {
+    .shell {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 
   .part {

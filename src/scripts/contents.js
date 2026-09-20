@@ -17,7 +17,7 @@ if (nav && article && marker) {
   } else {
     const sidebar = nav.closest('.sidebar')
     const header = document.querySelector('.site-header')
-    const desktop = matchMedia('(min-width: 961px)')
+    const desktop = matchMedia('(min-width: 96rem)')
     let points = []
     let positions = []
     let active = -1
