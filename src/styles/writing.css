@@ -42,8 +42,10 @@ html {
 }
 
 body {
+  display: flex;
+  flex-direction: column;
   min-width: 320px;
-  min-height: 100vh;
+  min-height: 100svh;
   margin: 0;
   background: var(--paper);
   color: var(--ink);
@@ -89,6 +91,7 @@ mark {
 /* -------------------------------------------------------------- layout */
 
 .page {
+  flex: 1 0 auto;
   width: auto;
   margin: 0;
   padding: 0;
@@ -620,6 +623,8 @@ main {
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 1rem;
+  width: 100%;
+  flex-shrink: 0;
   max-width: var(--layout-width);
   margin: 0 auto;
   padding: 1.25rem var(--layout-gutter) var(--layout-bottom);

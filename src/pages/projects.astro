@@ -16,15 +16,25 @@ const writeupLinks = new Map(
   itemLabel="project"
   description="Open-source projects and technical demonstrations by Raghib Hasan."
 >
-  <ul class="project-archive">
+  <ul class="project-archive" role="list">
     {
       projectSnapshot.map((project) => (
         <li class="project-entry">
-          <a class="project-title-link" href={project.url}>{project.name}</a>{project.description && <span class="project-description">: {project.description}</span>}
-          {project.homepage && <a class="project-extra" href={project.homepage}>Live ↗</a>}
-          {writeupLinks.has(project.name) && (
-            <a class="project-extra" href={writeupLinks.get(project.name)?.href}>Writeup →</a>
-          )}
+          <span class="project-language">{project.language}</span>
+          <div class="project-details">
+            <h2 class="project-name">
+              <a class="project-title-link" href={project.url}>{project.name}</a>
+            </h2>
+            {project.description && <p class="project-description">{project.description}</p>}
+            {(project.homepage || writeupLinks.has(project.name)) && (
+              <div class="project-links">
+                {project.homepage && <a class="project-extra" href={project.homepage}>Live ↗</a>}
+                {writeupLinks.has(project.name) && (
+                  <a class="project-extra" href={writeupLinks.get(project.name)?.href}>Writeup →</a>
+                )}
+              </div>
+            )}
+          </div>
         </li>
       ))
     }
@@ -34,24 +44,45 @@ const writeupLinks = new Map(
 <style>
   .project-archive {
     margin: 0;
-    padding-left: 1.5rem;
-    list-style: disc;
+    padding: 0;
+    list-style: none;
     font-size: 1rem;
     line-height: 1.8;
   }
 
   .project-entry {
-    margin: 0 0 1rem;
-    padding-left: 0.4rem;
+    display: grid;
+    grid-template-columns: 8rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: 2rem;
+    margin: 0;
+    padding: 2.25rem 0;
+    border-bottom: 1px dotted var(--rule-strong);
     overflow-wrap: anywhere;
   }
 
-  .project-entry::marker {
+  .project-language {
+    font-size: 0.85rem;
     color: var(--ink-muted);
   }
 
-  .project-description {
+  .project-details {
+    min-width: 0;
+  }
+
+  .project-name {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.5;
+    letter-spacing: normal;
+  }
+
+  .project-details .project-description {
+    margin: 0.85rem 0 0;
     color: var(--ink-muted);
+    font-size: 0.95rem;
+    line-height: 1.8;
   }
 
   .project-title-link,
@@ -66,7 +97,7 @@ const writeupLinks = new Map(
   }
 
   .project-title-link {
-    font-weight: 700;
+    font-weight: inherit;
   }
 
   .project-title-link:hover,
@@ -74,8 +105,22 @@ const writeupLinks = new Map(
     text-decoration-color: currentColor;
   }
 
+  .project-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
   .project-extra {
-    margin-left: 0.75rem;
     font-size: 0.85em;
+  }
+
+  @media (max-width: 760px) {
+    .project-entry {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.6rem;
+      padding-block: 1.75rem;
+    }
   }
 </style>

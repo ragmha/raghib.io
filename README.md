@@ -62,9 +62,11 @@ The existing deployment workflow needs no additional credential.
 
 ## Project writeups
 
-Projects and Writing share the editorial archive layout. Projects uses a
-bulleted list with a bold, underlined repository name and inline muted
-description, without row borders or category blocks.
+Projects and Writing share the editorial archive layout. Projects uses spacious
+rows with language metadata on the left, an underlined repository name and
+muted description on the right, and dotted separators. Rows stack on narrow
+screens. The footer sits at the bottom of short pages and follows the content
+on longer pages, without a fixed overlay.
 
 Project writeups are separate from the Writing archive and its RSS feed.
 Each project can have one writeup at `/project/<project-name>/writings`.
