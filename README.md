@@ -43,15 +43,17 @@ Each project can have one writeup at `/project/<project-name>/writings`.
 The repository README covers what the project does and how to use it; the
 writeup explains the problem, decisions, alternatives, trade-offs, and lessons.
 
-1. Add an MDX file in `src/content/project-writeups/`. Use the unpublished
-   `apple-books-mcp.mdx` starter as a structure, not as publishable copy.
+1. Add an MDX file in `src/content/project-writeups/`. The unpublished
+   `apple-books-mcp.mdx` writeup is a draft awaiting editorial review.
 2. Set `project` to the exact name in `src/content/project-snapshot.ts`, plus
    `title`, `description`, and the publication `date`.
 3. Write your account and set `published: true` when ready. Omitted or false
    `published` values keep the writeup private from the built site.
 
 Published writeups automatically add **Writeup →** beside the project's
-Source/Live links. Drafts generate neither a page nor a link. Unknown projects
+Source/Live links. During `bun dev`, drafts appear as **Writeup (draft) →**
+with a visible draft notice and `noindex` metadata. Production builds (including
+`bun run preview`) generate neither draft pages nor draft links. Unknown projects
 and duplicate writeups for the same project fail the build. The page reuses
 the editorial theme and contents rail, with links back to Projects and the
 repository README; no GitHub README is fetched or copied automatically.

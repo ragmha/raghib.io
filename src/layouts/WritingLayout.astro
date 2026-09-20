@@ -8,11 +8,13 @@ import SiteHeader from '../components/SiteHeader.astro'
 interface Props {
   title?: string
   description?: string
+  noindex?: boolean
 }
 
 const {
   title = 'Raghib Hasan',
   description = 'Independent writing on software, AI, systems, and the ideas shaping how technology is built and used.',
+  noindex = false,
 } = Astro.props
 
 const pageTitle =
@@ -25,6 +27,7 @@ const pageTitle =
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="alternate" type="application/rss+xml" href="/writing/feed.xml" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="generator" content={Astro.generator} />

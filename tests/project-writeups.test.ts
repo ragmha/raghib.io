@@ -20,6 +20,14 @@ test('drafts and projects with no writeup generate no routes or links', () => {
   assert.deepEqual(indexProjectWriteups([], projects), [])
 })
 
+test('explicit draft preview includes drafts without marking them published', () => {
+  const draft = entry(false)
+  const [result] = indexProjectWriteups([draft], projects, { includeDrafts: true })
+  assert.equal(result.href, '/project/sample-project/writings')
+  assert.equal(result.writeup.data.published, false)
+  assert.deepEqual(indexProjectWriteups([draft], projects, { includeDrafts: false }), [])
+})
+
 test('unknown project names fail explicitly, including in drafts', () => {
   assert.throws(() => indexProjectWriteups([entry(false, 'unknown')], projects), /unknown project/)
 })
