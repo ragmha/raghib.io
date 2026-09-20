@@ -50,8 +50,8 @@ Only this named list is read for publication.
 
 Names, descriptions, source URLs, homepages, and languages come from GitHub.
 Category overrides are keyed by `owner/repo` in
-`src/content/project-snapshot.ts`; writeups remain local. Repositories without
-an override still render, with their language label when available.
+`src/content/project-snapshot.ts`; writeups remain local. Category and language
+metadata are retained but not shown in the minimal project list.
 Removing a project with an existing writeup requires removing or reassigning
 that writeup, otherwise content validation deliberately fails.
 
@@ -62,10 +62,9 @@ The existing deployment workflow needs no additional credential.
 
 ## Project writeups
 
-Projects and Writing share the editorial archive layout and outlined label
-component. Set a project's category override in `src/content/project-snapshot.ts`;
-its programming language is displayed as a second label. Labels use the same
-hover-only color treatment as Writing.
+Projects and Writing share the editorial archive layout. Projects uses a
+bulleted list with a bold, underlined repository name and inline muted
+description, without row borders or category blocks.
 
 Project writeups are separate from the Writing archive and its RSS feed.
 Each project can have one writeup at `/project/<project-name>/writings`.
@@ -80,7 +79,7 @@ writeup explains the problem, decisions, alternatives, trade-offs, and lessons.
    `published` values keep the writeup private from the built site.
 
 Published writeups automatically add **Writeup →** beside the project's
-Source/Live links. Drafts are never linked from Projects, including during
+repository name and optional Live link. Drafts are never linked from Projects, including during
 development. During `bun dev`, open a draft directly at
 `/project/<project-name>/writings` to review it with a visible draft notice
 and `noindex` metadata. Production builds (including

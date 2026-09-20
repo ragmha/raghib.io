@@ -1,6 +1,5 @@
 ---
 import ArchiveLayout from '../layouts/ArchiveLayout.astro'
-import TagList from '../components/TagList.astro'
 import { projectSnapshot } from '../content/project-snapshot'
 import { getVisibleProjectWriteups } from '../lib/project-writeups'
 
@@ -17,69 +16,66 @@ const writeupLinks = new Map(
   itemLabel="project"
   description="Open-source projects and technical demonstrations by Raghib Hasan."
 >
-  <div class="project-archive">
+  <ul class="project-archive">
     {
       projectSnapshot.map((project) => (
-        <article class="project-entry">
-          <h2 class="project-heading"><a class="project-title-link" href={project.url}><span class="post-title">{project.name}</span></a></h2>
-          <span class="post-desc">{project.description}</span>
-          <TagList category={project.category} tags={project.language ? [project.language] : []} inferredCategory={false} />
-          <div class="project-links">
-            <a href={project.url}>Source ↗</a>
-            {project.homepage && <a href={project.homepage}>Live ↗</a>}
-            {writeupLinks.has(project.name) && (
-              <a href={writeupLinks.get(project.name)?.href}>
-                Writeup →
-              </a>
-            )}
-          </div>
-        </article>
+        <li class="project-entry">
+          <a class="project-title-link" href={project.url}>{project.name}</a>{project.description && <span class="project-description">: {project.description}</span>}
+          {project.homepage && <a class="project-extra" href={project.homepage}>Live ↗</a>}
+          {writeupLinks.has(project.name) && (
+            <a class="project-extra" href={writeupLinks.get(project.name)?.href}>Writeup →</a>
+          )}
+        </li>
       ))
     }
-  </div>
+  </ul>
 </ArchiveLayout>
 
 <style>
   .project-archive {
-    border-top: 1px solid var(--rule);
+    margin: 0;
+    padding-left: 1.5rem;
+    list-style: disc;
+    font-size: 1rem;
+    line-height: 1.8;
   }
 
   .project-entry {
-    padding: 1.35rem 0.5rem;
-    border-bottom: 1px solid var(--rule);
+    margin: 0 0 1rem;
+    padding-left: 0.4rem;
+    overflow-wrap: anywhere;
   }
 
-  .project-entry:is(:hover, :focus-within) {
-    background: var(--paper-sunk);
+  .project-entry::marker {
+    color: var(--ink-muted);
   }
 
-  .project-heading {
-    margin: 0;
-    font-size: inherit;
-    line-height: inherit;
+  .project-description {
+    color: var(--ink-muted);
+  }
+
+  .project-title-link,
+  .project-extra {
+    border: 0;
+    background: none;
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-color: var(--rule-strong);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
   }
 
   .project-title-link {
-    border: 0;
-    background: none;
-    color: inherit;
+    font-weight: 700;
   }
 
-  .project-title-link:is(:hover, :focus-visible) .post-title {
-    background: var(--mark);
-    color: var(--mark-ink);
+  .project-title-link:hover,
+  .project-extra:hover {
+    text-decoration-color: currentColor;
   }
 
-  .project-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-top: 0.75rem;
-    font-size: 0.68rem;
-    letter-spacing: 0.08em;
-  }
-
-  .post-title {
-    overflow-wrap: anywhere;
+  .project-extra {
+    margin-left: 0.75rem;
+    font-size: 0.85em;
   }
 </style>
