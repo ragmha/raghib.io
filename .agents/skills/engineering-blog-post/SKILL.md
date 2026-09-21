@@ -61,7 +61,7 @@ Answers 5 to 7 re-rank the pattern table below, so ask them before picking.
 - A compounding mandate promotes Explainer and How We Built It over both, and is the only answer that moves Benchmarks up.
 - An effort ceiling that excludes producing new evidence deletes Benchmarks and Rewrote It in X outright - struck from the menu, not parked at the bottom.
 
-If your harness has persistent memory, store the answers to 2, 3, 9 and 11. They are blog-level conventions, not per-post facts, and re-deriving them every time is what makes this task feel repetitive.
+If your harness has persistent memory, store only non-sensitive workflow preferences from answers 2 and 3. Never persist customer names, security details, unannounced roadmap information, internal numbers, or other confidential material.
 
 ## Workflow
 
