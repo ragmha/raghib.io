@@ -12,12 +12,14 @@
 # Astro
 /.astro/
 /dist/
-/.next/
 
 # misc
 .DS_Store
 *.pem
-/.impeccable/hook.cache.json
+/.impeccable/
+
+# generated mirror of .agents/skills for Claude Code
+/.claude/
 
 # debug
 npm-debug.log*
