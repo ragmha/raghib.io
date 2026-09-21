@@ -19,6 +19,9 @@
 *.pem
 /.impeccable/hook.cache.json
 
+# agent tooling (skills are vendored in .agents/skills; .claude mirrors them)
+/.claude/
+
 # debug
 npm-debug.log*
 yarn-debug.log*
