@@ -1,11 +1,17 @@
 import { defineConfig } from 'astro/config'
 import mdx from '@astrojs/mdx'
 import rehypeMermaid from 'rehype-mermaid'
+import sitemap from '@astrojs/sitemap'
 import rehypeParts from './src/lib/rehype-parts.mjs'
 
 export default defineConfig({
   site: 'https://raghib.io',
-  integrations: [mdx()],
+  integrations: [
+    mdx(),
+    sitemap({
+      filter: (page) => new URL(page).pathname.replace(/\/$/, '') !== '/about',
+    }),
+  ],
   markdown: {
     // Shiki must skip mermaid blocks, otherwise it highlights them into markup
     // that rehype-mermaid can no longer recognise as a diagram.

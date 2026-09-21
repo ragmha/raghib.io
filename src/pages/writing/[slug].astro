@@ -3,6 +3,7 @@ import { render, type CollectionEntry } from 'astro:content'
 import WritingLayout from '../../layouts/WritingLayout.astro'
 import PartsNav from '../../components/PartsNav.astro'
 import TagList from '../../components/TagList.astro'
+import { SITE_NAME } from '../../lib/seo'
 import {
   estimateReadingTime,
   formatDate,
@@ -29,7 +30,11 @@ const { Content, headings } = await render(post)
 const readingTime = estimateReadingTime(post.body)
 ---
 
-<WritingLayout title={post.data.title} description={post.data.description}>
+<WritingLayout
+  title={post.data.seoTitle ?? post.data.title}
+  description={post.data.description}
+  article={{ headline: post.data.title, date: post.data.date }}
+>
   <div class="shell">
     <aside class="sidebar">
       <PartsNav headings={headings} title={post.data.title} readingTime={readingTime} />
@@ -39,7 +44,8 @@ const readingTime = estimateReadingTime(post.body)
         <header class="doc-head">
           <h1 id="post-title">{post.data.title}</h1>
           <p class="doc-meta">
-            {formatDate(post.data.date)} · {readingTime}
+            <a href="/#about" rel="author">{SITE_NAME}</a> ·
+            <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time> · {readingTime}
           </p>
           <TagList category={getPostCategory(post)} tags={getPostTags(post)} />
         </header>
@@ -47,7 +53,7 @@ const readingTime = estimateReadingTime(post.body)
         <Content />
 
         <hr class="rule-dotted" />
-        <p class="doc-end"><a href="/writing">← All writing</a></p>
+        <p class="doc-end"><a href="/writing/">← All writing</a></p>
       </article>
     </main>
   </div>

@@ -78,6 +78,57 @@ body.site-surface {
   text-underline-offset: 3px;
 }
 
+.home-writing {
+  margin-top: 2.5rem;
+}
+
+.home-writing h2 {
+  margin: 0;
+  font-size: 0.9rem;
+  letter-spacing: normal;
+}
+
+.home-writing .post-list {
+  margin-top: 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.home-writing .post-list li {
+  margin: 0;
+}
+
+.home-writing .post-list a {
+  display: block;
+  padding-block: 1rem;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+}
+
+.home-writing .post-list a:hover .post-title {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.home-writing .post-list span {
+  display: block;
+}
+
+.home-writing .post-date {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.home-writing .post-title {
+  margin-block: 0.35rem;
+  font-weight: 600;
+}
+
+.home-writing .post-desc {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
 @media (max-width: 600px) {
   .site-surface .site-shell {
     grid-template-columns: minmax(0, 1fr);

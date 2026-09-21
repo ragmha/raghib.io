@@ -6,6 +6,7 @@ const writing = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/writing' }),
   schema: z.object({
     title: z.string(),
+    seoTitle: z.string().trim().min(1).optional(),
     description: z.string(),
     date: z.coerce.date(),
     tags: z.array(z.string()).default([]),
@@ -21,6 +22,7 @@ const projectWriteups = defineCollection({
       'Project must match a name in src/content/project-snapshot.ts',
     ),
     title: z.string().min(1),
+    seoTitle: z.string().trim().min(1).optional(),
     description: z.string().min(1),
     date: z.coerce.date(),
     published: z.boolean().default(false),

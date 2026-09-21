@@ -1,10 +1,15 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro'
+import PostList from '../components/PostList.astro'
+import { formatDate, getPostSlug, getPublishedPosts } from '../lib/posts'
+
+const latestPosts = (await getPublishedPosts()).slice(0, 3)
 ---
 
 <SiteLayout
+  title="Software, AI & Systems"
   heading="Ideas on technology and systems"
-  description="Independent writing on software, AI, systems, and the ideas shaping how technology is built and used."
+  description="Independent essays on software, AI, and systems by Raghib Hasan. Practical experiments, engineering trade-offs, and ideas that apply across industries."
 >
   <div class="home-about" id="about">
     <p>
@@ -24,4 +29,19 @@ import SiteLayout from '../layouts/SiteLayout.astro'
       You can reach me on <a href="https://www.linkedin.com/in/ragmha/">LinkedIn</a>.
     </p>
   </div>
+
+  {latestPosts.length > 0 && (
+    <section class="home-writing" aria-labelledby="latest-writing">
+      <div class="section-head">
+        <h2 id="latest-writing">Latest writing</h2>
+        <a href="/writing/">All writing</a>
+      </div>
+      <PostList posts={latestPosts.map((post) => ({
+        href: `/writing/${getPostSlug(post)}/`,
+        date: formatDate(post.data.date),
+        title: post.data.title,
+        description: post.data.description,
+      }))} />
+    </section>
+  )}
 </SiteLayout>

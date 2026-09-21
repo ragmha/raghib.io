@@ -19,7 +19,7 @@ const posts = await getPublishedPosts()
   {posts.length > 0 ? (
     <PostList
       posts={posts.map((post) => ({
-        href: `/writing/${getPostSlug(post)}`,
+        href: `/writing/${getPostSlug(post)}/`,
         date: formatDate(post.data.date),
         title: post.data.title,
         description: post.data.description,

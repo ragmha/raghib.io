@@ -29,7 +29,7 @@ export function indexProjectWriteups<T extends WriteupEntry>(
       visible.push({
         project,
         writeup,
-        href: `/project/${encodeURIComponent(project.name)}/writings`,
+        href: `/project/${encodeURIComponent(project.name)}/writings/`,
       })
     }
   }

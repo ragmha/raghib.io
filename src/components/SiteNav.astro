@@ -3,8 +3,8 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '')
 ---
 
 <nav class="site-nav" aria-label="Site sections">
-  <a href="/writing" aria-current={currentPath === '/writing' ? 'page' : undefined}>Writing</a>
-  <a href="/projects" aria-current={currentPath === '/projects' ? 'page' : undefined}>Projects</a>
+  <a href="/writing/" aria-current={currentPath === '/writing' ? 'page' : undefined}>Writing</a>
+  <a href="/projects/" aria-current={currentPath === '/projects' ? 'page' : undefined}>Projects</a>
 </nav>
 
 <style>

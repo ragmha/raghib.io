@@ -25,11 +25,13 @@ Open [http://localhost:4321](http://localhost:4321).
 ## Commands
 
 ```bash
-bun dev               # local development
-bun run check         # Astro and TypeScript checks
-bun run build         # static production build
-bun run sync:projects # refresh projects from the selected GitHub star list
-bun test              # unit tests
+bun dev                      # local development
+bun run check                # Astro and TypeScript checks
+bun run build                # static production build
+bun run check:seo             # audit the fresh production build (requires Chromium)
+bun run generate:social-card  # regenerate public/social-card.png
+bun run sync:projects         # refresh projects from the selected GitHub star list
+bun test --bail               # unit and publication-contract tests
 ```
 
 ## Projects
@@ -44,9 +46,48 @@ overrides (category, description, demo/extra links) live in
 ## Writing and project writeups
 
 Posts live in `src/content/writing/`. A project can optionally have a longer
-writeup at `/project/<project-name>/writings`, authored as MDX in
+writeup at `/project/<project-name>/writings/`, authored as MDX in
 `src/content/project-writeups/`; set `published: true` when it's ready to go
 live. Writeups are separate from the Writing archive/RSS feed.
+
+## SEO readiness before merging
+
+The `SEO readiness` workflow runs on every pull request into `main` and on
+merge-queue builds. Its job name is the required-check identifier: keep it
+stable when editing the workflow. A required status-check rule on `main`
+enforces the gate; merely adding a workflow does not prevent merging.
+The deployment workflow repeats the same checks before uploading the site.
+
+Run the gate locally with:
+
+```bash
+bunx playwright install chromium # once, if the browser is not installed
+bun test --bail
+bun run build
+bun run check:seo
+```
+
+The audit reads the generated HTML in Chromium with page scripts disabled.
+It requires unique titles/descriptions, one H1, canonical and social metadata,
+a real social-preview image, valid author/article schema, working internal links
+and image assets, and correct sitemap/robots/RSS discovery. Every published
+source entry must have a corresponding rendered article with matching metadata;
+drafts must not leak into the build. An intentionally empty writing archive is
+valid. Editable `.excalidraw` originals belong outside `public/`.
+
+Published writing needs a title, description, date, and nonempty body.
+Whitespace and HTML comments alone do not count as a body. The body check
+looks for content outside comments; it does not sanitize or render HTML.
+Use `published: false` for writing drafts; project writeups default to unpublished.
+An optional `seoTitle` gives search results a shorter title without changing the
+visible article heading. Shared metadata lives in `SeoHead.astro` and
+`src/lib/seo.ts`; regenerate the social card after changing its text or design.
+No article text or draft is automatically published by the audit.
+
+The gate checks technical readiness, not rankings, keyword demand, factual
+accuracy, or field Core Web Vitals. Those still need editorial review and
+production evidence. After deployment, submit `/sitemap-index.xml` in Search
+Console using an account authorized for the site.
 
 ---
 

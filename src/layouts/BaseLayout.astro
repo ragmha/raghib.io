@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css'
+import SeoHead from '../components/SeoHead.astro'
 import ThemeInit from '../components/ThemeInit.astro'
 
 interface Props {
@@ -11,27 +12,19 @@ interface Props {
 }
 
 const {
-  title = 'Raghib Hasan',
-  description = 'Independent writing on software, AI, systems, and the ideas shaping how technology is built and used.',
+  title,
+  description,
   bodyClass,
   pageClass,
   defaultTheme,
 } = Astro.props
 
-const pageTitle =
-  title === 'Raghib Hasan' ? title : `${title} · Raghib Hasan`
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="description" content={description} />
-    <link rel="alternate" type="application/rss+xml" href="/writing/feed.xml" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <meta name="generator" content={Astro.generator} />
-    <title>{pageTitle}</title>
+    <SeoHead title={title} description={description} />
     {defaultTheme && <ThemeInit defaultTheme={defaultTheme} />}
   </head>
   <body class={bodyClass}>

@@ -496,8 +496,7 @@ main {
 
 /* ------------------------------------------------------------ lists */
 
-.prose .post-list,
-.compact-list {
+.prose .post-list {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -509,8 +508,7 @@ main {
   border-bottom: 1px solid var(--rule);
 }
 
-.post-list a,
-.compact-list a {
+.post-list a {
   display: block;
   padding: 1.35rem 0.5rem;
   border-bottom: none;
@@ -520,8 +518,7 @@ main {
   padding-inline: 0;
 }
 
-.post-list a:hover,
-.compact-list a:hover {
+.post-list a:hover {
   background: var(--paper-sunk);
   color: inherit;
 }

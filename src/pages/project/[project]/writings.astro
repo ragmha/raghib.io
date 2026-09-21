@@ -5,6 +5,7 @@ import PartsNav from '../../../components/PartsNav.astro'
 import type { Project } from '../../../content/project-snapshot'
 import { getVisibleProjectWriteups } from '../../../lib/project-writeups'
 import { estimateReadingTime, formatDate } from '../../../lib/posts'
+import { SITE_NAME } from '../../../lib/seo'
 
 export async function getStaticPaths() {
   return (await getVisibleProjectWriteups()).map(({ project, writeup }) => ({
@@ -23,7 +24,12 @@ const { Content, headings } = await render(writeup)
 const readingTime = estimateReadingTime(writeup.body)
 ---
 
-<WritingLayout title={writeup.data.title} description={writeup.data.description} noindex={!writeup.data.published}>
+<WritingLayout
+  title={writeup.data.seoTitle ?? writeup.data.title}
+  description={writeup.data.description}
+  noindex={!writeup.data.published}
+  article={{ headline: writeup.data.title, date: writeup.data.date }}
+>
   <div class="shell">
     <aside class="sidebar">
       <PartsNav headings={headings} title={writeup.data.title} readingTime={readingTime} />
@@ -35,9 +41,12 @@ const readingTime = estimateReadingTime(writeup.body)
             <p class="draft-notice">Draft preview — not published. Review the account and conclusions before publishing.</p>
           )}
           <h1 id="post-title">{writeup.data.title}</h1>
-          <p class="doc-meta">{formatDate(writeup.data.date)} · {readingTime}</p>
+          <p class="doc-meta">
+            <a href="/#about" rel="author">{SITE_NAME}</a> ·
+            <time datetime={writeup.data.date.toISOString()}>{formatDate(writeup.data.date)}</time> · {readingTime}
+          </p>
           <p class="project-context">
-            <a href="/projects">Projects</a> / {project.name}
+            <a href="/projects/">Projects</a> / {project.name}
           </p>
           <p class="project-resources">
             <a href={project.url}>Repository &amp; README ↗</a>
@@ -48,7 +57,7 @@ const readingTime = estimateReadingTime(writeup.body)
         <Content />
 
         <hr class="rule-dotted" />
-        <p class="doc-end"><a href="/projects">← All projects</a></p>
+        <p class="doc-end"><a href="/projects/">← All projects</a></p>
       </article>
     </main>
   </div>
