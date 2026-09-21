@@ -59,7 +59,7 @@ report() { # label, extended-regex
 SUPERLATIVES='blazing[ -]?fast|lightning[ -]?fast|best[ -]in[ -]class|world[ -]class|state[ -]of[ -]the[ -]art|revolutionary|game[ -]chang|cutting[ -]edge|seamless|effortless|unparalleled|unmatched|industry[ -]leading|next[ -]generation|robust and scalable|10x (faster|better)'
 ABSOLUTES='(^|[^[:alnum:]_])(always|never|any scale|infinitely|zero (config|configuration|downtime|overhead)|guaranteed|100% (reliable|uptime|accurate))([^[:alnum:]_]|$)'
 ADOPTION='(^|[^[:alnum:]_])(thousands|millions|hundreds) of (developers|engineers|users|companies|teams)([^[:alnum:]_]|$)|trusted by|loved by developers'
-NUMBERS='[0-9]+(\.[0-9]+)?(x|( ?(ms|us|ns|s|sec|seconds|GB|MB|TB|QPS|RPS|req/s)))([^[:alnum:]_]|$)|[0-9]+(\.[0-9]+)?%[[:alnum:]_]'
+NUMBERS='(^|[^[:alnum:]_])[0-9]+(\.[0-9]+)?(x|( ?(ms|us|ns|s|sec|seconds|GB|MB|TB|QPS|RPS|req/s))|%)([^[:alnum:]_]|$)'
 VERSIONS='(^|[^[:alnum:]_])(latest|current|newest) (version|release|stable)([^[:alnum:]_]|$)'
 INTERNAL='(^|[^[:alnum:]_])[A-Z]{2,10}-[0-9]{2,6}([^[:alnum:]_]|$)|(^|[^[:alnum:]_])internal (only|doc|wiki)([^[:alnum:]_]|$)'
 HEDGE_FREE='(^|[^[:alnum:]_])proves([^[:alnum:]_]|$)|(^|[^[:alnum:]_])obviously([^[:alnum:]_]|$)|(^|[^[:alnum:]_])clearly (shows|demonstrates)([^[:alnum:]_]|$)|there is no reason to'
