@@ -34,3 +34,4 @@ jobs:
       - run: bun run build
       - run: bunx playwright install --with-deps chromium
       - run: bun run check:seo
+      - run: bun run check:vitals
