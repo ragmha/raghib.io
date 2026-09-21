@@ -48,6 +48,10 @@ writeup at `/project/<project-name>/writings`, authored as MDX in
 `src/content/project-writeups/`; set `published: true` when it's ready to go
 live. Writeups are separate from the Writing archive/RSS feed.
 
+Rendered diagrams live in `public/diagrams/`; editable `.excalidraw` sources live
+in `src/assets/diagrams/`. Edit a source in Excalidraw, then export the matching
+SVG. Icon credits and reuse terms are in `public/diagrams/ICONS-LICENSE.txt`.
+
 ---
 
 Feel free to open issues or contribute!

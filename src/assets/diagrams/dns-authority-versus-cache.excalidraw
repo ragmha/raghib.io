@@ -1,0 +1,1478 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "id": "record-change-label",
+      "type": "text",
+      "x": 0,
+      "y": 0,
+      "width": 295.7759094238281,
+      "height": 40,
+      "angle": 0,
+      "strokeColor": "#1c1b18",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "a0",
+      "roundness": null,
+      "seed": 264939342,
+      "version": 2,
+      "versionNonce": 2127859086,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1789936101122,
+      "link": null,
+      "locked": false,
+      "text": "Authoritative zone",
+      "fontSize": 32,
+      "fontFamily": 5,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "Authoritative zone",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "authoritative-answer",
+      "type": "rectangle",
+      "x": 0,
+      "y": 52,
+      "width": 944,
+      "height": 152,
+      "angle": 0,
+      "strokeColor": "#47603e",
+      "backgroundColor": "#e2ecd9",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "authoritative-answer-group"
+      ],
+      "frameId": null,
+      "index": "a1",
+      "roundness": null,
+      "seed": 233,
+      "version": 2,
+      "versionNonce": 1890540114,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "lhJRh4MYPbBIH1iDE78Is"
+        }
+      ],
+      "updated": 1789936101122,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "kind": "diagram-node",
+        "icon": "Server"
+      }
+    },
+    {
+      "id": "cache-label",
+      "type": "text",
+      "x": 0,
+      "y": 258,
+      "width": 230.49588012695312,
+      "height": 40,
+      "angle": 0,
+      "strokeColor": "#1c1b18",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "a2",
+      "roundness": null,
+      "seed": 621853842,
+      "version": 2,
+      "versionNonce": 944221134,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1789936101122,
+      "link": null,
+      "locked": false,
+      "text": "Resolver cache",
+      "fontSize": 32,
+      "fontFamily": 5,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "Resolver cache",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "cached-answer",
+      "type": "rectangle",
+      "x": 0,
+      "y": 312,
+      "width": 280,
+      "height": 200,
+      "angle": 0,
+      "strokeColor": "#816121",
+      "backgroundColor": "#f4e9c7",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "cached-answer-group"
+      ],
+      "frameId": null,
+      "index": "a3",
+      "roundness": null,
+      "seed": 493,
+      "version": 2,
+      "versionNonce": 305414162,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "l9i__uWp878dI2e6gIxS-"
+        }
+      ],
+      "updated": 1789936101122,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "kind": "diagram-node",
+        "icon": "Timer"
+      }
+    },
+    {
+      "id": "ttl-expiry",
+      "type": "arrow",
+      "x": 296.5,
+      "y": 412,
+      "width": 351,
+      "height": 0,
+      "angle": 0,
+      "strokeColor": "#1c1b18",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "a4",
+      "roundness": null,
+      "seed": 715,
+      "version": 2,
+      "versionNonce": 171770382,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "5qMSiDUVaOwQTsrJ3DMBN"
+        }
+      ],
+      "updated": 1789936101122,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          351,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "elbowed": false
+    },
+    {
+      "id": "refreshed-answer",
+      "type": "rectangle",
+      "x": 664,
+      "y": 312,
+      "width": 280,
+      "height": 200,
+      "angle": 0,
+      "strokeColor": "#47603e",
+      "backgroundColor": "#e2ecd9",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "refreshed-answer-group"
+      ],
+      "frameId": null,
+      "index": "a5",
+      "roundness": null,
+      "seed": 493,
+      "version": 2,
+      "versionNonce": 93744594,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "4xJg7CN0ky46HaAGQVv3h"
+        }
+      ],
+      "updated": 1789936101122,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "kind": "diagram-node",
+        "icon": "Server"
+      }
+    },
+    {
+      "id": "lhJRh4MYPbBIH1iDE78Is",
+      "type": "text",
+      "x": 246.8950653076172,
+      "y": 161.5,
+      "width": 450.2098693847656,
+      "height": 37.5,
+      "angle": 0,
+      "strokeColor": "#1c1b18",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "authoritative-answer-group"
+      ],
+      "frameId": null,
+      "index": "a6",
+      "roundness": null,
+      "seed": 397250638,
+      "version": 3,
+      "versionNonce": 1448343886,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1789936101122,
+      "link": null,
+      "locked": false,
+      "text": "New address (already changed)",
+      "fontSize": 30,
+      "fontFamily": 5,
+      "textAlign": "center",
+      "verticalAlign": "bottom",
+      "containerId": "authoritative-answer",
+      "originalText": "New address (already changed)",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "l9i__uWp878dI2e6gIxS-",
+      "type": "text",
+      "x": 53.030029296875,
+      "y": 432,
+      "width": 173.93994140625,
+      "height": 75,
+      "angle": 0,
+      "strokeColor": "#1c1b18",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "cached-answer-group"
+      ],
+      "frameId": null,
+      "index": "a7",
+      "roundness": null,
+      "seed": 1014126222,
+      "version": 3,
+      "versionNonce": 1677560466,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1789936101122,
+      "link": null,
+      "locked": false,
+      "text": "Old address\nstill cached",
+      "fontSize": 30,
+      "fontFamily": 5,
+      "textAlign": "center",
+      "verticalAlign": "bottom",
+      "containerId": "cached-answer",
+      "originalText": "Old address\nstill cached",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "5qMSiDUVaOwQTsrJ3DMBN",
+      "type": "text",
+      "x": 334.01605224609375,
+      "y": 394.5,
+      "width": 275.9678955078125,
+      "height": 35,
+      "angle": 0,
+      "strokeColor": "#1c1b18",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "a8",
+      "roundness": null,
+      "seed": 1900303566,
+      "version": 3,
+      "versionNonce": 207855502,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1789936101122,
+      "link": null,
+      "locked": false,
+      "text": "Cached TTL expires",
+      "fontSize": 28,
+      "fontFamily": 5,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "ttl-expiry",
+      "originalText": "Cached TTL expires",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "4xJg7CN0ky46HaAGQVv3h",
+      "type": "text",
+      "x": 713.8500213623047,
+      "y": 432,
+      "width": 180.29995727539062,
+      "height": 75,
+      "angle": 0,
+      "strokeColor": "#1c1b18",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [
+        "refreshed-answer-group"
+      ],
+      "frameId": null,
+      "index": "a9",
+      "roundness": null,
+      "seed": 800885518,
+      "version": 3,
+      "versionNonce": 349333586,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1789936101122,
+      "link": null,
+      "locked": false,
+      "text": "Next lookup:\nnew address",
+      "fontSize": 30,
+      "fontFamily": 5,
+      "textAlign": "center",
+      "verticalAlign": "bottom",
+      "containerId": "refreshed-answer",
+      "originalText": "Next lookup:\nnew address",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "type": "ellipse",
+      "version": 1289,
+      "versionNonce": 279739022,
+      "isDeleted": false,
+      "id": "authoritative-answer-icon-8dYzzm-4zt3DY2Jq-T5aX",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 0,
+      "angle": 0,
+      "x": 440,
+      "y": 68,
+      "strokeColor": "#47603e",
+      "backgroundColor": "transparent",
+      "width": 64,
+      "height": 64,
+      "seed": 1923400676,
+      "groupIds": [
+        "authoritative-answer-icon-group",
+        "authoritative-answer-group"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "customData": {
+        "kind": "library-icon",
+        "name": "Server",
+        "nodeId": "authoritative-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aA"
+    },
+    {
+      "type": "rectangle",
+      "version": 2001,
+      "versionNonce": 2052635986,
+      "isDeleted": false,
+      "id": "authoritative-answer-icon-Jx8OUm2XTs3k87vtb9LxP",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 461.7857582926016,
+      "y": 72.82699114908428,
+      "strokeColor": "#47603e",
+      "backgroundColor": "transparent",
+      "width": 20.428483414796382,
+      "height": 38.13316904095313,
+      "seed": 2105818340,
+      "groupIds": [
+        "authoritative-answer-icon-group",
+        "authoritative-answer-group"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "customData": {
+        "kind": "library-icon",
+        "name": "Server",
+        "nodeId": "authoritative-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aB"
+    },
+    {
+      "type": "line",
+      "version": 1828,
+      "versionNonce": 43645134,
+      "isDeleted": false,
+      "id": "authoritative-answer-icon-1VFybdTKx_2F98b2KC0VB",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 464.40136761873174,
+      "y": 77.04549179020218,
+      "strokeColor": "#47603e",
+      "backgroundColor": "transparent",
+      "width": 15.661837284677146,
+      "height": 1.2463385451178831e-13,
+      "seed": 1295864804,
+      "groupIds": [
+        "authoritative-answer-icon-group",
+        "authoritative-answer-group"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "lastCommittedPoint": null,
+      "startArrowhead": null,
+      "endArrowhead": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          15.661837284677146,
+          1.2463385451178831e-13
+        ]
+      ],
+      "customData": {
+        "kind": "library-icon",
+        "name": "Server",
+        "nodeId": "authoritative-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aC"
+    },
+    {
+      "type": "line",
+      "version": 1860,
+      "versionNonce": 112804626,
+      "isDeleted": false,
+      "id": "authoritative-answer-icon-D8HhZWPNpgwhClNJA_CfB",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 463.9015122679921,
+      "y": 80.55570465447292,
+      "strokeColor": "#47603e",
+      "backgroundColor": "transparent",
+      "width": 15.661837284677146,
+      "height": 1.2463385451178831e-13,
+      "seed": 833697636,
+      "groupIds": [
+        "authoritative-answer-icon-group",
+        "authoritative-answer-group"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "lastCommittedPoint": null,
+      "startArrowhead": null,
+      "endArrowhead": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          15.661837284677146,
+          1.2463385451178831e-13
+        ]
+      ],
+      "customData": {
+        "kind": "library-icon",
+        "name": "Server",
+        "nodeId": "authoritative-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aD"
+    },
+    {
+      "type": "line",
+      "version": 1842,
+      "versionNonce": 1321053966,
+      "isDeleted": false,
+      "id": "authoritative-answer-icon-FqiV_ooHsqaaF9pImFAiR",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 463.97070789409895,
+      "y": 84.06591751874416,
+      "strokeColor": "#47603e",
+      "backgroundColor": "transparent",
+      "width": 15.661837284677146,
+      "height": 1.2463385451178831e-13,
+      "seed": 886876900,
+      "groupIds": [
+        "authoritative-answer-icon-group",
+        "authoritative-answer-group"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "lastCommittedPoint": null,
+      "startArrowhead": null,
+      "endArrowhead": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          15.661837284677146,
+          1.2463385451178831e-13
+        ]
+      ],
+      "customData": {
+        "kind": "library-icon",
+        "name": "Server",
+        "nodeId": "authoritative-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aE"
+    },
+    {
+      "type": "line",
+      "version": 1846,
+      "versionNonce": 1216549074,
+      "isDeleted": false,
+      "id": "authoritative-answer-icon-vKN2M73s3kSOJe854-Lo-",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 463.9238220675575,
+      "y": 87.57613038301515,
+      "strokeColor": "#47603e",
+      "backgroundColor": "transparent",
+      "width": 15.661837284677146,
+      "height": 1.2463385451178831e-13,
+      "seed": 961392228,
+      "groupIds": [
+        "authoritative-answer-icon-group",
+        "authoritative-answer-group"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "lastCommittedPoint": null,
+      "startArrowhead": null,
+      "endArrowhead": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          15.661837284677146,
+          1.2463385451178831e-13
+        ]
+      ],
+      "customData": {
+        "kind": "library-icon",
+        "name": "Server",
+        "nodeId": "authoritative-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aF"
+    },
+    {
+      "type": "ellipse",
+      "version": 965,
+      "versionNonce": 1099996494,
+      "isDeleted": false,
+      "id": "authoritative-answer-icon-5Npvd_9kkEmZa9mn-OtIR",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 475.73126450629496,
+      "y": 91.3738060450861,
+      "strokeColor": "#47603e",
+      "backgroundColor": "transparent",
+      "width": 3.6403236910676555,
+      "height": 2.6475081389582105,
+      "seed": 2134719822,
+      "groupIds": [
+        "authoritative-answer-icon-group",
+        "authoritative-answer-group"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "customData": {
+        "kind": "library-icon",
+        "name": "Server",
+        "nodeId": "authoritative-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aG"
+    },
+    {
+      "type": "ellipse",
+      "version": 1999,
+      "versionNonce": 1397565074,
+      "isDeleted": false,
+      "id": "cached-answer-icon-2hzF7Pqejhmky_ZOpLcak",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 107.99999999999999,
+      "y": 328,
+      "strokeColor": "#816121",
+      "backgroundColor": "transparent",
+      "width": 64,
+      "height": 64,
+      "seed": 562472387,
+      "groupIds": [
+        "cached-answer-icon-group",
+        "cached-answer-group"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "customData": {
+        "kind": "library-icon",
+        "name": "Timer",
+        "nodeId": "cached-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aH"
+    },
+    {
+      "type": "ellipse",
+      "version": 1757,
+      "versionNonce": 812368782,
+      "isDeleted": false,
+      "id": "cached-answer-icon-3ZF4vul_u0CGpy_bWHecE",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 122.20007120729991,
+      "y": 342.19041976374876,
+      "strokeColor": "#816121",
+      "backgroundColor": "transparent",
+      "width": 35.193192885807015,
+      "height": 35.193192885807015,
+      "seed": 1631818477,
+      "groupIds": [
+        "cached-answer-icon-group",
+        "cached-answer-group"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "customData": {
+        "kind": "library-icon",
+        "name": "Timer",
+        "nodeId": "cached-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aI"
+    },
+    {
+      "type": "line",
+      "version": 1712,
+      "versionNonce": 802063442,
+      "isDeleted": false,
+      "id": "cached-answer-icon-Ad82oYMdw63nm6CTkC4um",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 139.79666765020337,
+      "y": 359.7870162066521,
+      "strokeColor": "#816121",
+      "backgroundColor": "transparent",
+      "width": 11.731064295269004,
+      "height": 5.865532147634502,
+      "seed": 1787604301,
+      "groupIds": [
+        "cached-answer-icon-group",
+        "cached-answer-group"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "lastCommittedPoint": null,
+      "startArrowhead": null,
+      "endArrowhead": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          11.731064295269004,
+          5.865532147634502
+        ]
+      ],
+      "customData": {
+        "kind": "library-icon",
+        "name": "Timer",
+        "nodeId": "cached-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aJ"
+    },
+    {
+      "type": "line",
+      "version": 1712,
+      "versionNonce": 1569202638,
+      "isDeleted": false,
+      "id": "cached-answer-icon-so289tdECwo9bpvRYd343",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 139.79666765020337,
+      "y": 359.7870162066521,
+      "strokeColor": "#816121",
+      "backgroundColor": "transparent",
+      "width": 5.865532147634502,
+      "height": 11.731064295269004,
+      "seed": 1954773933,
+      "groupIds": [
+        "cached-answer-icon-group",
+        "cached-answer-group"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "lastCommittedPoint": null,
+      "startArrowhead": null,
+      "endArrowhead": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          5.865532147634502,
+          -11.731064295269004
+        ]
+      ],
+      "customData": {
+        "kind": "library-icon",
+        "name": "Timer",
+        "nodeId": "cached-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aK"
+    },
+    {
+      "type": "line",
+      "version": 1713,
+      "versionNonce": 937306642,
+      "isDeleted": false,
+      "id": "cached-answer-icon-g3aQuyRMHPlLpNClO-6z4",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 122.20007120729991,
+      "y": 359.7870162066521,
+      "strokeColor": "#816121",
+      "backgroundColor": "transparent",
+      "width": 5.865532147634502,
+      "height": 0,
+      "seed": 122781197,
+      "groupIds": [
+        "cached-answer-icon-group",
+        "cached-answer-group"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "lastCommittedPoint": null,
+      "startArrowhead": null,
+      "endArrowhead": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          5.865532147634502,
+          0
+        ]
+      ],
+      "customData": {
+        "kind": "library-icon",
+        "name": "Timer",
+        "nodeId": "cached-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aL"
+    },
+    {
+      "type": "line",
+      "version": 1713,
+      "versionNonce": 1543419918,
+      "isDeleted": false,
+      "id": "cached-answer-icon-nQZnrpTas_HueV5nCwJyQ",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 139.79666765020337,
+      "y": 371.5180805019212,
+      "strokeColor": "#816121",
+      "backgroundColor": "transparent",
+      "width": 0,
+      "height": 5.865532147634502,
+      "seed": 1777349741,
+      "groupIds": [
+        "cached-answer-icon-group",
+        "cached-answer-group"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "lastCommittedPoint": null,
+      "startArrowhead": null,
+      "endArrowhead": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          5.865532147634502
+        ]
+      ],
+      "customData": {
+        "kind": "library-icon",
+        "name": "Timer",
+        "nodeId": "cached-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aM"
+    },
+    {
+      "type": "line",
+      "version": 1713,
+      "versionNonce": 1920145362,
+      "isDeleted": false,
+      "id": "cached-answer-icon-LDay8AKT6FrO4S--hNDcx",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 139.79666765020337,
+      "y": 342.19041976374876,
+      "strokeColor": "#816121",
+      "backgroundColor": "transparent",
+      "width": 0,
+      "height": 5.865532147634502,
+      "seed": 1210654413,
+      "groupIds": [
+        "cached-answer-icon-group",
+        "cached-answer-group"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "lastCommittedPoint": null,
+      "startArrowhead": null,
+      "endArrowhead": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          5.865532147634502
+        ]
+      ],
+      "customData": {
+        "kind": "library-icon",
+        "name": "Timer",
+        "nodeId": "cached-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aN"
+    },
+    {
+      "type": "line",
+      "version": 1713,
+      "versionNonce": 1942521422,
+      "isDeleted": false,
+      "id": "cached-answer-icon-WpYVzweB9oJJzJXZqCHH5",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 151.52773194547234,
+      "y": 359.7870162066521,
+      "strokeColor": "#816121",
+      "backgroundColor": "transparent",
+      "width": 5.865532147634502,
+      "height": 0,
+      "seed": 412466477,
+      "groupIds": [
+        "cached-answer-icon-group",
+        "cached-answer-group"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "lastCommittedPoint": null,
+      "startArrowhead": null,
+      "endArrowhead": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          5.865532147634502,
+          0
+        ]
+      ],
+      "customData": {
+        "kind": "library-icon",
+        "name": "Timer",
+        "nodeId": "cached-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aO"
+    },
+    {
+      "type": "ellipse",
+      "version": 1289,
+      "versionNonce": 1873038738,
+      "isDeleted": false,
+      "id": "refreshed-answer-icon-8dYzzm-4zt3DY2Jq-T5aX",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 0,
+      "angle": 0,
+      "x": 772,
+      "y": 328,
+      "strokeColor": "#47603e",
+      "backgroundColor": "transparent",
+      "width": 64,
+      "height": 64,
+      "seed": 1923400676,
+      "groupIds": [
+        "refreshed-answer-icon-group",
+        "refreshed-answer-group"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "customData": {
+        "kind": "library-icon",
+        "name": "Server",
+        "nodeId": "refreshed-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aP"
+    },
+    {
+      "type": "rectangle",
+      "version": 2001,
+      "versionNonce": 96373902,
+      "isDeleted": false,
+      "id": "refreshed-answer-icon-Jx8OUm2XTs3k87vtb9LxP",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 793.7857582926016,
+      "y": 332.8269911490843,
+      "strokeColor": "#47603e",
+      "backgroundColor": "transparent",
+      "width": 20.428483414796382,
+      "height": 38.13316904095313,
+      "seed": 2105818340,
+      "groupIds": [
+        "refreshed-answer-icon-group",
+        "refreshed-answer-group"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "customData": {
+        "kind": "library-icon",
+        "name": "Server",
+        "nodeId": "refreshed-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aQ"
+    },
+    {
+      "type": "line",
+      "version": 1828,
+      "versionNonce": 615041874,
+      "isDeleted": false,
+      "id": "refreshed-answer-icon-1VFybdTKx_2F98b2KC0VB",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 796.4013676187318,
+      "y": 337.04549179020216,
+      "strokeColor": "#47603e",
+      "backgroundColor": "transparent",
+      "width": 15.661837284677146,
+      "height": 1.2463385451178831e-13,
+      "seed": 1295864804,
+      "groupIds": [
+        "refreshed-answer-icon-group",
+        "refreshed-answer-group"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "lastCommittedPoint": null,
+      "startArrowhead": null,
+      "endArrowhead": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          15.661837284677146,
+          1.2463385451178831e-13
+        ]
+      ],
+      "customData": {
+        "kind": "library-icon",
+        "name": "Server",
+        "nodeId": "refreshed-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aR"
+    },
+    {
+      "type": "line",
+      "version": 1860,
+      "versionNonce": 1872349902,
+      "isDeleted": false,
+      "id": "refreshed-answer-icon-D8HhZWPNpgwhClNJA_CfB",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 795.9015122679921,
+      "y": 340.55570465447295,
+      "strokeColor": "#47603e",
+      "backgroundColor": "transparent",
+      "width": 15.661837284677146,
+      "height": 1.2463385451178831e-13,
+      "seed": 833697636,
+      "groupIds": [
+        "refreshed-answer-icon-group",
+        "refreshed-answer-group"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "lastCommittedPoint": null,
+      "startArrowhead": null,
+      "endArrowhead": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          15.661837284677146,
+          1.2463385451178831e-13
+        ]
+      ],
+      "customData": {
+        "kind": "library-icon",
+        "name": "Server",
+        "nodeId": "refreshed-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aS"
+    },
+    {
+      "type": "line",
+      "version": 1842,
+      "versionNonce": 1205309714,
+      "isDeleted": false,
+      "id": "refreshed-answer-icon-FqiV_ooHsqaaF9pImFAiR",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 795.970707894099,
+      "y": 344.0659175187442,
+      "strokeColor": "#47603e",
+      "backgroundColor": "transparent",
+      "width": 15.661837284677146,
+      "height": 1.2463385451178831e-13,
+      "seed": 886876900,
+      "groupIds": [
+        "refreshed-answer-icon-group",
+        "refreshed-answer-group"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "lastCommittedPoint": null,
+      "startArrowhead": null,
+      "endArrowhead": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          15.661837284677146,
+          1.2463385451178831e-13
+        ]
+      ],
+      "customData": {
+        "kind": "library-icon",
+        "name": "Server",
+        "nodeId": "refreshed-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aT"
+    },
+    {
+      "type": "line",
+      "version": 1846,
+      "versionNonce": 1878212878,
+      "isDeleted": false,
+      "id": "refreshed-answer-icon-vKN2M73s3kSOJe854-Lo-",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 795.9238220675575,
+      "y": 347.57613038301514,
+      "strokeColor": "#47603e",
+      "backgroundColor": "transparent",
+      "width": 15.661837284677146,
+      "height": 1.2463385451178831e-13,
+      "seed": 961392228,
+      "groupIds": [
+        "refreshed-answer-icon-group",
+        "refreshed-answer-group"
+      ],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "lastCommittedPoint": null,
+      "startArrowhead": null,
+      "endArrowhead": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          15.661837284677146,
+          1.2463385451178831e-13
+        ]
+      ],
+      "customData": {
+        "kind": "library-icon",
+        "name": "Server",
+        "nodeId": "refreshed-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aU"
+    },
+    {
+      "type": "ellipse",
+      "version": 965,
+      "versionNonce": 749182674,
+      "isDeleted": false,
+      "id": "refreshed-answer-icon-5Npvd_9kkEmZa9mn-OtIR",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "angle": 0,
+      "x": 807.731264506295,
+      "y": 351.3738060450861,
+      "strokeColor": "#47603e",
+      "backgroundColor": "transparent",
+      "width": 3.6403236910676555,
+      "height": 2.6475081389582105,
+      "seed": 2134719822,
+      "groupIds": [
+        "refreshed-answer-icon-group",
+        "refreshed-answer-group"
+      ],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1789936101123,
+      "link": null,
+      "locked": false,
+      "startBinding": null,
+      "endBinding": null,
+      "customData": {
+        "kind": "library-icon",
+        "name": "Server",
+        "nodeId": "refreshed-answer",
+        "source": "IT icons by Mateusz Baran"
+      },
+      "index": "aV"
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#f7f5f0",
+    "exportBackground": true,
+    "exportWithDarkMode": false,
+    "gridSize": null
+  },
+  "files": {}
+}
