@@ -42,9 +42,14 @@ done
 findings=0
 
 report() { # label, extended-regex
-  local label="$1" pattern="$2" hits
+  local label="$1" pattern="$2" hits status
   hits=$(grep -nEi -- "$pattern" "$file" 2>/dev/null)
-  [ -n "$hits" ] || return 0
+  status=$?
+  if [ "$status" -gt 1 ]; then
+    echo "failed to scan: $file" >&2
+    exit 64
+  fi
+  [ "$status" -eq 0 ] || return 0
   findings=1
   [ "$quiet" -eq 1 ] || printf '\n== %s ==\n' "$label"
   printf '%s\n' "$hits" | sed 's/^/  /'
