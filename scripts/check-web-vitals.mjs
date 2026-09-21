@@ -1,6 +1,9 @@
 // Core Web Vitals gate, following addyosmani/web-quality-skills/skills/core-web-vitals.
-// Structural LCP and CLS causes are asserted against the build; CLS is also measured in a lab
-// run. Lab numbers are not field data, so only CLS is gated and LCP is reported for context.
+// Structural LCP and CLS causes are asserted against the build, then both metrics are measured
+// under fixed Lighthouse-style throttling. Throttling is what makes the measurement meaningful:
+// over an unthrottled loopback server fonts arrive too fast to swap, so font-driven layout shift
+// never appears, and LCP collapses to CPU jitter. These budgets detect regressions under one
+// controlled condition; they are not a field p75 and do not predict CrUX.
 import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import { readFile, readdir, stat } from 'node:fs/promises'
@@ -11,6 +14,15 @@ const CRITICAL_CSS_BUDGET = 14 * 1024
 const RENDER_BLOCKING_CSS_BUDGET = 40 * 1024
 const BLOCKING_INLINE_SCRIPT_BUDGET = 2 * 1024
 const CLS_BUDGET = 0.1
+const LCP_BUDGET = 2500
+
+// Lighthouse mobile defaults: Slow 4G and a 4x CPU slowdown.
+const THROTTLING = {
+  latency: 150,
+  downloadThroughput: (1.6 * 1024 * 1024) / 8,
+  uploadThroughput: (750 * 1024) / 8,
+  cpuSlowdown: 4,
+}
 
 const root = resolve('dist')
 function outputPath(pathname) {
@@ -181,6 +193,15 @@ try {
     }).observe({ type: 'largest-contentful-paint', buffered: true })
   })
   const measured = await context.newPage()
+  const cdp = await context.newCDPSession(measured)
+  await cdp.send('Network.enable')
+  await cdp.send('Network.emulateNetworkConditions', {
+    offline: false,
+    latency: THROTTLING.latency,
+    downloadThroughput: THROTTLING.downloadThroughput,
+    uploadThroughput: THROTTLING.uploadThroughput,
+  })
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: THROTTLING.cpuSlowdown })
   const report = []
   for (const { file, route } of audited) {
     await measured.goto(new URL(route, origin).href, { waitUntil: 'load' })
@@ -206,9 +227,17 @@ try {
       return { cls, lcp: window.__lcp }
     })
     assert.ok(cls <= CLS_BUDGET, `Measured CLS for ${file} is ${cls.toFixed(4)}, over the ${CLS_BUDGET} budget`)
-    report.push(`${route} CLS ${cls.toFixed(4)} (lab LCP ${Math.round(lcp)}ms)`)
+    assert.ok(lcp > 0, `No LCP candidate was painted for ${file}`)
+    assert.ok(
+      lcp <= LCP_BUDGET,
+      `Throttled LCP for ${file} is ${Math.round(lcp)}ms, over the ${LCP_BUDGET}ms budget`,
+    )
+    report.push(`${route} LCP ${String(Math.round(lcp)).padStart(4)}ms  CLS ${cls.toFixed(4)}`)
   }
-  console.log(`Core Web Vitals checks passed for ${audited.length} pages:\n  ${report.join('\n  ')}`)
+  console.log(
+    `Core Web Vitals checks passed for ${audited.length} pages ` +
+    `(Slow 4G, ${THROTTLING.cpuSlowdown}x CPU):\n  ${report.join('\n  ')}`,
+  )
 } finally {
   await browser.close()
   await new Promise((done) => server.close(done))
