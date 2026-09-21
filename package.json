@@ -8,6 +8,7 @@
     "build": "astro check && astro build",
     "check": "astro check",
     "check:seo": "bun scripts/check-seo.mjs",
+    "check:vitals": "bun scripts/check-web-vitals.mjs",
     "generate:social-card": "bun scripts/generate-social-card.mjs",
     "preview": "astro preview",
     "sync:projects": "bun scripts/sync-projects.ts"
