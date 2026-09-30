@@ -1,0 +1,340 @@
+---
+title: "Deployed, Not Live: Why Your Domain Still Points at the Host You Left"
+seoTitle: "DNS Cutovers: Why Domains Hit the Old Host"
+description: "A migration moves your files. It does not automatically change who answers for your domain, and that gap can leave visitors reaching the old host."
+date: "2026-09-18"
+tags: ["dns", "infrastructure", "migration", "operations"]
+published: true
+---
+
+A deploy pipeline reported success. The build artifacts were correct. The new
+hosting platform had the site ready.
+
+My domain still returned a 404 from a company I had stopped using months earlier.
+
+**The site had moved. The route to it had not.**
+
+Each system reported accurately about the part it owned. The deploy pipeline knew
+the files were there. It did not know whether visitors would ever reach them.
+
+This failure is not specific to one stack or one vendor. To see why, start with
+what happens between typing a domain name and loading a page.
+
+## What DNS Does
+
+**DNS stands for Domain Name System.** It lets software look up information about
+a domain name. For a website, a key piece of that information is an **IP
+address**: an address the browser can connect to.
+
+Your browser or device usually asks a **recursive resolver**, a DNS service that
+does the lookup on your behalf. It may reuse a saved, or cached, answer. Otherwise,
+it follows DNS referrals to the **authoritative nameserver** that publishes the
+domain's DNS records.
+
+For illustration, imagine an **A record**, a DNS entry that supplies an IPv4
+address, mapping `example.com` to `192.0.2.10`. That address is reserved for
+documentation; this is an example, not a live lookup.
+
+<figure class="excalidraw-figure">
+  <div class="diagram-scroll" role="region" aria-label="From a domain name to a website request; scroll horizontally to explore" tabindex="0">
+    <img
+      src="/diagrams/dns-lookup-basics.svg"
+      width="992"
+      height="384"
+      loading="eager"
+      fetchpriority="high"
+      decoding="async"
+      alt="Read left to right: the browser asks DNS about example.com, receives the illustrative address 192.0.2.10, then uses HTTPS to request the page from that address."
+    />
+  </div>
+  <figcaption>
+    A simplified website visit. Looking up the address and fetching the page are
+    separate operations.
+  </figcaption>
+</figure>
+
+**DNS helps find the address. HTTPS requests the page.** Moving the website's
+files to a new host does not, by itself, change the DNS answer.
+
+## The Mental Model That Causes It
+
+The tempting mental model is simple:
+
+> I bought the domain from a registrar, so I configure the domain at the registrar.
+
+That model is incomplete in a consequential way. Buying a domain and
+answering for a domain are separate responsibilities, and they are routinely held
+by different companies.
+
+There are five responsibilities to keep separate. The registrar manages the
+registration; it is not a stop on every visitor's DNS lookup:
+
+1. **The registrar** — where the domain is purchased and renewed.
+2. **The delegation** — a pointer in the [parent zone](https://www.rfc-editor.org/rfc/rfc8499.html#section-7)
+   naming the domain's authoritative nameservers. For `example.com`, the parent
+   zone is `.com`.
+3. **The zone** — the actual records, held by whoever the delegation names.
+4. **The origin** — the platform that serves the bytes.
+5. **TLS and routing** — certificate issuance and the relationship between the
+   apex domain and `www`.
+
+In this migration, the site was deploying to GitHub Pages, while recorded
+nameserver answers named the old DNS provider and HTTP requests reached the old
+host. The diagram shows a failure path to investigate: delegation selecting a
+zone whose records still send visitors to the previous host.
+
+<figure class="excalidraw-figure">
+  <div class="diagram-scroll" role="region" aria-label="Deployment and DNS routes; scroll horizontally to explore" tabindex="0">
+    <img
+      src="/diagrams/dns-deploy-versus-delegation.svg"
+      width="992"
+      height="640"
+      loading="lazy"
+      decoding="async"
+      alt="Read left to right: a successful build puts the new site on GitHub Pages. In a separate row, unchanged delegation selects the old DNS zone, whose address sends the browser to the old host and a 404."
+    />
+  </div>
+  <figcaption>
+    A successful deployment does not change the DNS path visitors follow.
+  </figcaption>
+</figure>
+
+You do not have to move DNS providers when you move hosting: Vercel DNS can stay
+in place while GitHub Pages serves the site. If the DNS records need to change,
+update the zone whose answers visitors actually use.
+
+## Why the Control Panel Misleads You
+
+Here is where the controls can mislead.
+
+A registrar can offer both DNS-record editing and nameserver settings. These are
+different controls. If delegation selects another provider, editing a separate
+zone at the registrar will not change the public answers followed through that
+delegation. The registrar's nameserver controls can still change the delegation.
+
+In that situation, waiting for propagation or clearing caches does not fix
+editing the wrong zone.
+
+> The interface you are editing and the system that is consulted are not
+> guaranteed to be the same system. Verify authority before you change configuration.
+
+That sentence is the transferable lesson, and it is not really about DNS.
+
+## Ask One Question First
+
+Before changing anything, start with your recursive resolver's view. In these
+commands, replace `example.com` with your domain:
+
+```bash
+dig +short NS example.com
+```
+
+This answer may be cached and may contain the child zone's NS data. It does not
+establish the current delegation in the parent zone. Follow the referrals with
+[`+trace`](https://bind9.readthedocs.io/en/stable/manpages.html#dig-dns-lookup-utility):
+
+```bash
+dig +trace NS example.com
+```
+
+For `example.com`, look for the referral from a `.com` parent nameserver naming
+`example.com`'s servers. That is the parent delegation evidence. The final NS
+answer from the child's servers is the child zone's own answer, not that referral.
+
+During the original troubleshooting of `raghib.io`, the recorded NS answer was:
+
+```
+ns1.vercel-dns.com
+ns2.vercel-dns.com
+```
+
+The site was deploying to GitHub Pages while that answer named Vercel DNS. That
+can be a valid arrangement. The active zone's hosting records and the HTTP
+response needed separate checks.
+
+The historical response from `https://raghib.io/` included this status line and
+selected headers (excerpt, not complete output):
+
+```text
+HTTP/2 404
+server: Vercel
+x-vercel-error: DEPLOYMENT_NOT_FOUND
+```
+
+Vercel documents [`DEPLOYMENT_NOT_FOUND`](https://vercel.com/docs/errors/DEPLOYMENT_NOT_FOUND)
+as meaning that the requested deployment could not be found. These headers
+identify a Vercel response; they do not establish which DNS setting sent the
+request there.
+
+Error messages help narrow the investigation:
+
+| Signature | What it tells you |
+|---|---|
+| `DEPLOYMENT_NOT_FOUND` | The vendor received the request but could not find the deployment |
+| "There isn't a GitHub Pages site here" | Pages is reachable but has no site for this hostname |
+| [Cloudflare error 1000](https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/error-1000/) | A DNS record points to a prohibited IP; the request is blocked |
+| [Cloudflare error 1016](https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/error-1016/) | Cloudflare cannot resolve the origin hostname |
+| `NoSuchBucket` | The requested bucket does not exist |
+| `NXDOMAIN` | The resolver reports that the queried DNS name does not exist |
+| A certificate warning | TLS certificate validation failed; inspect the hostname, chain, and validity dates |
+
+A response naming the old host tells you where the request arrived, not which
+DNS setting was wrong. Check parent delegation, the records in the selected zone,
+and cached answers. The nameserver result is a starting point, not a diagnosis
+on its own.
+
+## Do Not Trust Your Own Resolver
+
+The second discipline matters as much as the first.
+
+A record's **time to live (TTL)** tells a resolver how long it can normally reuse
+a cached answer. During a migration, your own machine may keep returning an
+old answer consistently enough to look like evidence of a failed change.
+
+Ask a confirmed authoritative nameserver directly. Here, `example.com` and
+`ns1.example.net` are placeholders for your domain and its authoritative server:
+
+```bash
+dig @ns1.example.net example.com A +norecurse
+```
+
+Check for the `aa` ("authoritative answer") flag. The record's TTL in that answer
+is the value the authority publishes, rather than a recursive cache's remaining
+lifetime. If the authority publishes the new address but a resolver still
+returns the old one, check the cached answer's remaining TTL before changing
+more configuration.
+
+<figure class="excalidraw-figure">
+  <div class="diagram-scroll" role="region" aria-label="DNS cache timeline; scroll horizontally to explore" tabindex="0">
+    <img
+      src="/diagrams/dns-authority-versus-cache.svg"
+      width="992"
+      height="560"
+      loading="lazy"
+      decoding="async"
+      alt="The authoritative zone already has the new address. Below it, time runs left to right: a resolver returns the cached old address, its TTL expires, and the next lookup retrieves the new address."
+    />
+  </div>
+  <figcaption>
+    Two different answers do not necessarily mean two broken systems. One may be
+    current zone data; the other may be an unexpired cached answer.
+  </figcaption>
+</figure>
+
+Compare complete answer sets for the same name and record type, ignoring address
+order. Rotation can legitimately change the set, and location-based DNS (GeoDNS)
+can return different sets to different query locations. Check the provider's
+expected behavior for those locations before treating a difference as stale DNS.
+Sorting answers or taking two samples cannot, by itself, establish a caching
+problem.
+
+## The Blast Radius Is the TTL
+
+Before a cutover, read the [configured TTL](https://www.rfc-editor.org/rfc/rfc1034.html#section-3.6)
+from a known authoritative server. With the same placeholders:
+
+```bash
+dig @ns1.example.net example.com A +norecurse +noall +answer
+```
+
+The number after the record name is the TTL in seconds. A recursive resolver may
+instead show the remaining lifetime of a cached answer; do not assume that is
+the current configured TTL.
+
+If a record's TTL is a day, lowering it to 300 seconds does not shorten copies
+already cached for a day. Lower it *before* the migration, then wait for the old
+TTL to elapse before changing the address.
+
+That reduces the normal caching window for that record to five minutes. It is not
+a five-minute guarantee for the whole cutover: delegation records have their own
+TTLs, and a lower address-record TTL does not speed up a nameserver change.
+
+This is ordinary risk management expressed in infrastructure: reduce the cost of
+being wrong before you take the action that might be wrong.
+
+## What Actually Gets Lost
+
+The website was the visible failure here. Other services can be affected by the
+same change, even if their failures are less obvious.
+
+A zone can also hold mail routing, sender authentication, and domain-ownership
+proofs. If those records are missing from the destination zone, a delegation
+change can disrupt mail delivery, weaken sender authentication, or break service
+verification. These are possible risks, not losses established by this migration.
+
+Before any cutover, account for:
+
+- Apex and `www` address records
+- `MX`, SPF, DKIM, and `_dmarc`
+- Domain-verification records for every external service
+- Live subdomains such as `api`, `staging`, `docs`, and `status`
+- `CAA`, if the new certificate authority differs
+
+Any item you cannot account for is a cutover risk to investigate before proceeding.
+
+## Encoding the Procedure
+
+I wrote a local diagnostic script to make the nameserver lookup, public and direct
+DNS queries, HTTP checks, and carry-over inventory repeatable. That makes the
+procedure easier to rerun; its interpretations still need to be tested.
+
+This selected excerpt preserves recorded nameserver and HTTP lines, with
+overbroad diagnostic conclusions omitted:
+
+```text
+  nameserver             ns1.vercel-dns.com
+
+  ✗ raghib.io — HTTP 404, served by Vercel
+    x-vercel-error: DEPLOYMENT_NOT_FOUND
+```
+
+Those old conclusions were too broad. A registrar's delegation controls still
+matter, and recursive NS results are not by themselves proof of parent delegation.
+
+The checks also need to account for the address variation described above and
+for wildcards. A wildcard can supply answers for otherwise absent names, but
+existing names and delegation boundaries limit where it applies. That can make
+naive enumeration mistake wildcard answers for explicitly configured names.
+
+> Scripts and checklists both encode assumptions. Make the checks repeatable,
+> then test those assumptions against known-good cases and deliberate test failures.
+
+## What Fixed This Migration
+
+In the original troubleshooting exchange, I confirmed switching the nameserver
+setting to Namecheap BasicDNS and fixing the DNS records, including the A-record
+typo: `85.199.108.153` became `185.199.108.153`.
+
+Separately, the earlier troubleshooting reply recorded:
+
+- Nameservers: `dns1.registrar-servers.com` and `dns2.registrar-servers.com`.
+- Apex A records: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`,
+  and `185.199.111.153`.
+- `www` CNAME: `ragmha.github.io`.
+- HTTP `200`, with TLS provisioning still pending.
+
+Those are recorded historical observations, not fresh checks. They do not
+establish a cutover duration or confirm a later successful HTTPS result.
+
+## The General Case
+
+Strip away the protocol and a reusable pattern remains, applicable to any system
+where configuration and authority can drift apart:
+
+1. **Establish who is authoritative before changing configuration.** The editable
+   surface may affect the consulted system indirectly; confirm that relationship.
+2. **Read the error vocabulary precisely.** A 404 from the old host and one from
+   the new host tell you different things about where the request arrived.
+3. **Distrust your own cached view.** Compare it with the responsible source,
+   accounting for caching and legitimate answer variation.
+4. **Reduce the blast radius before acting**, not after the incident.
+5. **Inventory the invisible dependencies.** The visible failure may not reveal
+   every service at risk.
+6. **Encode the procedure** so its assumptions can be tested and corrected.
+
+Feature flags, identity and access policies, caching layers, service discovery,
+and configuration management can show the same pattern: a successful edit in one
+system does not necessarily change the system being consulted.
+
+The durable habit is narrow enough to state in a sentence: before changing a
+configuration, confirm how that setting affects the system being consulted.

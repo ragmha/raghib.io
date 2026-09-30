@@ -1,0 +1,32 @@
+Icon artwork adapted from "IT icons" by Mateusz Baran.
+
+Library: https://libraries.excalidraw.com/
+Author: https://github.com/mateuszbaransanok
+Source: https://github.com/excalidraw/excalidraw-libraries/blob/main/libraries/mateuszbaransanok/it-icons.excalidrawlib
+Source blob: ed3a12269f73ae8cd8f4656fd275007111925565
+
+The Host, Network, Server, Settings, Database, and Timer artwork is scaled and
+recolored in these diagrams. Original library captions are replaced by the
+diagram's own labels. The source repository's license is reproduced below.
+
+MIT License
+
+Copyright (c) 2020 Excalidraw
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
