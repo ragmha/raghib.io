@@ -1,6 +1,8 @@
 ---
 // Contents navigation for a single document's own section headings, sourced
 // from Astro's heading extraction.
+import contentsDisclosure from '../scripts/contents-disclosure.js?raw'
+
 interface Heading {
   slug: string
   text: string
@@ -23,6 +25,7 @@ const parts = headings.filter((heading) => heading.depth >= 2 && heading.depth <
     <button class="contents-toggle" type="button" data-contents-toggle
       aria-label="Toggle contents" aria-controls="article-contents" aria-expanded="false" hidden>
     </button>
+    <script is:inline set:html={contentsDisclosure}></script>
     <nav id="article-contents" class="parts" aria-label="Contents" data-contents-nav>
       <div class="parts-rail" aria-hidden="true">
         <span class="parts-window" data-reading-window></span>

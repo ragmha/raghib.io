@@ -29,6 +29,7 @@ bun dev                      # local development
 bun run check                # Astro and TypeScript checks
 bun run build                # static production build
 bun run check:seo             # audit the fresh production build (requires Chromium)
+bun run check:vitals          # controlled mobile LCP/CLS regression checks
 bun run generate:social-card  # regenerate public/social-card.png
 bun run sync:projects         # refresh projects from the selected GitHub star list
 bun test --bail               # unit and publication-contract tests
@@ -50,6 +51,10 @@ writeup at `/project/<project-name>/writings/`, authored as MDX in
 `src/content/project-writeups/`; set `published: true` when it's ready to go
 live. Writeups are separate from the Writing archive/RSS feed.
 
+Rendered diagrams live in `public/diagrams/`; editable `.excalidraw` sources live
+in `src/assets/diagrams/`. Edit a source in Excalidraw, then export the matching
+SVG. Icon credits and reuse terms are in `public/diagrams/ICONS-LICENSE.txt`.
+
 ## SEO readiness before merging
 
 The `SEO readiness` workflow runs on every pull request into `main` and on
@@ -65,6 +70,7 @@ bunx playwright install chromium # once, if the browser is not installed
 bun test --bail
 bun run build
 bun run check:seo
+bun run check:vitals
 ```
 
 The audit reads the generated HTML in Chromium with page scripts disabled.
@@ -84,8 +90,9 @@ visible article heading. Shared metadata lives in `SeoHead.astro` and
 `src/lib/seo.ts`; regenerate the social card after changing its text or design.
 No article text or draft is automatically published by the audit.
 
-The gate checks technical readiness, not rankings, keyword demand, factual
-accuracy, or field Core Web Vitals. Those still need editorial review and
+The vitals check measures mobile LCP and CLS under fixed network and CPU
+throttling. The gate checks technical readiness, not rankings, keyword demand,
+factual accuracy, or field Core Web Vitals. Those still need editorial review and
 production evidence. After deployment, submit `/sitemap-index.xml` in Search
 Console using an account authorized for the site.
 

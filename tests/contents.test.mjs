@@ -6,8 +6,11 @@ import { activeSection, railPosition } from '../src/lib/reading-progress.mjs'
 
 const source = readFileSync(new URL('../src/scripts/contents.js', import.meta.url), 'utf8')
   .replace(/^import .* from .*\n/, '')
+const disclosureSource = readFileSync(
+  new URL('../src/scripts/contents-disclosure.js', import.meta.url), 'utf8',
+)
 
-async function page({ hidden = false, missing = false, interacting = false } = {}) {
+async function page({ hidden = false, missing = false, interacting = false, disclosure = true, tracking = true } = {}) {
   const events = new Map()
   const tasks = []
   const errors = []
@@ -18,7 +21,6 @@ async function page({ hidden = false, missing = false, interacting = false } = {
   let resized
   let context
   const sidebarEvents = new Map()
-  const navEvents = new Map()
   const toggleEvents = new Map()
   const toggle = {
     hidden: true,
@@ -58,7 +60,6 @@ async function page({ hidden = false, missing = false, interacting = false } = {
     querySelectorAll: () => links,
     closest: () => sidebar,
     matches: () => interacting,
-    addEventListener: (event, handler) => navEvents.set(event, handler),
     getBoundingClientRect: () => ({ top: navTop() }),
   }
   const article = { getBoundingClientRect: () => ({ bottom: 2200 - context.scrollY }) }
@@ -70,6 +71,7 @@ async function page({ hidden = false, missing = false, interacting = false } = {
     innerHeight: 500,
     document: {
       hidden,
+      currentScript: { closest: () => sidebar },
       documentElement: {},
       fonts: { ready: Promise.resolve() },
       querySelector: (selector) => ({
@@ -92,7 +94,8 @@ async function page({ hidden = false, missing = false, interacting = false } = {
     },
     console: { error: (...args) => errors.push(args) },
   }
-  runInNewContext(source, context)
+  if (disclosure) runInNewContext(disclosureSource, context)
+  if (tracking) runInNewContext(source, context)
   await Promise.resolve()
   const flush = () => {
     let count = 0
@@ -107,7 +110,7 @@ async function page({ hidden = false, missing = false, interacting = false } = {
     togglePanel: () => toggleEvents.get('click')(),
     escape: () => sidebarEvents.get('keydown')({ key: 'Escape' }),
     outside: () => events.get('pointerdown')({ target: {} }),
-    followLink: () => navEvents.get('click')({ target: { closest: () => links[1] } }),
+    followLink: () => sidebarEvents.get('click')({ target: { closest: () => links[1] } }),
     active: () => links.findIndex((link) => link.attributes['aria-current'] === 'location'),
     scroll: (y) => { context.scrollY = y; events.get('scroll')() },
     event: (name) => events.get(name)(),
@@ -115,6 +118,24 @@ async function page({ hidden = false, missing = false, interacting = false } = {
     pending: () => tasks.length,
   }
 }
+
+test('disclosure is ready before the asynchronous tracking module loads', async () => {
+  const p = await page({ tracking: false })
+  assert.equal(p.sidebar.dataset.enhanced, '')
+  assert.equal(p.toggle.hidden, false)
+  assert.equal(p.nav.dataset.enhanced, undefined)
+  p.togglePanel()
+  assert.equal(p.toggle.attributes['aria-expanded'], 'true')
+  p.followLink()
+  assert.equal(p.toggle.attributes['aria-expanded'], 'false')
+})
+
+test('tracking alone preserves the inline fallback when bootstrap did not run', async () => {
+  const p = await page({ disclosure: false })
+  assert.equal(p.sidebar.dataset.enhanced, undefined)
+  assert.equal(p.toggle.hidden, true)
+  assert.equal(p.active(), 0)
+})
 
 test('contents enhances visible fallback and selects the article title initially', async () => {
   const p = await page()
@@ -187,6 +208,8 @@ test('missing targets report an error and leave the readable fallback uncollapse
   const p = await page({ missing: true })
   assert.equal(p.errors.length, 1)
   assert.equal(p.nav.dataset.enhanced, undefined)
+  assert.equal(p.sidebar.dataset.enhanced, undefined)
+  assert.equal(p.toggle.hidden, true)
 })
 
 test('rail opens on tap and closes with Escape, an outside tap, or a section link', async () => {
