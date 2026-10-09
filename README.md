@@ -60,6 +60,11 @@ Astro's `<Image />` or `<Picture />` components so responsive `srcset` values an
 optimized formats are generated automatically. Icon credits and reuse terms are
 in `public/diagrams/ICONS-LICENSE.txt`.
 
+JetBrains Mono uses `font-display: optional` and width-matched fallback text to
+avoid rewrapping content after the first paint. On slow first visits, the system
+monospace font may remain for that page load. The header reserves space for the
+theme button before its script initializes.
+
 ## SEO readiness before merging
 
 The `SEO readiness` workflow runs on every pull request into `main` and on
