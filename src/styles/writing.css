@@ -494,9 +494,11 @@ main {
 .diagram svg,
 .prose > figure img,
 .prose > figure svg {
+  width: auto;
   max-width: 100%;
   height: auto;
-  display: inline-block;
+  display: block;
+  margin-inline: auto;
 }
 
 .diagram figcaption,
@@ -515,17 +517,37 @@ main {
 }
 
 .diagram-scroll {
+  width: 100%;
   max-width: 100%;
   overflow-x: auto;
   overscroll-behavior-x: contain;
 }
 
-.prose > .excalidraw-figure img {
+.diagram-scroll img,
+.diagram-scroll svg {
   display: block;
   width: 100%;
-  min-width: 36rem;
-  max-width: none;
+  max-width: 100%;
+  min-width: 0;
+  height: auto;
   margin-inline: auto;
+}
+
+.prose > .excalidraw-figure img {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.prose :where(pre, table) {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.prose table {
+  display: block;
+  width: max-content;
+  min-width: 100%;
 }
 
 .prose > .excalidraw-figure figcaption {
@@ -710,6 +732,33 @@ main {
 
   .part h2 {
     font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 28rem) {
+  body {
+    font-size: 0.9rem;
+  }
+
+  .shell,
+  .writing-index {
+    padding-block: 1.5rem 2rem;
+  }
+
+  .diagram,
+  .prose > figure {
+    padding: 0.75rem;
+  }
+
+  .site-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .footer-links {
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
   }
 }
 

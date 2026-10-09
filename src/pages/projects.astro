@@ -146,4 +146,25 @@ const writeupLinks = new Map(
       max-width: none;
     }
   }
+
+  @media (max-width: 28rem) {
+    .project-entry {
+      grid-template-columns: 28px minmax(0, 1fr);
+      column-gap: 0.6rem;
+    }
+
+    .project-artwork {
+      width: 28px;
+      height: 28px;
+    }
+
+    .project-links {
+      gap: 0.3rem;
+    }
+
+    .project-extra {
+      padding-inline: 0.4rem;
+      font-size: 0.65rem;
+    }
+  }
 </style>

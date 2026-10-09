@@ -134,3 +134,13 @@ body.site-surface {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+@media (max-width: 28rem) {
+  .site-surface .site-shell {
+    padding-block-start: 1.5rem;
+  }
+
+  .home-writing .post-list a {
+    padding-block: 0.85rem;
+  }
+}

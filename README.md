@@ -53,7 +53,12 @@ live. Writeups are separate from the Writing archive/RSS feed.
 
 Rendered diagrams live in `public/diagrams/`; editable `.excalidraw` sources live
 in `src/assets/diagrams/`. Edit a source in Excalidraw, then export the matching
-SVG. Icon credits and reuse terms are in `public/diagrams/ICONS-LICENSE.txt`.
+SVG. Keep SVG diagrams as native `<img>` elements with explicit `width`, `height`,
+and descriptive `alt` attributes; shared writing styles scale them to their
+container. Put raster content images in `src/assets/` and render them with
+Astro's `<Image />` or `<Picture />` components so responsive `srcset` values and
+optimized formats are generated automatically. Icon credits and reuse terms are
+in `public/diagrams/ICONS-LICENSE.txt`.
 
 ## SEO readiness before merging
 
