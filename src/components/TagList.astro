@@ -1,0 +1,39 @@
+---
+// Block labels for the inferred category and freeform tags. Colors are stable,
+// but only appear on hover so the row stays quiet by default.
+import { getCategoryColor, getTagColor, type WritingCategory } from '../lib/posts'
+
+interface Props {
+  category?: WritingCategory
+  tags?: string[]
+  inferredCategory?: boolean
+}
+
+const { category, tags = [], inferredCategory = true } = Astro.props
+
+// The category is inferred from the tags, so drop any tag that just repeats it.
+const visibleTags = category
+  ? tags.filter((tag) => tag.toLowerCase() !== category.toLowerCase())
+  : tags
+---
+
+{
+  (category || visibleTags.length > 0) && (
+    <ul class="tag-list">
+      {category && (
+        <li
+          class="tag tag-category"
+          data-tag-color={getCategoryColor(category)}
+          title={inferredCategory ? 'Automatically inferred category' : 'Project category'}
+        >
+          {category}
+        </li>
+      )}
+      {visibleTags.map((tag) => (
+        <li class="tag" data-tag-color={getTagColor(tag)}>
+          {tag}
+        </li>
+      ))}
+    </ul>
+  )
+}

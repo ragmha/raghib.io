@@ -1,0 +1,47 @@
+---
+// Standalone editorial layout for essays and project writeups.
+// Shared presentation does not merge their content collections or feeds.
+import '../styles/writing.css'
+import SeoHead from '../components/SeoHead.astro'
+import ThemeInit from '../components/ThemeInit.astro'
+import SiteHeader from '../components/SiteHeader.astro'
+import type { ArticleMetadata } from '../lib/seo'
+
+interface Props {
+  title?: string
+  description?: string
+  noindex?: boolean
+  article?: ArticleMetadata
+}
+
+const {
+  title,
+  description,
+  noindex = false,
+  article,
+} = Astro.props
+
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <SeoHead title={title} description={description} noindex={noindex} article={article} />
+    <ThemeInit />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <SiteHeader />
+    <div class="page">
+      <slot />
+    </div>
+    <footer class="site-footer">
+      <span>© {new Date().getFullYear()} Raghib Hasan</span>
+      <span class="footer-links">
+        <a href="https://github.com/ragmha" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://www.linkedin.com/in/ragmha/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <a href="/writing/feed.xml">RSS</a>
+      </span>
+    </footer>
+  </body>
+</html>

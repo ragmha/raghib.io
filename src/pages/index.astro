@@ -1,60 +1,60 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro'
-import Footer from '../components/Footer.astro'
-import { getPublishedPosts, getPostSlug } from '../lib/posts'
+import SiteLayout from '../layouts/SiteLayout.astro'
+import PostList from '../components/PostList.astro'
+import { formatDate, getPostSlug, getPublishedPosts } from '../lib/posts'
 
-const posts = (await getPublishedPosts()).slice(0, 3)
+const latestPosts = (await getPublishedPosts()).slice(0, 3)
 ---
 
-<BaseLayout
-  description="Independent writing on software, AI, systems, and the ideas shaping how technology is built and used."
+<SiteLayout
+  title="Software, AI & Systems"
+  heading="How technology becomes useful"
+  description="Independent writing by Raghib Hasan on AI, software, and the systems that turn promising technology into useful, trustworthy work."
 >
-  <!-- THESIS: Ideas should be easy to find and worth returning to. OWN-WORLD: One narrow text column, system sans-serif type, muted green links, and no decorative containers. STORY: Meet the writer, choose an area, follow the thinking. FIRST VIEWPORT: Name, point of view, and direct links. FORM: Personal index based on the supplied matchaonmuffins.dev reference. -->
-  <main class="home">
-    <section class="intro">
-      <p class="name">Raghib Hasan</p>
-      <h1>Ideas on technology and systems</h1>
-      <p>
-        I write about software, AI, and the decisions that turn promising
-        technology into useful, trustworthy systems.
-      </p>
-    </section>
+  <div class="home-about" id="about">
+    <p>
+      I’m interested in what it takes to turn AI capability into something
+      people actually use—and how that changes the software, organizations,
+      and services around it.
+    </p>
 
-    <nav class="index-links" aria-label="Site sections">
-      <a href="/writing"><span>Writing</span><small>Essays and explorations</small></a>
-      <a href="/projects"><span>Projects</span><small>Ideas made tangible</small></a>
-      <a href="/about"><span>About</span><small>How I think</small></a>
-      <a href="https://github.com/ragmha"><span>GitHub ↗</span><small>Source code</small></a>
-      <a href="https://www.linkedin.com/in/ragmha/"><span>LinkedIn ↗</span><small>Background</small></a>
-    </nav>
+    <p>I’m currently a Strategic Solution Engineer at Microsoft.</p>
 
-    <section>
-      <h2>Focus</h2>
-      <ul>
-        <li>How AI changes the way software is designed and built</li>
-        <li>Architecture, platforms, and resilient systems</li>
-        <li>Governance, trust, and responsible technology adoption</li>
-      </ul>
-    </section>
+    <p>Previously:</p>
+    <ul>
+      <li>
+        Worked as an Entrepreneur in Residence, raising capital and pitching
+        new ventures
+      </li>
+      <li>
+        Built the end-to-end online grocery shopping experience and the
+        organization behind it. My work in quick commerce later included
+        helping bring robot delivery to Finland
+      </li>
+      <li>
+        Shipped end-to-end web and mobile software for major B2C, B2B, and
+        startup clients
+      </li>
+    </ul>
 
-    <section>
+    <p>
+      You can reach me on
+      <a href="https://www.linkedin.com/in/ragmha/">LinkedIn</a>.
+    </p>
+  </div>
+
+  {latestPosts.length > 0 && (
+    <section class="home-writing" aria-labelledby="latest-writing">
       <div class="section-head">
-        <h2>Latest writing</h2>
-        <a href="/writing">All</a>
+        <h2 id="latest-writing">Latest writing</h2>
+        <a href="/writing/">All writing</a>
       </div>
-      <div class="compact-list">
-        {
-          posts.map((post) => (
-            <a href={`/writing/${getPostSlug(post)}`}>
-              <span>{post.data.title}</span>
-              <time datetime={post.data.date.toISOString()}>
-                {post.data.date.getFullYear()}
-              </time>
-            </a>
-          ))
-        }
-      </div>
+      <PostList posts={latestPosts.map((post) => ({
+        href: `/writing/${getPostSlug(post)}/`,
+        date: formatDate(post.data.date),
+        title: post.data.title,
+        description: post.data.description,
+      }))} />
     </section>
-  </main>
-  <Footer />
-</BaseLayout>
+  )}
+</SiteLayout>

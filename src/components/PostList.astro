@@ -1,0 +1,28 @@
+---
+interface Item {
+  href: string
+  date: string
+  title: string
+  description?: string
+}
+
+interface Props {
+  posts: Item[]
+}
+
+const { posts } = Astro.props
+---
+
+<ul class="post-list" role="list">
+  {
+    posts.map((post) => (
+      <li>
+        <a href={post.href}>
+          <span class="post-date">{post.date}</span>
+          <span class="post-title">{post.title}</span>
+          {post.description && <span class="post-desc">{post.description}</span>}
+        </a>
+      </li>
+    ))
+  }
+</ul>

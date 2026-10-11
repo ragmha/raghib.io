@@ -1,0 +1,38 @@
+:root {
+  --theme-bg: #161614;
+  --theme-surface: #1e1e1b;
+  --theme-text: #e7e5dc;
+  --theme-muted: #a5a297;
+  --theme-faint: #918e83;
+  --theme-rule: #2d2d28;
+  --theme-rule-strong: #3d3c35;
+  --theme-highlight: #cede3f;
+  --theme-highlight-text: #161614;
+  --theme-code-bg: #1e1e1b;
+  color-scheme: dark;
+  background: var(--theme-bg);
+}
+
+:root[data-theme='light'] {
+  --theme-bg: #f7f5f0;
+  --theme-surface: #f2f0e7;
+  --theme-text: #111;
+  --theme-muted: #6f6d63;
+  --theme-faint: #777;
+  --theme-rule: #dedbcf;
+  --theme-rule-strong: #c9c5b6;
+  --theme-highlight: #e9f56c;
+  --theme-highlight-text: #1c1b18;
+  --theme-code-bg: #f1efe6;
+  color-scheme: light;
+}
+
+:root ::selection {
+  background: var(--theme-highlight);
+  color: var(--theme-highlight-text);
+}
+
+:root :focus-visible {
+  outline: 2px solid var(--theme-highlight);
+  outline-offset: 3px;
+}
