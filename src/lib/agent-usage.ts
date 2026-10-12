@@ -540,21 +540,25 @@ export function sessionCost(analysis: Analysis): [number, number] | null {
   return [low, high]
 }
 
-export function sessionMetrics(analysis: Analysis) {
-  const input = analysis.totals.input.value
-  const read = analysis.totals.read.value
-  return {
-    calls: analysis.totals.requests.value,
-    input,
-    cacheShare: input && read !== null ? read / input : null,
-    peakContext: analysis.calls.length ? Math.max(...analysis.calls.map((call) => call.input ?? 0)) : null,
-    output: analysis.totals.output.value,
-    cost: sessionCost(analysis),
-    toolCalls: analysis.tools.reduce((sum, tool) => sum + tool.count, 0),
-    failures: analysis.failedCalls + analysis.tools.reduce((sum, tool) => sum + tool.failed, 0),
+export function projectModelSavings(records: Usage[], alternative: ModelPrice, runs: number, currentModel?: ModelPrice) {
+  if (!Number.isSafeInteger(runs) || runs < 1) throw new Error('Use a positive whole number of task runs.')
+  const current = estimateCost(records, currentModel)
+  const proposed = estimateCost(records, alternative)
+  if (current.low === null || current.high === null) {
+    return { available: false, reason: current.reason ?? 'Current model cost is unavailable.' } as const
   }
+  if (proposed.low === null || proposed.high === null) {
+    return { available: false, reason: proposed.reason ?? 'Alternative model cost is unavailable.' } as const
+  }
+  const unchanged = records.every((record) => (currentModel ?? findModelPrice(record.model))?.id === alternative.id)
+  // Repeat the priced workload, not its token counts: context tiers apply per call.
+  return {
+    available: true,
+    current: [current.low * runs, current.high * runs],
+    alternative: [proposed.low * runs, proposed.high * runs],
+    savings: unchanged ? [0, 0] : [(current.low - proposed.high) * runs, (current.high - proposed.low) * runs],
+  } as const
 }
-export type SessionMetrics = ReturnType<typeof sessionMetrics>
 
 export function parseTokenInput(value: string) {
   const match = value.trim().match(/^(\d+(?:\.\d+)?)\s*([km])?$/i)
@@ -577,9 +581,7 @@ export function manualUsage(
 }
 
 const demoAt = (minute: number) => `2026-10-09T12:${String(minute).padStart(2, '0')}:00Z`
-// cacheKept < 1 turns cached reads into fresh input, as when instructions change between turns.
-function demoSession(cacheKept = 1) {
-  const keep = (tokens: number) => Math.round(tokens * cacheKept)
+function demoSession() {
   let codexTotal = 0
   return JSON.stringify([
     { type: 'session.start', data: { sessionId: 'copilot-demo' } },
@@ -589,7 +591,7 @@ function demoSession(cacheKept = 1) {
       [12000, 8000, 0, 1100, 300, 'gpt-6.1-sol'],
     ].map(([inputTokens, cacheReadTokens, cacheWriteTokens, outputTokens, reasoningTokens, model], index) => ({
       id: `copilot-demo-${index}`, type: 'assistant.usage', timestamp: demoAt(index * 3),
-      data: { model, inputTokens, cacheReadTokens: keep(cacheReadTokens as number), cacheWriteTokens, outputTokens, reasoningTokens },
+      data: { model, inputTokens, cacheReadTokens, cacheWriteTokens, outputTokens, reasoningTokens },
     })),
     { type: 'tool.execution_complete', data: { toolCallId: 'copilot-tool', toolName: 'bash', success: true } },
     { type: 'session_meta', payload: { id: 'codex-demo' } },
@@ -603,7 +605,7 @@ function demoSession(cacheKept = 1) {
             type: 'event_msg', timestamp: demoAt(10 + index * 3),
             payload: { type: 'token_count', info: {
               total_token_usage: { total_tokens: codexTotal },
-              last_token_usage: { input_tokens: input, cached_input_tokens: keep(cached), output_tokens: output, reasoning_output_tokens: reasoning },
+              last_token_usage: { input_tokens: input, cached_input_tokens: cached, output_tokens: output, reasoning_output_tokens: reasoning },
             } },
           },
         ]
@@ -613,14 +615,10 @@ function demoSession(cacheKept = 1) {
         type: 'assistant', sessionId: 'claude-demo', timestamp: demoAt(24 + index * 4),
         message: {
           id: `claude-demo-${index}`, model: 'claude-opus-5',
-          usage: {
-            input_tokens: input_tokens + cache_read_input_tokens - keep(cache_read_input_tokens),
-            cache_read_input_tokens: keep(cache_read_input_tokens), cache_creation_input_tokens, output_tokens,
-          },
+          usage: { input_tokens, cache_read_input_tokens, cache_creation_input_tokens, output_tokens },
           content: [{ type: 'tool_use', id: `claude-tool-${index}`, name: index === 1 ? 'Edit' : 'Bash' }],
         },
       })),
   ])
 }
 export const demoEvents = demoSession()
-export const demoBeforeEvents = demoSession(0.2)

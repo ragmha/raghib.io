@@ -50,8 +50,12 @@ overrides (category, description, demo/extra links) live in
 and shows how the agent used the model: an interactive per-call context chart
 (hover, tap, or arrow keys; per-call or running total), plain-language findings
 on cache reuse, context growth and output ratio, token mix, per-model usage and
-tool activity. Estimated costs on other models come last. A Before / after tab
-compares a second run of the same task (cost, cache reuse, context, calls). Nothing is uploaded.
+tool activity. Model savings uses two cost lines and a task-volume slider to
+reprice the same token workload on another model. It replaces the two-session
+before/after report: no second upload is needed. Cost ranges are preserved;
+the projection assumes unchanged token/cache usage, not equal model quality.
+These are API savings estimates, not profit or Copilot subscription savings.
+Nothing is uploaded.
 Inspired by Steve Kinney's
 [model calculator](https://stevekinney.com/experiments/model-calculator).
 

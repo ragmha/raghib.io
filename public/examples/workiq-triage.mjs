@@ -66,11 +66,17 @@ const SAMPLE = Batch.parse({
   ],
 });
 
+/** @param {Record<string, string | undefined>} env @param {string} name */
 function required(env, name) {
-  if (!env[name]?.trim()) throw new Error(`Set ${name} before running this command.`);
-  return env[name].trim();
+  const value = env[name]?.trim();
+  if (!value) throw new Error(`Set ${name} before running this command.`);
+  return value;
 }
 
+/**
+ * @param {Record<string, string | undefined>} env
+ * @returns {{url: string, model: string, headers: Record<string, string>}}
+ */
 function endpoint(env) {
   if (env.AZURE_ENDPOINT !== undefined) {
     const url = new URL(required(env, 'AZURE_ENDPOINT'));
@@ -90,6 +96,7 @@ function endpoint(env) {
   };
 }
 
+/** @param {unknown} state @param {ReturnType<typeof endpoint>} target */
 async function decide(state, target) {
   const response = await fetch(target.url, {
     method: 'POST',
@@ -109,6 +116,10 @@ async function decide(state, target) {
   };
 }
 
+/** @typedef {z.infer<typeof LlmAnswer> & {probability?: number}} Answer */
+/** @typedef {{item: z.infer<typeof Item>, llm: Answer, d1: Awaited<ReturnType<typeof decide>>}} Row */
+
+/** @param {Answer} answer */
 function section(answer) {
   if (answer.route === 'cannot_tell' || (answer.probability !== undefined && answer.probability < MIN_PROBABILITY)) {
     return 'Review before routing';
@@ -118,8 +129,15 @@ function section(answer) {
   return answer.urgency >= 2 ? 'My next actions' : 'My later list';
 }
 
+/** @param {string} value */
 const escape = value => value.replace(/([\\`*_{}\[\]()#+.!|<>~-])/g, '\\$1').replace(/\s+/g, ' ');
 
+/**
+ * @param {Row[]} rows
+ * @param {z.infer<typeof Batch>} batch
+ * @param {string} model
+ * @param {ReturnType<typeof endpoint>} target
+ */
 function report(rows, batch, model, target) {
   const lines = [
     '# Triage comparison - review, not automatic assignment',
@@ -127,8 +145,10 @@ function report(rows, batch, model, target) {
     `Decision model(s): ${[...new Set(rows.map(row => row.d1.model))].join(', ')}.`,
     'Route probability cutoff: 0.7. Next-action score cutoff: 2. Neither is calibrated for your work.',
   ];
-  for (const [key, heading] of [['llm', 'LLM only'], ['d1', 'Microsoft-Decision-1']]) {
-    lines.push(`\n## ${heading}`);
+  /** @type {Array<'llm' | 'd1'>} */
+  const models = ['llm', 'd1'];
+  for (const key of models) {
+    lines.push(`\n## ${key === 'llm' ? 'LLM only' : 'Microsoft-Decision-1'}`);
     for (const group of ['My next actions', 'My later list', 'Review before routing', 'Proposed handoffs', 'Recorded decisions']) {
       lines.push(`\n### ${group}`);
       const selected = rows.filter(row => section(row[key]) === group)
@@ -161,6 +181,12 @@ async function selfTest() {
     endpoint({ AZURE_ENDPOINT: 'https://example.test/', AZURE_API_KEY: 'fixture-key', DEPLOYMENT_NAME: 'fixture-deployment' }),
     endpoint({ OPENROUTER_API_KEY: 'fixture-key' }),
   ];
+  assert.equal(targets[0].url, 'https://example.test/providers/microsoft/v1/systemone');
+  assert.equal(targets[0].model, 'fixture-deployment');
+  assert.equal(targets[0].headers['api-key'], 'fixture-key');
+  assert.equal(targets[1].url, 'https://openrouter.ai/api/alpha/decisions');
+  assert.equal(targets[1].model, 'microsoft/microsoft-decision-1');
+  assert.equal(targets[1].headers.Authorization, 'Bearer fixture-key');
   const payload = {
     model: 'fixture-model',
     answers: {
@@ -168,9 +194,11 @@ async function selfTest() {
       urgency: { type: 'score', score: 2.6 },
     },
   };
+  assert.throws(() => DecisionResponse.parse({
+    ...payload,
+    answers: { ...payload.answers, route: { ...payload.answers.route, probabilities: {} } },
+  }));
   const invalid = structuredClone(payload);
-  delete invalid.answers.route.probabilities.me;
-  assert.throws(() => DecisionResponse.parse(invalid));
   invalid.answers.route.probabilities.me = 2;
   assert.throws(() => DecisionResponse.parse(invalid));
   const originalFetch = globalThis.fetch;
@@ -178,8 +206,12 @@ async function selfTest() {
     for (const target of targets) {
       globalThis.fetch = async (url, options) => {
         assert.equal(url, target.url);
+        assert.ok(options && typeof options.body === 'string');
         assert.deepEqual(JSON.parse(options.body), { model: target.model, state: { item: SAMPLE.items[0] }, questions: QUESTIONS });
-        assert.equal(options.headers['Content-Type'], 'application/json');
+        assert.equal(new Headers(options.headers).get('Content-Type'), 'application/json');
+        for (const [key, value] of Object.entries(target.headers)) {
+          assert.equal(new Headers(options.headers).get(key), value);
+        }
         assert.equal(options.redirect, 'error');
         return Response.json(payload);
       };
@@ -192,6 +224,7 @@ async function selfTest() {
   } finally {
     globalThis.fetch = originalFetch;
   }
+  /** @type {Row[]} */
   const rows = SAMPLE.items.map(item => ({
     item,
     llm: { route: 'me', urgency: 3 },
@@ -215,6 +248,7 @@ async function main() {
     ? Batch.parse(JSON.parse(await readFile(path, 'utf8'))) : SAMPLE;
   const { CopilotClient } = await import('@github/copilot-sdk');
   const client = new CopilotClient();
+  /** @type {import('@github/copilot-sdk').SessionConfig} */
   const config = {
     model,
     enableConfigDiscovery: false,
@@ -229,7 +263,7 @@ async function main() {
       const as_of = new Date().toISOString();
       const session = await client.createSession({
         ...config,
-        availableTools: ['mcp:ask'],
+        availableTools: ['mcp:workiq-ask'],
         mcpServers: {
           workiq: { type: 'stdio', command: 'npx', args: ['-y', '@microsoft/workiq@1.0.1', 'mcp'], tools: ['ask'] },
         },
@@ -254,7 +288,9 @@ async function main() {
       }
       return;
     }
+    assert.ok(target);
     console.log(command === '--sample' ? 'Synthetic input; live model calls. Not a workplace benchmark.' : 'Sending the reviewed snapshot to both configured model services.');
+    /** @type {Row[]} */
     const rows = [];
     // ponytail: sequential calls for this 12-item tutorial; add bounded concurrency only for a larger queue.
     for (const item of batch.items) {

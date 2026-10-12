@@ -1,95 +1,75 @@
 ---
 title: "What If RFP Answers Came With a Sandbox?"
-seoTitle: "Beyond the RFP Spreadsheet: A Vendor-Neutral Evaluation Sandbox"
-description: "A proposal for testing vendor claims in a reproducible sandbox, with Terraform deployment, standard identity integration, and evidence buyers can inspect."
+seoTitle: "Beyond the RFP Spreadsheet: Answers You Can Check"
+description: "A small, runnable experiment: a vendor's RFP answers ship with a sandbox that checks them, and reports supported, contradicted, stale or unknown."
 date: "2026-10-12"
-tags: ["ai", "agents", "mcp", "a2a", "governance"]
+tags: ["ai", "agents", "mcp", "terraform", "governance"]
 published: false
 ---
 
-Every vendor review seems to begin the same way: someone sends a spreadsheet, someone else searches old answers, and both sides spend time reconciling versions.
+A vendor questionnaire arrives. Someone copies earlier answers into a spreadsheet. The buyer still has to work out which answers are current and what supports them.
 
-The spreadsheet is not the problem by itself. It is a portable protocol: it defines the questions, the expected answers, and the record both parties can keep. The trouble is that the protocol travels as a file. Answers get copied forward, evidence goes stale, and the buyer cannot easily tell whether a response is a current fact, a policy statement, or a guess.
+The spreadsheet isn't the real problem. A buyer can't tell whether a cell that says "Yes" is a current fact, a policy intention, or a copy of something that was true two years ago.
 
-What if a vendor's answer came with a sandbox where the buyer could check the claim?
+So I tried a different shape: **what if each answer came with a sandbox that checks it?**
 
-## The answer is not another chatbot
+## The experiment
 
-A vendor chatbot can make it easier to search a trust center. That is useful, but it does not automatically solve the harder problem: can a buyer rely on the answer, trace it to evidence, and record what was actually checked?
+The sample project is public at [github.com/ragmha/rfp-sandbox](https://github.com/ragmha/rfp-sandbox).
+The run below is [this recorded report](https://github.com/ragmha/rfp-sandbox/blob/fee92e337877d73dc4f5706a2ac9564c9ef3fcb8/report.json),
+pinned to the commit whose source hashes it records.
 
-The experiment I want to test is narrower than a complete RFP platform. A vendor offers a disposable evaluation environment, approved answers, and a small set of repeatable checks. A buyer can inspect the environment directly or use an agent to retrieve answers and evidence. Each result records the claim, what was checked, and what remains unverified.
+To reproduce it, install Docker Compose, Terraform, and Python 3.11+, then run:
 
-The result is not an autonomous approval. It is a better first draft of the review, with uncertainty visible instead of buried in a spreadsheet cell.
+```bash
+git clone https://github.com/ragmha/rfp-sandbox && cd rfp-sandbox
+docker compose up -d --wait            # stand-in for the buyer's identity provider
+terraform -chdir=terraform init
+terraform -chdir=terraform apply       # the integration the buyer reviews first
+python3 run_checks.py --check-revocation
+```
 
-## Bring the evaluation to the buyer
+The last command explicitly permits disabling and restoring a disposable test user.
+Without that flag, the revocation check stays **unknown**. For a no-infrastructure
+start, `python3 run_checks.py --self-test` exercises the checks offline.
 
-There are two useful places to run the sandbox: a temporary environment hosted by the vendor, or an environment deployed into the customer's own cloud account and private network. Both should use the same application version and checks. They need not use identical infrastructure.
+## What one run found
 
-Terraform makes the deployment reviewable and repeatable. The buyer can inspect the plan before approving resources, network access, and permissions. A first implementation should target one documented environment, not promise a universal module that works across every cloud.
+The recorded run is from **12 October 2026**. The first three results use a live
+local Keycloak instance and synthetic users. MFA and audit-export results use
+hand-authored fixtures, not live production telemetry:
 
-The idea is vendor-neutral even when the first implementation is not. The questions and evidence format should not depend on a particular cloud provider, identity product, or query engine. Supporting another environment later may require different Terraform resources; it should not require redefining what a test result means.
+| Question | Vendor's answer | Result | What the sandbox found |
+| --- | --- | --- | --- |
+| Can the sample authenticate with its identity provider? | Yes | ✅ supported | Password-grant token obtained; introspected issuer and audience matched |
+| Can groups control the sample's permissions? | Yes | ✅ supported | The authorization function allowed admin export and denied viewer export |
+| Does disabling the test user remove access? | Yes | ✅ supported | New token request blocked; previous token rejected after disabling |
+| Is MFA enforced for privileged accounts? | Yes, every one | ❌ contradicted | 11 of 12 accounts; one exception |
+| Can we export audit logs? | Yes, daily | ⏳ stale | Evidence is 253 days old |
+| Is customer data encrypted at rest? | Yes, AES-256 | ❔ unknown | No evidence provided; this sample cannot verify the claim |
 
-Customer-hosted also does not automatically mean private. Outbound traffic, telemetry, and any external model calls need explicit boundaries. Evidence should remain in the evaluation environment by default, with the buyer deciding what to export. Synthetic data, isolated credentials, resource costs, and a documented teardown belong in the experiment from the start.
+Six "yes" answers became three locally supported results, one contradiction, one
+stale observation, and one unknown. The checks make those decisions without a model.
+The report includes its timestamp and source/configuration hashes; rerunning later
+can change freshness results.
 
-## Turn “easy integration” into a check
+## Small enough to inspect
 
-“Works with your identity provider” is a claim. A successful integration has more specific conditions:
+The README covers setup and teardown. An optional FastMCP server exposes
+`list_claims` and `get_answer` over local stdio. It serves the recorded report,
+including its date and scope; it cannot deploy resources or run checks.
 
-| Buyer question | What the sandbox could check |
-| --- | --- |
-| Can employees use our existing sign-in? | Complete an OIDC or SAML sign-in and verify issuer, audience, and the expected identity claims. |
-| Can we control what each user can do? | Map a test group or role to an application permission, then verify both allowed and denied actions. |
-| Can we remove access? | If SCIM provisioning is supported, deactivate a test user and check new sign-ins and existing sessions within a stated revocation window. |
+This is deliberately not a complete vendor application. Token checks use a password
+grant, not browser SSO or PKCE. Permission checks exercise a Python function, not a
+real export endpoint. Revocation is observed after disabling, not measured as an
+instantaneous guarantee. The sample proves those narrow behaviours, not production readiness.
 
-Entra ID, Okta, or Keycloak could be an example integration. None needs to define the experiment. OIDC and SAML address federation; SCIM addresses provisioning. Support for one does not establish support for the others.
+## The customer-hosted direction
 
-Terraform can prepare supported infrastructure and configuration, but it does not replace the customer's identity administrator or grant consent on their behalf. These checks may deliberately change disposable test users or sessions. They must never become permission for an agent to modify production identities.
+The next useful question is whether a buyer can run the evaluation inside their
+own private network, with their own identity provider. That is a direction, not a
+feature of this sample. Only local Keycloak is implemented; another provider needs
+different Terraform resources and identity checks, not just a renamed provider.
+Customer VPC deployment, SCIM, and agent-to-agent exchange remain unbuilt.
 
-## Give each tool one job
-
-Several pieces of the agent ecosystem could fit, but they solve different parts of the problem:
-
-- **MCP** can expose narrow tools to an agent, such as retrieving an approved answer or checking a named control.
-- **A2A** could support communication between a buyer-side agent and a vendor-side agent. It is a possible exchange mechanism, not a guarantee that the parties agree on the meaning or authority of an answer.
-- **An agent gateway** could enforce identity, authorization, rate limits, and logging at the vendor's boundary.
-- **An evidence store** could hold time-stamped test results and control observations. Kusto is one possible query engine; a small prototype could begin with structured files.
-- **A buyer-side agent** could assemble questions and responses into a review the buyer can inspect. The checks should also run without an agent.
-
-These are candidate components, not a finished architecture. MCP does not define the commercial relationship between buyer and vendor. A2A does not make the answer true. A gateway cannot make an outdated policy current. The governance still has to come from the people and systems responsible for the claim.
-
-## Make uncertainty a first-class result
-
-Consider a buyer asking whether privileged accounts require multifactor authentication.
-
-The vendor's approved answer says yes. A read-only check of synthetic control observations finds one privileged test account recorded as lacking the required MFA enforcement. A useful response should not collapse those two pieces of information into a confident “yes.”
-
-It should say that the written statement requires MFA, the latest observation found an exception, and the evidence therefore does not fully support the statement. It should include the observation time and scope, then route the discrepancy to a person.
-
-The tool should also return **unknown** when evidence is missing and **stale** when evidence has passed its review window. “No evidence” is not the same as “no issue”; a control policy is not the same as proof that the control is working.
-
-The query engine is incidental. The important distinction is between an approved statement and a separate, time-stamped observation. The data would be synthetic: the goal is to test the exchange, not imply access to any real company's controls. A successful test sign-in would not, by itself, prove that MFA is enforced for every account.
-
-Every report should identify the application version, test version, configuration, environment, and observation time. A sandbox result applies to that setup, not automatically to production. Organizational claims, such as employee screening, still need documentary evidence and human review rather than a fabricated software test.
-
-## Start with one question, not an ecosystem
-
-Start with one integration question, one Terraform deployment target, and one repeatable check. Once the sandbox can produce a result without AI, an MCP interface needs only two read-only operations:
-
-1. Retrieve one approved answer with its owner, source, and last-reviewed date.
-2. Check one named control and return a bounded evidence summary.
-
-Keep evidence queries fixed and parameterized. Do not let the model submit arbitrary queries or shell commands, and do not return raw account records when an aggregate result is enough. Provisioning and identity-changing checks belong in a separate, explicitly approved setup or test step. Require buyer authorization, log what was requested, and make it clear when a human must review the result.
-
-Use fixtures to exercise supported, contradicted, missing, and stale evidence. Those are acceptance criteria for the proposed experiment, not results I have already measured. Only after that would I add agent-to-agent orchestration or a dedicated gateway; authentication and authorization are required from the first shared deployment.
-
-This keeps the experiment small enough to learn from. It also makes failure legible: if a claim cannot be tied to evidence, the system says so instead of producing a polished paragraph that sounds complete.
-
-## The hard part is trust, not transport
-
-It is tempting to think the missing piece is a protocol. But a protocol only moves a request and response. Buyers still need to know who approved the answer, which evidence supports it, how recent that evidence is, and what to do when the statement and observation disagree.
-
-There are adoption questions too. Vendors may not want to expose internal systems. Buyers may require a particular spreadsheet or portal. Legal and procurement teams may treat a machine-generated response differently from a signed attestation. The experiment should preserve a human approval step and keep an export path, rather than pretending those constraints disappear.
-
-The useful shift is not “replace every spreadsheet with an agent.” It is to separate the questions from the file that happens to carry them. If questions become structured requests and answers arrive with traceable evidence, a spreadsheet can remain an export format—not the source of truth.
-
-That is what I want to test: not whether agents can fill in a questionnaire, but whether a buyer can reproduce a vendor's claim under conditions they can inspect.
+The useful shift isn't replacing spreadsheets with agents. It's making answers something a buyer can check under conditions they can see. The spreadsheet can stay, but only as an export of those results.

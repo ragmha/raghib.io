@@ -172,9 +172,8 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
 
       <div class="dashboard-tabs" role="tablist" aria-label="Session report sections">
         <button id="overview-tab" type="button" role="tab" aria-selected="true" aria-controls="overview-panel" tabindex="0">Overview</button>
-        <button id="models-tab" type="button" role="tab" aria-selected="false" aria-controls="models-panel" tabindex="-1">Models &amp; costs</button>
+        <button id="models-tab" type="button" role="tab" aria-selected="false" aria-controls="models-panel" tabindex="-1">Model savings</button>
         <button id="tools-tab" type="button" role="tab" aria-label="Tools and coverage notes" aria-selected="false" aria-controls="tools-panel" tabindex="-1">Tools</button>
-        <button id="compare-tab" type="button" role="tab" aria-selected="false" aria-controls="compare-panel" tabindex="-1">Before / after</button>
       </div>
 
       <section id="overview-panel" class="tab-panel" role="tabpanel" aria-labelledby="overview-tab" tabindex="0">
@@ -223,25 +222,51 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       </section>
 
       <section id="models-panel" class="tab-panel" role="tabpanel" aria-labelledby="models-tab" tabindex="0" hidden>
-        <section id="recorded-models" class="panel" aria-labelledby="recorded-heading" hidden>
-          <h3 id="recorded-heading">How each model was used</h3>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th scope="col">Model</th><th scope="col">Calls</th><th scope="col">Input tokens</th><th scope="col">Cached</th><th scope="col">Output tokens</th></tr></thead>
-              <tbody id="recorded-body"></tbody>
-            </table>
+        <section class="panel savings-panel" aria-labelledby="savings-heading">
+          <h3 id="savings-heading">Same task. Lower cost?</h3>
+          <div class="savings-controls">
+            <label for="savings-current">Current model
+              <select id="savings-current">
+                <option value="recorded">As recorded</option>
+                {modelPrices.map((price) => <option value={price.id}>{price.name}</option>)}
+              </select>
+            </label>
+            <label for="savings-model">Compare with
+              <select id="savings-model">
+                {modelPrices.map((price) => <option value={price.id}>{price.name}</option>)}
+              </select>
+            </label>
           </div>
+          <p id="savings-result" class="savings-result" role="status" aria-live="polite"></p>
+          <svg id="savings-chart" class="savings-chart" role="img" aria-label="Estimated cost over repeated task runs"></svg>
+          <div id="savings-legend" class="savings-legend">
+            <span class="current-line"><span id="savings-current-name">Current</span> <strong id="savings-current-cost"></strong></span>
+            <span class="alternative-line"><span id="savings-model-name">Alternative</span> <strong id="savings-model-cost"></strong></span>
+          </div>
+          <label class="savings-runs" for="savings-runs">
+            Task runs <output id="savings-run-count" for="savings-runs">100</output>
+            <input id="savings-runs" type="range" min="1" max="1000" value="100" />
+          </label>
+          <p class="table-note">Same token workload, different prices. Quality may differ. API estimates—not your Copilot bill.</p>
+          <details class="rate-table">
+            <summary>Assumptions</summary>
+            <p class="table-note">
+              One run repeats the entire loaded workload, even if it contains several sessions.
+              Token counts and cache reuse stay fixed; models may tokenize differently, need more attempts,
+              or not support the same context and tools. Lines show midpoint estimates; ranges show pricing
+              uncertainty. Savings exclude switching costs and are not measured profit.
+            </p>
+          </details>
         </section>
 
         <section class="panel" aria-labelledby="comparison-heading">
-          <h3 id="comparison-heading">What if a different model did the same work?</h3>
-          <p class="table-note">
-            API estimates at provider-published rates, last checked
-            <time datetime={pricingDate}>{pricingDate}</time>. Recorded models are highlighted.
-            Ranges reflect known rate tiers; these are API prices, not subscription costs.
-          </p>
+          <h3 id="comparison-heading" class="visually-hidden">Model rates</h3>
           <details id="comparison-details" class="rate-table">
             <summary>Compare all models and exact rates</summary>
+            <p class="table-note">
+              Provider-published API rates, last checked <time datetime={pricingDate}>{pricingDate}</time>.
+              Recorded models are highlighted.
+            </p>
             <ol id="cost-chart" class="bar-chart"></ol>
             <div class="table-wrap">
               <table class="sortable">
@@ -281,6 +306,15 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
               Reasoning tokens are included in output.
             </p>
           </details>
+          <details id="recorded-models" class="rate-table" hidden>
+            <summary>How each model was used</summary>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th scope="col">Model</th><th scope="col">Calls</th><th scope="col">Input tokens</th><th scope="col">Cached</th><th scope="col">Output tokens</th></tr></thead>
+                <tbody id="recorded-body"></tbody>
+              </table>
+            </div>
+          </details>
         </section>
       </section>
 
@@ -296,41 +330,6 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
         </details>
       </section>
 
-      <section id="compare-panel" class="tab-panel" role="tabpanel" aria-labelledby="compare-tab" tabindex="0" hidden>
-        <section class="panel" aria-labelledby="compare-heading">
-          <div class="chart-head">
-            <h3 id="compare-heading">Did the change help?</h3>
-            <button id="clear-before" type="button" class="link-button" hidden>Remove before</button>
-          </div>
-          <p id="compare-intro" class="table-note">
-            Run the same task twice—before and after a change to the model, instructions, or tools.
-            The report above is <strong>after</strong>; add the earlier run as <strong>before</strong>.
-          </p>
-          <div id="compare-pick" class="actions">
-            <label class="file-button">
-              Choose before session
-              <input id="before-files" class="visually-hidden" type="file" accept=".json,.jsonl,application/json" multiple />
-            </label>
-            <button id="sample-before" type="button" class="quiet">Try sample before</button>
-          </div>
-          <p id="compare-headline" class="compare-headline" role="status" aria-live="polite"></p>
-          <div id="compare-signatures" class="compare-signatures" hidden></div>
-          <div id="compare-table-wrap" class="table-wrap" hidden>
-            <table>
-              <caption class="visually-hidden">Before and after metrics</caption>
-              <thead>
-                <tr>
-                  <th scope="col">Metric</th>
-                  <th scope="col">Before</th>
-                  <th scope="col">After</th>
-                  <th scope="col">Change</th>
-                </tr>
-              </thead>
-              <tbody id="compare-body"></tbody>
-            </table>
-          </div>
-        </section>
-      </section>
     </section>
   </div>
 
@@ -339,17 +338,15 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
     import {
       analyzeUsage,
       compareModels,
-      demoBeforeEvents,
       demoEvents,
       estimateCost,
       findings,
       manualUsage,
       parseUsage,
       parseTokenInput,
+      projectModelSavings,
       sessionCost,
-      sessionMetrics,
       type Analysis,
-      type SessionMetrics,
       type Usage,
       type UsageTotals,
     } from '../../lib/agent-usage'
@@ -370,9 +367,6 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       style: 'currency', currency: 'USD', maximumSignificantDigits: 4,
     })
     let lastAnalysis: Analysis | null = null
-    let lastIsExample = false
-    let beforeAnalysis: Analysis | null = null
-    let beforeIsSample = false
     let pricingWorkload: Usage[] = []
     let sortBy: 'model' | 'benchmark' | 'cost' = 'cost'
     let sortDirection: 1 | -1 = 1
@@ -704,12 +698,13 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
         )
         rateBody.append(row)
       }
+      renderSavings()
     }
 
     function showAnalysis(analysis: Analysis, isExample = false) {
       lastAnalysis = analysis
-      lastIsExample = isExample
-      if (!isExample && beforeIsSample) beforeAnalysis = null
+      byId<HTMLSelectElement>('savings-current').value = 'recorded'
+      byId<HTMLSelectElement>('savings-model').value = ''
       const overviewTab = dashboardTabs[0]
       if (overviewTab) activateDashboardTab(overviewTab)
       results.hidden = false
@@ -803,101 +798,96 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       warningList.replaceChildren()
       warningPanel.hidden = analysis.warnings.length === 0
       for (const warning of analysis.warnings) warningList.append(element('li', '', warning))
-      renderCompare()
     }
 
-    const signedPercent = new Intl.NumberFormat('en-US', {
-      style: 'percent', maximumFractionDigits: 0, signDisplay: 'exceptZero',
-    })
-    function change(before: number | null, after: number | null, points = false) {
-      if (before === null || after === null) return '—'
-      if (points) {
-        const delta = Math.round((after - before) * 100)
-        return `${delta > 0 ? '+' : delta < 0 ? '−' : ''}${Math.abs(delta)} pts`
-      }
-      if (before === 0) return after === 0 ? '0%' : 'new'
-      return signedPercent.format((after - before) / before).replace('-', '−')
+    function savingsUnavailable(message: string) {
+      document.getElementById('savings-chart')!.replaceChildren()
+      byId('savings-legend').hidden = true
+      byId('savings-result').textContent = message
+      byId<HTMLInputElement>('savings-runs').disabled = true
     }
 
-    const costMidpoint = (cost: SessionMetrics['cost']) => cost && (cost[0] + cost[1]) / 2
-    const compareRows: [string, (m: SessionMetrics) => number | null, (m: SessionMetrics) => string, boolean?][] = [
-      ['Model calls', (m) => m.calls, (m) => m.calls === null ? '—' : numberFormat.format(m.calls)],
-      ['Input tokens', (m) => m.input, (m) => m.input === null ? '—' : compactFormat.format(m.input)],
-      ['Input from cache', (m) => m.cacheShare, (m) => m.cacheShare === null ? '—' : percentFormat.format(m.cacheShare), true],
-      ['Peak context per call', (m) => m.peakContext, (m) => m.peakContext === null ? '—' : compactFormat.format(m.peakContext)],
-      ['Output tokens', (m) => m.output, (m) => m.output === null ? '—' : compactFormat.format(m.output)],
-      ['Estimated API cost', (m) => costMidpoint(m.cost), (m) => m.cost ? estimatedCost(...m.cost) : '—'],
-      ['Tool calls', (m) => m.toolCalls, (m) => numberFormat.format(m.toolCalls)],
-      ['Failures', (m) => m.failures, (m) => numberFormat.format(m.failures)],
-    ]
-
-    function renderCompare() {
-      const ready = Boolean(beforeAnalysis && lastAnalysis)
-      byId('compare-signatures').hidden = !ready
-      byId('compare-table-wrap').hidden = !ready
-      byId('compare-pick').hidden = ready
-      byId('compare-intro').hidden = ready
-      byId('clear-before').hidden = !beforeAnalysis
-      byId('sample-before').hidden = !lastIsExample
-      if (!beforeAnalysis || !lastAnalysis) {
-        byId('compare-headline').textContent = ''
-        byId('compare-body').replaceChildren()
-        byId('compare-signatures').replaceChildren()
+    function renderSavings() {
+      const modelSelect = byId<HTMLSelectElement>('savings-model')
+      const currentSelect = byId<HTMLSelectElement>('savings-current')
+      const current = findModelPrice(currentSelect.value)
+      if (currentSelect.value !== 'recorded' && !current) {
+        savingsUnavailable('Choose a current model with a published rate.')
         return
       }
-      const runs = [['Before', beforeAnalysis], ['After', lastAnalysis]] as const
-      const metrics = runs.map(([, analysis]) => sessionMetrics(analysis))
-      const [before, after] = metrics
+      if (!modelSelect.value) {
+        const cheapest = compareModels(pricingWorkload)
+          .find(({ price, estimate }) => price.id !== current?.id && estimate.low !== null)
+        modelSelect.value = cheapest?.price.id ?? modelSelect.options[0].value
+      }
+      const alternative = findModelPrice(modelSelect.value)
+      if (!alternative) {
+        savingsUnavailable('Choose a comparison model with a published rate.')
+        return
+      }
+      const runsInput = byId<HTMLInputElement>('savings-runs')
+      const runs = runsInput.valueAsNumber
+      const projection = projectModelSavings(pricingWorkload, alternative, runs, current)
+      byId('savings-run-count').textContent = numberFormat.format(runs)
+      if (!projection.available) {
+        savingsUnavailable(`${projection.reason} Choose a priced model or enter complete token counts.`)
+        return
+      }
+      runsInput.disabled = false
+      byId('savings-legend').hidden = false
+      const [low, high] = projection.savings
+      const result = low === 0 && high === 0 ? 'No estimated savings'
+        : low >= 0 ? `Estimated savings: ${estimatedCost(low, high)}`
+          : high <= 0 ? `Estimated extra cost: ${estimatedCost(-high, -low)}`
+            : `Savings uncertain: ${estimatedCost(low, high)}`
+      byId('savings-result').textContent = `${result} at ${numberFormat.format(runs)} run${runs === 1 ? '' : 's'}.`
 
-      const max = Math.max(...runs.map(([, analysis]) => tokenParts(analysis).total))
-      const signatures = byId('compare-signatures')
-      signatures.replaceChildren()
-      for (const [label, analysis] of runs) {
-        const total = tokenParts(analysis).total
-        const row = element('div', 'compare-row')
-        const track = element('div', 'compare-track')
-        const mix = element('div', 'token-mix')
-        mix.setAttribute('role', 'img')
-        mix.style.width = `${max ? (total / max) * 100 : 0}%`
-        fillTokenBar(mix, analysis)
-        track.append(mix)
-        row.append(element('span', 'compare-label', label), track, element('span', 'token-total', `${compactFormat.format(total)} tokens`))
-        signatures.append(row)
-      }
-      const legend = element('ul', 'legend')
-      for (const part of tokenParts(lastAnalysis).parts) {
-        const item = element('li')
-        item.append(element('span', `swatch ${part.className}`), part.name)
-        legend.append(item)
-      }
-      signatures.append(legend)
+      const recordedModels = [...new Set(pricingWorkload.map((record) =>
+        findModelPrice(record.model)?.name ?? record.model))]
+      const currentName = current?.name ?? (recordedModels.length === 1 ? recordedModels[0] : 'Recorded model mix')
+      byId('savings-current-name').textContent = currentName
+      byId('savings-model-name').textContent = alternative.name
+      byId('savings-current-cost').textContent = estimatedCost(...projection.current)
+      byId('savings-model-cost').textContent = estimatedCost(...projection.alternative)
 
-      byId('compare-body').replaceChildren(...compareRows.map(([label, value, display, points]) => {
-        const row = element('tr')
-        row.append(cell('th', label, 'row'), cell('td', display(before)), cell('td', display(after)),
-          cell('td', change(value(before), value(after), points)))
-        return row
-      }))
-
-      const notes: string[] = []
-      const costBefore = costMidpoint(before.cost)
-      const costAfter = costMidpoint(after.cost)
-      if (costBefore && costAfter !== null) {
-        const delta = (costAfter - costBefore) / costBefore
-        notes.push(Math.abs(delta) < 0.005 ? 'Estimated cost held steady'
-          : `Estimated cost ${delta < 0 ? 'fell' : 'rose'} ${signedPercent.format(Math.abs(delta)).replace('+', '')}`)
+      const plot = document.getElementById('savings-chart')!
+      const width = Math.max(280, plot.clientWidth)
+      const left = 60, right = width - 16, top = 28, bottom = 206
+      const currentMid = (projection.current[0] + projection.current[1]) / 2
+      const alternativeMid = (projection.alternative[0] + projection.alternative[1]) / 2
+      const maximum = Math.max(currentMid, alternativeMid) * 1.12 || 1
+      const y = (value: number) => bottom - value / maximum * (bottom - top)
+      const axisCost = new Intl.NumberFormat('en-US', {
+        style: 'currency', currency: 'USD', notation: 'compact', maximumSignificantDigits: 3,
+      })
+      plot.setAttribute('viewBox', `0 0 ${width} 250`)
+      plot.setAttribute('aria-label',
+        `${currentName}: ${estimatedCost(...projection.current)}. ${alternative.name}: ${estimatedCost(...projection.alternative)}. ${result} over ${runs} runs. Lines show midpoint estimates.`)
+      plot.replaceChildren()
+      for (let tick = 0; tick <= 4; tick++) {
+        const value = maximum * tick / 4
+        plot.append(svg('line', { x1: left, x2: right, y1: y(value), y2: y(value), class: 'savings-grid' }),
+          svg('text', { x: left - 8, y: y(value) + 4, 'text-anchor': 'end' }, axisCost.format(value)))
       }
-      if (before.cacheShare !== null && after.cacheShare !== null) {
-        notes.push(`cache reuse went from ${percentFormat.format(before.cacheShare)} to ${percentFormat.format(after.cacheShare)}`)
+      const ticks = [...new Set([0, Math.round(runs / 2), runs])]
+      for (const tick of ticks) {
+        plot.append(svg('text', {
+          x: left + (right - left) * tick / runs, y: bottom + 18, 'text-anchor': 'middle',
+        }, compactFormat.format(tick)))
       }
-      if (before.calls !== null && after.calls !== null && before.calls !== after.calls) {
-        notes.push(`${numberFormat.format(after.calls)} model calls instead of ${numberFormat.format(before.calls)}`)
+      plot.append(
+        svg('text', { x: left, y: 14 }, 'Cost (USD)'),
+        svg('text', { x: (left + right) / 2, y: 246, 'text-anchor': 'middle' }, 'Task runs'),
+        svg('path', {
+          d: `M ${left} ${bottom} L ${right} ${y(currentMid)} L ${right} ${y(alternativeMid)} Z`,
+          class: 'savings-gap',
+        }),
+      )
+      for (const [name, value] of [['current', currentMid], ['alternative', alternativeMid]] as const) {
+        plot.append(svg('line', {
+          x1: left, y1: bottom, x2: right, y2: y(value), class: `savings-line ${name}`,
+        }), svg('circle', { cx: right, cy: y(value), r: 4, class: `savings-dot ${name}` }))
       }
-      const headline = notes.length ? `${notes.join('; ')}.` : 'Compared below.'
-      const mismatch = beforeAnalysis.sources.join() !== lastAnalysis.sources.join()
-        ? ' The runs come from different tools, so treat differences with care.' : ''
-      byId('compare-headline').textContent =
-        `${headline.charAt(0).toUpperCase()}${headline.slice(1)}${mismatch}${lastIsExample ? ' Illustrative sample.' : ''}`
     }
 
     let busy = false
@@ -906,8 +896,6 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
     function setBusy(value: boolean) {
       busy = value
       fileInput.disabled = value
-      byId<HTMLInputElement>('before-files').disabled = value
-      byId<HTMLButtonElement>('sample-before').disabled = value
       byId<HTMLButtonElement>('demo-button').disabled = value
       byId<HTMLButtonElement>('manual-submit').disabled = value
       clearButton.disabled = value
@@ -917,8 +905,8 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       results.hidden = true
       clearButton.hidden = true
       lastAnalysis = null
-      lastIsExample = false
       pricingWorkload = []
+      savingsUnavailable('Load a session or enter token counts to estimate savings.')
       timelinePoints = []
       timelineIndex = -1
       byId('timeline-tip').hidden = true
@@ -932,18 +920,13 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       for (const id of ['findings-panel', 'timeline-panel', 'recorded-models', 'tool-activity', 'warnings-panel']) byId<HTMLElement>(id).hidden = true
     }
 
-    let analysisTarget: 'after' | 'before' = 'after'
-    const report = (message: string) => {
-      byId(analysisTarget === 'before' ? 'compare-headline' : 'status').textContent = message
-    }
-    function analyze(request: WorkerRequest, label: string, focusResults = true, target: 'after' | 'before' = 'after') {
+    function analyze(request: WorkerRequest, label: string, focusResults = true) {
       if (busy) return
-      analysisTarget = target
-      if (target === 'after') clearAnalysis()
+      clearAnalysis()
       analysisIsExample = Boolean(request.demo)
       focusResultsAfterAnalysis = focusResults
       setBusy(true)
-      report(label)
+      status.textContent = label
       worker.postMessage(request)
     }
 
@@ -975,12 +958,7 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
 
     worker.addEventListener('message', ({ data }: MessageEvent<WorkerResponse>) => {
       if (data.type === 'progress') {
-        report(`Read ${data.done} of ${data.total} files locally…`)
-      } else if (data.type === 'result' && analysisTarget === 'before') {
-        setBusy(false)
-        beforeAnalysis = data.analysis
-        beforeIsSample = false
-        renderCompare()
+        status.textContent = `Read ${data.done} of ${data.total} files locally…`
       } else if (data.type === 'result') {
         setBusy(false)
         showAnalysis(data.analysis, analysisIsExample)
@@ -990,38 +968,31 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
         if (focusResultsAfterAnalysis) results.focus()
       } else {
         setBusy(false)
-        report(data.message)
+        status.textContent = data.message
       }
     })
     worker.addEventListener('error', () => {
       setBusy(false)
-      report('The local analysis worker stopped unexpectedly. Try a smaller export.')
+      status.textContent = 'The local analysis worker stopped unexpectedly. Try a smaller export.'
     })
 
     byId<HTMLButtonElement>('demo-button').addEventListener('click', () => analyze({ demo: demoEvents }, 'Loading sample report…'))
     byId<HTMLButtonElement>('clear-button').addEventListener('click', () => {
-      beforeAnalysis = null
       clearAnalysis()
-      renderCompare()
       status.textContent = 'Results cleared.'
     })
 
-    const beforeInput = byId<HTMLInputElement>('before-files')
-    beforeInput.addEventListener('change', () => {
-      const files = Array.from(beforeInput.files ?? [])
-      if (files.length) analyze({ files }, `Reading ${files.length} file${files.length === 1 ? '' : 's'} locally…`, false, 'before')
-      beforeInput.value = ''
-    })
-    byId<HTMLButtonElement>('sample-before').addEventListener('click', () => {
-      beforeAnalysis = analyzeUsage([parseUsage(demoBeforeEvents)])
-      beforeIsSample = true
-      renderCompare()
-    })
-    byId<HTMLButtonElement>('clear-before').addEventListener('click', () => {
-      beforeAnalysis = null
-      renderCompare()
-      byId<HTMLInputElement>('before-files').focus()
-    })
+    for (const id of ['savings-model', 'savings-current', 'savings-runs']) {
+      byId(id).addEventListener('input', renderSavings)
+    }
+    let savingsWidth = 0
+    new ResizeObserver(([entry]) => {
+      const width = Math.round(entry.contentRect.width)
+      if (width && width !== savingsWidth) {
+        savingsWidth = width
+        if (pricingWorkload.length) renderSavings()
+      }
+    }).observe(document.getElementById('savings-chart')!)
 
     for (const radio of document.querySelectorAll<HTMLInputElement>('input[name="timeline-mode"]')) {
       radio.addEventListener('change', () => {
@@ -1061,6 +1032,8 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       } catch (cause) {
         manualError.textContent = cause instanceof Error ? cause.message : 'Enter valid token counts.'
         manualError.hidden = false
+        pricingWorkload = []
+        savingsUnavailable('Enter valid token counts to estimate savings.')
       }
     }
 
@@ -1088,6 +1061,7 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       try {
         const record = currentManualUsage()
         showAnalysis(analyzeUsage([{ usage: [record], tools: [], warnings: [], recognized: 1, sources: [] }]))
+        activateDashboardTab(byId<HTMLButtonElement>('models-tab'))
         status.textContent = 'Estimate calculated from your manual token assumptions.'
         results.focus()
       } catch (cause) {
@@ -1188,8 +1162,7 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
     }
 
     .actions button,
-    .actions a,
-    .actions .file-button {
+    .actions a {
       min-height: 2.5rem;
       padding: 0.45rem 0.75rem;
       border: 1px solid var(--calc-line);
@@ -1202,90 +1175,85 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       cursor: pointer;
     }
 
-    .file-button {
-      display: inline-flex;
-      align-items: center;
-    }
-
-    .file-button:focus-within {
-      outline: 2px solid var(--theme-text);
-      outline-offset: 2px;
-    }
-
-    .link-button {
-      padding: 0.25rem 0;
-      border: 0;
-      background: none;
-      color: var(--calc-muted);
-      font: inherit;
-      font-size: 0.78rem;
-      text-decoration: underline;
-      cursor: pointer;
-    }
-
-    .compare-headline {
-      margin: 0.75rem 0 0;
-      font-size: 0.95rem;
-    }
-
-    .compare-headline:empty {
-      display: none;
-    }
-
-    .compare-signatures {
+    .savings-controls {
       display: grid;
-      gap: 0.6rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
       margin-top: 1rem;
     }
 
-    .compare-signatures :global(.compare-row) {
+    .savings-controls label {
       display: grid;
-      grid-template-columns: 4rem minmax(0, 1fr) 6.5rem;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .compare-signatures :global(.compare-label) {
+      gap: 0.35rem;
       font-size: 0.8rem;
     }
 
-    .calculator .compare-signatures :global(.token-mix) {
-      margin-top: 0;
+    .savings-result {
+      margin: 1.25rem 0 0.75rem;
+      font-size: 1rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
     }
 
-    .compare-signatures :global(.token-total) {
-      text-align: right;
+    .savings-panel { --savings-accent: var(--signature-read); }
+    :global(:root[data-theme='light']) .savings-panel { --savings-accent: #256b37; }
+
+    .savings-chart {
+      display: block;
+      width: 100%;
+      height: 250px;
+      overflow: visible;
     }
 
-    #compare-table-wrap {
+    .savings-chart:empty { display: none; }
+    .savings-chart :global(text) { fill: var(--calc-muted); font: 11px var(--font-mono); }
+    .savings-chart :global(.savings-grid) { stroke: var(--calc-line); }
+    .savings-chart :global(.savings-gap) { fill: var(--savings-accent); opacity: 0.12; }
+    .savings-chart :global(.savings-line) { stroke-width: 2; vector-effect: non-scaling-stroke; }
+    .savings-chart :global(.savings-line.current) { stroke: var(--theme-text); stroke-dasharray: 6 4; }
+    .savings-chart :global(.savings-line.alternative) { stroke: var(--savings-accent); }
+    .savings-chart :global(.savings-dot.current) { fill: var(--theme-text); }
+    .savings-chart :global(.savings-dot.alternative) { fill: var(--savings-accent); }
+
+    .savings-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.5rem;
       margin-top: 0.75rem;
+      font-size: 0.8rem;
     }
 
-    #compare-table-wrap :global(th),
-    #compare-table-wrap :global(td) {
-      padding-inline: 0.3rem;
-      white-space: normal;
+    .savings-legend > span::before {
+      content: '';
+      display: inline-block;
+      width: 1.25rem;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+      border-top: 2px dashed var(--theme-text);
     }
 
-    #compare-table-wrap :global(td:last-child) {
-      white-space: nowrap;
+    .savings-legend .alternative-line::before { border-top: 2px solid var(--savings-accent); }
+    .savings-legend strong { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+    .savings-runs {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 0.25rem;
+      margin-top: 1.25rem;
+      font-size: 0.85rem;
     }
 
-    .compare-signatures :global(.legend) {
-      margin: 0.25rem 0 0;
-      font-size: 0.75rem;
+    .savings-runs input {
+      grid-column: 1 / -1;
+      width: 100%;
+      min-height: 2rem;
+      margin: 0;
+      accent-color: var(--theme-text);
     }
 
-    @media (max-width: 36rem) {
-      .compare-signatures :global(.compare-row) {
-        grid-template-columns: 3.25rem minmax(0, 1fr);
-      }
-
-      .compare-signatures :global(.compare-row .token-total) {
-        grid-column: 2;
-        text-align: left;
-      }
-    }
+    .savings-runs output { font-variant-numeric: tabular-nums; }
+    .savings-runs input:disabled { opacity: 0.5; }
 
     .actions .quiet {
       background: transparent;
@@ -1332,8 +1300,10 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
     }
 
     #manual-form input,
-    #manual-form select {
+    #manual-form select,
+    .savings-controls select {
       width: 100%;
+      min-width: 0;
       min-height: 2.6rem;
       padding: 0.45rem;
       border: 1px solid var(--calc-line);
@@ -1350,7 +1320,8 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       margin-top: 1rem;
     }
 
-    #manual-form select {
+    #manual-form select,
+    .savings-controls select {
       appearance: none;
       padding-right: 2rem;
       background:

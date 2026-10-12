@@ -64,6 +64,8 @@ uncertainty.
 
 ```mermaid
 flowchart TD
+    accTitle: Work IQ to a reviewed to-do list
+    accDescr: Work IQ and the Copilot SDK produce a reviewed evidence snapshot. The same snapshot, or synthetic tasks, goes to an LLM and Decision-1. Their proposals are compared before separating personal work, later work, uncertain items, handoffs and recorded decisions.
     sources(["Meetings and Teams chats"]) --> workiq["Work IQ + Copilot SDK"]
     workiq --> review["Review a local evidence snapshot"]
     sample["Or start with synthetic tasks"] --> compare
@@ -74,8 +76,9 @@ flowchart TD
     d1 --> report
     report --> mine(["My next actions"])
     report --> later(["My later list"])
-    report --> check(["Review uncertain items"])
-    report --> elsewhere(["Proposed handoffs and recorded decisions"])
+    report --> check(["Needs review"])
+    report --> elsewhere(["Handoffs + records"])
+    classDef default fill:transparent,stroke:#8d9287
 ```
 
 It is one script, not another task-management app. Its output is a local

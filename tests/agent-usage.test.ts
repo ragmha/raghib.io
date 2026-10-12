@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, test } from 'node:test'
-import { analyzeUsage, demoBeforeEvents, demoEvents, estimateCost, findings, manualUsage, parseTokenInput, parseUsage, sessionMetrics } from '../src/lib/agent-usage'
+import { analyzeUsage, demoEvents, estimateCost, findings, manualUsage, parseTokenInput, parseUsage, projectModelSavings, sessionCost } from '../src/lib/agent-usage'
 import type { Usage } from '../src/lib/agent-usage'
 import { findModelPrice } from '../src/lib/model-pricing'
 
@@ -188,21 +188,86 @@ describe('agent usage analysis', () => {
     assert.ok(notes.some((note) => /models were used/.test(note)))
   })
 
-  test('sample before run differs only in cache reuse', () => {
-    const after = sessionMetrics(analyzeUsage([parseUsage(demoEvents)]))
-    const before = sessionMetrics(analyzeUsage([parseUsage(demoBeforeEvents)]))
-    assert.equal(before.calls, after.calls)
-    assert.equal(before.input, after.input)
-    assert.equal(before.output, after.output)
-    assert.equal(before.toolCalls, after.toolCalls)
-    assert.ok(before.cacheShare! < after.cacheShare!)
-    assert.ok(before.cost && after.cost && before.cost[0] > after.cost[0])
-  })
-
   test('session cost is unknown when a model has no price', () => {
     const analysis = analyzeUsage([parseUsage(JSON.stringify({
       type: 'assistant.usage', data: { model: 'unknown-model-x', inputTokens: 10, outputTokens: 5 },
     }))])
-    assert.equal(sessionMetrics(analysis).cost, null)
+    assert.equal(sessionCost(analysis), null)
+  })
+
+  test('projects savings by repeating the workload, not inflating per-call context', () => {
+    const workload = [{ ...manualUsage('gpt-5.5', 100_000, 0, 0, 1000), kind: 'call' as const }]
+    const projection = projectModelSavings(workload, findModelPrice('gpt-5-mini')!, 100)
+    assert.equal(projection.available, true)
+    assert.equal(projection.current[0], 53)
+    assert.equal(projection.current[1], 53)
+    assert.equal(projection.alternative[0], 2.7)
+    assert.ok(Math.abs(projection.savings[0] - 50.3) < 1e-9)
+    assert.equal(projection.savings[0], projection.savings[1])
+  })
+
+  test('preserves cost and savings bounds for uncertain cache-write rates', () => {
+    const projection = projectModelSavings(
+      [manualUsage('claude-opus-5', 0, 0, 1_000_000, 0)], findModelPrice('claude-haiku-4.5')!, 10,
+    )
+    assert.equal(projection.available, true)
+    assert.deepEqual(projection.current, [62.5, 100])
+    assert.deepEqual(projection.alternative, [12.5, 20])
+    assert.deepEqual(projection.savings, [42.5, 87.5])
+  })
+
+  test('does not claim savings for unchanged or more expensive models', () => {
+    const workload = [manualUsage('claude-haiku-4.5', 0, 0, 1_000_000, 0)]
+    const same = projectModelSavings(workload, findModelPrice('claude-haiku-4.5')!, 10)
+    assert.equal(same.available, true)
+    assert.deepEqual(same.savings, [0, 0])
+    const more = projectModelSavings(workload, findModelPrice('claude-opus-5')!, 10)
+    assert.equal(more.available, true)
+    assert.deepEqual(more.savings, [-87.5, -42.5])
+  })
+
+  test('keeps overlapping price ranges instead of claiming a saving from their midpoints', () => {
+    const workload = [manualUsage('claude-opus-5', 0, 0, 1_000_000, 0)]
+    const alternative = { ...findModelPrice('claude-haiku-4.5')!, write1h: 12 }
+    const projection = projectModelSavings(workload, alternative, 1)
+    assert.equal(projection.available, true)
+    assert.deepEqual(projection.savings, [-5.75, 8.75])
+  })
+
+  test('uses recorded mixed-model rates unless the baseline is explicitly overridden', () => {
+    const workload = [
+      manualUsage('gpt-5.5', 1_000_000, 0, 0, 0),
+      manualUsage('gpt-5-mini', 1_000_000, 0, 0, 0),
+    ]
+    const model = findModelPrice('gpt-5-mini')!
+    const mixed = projectModelSavings(workload, model, 1)
+    assert.equal(mixed.available, true)
+    assert.deepEqual(mixed.current, [10.25, 10.25])
+    assert.deepEqual(mixed.alternative, [0.5, 0.5])
+    const override = projectModelSavings(workload, model, 1, model)
+    assert.equal(override.available, true)
+    assert.deepEqual(override.current, [0.5, 0.5])
+    assert.deepEqual(override.savings, [0, 0])
+  })
+
+  test('handles zero, missing, unknown-model, expired-rate and invalid-run inputs honestly', () => {
+    const model = findModelPrice('gpt-5-mini')!
+    const emptyUsage = manualUsage('gpt-5.5', 0, 0, 0, 0)
+    const zero = projectModelSavings([emptyUsage], model, 1)
+    assert.equal(zero.available, true)
+    assert.deepEqual(zero.savings, [0, 0])
+    for (const workload of [[], [{ ...emptyUsage, output: null }], [{ ...emptyUsage, model: 'unknown-model' }]]) {
+      const projection = projectModelSavings(workload, model, 10)
+      assert.equal(projection.available, false)
+      if (projection.available) throw new Error('Incomplete records must not produce savings.')
+      assert.ok(projection.reason)
+    }
+    const expired = projectModelSavings([emptyUsage], { ...model, promotionalUntil: '2000-01-01' }, 1)
+    assert.equal(expired.available, false)
+    if (expired.available) throw new Error('Expired rates must not produce savings.')
+    assert.match(expired.reason, /expired/)
+    for (const runs of [0, -1, 1.5, NaN, Infinity]) {
+      assert.throws(() => projectModelSavings([emptyUsage], model, runs), /positive whole number/)
+    }
   })
 })
