@@ -3,16 +3,14 @@ import { render, type CollectionEntry } from 'astro:content'
 import { Picture } from 'astro:assets'
 import WritingLayout from '../../layouts/WritingLayout.astro'
 import PartsNav from '../../components/PartsNav.astro'
-import TagList from '../../components/TagList.astro'
-import RfpSandboxHero from '../../components/RfpSandboxHero.astro'
-import { SITE_NAME } from '../../lib/seo'
+import DecisionHero from '../../components/DecisionHero.astro'
 import {
   estimateReadingTime,
-  formatDate,
   getPostCategory,
-  getPostTags,
   getPostSlug,
   getVisiblePosts,
+  getTagLabel,
+  getTaxonomySlug,
 } from '../../lib/posts'
 
 export async function getStaticPaths() {
@@ -30,6 +28,15 @@ interface Props {
 const { post } = Astro.props
 const { Content, headings } = await render(post)
 const readingTime = estimateReadingTime(post.body)
+const minutes = parseInt(readingTime)
+const category = getPostCategory(post)
+const categoryHref = `/writing/category/${getTaxonomySlug(category)}/`
+const published = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  timeZone: 'UTC',
+}).format(post.data.date)
 ---
 
 <WritingLayout
@@ -53,28 +60,47 @@ const readingTime = estimateReadingTime(post.body)
       fetchpriority="high"
     />
   )}
-  <div class="shell">
-    <aside class="sidebar">
-      <PartsNav headings={headings} title={post.data.title} readingTime={readingTime} />
-    </aside>
-    <main id="main">
-      <article class="prose">
-        <header class="doc-head">
-          {!post.data.published && (
-            <p class="draft-notice">Draft preview — not published. Review the account and conclusions before publishing.</p>
+  <div class="shell shell-solo">
+    <main id="main" class="post-layout">
+      <header class="post-head">
+        {!post.data.published && (
+          <p class="draft-notice">Draft preview — not published. Review the account and conclusions before publishing.</p>
+        )}
+        <nav class="post-crumbs" aria-label="Breadcrumb">
+          <a href="/writing/">Writing</a> / <a href={categoryHref}>{category}</a>
+        </nav>
+        <h1 id="post-title">{post.data.title}</h1>
+        <p class="post-lede">{post.data.description}</p>
+        <dl class="post-facts">
+          <div><dt>Category:</dt><dd><a href={categoryHref}>{category}</a></dd></div>
+          <div><dt>Published:</dt><dd><time datetime={post.data.date.toISOString()}>{published}</time></dd></div>
+          <div><dt>Reading time:</dt><dd>{minutes} minute{minutes === 1 ? '' : 's'}</dd></div>
+          {post.data.tags.length > 0 && (
+            <div>
+              <dt>Tags:</dt>
+              <dd>
+                {post.data.tags.map((tag, i) => (
+                  <>{i > 0 && ', '}<a href={`/writing/tag/${getTaxonomySlug(tag)}/`}>{getTagLabel(tag)}</a></>
+                ))}
+              </dd>
+            </div>
           )}
-          <h1 id="post-title">{post.data.title}</h1>
-          <p class="doc-meta">
-            <a href="/#about" rel="author">{SITE_NAME}</a> ·
-            <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time> · {readingTime}
-          </p>
-          <TagList category={getPostCategory(post)} tags={getPostTags(post)} />
-        </header>
-        {post.data.hero === 'rfp-sandbox' && <RfpSandboxHero />}
-        <Content />
-        <hr class="rule-dotted" />
-        <p class="doc-end"><a href="/writing/">← All writing</a></p>
-      </article>
+        </dl>
+      </header>
+
+      {post.data.hero === 'decision' && <DecisionHero />}
+
+      <div class="post-body">
+        <aside class="sidebar">
+          <PartsNav headings={headings} />
+        </aside>
+        <article class="prose">
+          <Content />
+
+          <hr class="rule-dotted" />
+          <p class="doc-end"><a href="/writing/">← All writing</a></p>
+        </article>
+      </div>
     </main>
   </div>
 </WritingLayout>

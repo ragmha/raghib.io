@@ -1,7 +1,7 @@
 ---
-title: "What If Vendors Answered RFPs Through Agents?"
-seoTitle: "Beyond the RFP Spreadsheet: A Proposal for Agent-to-Agent Vendor Reviews"
-description: "A small experiment in replacing emailed vendor questionnaires with approved answers, inspectable evidence, and an explicit human review boundary."
+title: "What If RFP Answers Came With a Sandbox?"
+seoTitle: "Beyond the RFP Spreadsheet: A Vendor-Neutral Evaluation Sandbox"
+description: "A proposal for testing vendor claims in a reproducible sandbox, with Terraform deployment, standard identity integration, and evidence buyers can inspect."
 date: "2026-10-12"
 tags: ["ai", "agents", "mcp", "a2a", "governance"]
 published: false
@@ -11,15 +11,39 @@ Every vendor review seems to begin the same way: someone sends a spreadsheet, so
 
 The spreadsheet is not the problem by itself. It is a portable protocol: it defines the questions, the expected answers, and the record both parties can keep. The trouble is that the protocol travels as a file. Answers get copied forward, evidence goes stale, and the buyer cannot easily tell whether a response is a current fact, a policy statement, or a guess.
 
-What if the buyer's system could ask the vendor's system directly—and receive not just an answer, but the evidence and limits behind it?
+What if a vendor's answer came with a sandbox where the buyer could check the claim?
 
 ## The answer is not another chatbot
 
 A vendor chatbot can make it easier to search a trust center. That is useful, but it does not automatically solve the harder problem: can a buyer rely on the answer, trace it to evidence, and record what was actually checked?
 
-The experiment I want to test is narrower. A vendor publishes a small, authenticated interface for approved responses. A buyer's agent asks a specific question. The vendor side returns an answer, its source, when it was reviewed, and—where the claim can be checked—an evidence result. The buyer's system stores that response in a review record.
+The experiment I want to test is narrower than a complete RFP platform. A vendor offers a disposable evaluation environment, approved answers, and a small set of repeatable checks. A buyer can inspect the environment directly or use an agent to retrieve answers and evidence. Each result records the claim, what was checked, and what remains unverified.
 
 The result is not an autonomous approval. It is a better first draft of the review, with uncertainty visible instead of buried in a spreadsheet cell.
+
+## Bring the evaluation to the buyer
+
+There are two useful places to run the sandbox: a temporary environment hosted by the vendor, or an environment deployed into the customer's own cloud account and private network. Both should use the same application version and checks. They need not use identical infrastructure.
+
+Terraform makes the deployment reviewable and repeatable. The buyer can inspect the plan before approving resources, network access, and permissions. A first implementation should target one documented environment, not promise a universal module that works across every cloud.
+
+The idea is vendor-neutral even when the first implementation is not. The questions and evidence format should not depend on a particular cloud provider, identity product, or query engine. Supporting another environment later may require different Terraform resources; it should not require redefining what a test result means.
+
+Customer-hosted also does not automatically mean private. Outbound traffic, telemetry, and any external model calls need explicit boundaries. Evidence should remain in the evaluation environment by default, with the buyer deciding what to export. Synthetic data, isolated credentials, resource costs, and a documented teardown belong in the experiment from the start.
+
+## Turn “easy integration” into a check
+
+“Works with your identity provider” is a claim. A successful integration has more specific conditions:
+
+| Buyer question | What the sandbox could check |
+| --- | --- |
+| Can employees use our existing sign-in? | Complete an OIDC or SAML sign-in and verify issuer, audience, and the expected identity claims. |
+| Can we control what each user can do? | Map a test group or role to an application permission, then verify both allowed and denied actions. |
+| Can we remove access? | If SCIM provisioning is supported, deactivate a test user and check new sign-ins and existing sessions within a stated revocation window. |
+
+Entra ID, Okta, or Keycloak could be an example integration. None needs to define the experiment. OIDC and SAML address federation; SCIM addresses provisioning. Support for one does not establish support for the others.
+
+Terraform can prepare supported infrastructure and configuration, but it does not replace the customer's identity administrator or grant consent on their behalf. These checks may deliberately change disposable test users or sessions. They must never become permission for an agent to modify production identities.
 
 ## Give each tool one job
 
@@ -28,8 +52,8 @@ Several pieces of the agent ecosystem could fit, but they solve different parts 
 - **MCP** can expose narrow tools to an agent, such as retrieving an approved answer or checking a named control.
 - **A2A** could support communication between a buyer-side agent and a vendor-side agent. It is a possible exchange mechanism, not a guarantee that the parties agree on the meaning or authority of an answer.
 - **An agent gateway** could enforce identity, authorization, rate limits, and logging at the vendor's boundary.
-- **Kusto** could query time-stamped operational evidence, such as synthetic control observations, to check whether a statement is supported.
-- **A buyer-side agent**, perhaps something like Goose, could assemble questions and responses into a review the buyer can inspect.
+- **An evidence store** could hold time-stamped test results and control observations. Kusto is one possible query engine; a small prototype could begin with structured files.
+- **A buyer-side agent** could assemble questions and responses into a review the buyer can inspect. The checks should also run without an agent.
 
 These are candidate components, not a finished architecture. MCP does not define the commercial relationship between buyer and vendor. A2A does not make the answer true. A gateway cannot make an outdated policy current. The governance still has to come from the people and systems responsible for the claim.
 
@@ -37,24 +61,26 @@ These are candidate components, not a finished architecture. MCP does not define
 
 Consider a buyer asking whether privileged accounts require multifactor authentication.
 
-The vendor's approved answer says yes. A read-only query against synthetic Kusto observations checks the latest available control data and finds one account without MFA. A useful response should not collapse those two pieces of information into a confident “yes.”
+The vendor's approved answer says yes. A read-only check of synthetic control observations finds one privileged test account recorded as lacking the required MFA enforcement. A useful response should not collapse those two pieces of information into a confident “yes.”
 
 It should say that the written statement requires MFA, the latest observation found an exception, and the evidence therefore does not fully support the statement. It should include the observation time and scope, then route the discrepancy to a person.
 
 The tool should also return **unknown** when evidence is missing and **stale** when evidence has passed its review window. “No evidence” is not the same as “no issue”; a control policy is not the same as proof that the control is working.
 
-That distinction is the point of using a query system like Kusto in the experiment. It gives the demo a way to contrast a vendor's approved statement with a separate, time-stamped observation. The data would be synthetic: the goal is to test the shape of the exchange, not imply access to any real company's controls.
+The query engine is incidental. The important distinction is between an approved statement and a separate, time-stamped observation. The data would be synthetic: the goal is to test the exchange, not imply access to any real company's controls. A successful test sign-in would not, by itself, prove that MFA is enforced for every account.
+
+Every report should identify the application version, test version, configuration, environment, and observation time. A sandbox result applies to that setup, not automatically to production. Organizational claims, such as employee screening, still need documentary evidence and human review rather than a fabricated software test.
 
 ## Start with one question, not an ecosystem
 
-The first version needs only two read-only operations:
+Start with one integration question, one Terraform deployment target, and one repeatable check. Once the sandbox can produce a result without AI, an MCP interface needs only two read-only operations:
 
 1. Retrieve one approved answer with its owner, source, and last-reviewed date.
 2. Check one named control and return a bounded evidence summary.
 
-Keep the Kusto query fixed and parameterized. Do not let the model submit arbitrary KQL, and do not return raw account records when an aggregate result is enough. Require buyer authorization, log what was requested, and make it clear when a human must review the result.
+Keep evidence queries fixed and parameterized. Do not let the model submit arbitrary queries or shell commands, and do not return raw account records when an aggregate result is enough. Provisioning and identity-changing checks belong in a separate, explicitly approved setup or test step. Require buyer authorization, log what was requested, and make it clear when a human must review the result.
 
-Then test three cases: evidence supports the answer, evidence contradicts it, and the system cannot determine either way. Add a stale-evidence case if those first three work. Only after that would I connect a buyer agent over A2A or put an agent gateway in front of the vendor service.
+Use fixtures to exercise supported, contradicted, missing, and stale evidence. Those are acceptance criteria for the proposed experiment, not results I have already measured. Only after that would I add agent-to-agent orchestration or a dedicated gateway; authentication and authorization are required from the first shared deployment.
 
 This keeps the experiment small enough to learn from. It also makes failure legible: if a claim cannot be tied to evidence, the system says so instead of producing a polished paragraph that sounds complete.
 
@@ -66,4 +92,4 @@ There are adoption questions too. Vendors may not want to expose internal system
 
 The useful shift is not “replace every spreadsheet with an agent.” It is to separate the questions from the file that happens to carry them. If questions become structured requests and answers arrive with traceable evidence, a spreadsheet can remain an export format—not the source of truth.
 
-That is what I want to test: not whether agents can fill in a questionnaire, but whether two organizations can exchange a review that is easier to verify than the document they started with.
+That is what I want to test: not whether agents can fill in a questionnaire, but whether a buyer can reproduce a vendor's claim under conditions they can inspect.

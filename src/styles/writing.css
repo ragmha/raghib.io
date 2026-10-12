@@ -594,13 +594,6 @@ main {
   max-width: 100%;
 }
 
-.diagram-scroll.decision-patterns img,
-.diagram-scroll.decision-patterns svg {
-  width: 720px;
-  max-width: none;
-  min-width: 720px;
-}
-
 .prose :where(pre, table) {
   max-width: 100%;
   overflow-x: auto;

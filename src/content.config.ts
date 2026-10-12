@@ -13,6 +13,7 @@ const writing = defineCollection({
     tags: z.array(z.string()).default([]),
     published: z.boolean().default(true),
     cover: z.object({ src: image(), alt: z.string().trim().min(1) }).optional(),
+    hero: z.literal('decision').optional(),
   }),
 })
 

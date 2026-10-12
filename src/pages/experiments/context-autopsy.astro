@@ -1,23 +1,31 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro'
 import { modelPrices, pricingDate } from '../../lib/model-pricing'
-import { analyzeUsage, demoEvents, findings, parseUsage } from '../../lib/agent-usage'
+import { analyzeUsage, demoEvents, findings, parseUsage, sessionCost } from '../../lib/agent-usage'
 
 const sample = analyzeUsage([parseUsage(demoEvents)])
 const sampleFindings = findings(sample)
-const sampleCoverage = `Illustrative sample · ${sample.sources.join(' + ')} · ${sample.coverage}`
+const sampleCoverage =
+  `Illustrative sample · ${sample.sessions} sessions · ${sample.sources.join(' + ')} · ${sample.coverage}`
 const count = (total: { value: number | null; missing: number }) =>
   total.value === null ? '—' : `${new Intl.NumberFormat('en-US').format(total.value)}${total.missing ? '+' : ''}`
+const sampleCost = sessionCost(sample)
+const sampleCostFormat = new Intl.NumberFormat('en-US', {
+  style: 'currency', currency: 'USD', maximumSignificantDigits: 4,
+})
+const sampleCostText = sampleCost === null
+  ? '—'
+  : Math.abs(sampleCost[1] - sampleCost[0]) < 0.000001
+    ? sampleCostFormat.format(sampleCost[0])
+    : `${sampleCostFormat.format(sampleCost[0])}–${sampleCostFormat.format(sampleCost[1])}`
 const sampleFacts = [
-  ['Sessions', String(sample.sessions)],
   ['Model calls', count(sample.totals.requests)],
   ['Input from cache', sample.totals.input.value && sample.totals.read.value !== null
     ? new Intl.NumberFormat('en-US', { style: 'percent', maximumFractionDigits: 1 }).format(sample.totals.read.value / sample.totals.input.value)
     : '—'],
   ['Peak context per call', new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 })
     .format(Math.max(0, ...sample.calls.map((call) => call.input ?? 0)))],
-  ['Input tokens', count(sample.totals.input)],
-  ['Output tokens', count(sample.totals.output)],
+  ['Estimated API cost', sampleCostText],
 ]
 
 const description =
@@ -49,8 +57,7 @@ const appJsonLd = JSON.stringify({
   <script is:inline type="application/ld+json" set:html={appJsonLd} />
   <div class="calculator">
     <p class="intro">
-      Explore a sample session below, or add your own to inspect context, cache reuse, model
-      output, and tool activity.
+      Inspect context, cache reuse, output, and tools in a sample session—or your own.
     </p>
 
     <noscript>
@@ -59,207 +66,272 @@ const appJsonLd = JSON.stringify({
       </p>
     </noscript>
 
+    <details class="panel import-panel">
+      <summary>Analyze your own session</summary>
+      <div class="import-content">
+        <p>
+          Drop JSON or JSONL logs from Copilot, Codex, Claude Code, or OpenTelemetry.
+          Files are processed locally.
+        </p>
+        <details class="sources-help">
+          <summary>Supported files and paths</summary>
+          <dl class="sources">
+            <div><dt>GitHub Copilot CLI</dt><dd><code>~/.copilot/session-state/&lt;session&gt;/events.jsonl</code></dd></div>
+            <div><dt>Codex CLI</dt><dd><code>~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl</code></dd></div>
+            <div><dt>Claude Code</dt><dd><code>~/.claude/projects/&lt;project&gt;/&lt;session&gt;.jsonl</code></dd></div>
+            <div><dt>OpenTelemetry</dt><dd>GenAI chat and tool spans as OTLP JSON</dd></div>
+          </dl>
+        </details>
+        <label class="dropzone" for="session-files">
+          <span><strong>Choose or drop logs</strong></span>
+          <span>20 files max · 20 MiB each · 50 MiB total</span>
+          <input id="session-files" type="file" accept=".json,.jsonl,application/json" multiple />
+        </label>
+        <div class="actions">
+          <button id="demo-button" type="button">Reload sample report</button>
+          <button id="clear-button" type="button" class="quiet" hidden>Clear results</button>
+        </div>
+        <p id="status" class="status" role="status" aria-live="polite">Sample report loaded. Add a session below to replace it.</p>
+
+        <details class="export-help">
+          <summary>Having trouble finding the session file?</summary>
+          <p>
+            These folders are hidden. On macOS, press <kbd>⌘</kbd><kbd>⇧</kbd><kbd>G</kbd> in
+            the file picker and paste the folder path; on Windows, paste the path with
+            <code>%USERPROFILE%</code> in place of <code>~</code>. Codex and Claude Code
+            files can be dropped directly. Copilot names each session folder by ID, so these
+            helpers list IDs and dates, then copy the chosen raw file locally.
+          </p>
+          <div class="actions">
+            <a href="/copilot-export.sh" download>Download Copilot Bash helper</a>
+            <a href="/copilot-export.ps1" download>Download Copilot PowerShell helper</a>
+          </div>
+          <pre><code>bash copilot-export.sh --list
+bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code></pre>
+          <pre><code>.\copilot-export.ps1 -List
+.\copilot-export.ps1 -Session SESSION_ID -Output copilot-events.jsonl</code></pre>
+          <p>
+            Review raw logs before sharing; they may contain private conversation or tool data.
+          </p>
+        </details>
+        <details class="manual-entry">
+          <summary>Enter token counts instead</summary>
+          <p>No session log? Enter counts to compare model prices.</p>
+          <form id="manual-form">
+            <label>
+              Model used
+              <select id="manual-model">
+                {modelPrices.map((price) => <option value={price.id}>{price.name}</option>)}
+              </select>
+            </label>
+            <div class="token-inputs">
+              <label>
+                Uncached input
+                <input id="uncached-input" inputmode="decimal" value="0" autocomplete="off" />
+              </label>
+              <label>
+                Cached input reads
+                <input id="cache-read" inputmode="decimal" value="0" autocomplete="off" />
+              </label>
+              <label>
+                Cache writes (TTL unknown)
+                <input id="cache-write" inputmode="decimal" value="0" autocomplete="off" />
+              </label>
+              <label>
+                5-minute cache writes
+                <input id="cache-write-5m" inputmode="decimal" value="0" autocomplete="off" />
+              </label>
+              <label>
+                1-hour cache writes
+                <input id="cache-write-1h" inputmode="decimal" value="0" autocomplete="off" />
+              </label>
+              <label>
+                Output + reasoning
+                <input id="output-tokens" inputmode="decimal" value="0" autocomplete="off" />
+              </label>
+            </div>
+            <p id="manual-error" class="error" role="alert" hidden></p>
+            <div class="actions">
+              <button id="manual-submit" type="submit">Compare model costs</button>
+            </div>
+          </form>
+        </details>
+      </div>
+    </details>
+
     <section id="results" class="results" aria-labelledby="results-heading" tabindex="-1">
-      <h2 id="results-heading">What happened under the prompt</h2>
-      <p id="coverage" class="coverage">{sampleCoverage}</p>
+      <header class="results-head">
+        <div>
+          <h2 id="results-heading">Session signature</h2>
+          <p id="coverage" class="coverage">{sampleCoverage}</p>
+        </div>
+      </header>
       <div id="summary" class="summary">
         {sampleFacts.map(([label, value]) => <div><span>{label}</span><strong>{value}</strong></div>)}
       </div>
 
-      <section id="findings-panel" class="panel" aria-labelledby="findings-heading">
-        <h3 id="findings-heading">Findings</h3>
-        <ul id="findings-list" class="findings">{sampleFindings.map((note) => <li>{note}</li>)}</ul>
-      </section>
+      <div class="dashboard-tabs" role="tablist" aria-label="Session report sections">
+        <button id="overview-tab" type="button" role="tab" aria-selected="true" aria-controls="overview-panel" tabindex="0">Overview</button>
+        <button id="models-tab" type="button" role="tab" aria-selected="false" aria-controls="models-panel" tabindex="-1">Models &amp; costs</button>
+        <button id="tools-tab" type="button" role="tab" aria-label="Tools and coverage notes" aria-selected="false" aria-controls="tools-panel" tabindex="-1">Tools</button>
+        <button id="compare-tab" type="button" role="tab" aria-selected="false" aria-controls="compare-panel" tabindex="-1">Before / after</button>
+      </div>
 
-      <section id="timeline-panel" class="panel" aria-labelledby="timeline-heading" hidden>
-        <div class="chart-head">
-          <h3 id="timeline-heading">Context, call by call</h3>
-          <fieldset class="toggle">
-            <legend class="visually-hidden">Chart view</legend>
-            <label><input type="radio" name="timeline-mode" value="call" checked /> Per call</label>
-            <label><input type="radio" name="timeline-mode" value="total" /> Running total</label>
-          </fieldset>
+      <section id="overview-panel" class="tab-panel" role="tabpanel" aria-labelledby="overview-tab" tabindex="0">
+        <div class="overview-grid">
+          <section id="timeline-panel" class="panel timeline-panel" aria-labelledby="timeline-heading" hidden>
+            <div class="chart-head">
+              <h3 id="timeline-heading">Context, call by call</h3>
+              <fieldset class="toggle">
+                <legend class="visually-hidden">Chart view</legend>
+                <label><input type="radio" name="timeline-mode" value="call" checked /> Per call</label>
+                <label><input type="radio" name="timeline-mode" value="total" /> Running total</label>
+              </fieldset>
+            </div>
+            <p class="table-note">Hover, tap, or focus the chart and use arrow keys to inspect each call.</p>
+            <div class="chart-wrap">
+              <svg id="timeline" class="context-chart" viewBox="0 0 720 280" tabindex="0" role="img"></svg>
+              <div id="timeline-tip" class="chart-tip" role="status" aria-live="polite" hidden></div>
+            </div>
+            <ul class="legend">
+              <li><span class="swatch read"></span>Cached input</li>
+              <li><span class="swatch fresh"></span>Fresh input</li>
+              <li><span class="swatch output"></span>Output</li>
+            </ul>
+          </section>
+
+          <div class="overview-side">
+            <section class="panel signature-panel" aria-labelledby="mix-heading">
+              <div class="chart-head">
+                <h3 id="mix-heading">Token signature</h3>
+                <span id="token-total" class="token-total"></span>
+              </div>
+              <div id="token-mix" class="token-mix" role="img"></div>
+              <ul id="token-legend" class="legend"></ul>
+            </section>
+
+            <section id="findings-panel" class="panel" aria-labelledby="findings-heading">
+              <h3 id="findings-heading">What stands out</h3>
+              <ul id="findings-list" class="findings">{sampleFindings.slice(0, 3).map((note) => <li>{note}</li>)}</ul>
+              <details id="more-findings" class="more-findings" hidden>
+                <summary>Show more findings</summary>
+                <ul id="additional-findings-list" class="findings"></ul>
+              </details>
+            </section>
+          </div>
         </div>
-        <p class="table-note">Hover, tap, or focus the chart and use arrow keys to inspect each call.</p>
-        <div class="chart-wrap">
-          <svg id="timeline" class="context-chart" viewBox="0 0 720 280" tabindex="0" role="img"></svg>
-          <div id="timeline-tip" class="chart-tip" role="status" aria-live="polite" hidden></div>
-        </div>
-        <ul class="legend">
-          <li><span class="swatch read"></span>Cached input</li>
-          <li><span class="swatch fresh"></span>Fresh input and cache writes</li>
-          <li><span class="swatch output"></span>Output</li>
-        </ul>
       </section>
 
-      <section class="panel" aria-labelledby="mix-heading">
-        <h3 id="mix-heading">Where the tokens went</h3>
-        <div id="token-mix" class="token-mix" role="img"></div>
-        <ul id="token-legend" class="legend"></ul>
-      </section>
-
-      <section id="recorded-models" class="panel" aria-labelledby="recorded-heading" hidden>
-        <h3 id="recorded-heading">How each model was used</h3>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th scope="col">Model</th><th scope="col">Calls</th><th scope="col">Input tokens</th><th scope="col">Cached</th><th scope="col">Output tokens</th></tr></thead>
-            <tbody id="recorded-body"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <section id="tool-activity" class="panel" aria-labelledby="tools-heading" hidden>
-        <h3 id="tools-heading">Tools the agent reached for</h3>
-        <ol id="tools-chart" class="bar-chart"></ol>
-        <p id="failure-count" class="table-note"></p>
-      </section>
-
-      <section class="panel" aria-labelledby="comparison-heading">
-        <h3 id="comparison-heading">What if a different model did the same work?</h3>
-        <p class="table-note">
-          API price estimates at provider-published rates, last checked
-          <time datetime={pricingDate}>{pricingDate}</time>. Highlighted models were recorded
-          in the session; ranges reflect known cache TTL, long-context, or time-based rate tiers.
-          API prices are not agent subscriptions or plan allowances.
-        </p>
-        <ol id="cost-chart" class="bar-chart"></ol>
-        <div class="table-wrap">
-          <table class="sortable">
-            <thead>
-              <tr>
-                <th scope="col"><button type="button" data-sort="model" aria-label="Sort by model">Model</button></th>
-                <th scope="col">Provider</th>
-                <th scope="col">Context / rate notes</th>
-                <th scope="col"><button type="button" data-sort="benchmark" aria-label="Sort by one million input plus one million output tokens">1M in + 1M out</button></th>
-                <th scope="col" aria-sort="ascending"><button type="button" data-sort="cost" aria-label="Sort by workload cost">Workload cost</button></th>
-              </tr>
-            </thead>
-            <tbody id="comparison-sort-body"></tbody>
-          </table>
-        </div>
-        <details class="rate-table">
-          <summary>Show exact estimates and token rates</summary>
+      <section id="models-panel" class="tab-panel" role="tabpanel" aria-labelledby="models-tab" tabindex="0" hidden>
+        <section id="recorded-models" class="panel" aria-labelledby="recorded-heading" hidden>
+          <h3 id="recorded-heading">How each model was used</h3>
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th scope="col">Model</th>
-                  <th scope="col">Estimated total</th>
-                  <th scope="col">Input</th>
-                  <th scope="col">Cached input</th>
-                  <th scope="col">5-minute write</th>
-                  <th scope="col">1-hour write</th>
-                  <th scope="col">Output</th>
-                </tr>
-              </thead>
-              <tbody id="comparison-body"></tbody>
+              <thead><tr><th scope="col">Model</th><th scope="col">Calls</th><th scope="col">Input tokens</th><th scope="col">Cached</th><th scope="col">Output tokens</th></tr></thead>
+              <tbody id="recorded-body"></tbody>
             </table>
           </div>
+        </section>
+
+        <section class="panel" aria-labelledby="comparison-heading">
+          <h3 id="comparison-heading">What if a different model did the same work?</h3>
           <p class="table-note">
-            Rates are USD per 1 million tokens. A “+” on a token total means some records
-            did not report that category. Cache writes without a reported TTL are shown as
-            a cost range when the provider has different TTL rates. Prices exclude batch
-            discounts, regional uplifts, taxes, storage fees, and tool fees unless noted.
-            Reasoning tokens are included in output.
+            API estimates at provider-published rates, last checked
+            <time datetime={pricingDate}>{pricingDate}</time>. Recorded models are highlighted.
+            Ranges reflect known rate tiers; these are API prices, not subscription costs.
           </p>
+          <details id="comparison-details" class="rate-table">
+            <summary>Compare all models and exact rates</summary>
+            <ol id="cost-chart" class="bar-chart"></ol>
+            <div class="table-wrap">
+              <table class="sortable">
+                <thead>
+                  <tr>
+                    <th scope="col"><button type="button" data-sort="model" aria-label="Sort by model">Model</button></th>
+                    <th scope="col">Provider</th>
+                    <th scope="col">Context / rate notes</th>
+                    <th scope="col"><button type="button" data-sort="benchmark" aria-label="Sort by one million input plus one million output tokens">1M in + 1M out</button></th>
+                    <th scope="col" aria-sort="ascending"><button type="button" data-sort="cost" aria-label="Sort by workload cost">Workload cost</button></th>
+                  </tr>
+                </thead>
+                <tbody id="comparison-sort-body"></tbody>
+              </table>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Model</th>
+                    <th scope="col">Estimated total</th>
+                    <th scope="col">Input</th>
+                    <th scope="col">Cached input</th>
+                    <th scope="col">5-minute write</th>
+                    <th scope="col">1-hour write</th>
+                    <th scope="col">Output</th>
+                  </tr>
+                </thead>
+                <tbody id="comparison-body"></tbody>
+              </table>
+            </div>
+            <p class="table-note">
+              Rates are USD per 1 million tokens. A “+” on a token total means some records
+              did not report that category. Cache writes without a reported TTL are shown as
+              a cost range when the provider has different TTL rates. Prices exclude batch
+              discounts, regional uplifts, taxes, storage fees, and tool fees unless noted.
+              Reasoning tokens are included in output.
+            </p>
+          </details>
+        </section>
+      </section>
+
+      <section id="tools-panel" class="tab-panel" role="tabpanel" aria-labelledby="tools-tab" tabindex="0" hidden>
+        <section id="tool-activity" class="panel" aria-labelledby="tools-heading" hidden>
+          <h3 id="tools-heading">Tools the agent reached for</h3>
+          <ol id="tools-chart" class="bar-chart"></ol>
+          <p id="failure-count" class="table-note"></p>
+        </section>
+        <details id="warnings-panel" class="panel warnings" hidden>
+          <summary id="warnings-heading">Coverage notes</summary>
+          <ul id="warnings-list"></ul>
         </details>
       </section>
 
-      <section id="warnings-panel" class="panel warnings" aria-labelledby="warnings-heading" hidden>
-        <h3 id="warnings-heading">Coverage notes</h3>
-        <ul id="warnings-list"></ul>
+      <section id="compare-panel" class="tab-panel" role="tabpanel" aria-labelledby="compare-tab" tabindex="0" hidden>
+        <section class="panel" aria-labelledby="compare-heading">
+          <div class="chart-head">
+            <h3 id="compare-heading">Did the change help?</h3>
+            <button id="clear-before" type="button" class="link-button" hidden>Remove before</button>
+          </div>
+          <p id="compare-intro" class="table-note">
+            Run the same task twice—before and after a change to the model, instructions, or tools.
+            The report above is <strong>after</strong>; add the earlier run as <strong>before</strong>.
+          </p>
+          <div id="compare-pick" class="actions">
+            <label class="file-button">
+              Choose before session
+              <input id="before-files" class="visually-hidden" type="file" accept=".json,.jsonl,application/json" multiple />
+            </label>
+            <button id="sample-before" type="button" class="quiet">Try sample before</button>
+          </div>
+          <p id="compare-headline" class="compare-headline" role="status" aria-live="polite"></p>
+          <div id="compare-signatures" class="compare-signatures" hidden></div>
+          <div id="compare-table-wrap" class="table-wrap" hidden>
+            <table>
+              <caption class="visually-hidden">Before and after metrics</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Metric</th>
+                  <th scope="col">Before</th>
+                  <th scope="col">After</th>
+                  <th scope="col">Change</th>
+                </tr>
+              </thead>
+              <tbody id="compare-body"></tbody>
+            </table>
+          </div>
+        </section>
       </section>
     </section>
-
-    <section class="panel" aria-labelledby="session-heading">
-      <h2 id="session-heading">Try your own session</h2>
-      <p>Drop JSON or JSONL logs from Copilot, Codex, Claude Code, or OpenTelemetry.</p>
-      <details class="sources-help">
-        <summary>Supported files and paths</summary>
-        <dl class="sources">
-          <div><dt>GitHub Copilot CLI</dt><dd><code>~/.copilot/session-state/&lt;session&gt;/events.jsonl</code></dd></div>
-          <div><dt>Codex CLI</dt><dd><code>~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl</code></dd></div>
-          <div><dt>Claude Code</dt><dd><code>~/.claude/projects/&lt;project&gt;/&lt;session&gt;.jsonl</code></dd></div>
-          <div><dt>OpenTelemetry</dt><dd>GenAI chat and tool spans as OTLP JSON</dd></div>
-        </dl>
-      </details>
-      <label class="dropzone" for="session-files">
-        <span><strong>Choose or drop logs</strong></span>
-        <span>20 files max · 20 MiB each · 50 MiB total</span>
-        <input id="session-files" type="file" accept=".json,.jsonl,application/json" multiple />
-      </label>
-      <div class="actions">
-        <button id="demo-button" type="button">Reload sample report</button>
-        <button id="clear-button" type="button" class="quiet" hidden>Clear results</button>
-      </div>
-      <p id="status" class="status" role="status" aria-live="polite">Sample report loaded. Add a session below to replace it.</p>
-
-      <details class="export-help">
-        <summary>Having trouble finding the session file?</summary>
-        <p>
-          These folders are hidden. On macOS, press <kbd>⌘</kbd><kbd>⇧</kbd><kbd>G</kbd> in
-          the file picker and paste the folder path; on Windows, paste the path with
-          <code>%USERPROFILE%</code> in place of <code>~</code>. Codex and Claude Code
-          files can be dropped directly. Copilot names each session folder by ID, so these
-          helpers list IDs and dates, then copy the chosen raw file locally.
-        </p>
-        <div class="actions">
-          <a href="/copilot-export.sh" download>Download Copilot Bash helper</a>
-          <a href="/copilot-export.ps1" download>Download Copilot PowerShell helper</a>
-        </div>
-        <pre><code>bash copilot-export.sh --list
-bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code></pre>
-        <pre><code>.\copilot-export.ps1 -List
-.\copilot-export.ps1 -Session SESSION_ID -Output copilot-events.jsonl</code></pre>
-        <p>
-          Review raw logs before sharing; they may contain private conversation or tool data.
-        </p>
-      </details>
-    </section>
-
-    <section class="panel" aria-labelledby="manual-heading">
-      <h2 id="manual-heading">Enter counts instead</h2>
-      <p>No session log? Enter token counts to compare model prices.</p>
-      <form id="manual-form">
-        <label>
-          Model used
-          <select id="manual-model">
-            {modelPrices.map((price) => <option value={price.id}>{price.name}</option>)}
-          </select>
-        </label>
-        <div class="token-inputs">
-          <label>
-            Uncached input
-            <input id="uncached-input" inputmode="decimal" value="0" autocomplete="off" />
-          </label>
-          <label>
-            Cached input reads
-            <input id="cache-read" inputmode="decimal" value="0" autocomplete="off" />
-          </label>
-          <label>
-            Cache writes (TTL unknown)
-            <input id="cache-write" inputmode="decimal" value="0" autocomplete="off" />
-          </label>
-          <label>
-            5-minute cache writes
-            <input id="cache-write-5m" inputmode="decimal" value="0" autocomplete="off" />
-          </label>
-          <label>
-            1-hour cache writes
-            <input id="cache-write-1h" inputmode="decimal" value="0" autocomplete="off" />
-          </label>
-          <label>
-            Output + reasoning
-            <input id="output-tokens" inputmode="decimal" value="0" autocomplete="off" />
-          </label>
-        </div>
-        <p id="manual-error" class="error" role="alert" hidden></p>
-        <div class="actions">
-          <button id="manual-submit" type="submit">Compare model costs</button>
-        </div>
-      </form>
-    </section>
-
   </div>
 
   <script>
@@ -267,13 +339,17 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
     import {
       analyzeUsage,
       compareModels,
+      demoBeforeEvents,
       demoEvents,
       estimateCost,
       findings,
       manualUsage,
       parseUsage,
       parseTokenInput,
+      sessionCost,
+      sessionMetrics,
       type Analysis,
+      type SessionMetrics,
       type Usage,
       type UsageTotals,
     } from '../../lib/agent-usage'
@@ -285,6 +361,7 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
     const status = byId<HTMLParagraphElement>('status')
     const results = byId<HTMLElement>('results')
     const clearButton = byId<HTMLButtonElement>('clear-button')
+    const dashboardTabs = [...document.querySelectorAll<HTMLButtonElement>('.dashboard-tabs [role="tab"]')]
     const numberFormat = new Intl.NumberFormat()
     const compactFormat = new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 })
     const percentFormat = new Intl.NumberFormat('en-US', { style: 'percent', maximumFractionDigits: 1 })
@@ -293,9 +370,39 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       style: 'currency', currency: 'USD', maximumSignificantDigits: 4,
     })
     let lastAnalysis: Analysis | null = null
+    let lastIsExample = false
+    let beforeAnalysis: Analysis | null = null
+    let beforeIsSample = false
     let pricingWorkload: Usage[] = []
     let sortBy: 'model' | 'benchmark' | 'cost' = 'cost'
     let sortDirection: 1 | -1 = 1
+
+    function activateDashboardTab(activeTab: HTMLButtonElement, focus = false) {
+      for (const tab of dashboardTabs) {
+        const selected = tab === activeTab
+        tab.setAttribute('aria-selected', String(selected))
+        tab.tabIndex = selected ? 0 : -1
+        const panelId = tab.getAttribute('aria-controls')
+        const panel = panelId ? document.getElementById(panelId) : null
+        if (panel instanceof HTMLElement) panel.hidden = !selected
+      }
+      if (focus) activeTab.focus()
+    }
+
+    dashboardTabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => activateDashboardTab(tab))
+      tab.addEventListener('keydown', (event) => {
+        const nextIndex = event.key === 'ArrowRight' ? (index + 1) % dashboardTabs.length
+          : event.key === 'ArrowLeft' ? (index - 1 + dashboardTabs.length) % dashboardTabs.length
+            : event.key === 'Home' ? 0
+              : event.key === 'End' ? dashboardTabs.length - 1
+                : -1
+        if (nextIndex < 0) return
+        event.preventDefault()
+        const nextTab = dashboardTabs[nextIndex]
+        if (nextTab) activateDashboardTab(nextTab, true)
+      })
+    })
 
     function element<K extends keyof HTMLElementTagNameMap>(tag: K, className = '', text = '') {
       const node = document.createElement(tag)
@@ -341,7 +448,7 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       }
     }
 
-    function renderTokenMix(analysis: Analysis) {
+    function tokenParts(analysis: Analysis) {
       const value = (field: 'input' | 'output' | 'read' | 'write') => analysis.totals[field].value ?? 0
       const read = value('read')
       const write = value('write') + (analysis.totals.cacheWrite5m.value ?? 0) +
@@ -352,21 +459,32 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
         { name: 'Cache writes', className: 'write', tokens: write },
         { name: 'Output', className: 'output', tokens: value('output') },
       ]
-      const total = parts.reduce((sum, part) => sum + part.tokens, 0)
-      const mix = byId('token-mix')
-      const legend = byId('token-legend')
+      return { parts, total: parts.reduce((sum, part) => sum + part.tokens, 0) }
+    }
+
+    function fillTokenBar(mix: HTMLElement, analysis: Analysis) {
+      const { parts, total } = tokenParts(analysis)
       mix.replaceChildren()
-      legend.replaceChildren()
       mix.setAttribute('aria-label', parts.map((part) =>
         `${part.name}: ${numberFormat.format(part.tokens)} tokens`).join(', '))
       for (const part of parts) {
+        if (!part.tokens) continue
+        const segment = element('span', `segment ${part.className}`)
+        segment.style.flexGrow = String(part.tokens)
+        segment.title = `${part.name}: ${numberFormat.format(part.tokens)}`
+        if (part.tokens / total >= 0.12) segment.textContent = compactFormat.format(part.tokens)
+        mix.append(segment)
+      }
+    }
+
+    function renderTokenMix(analysis: Analysis) {
+      const { parts, total } = tokenParts(analysis)
+      const legend = byId('token-legend')
+      fillTokenBar(byId('token-mix'), analysis)
+      legend.replaceChildren()
+      byId('token-total').textContent = `${compactFormat.format(total)} tokens`
+      for (const part of parts) {
         const share = total ? part.tokens / total : 0
-        if (share) {
-          const segment = element('span', `segment ${part.className}`)
-          segment.style.flexGrow = String(part.tokens)
-          segment.title = `${part.name}: ${numberFormat.format(part.tokens)}`
-          mix.append(segment)
-        }
         const item = element('li')
         item.append(element('span', `swatch ${part.className}`),
           `${part.name} · ${compactFormat.format(part.tokens)} · ${percentFormat.format(share)}`)
@@ -444,9 +562,12 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       }
       const firstTime = points.find((point) => point.at !== null)?.at
       const lastTime = points.findLast((point) => point.at !== null)?.at
+      const axisTimeFormat = width < 520
+        ? new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' })
+        : timeFormat
       root.append(
-        svg('text', { x: left, y: height - 8, class: 'axis' }, firstTime ? timeFormat.format(firstTime) : 'First call'),
-        svg('text', { x: width - right, y: height - 8, 'text-anchor': 'end', class: 'axis' }, lastTime ? timeFormat.format(lastTime) : 'Last call'),
+        svg('text', { x: left, y: height - 8, class: 'axis' }, firstTime ? axisTimeFormat.format(firstTime) : 'First call'),
+        svg('text', { x: width - right, y: height - 8, 'text-anchor': 'end', class: 'axis' }, lastTime ? axisTimeFormat.format(lastTime) : 'Last call'),
       )
 
       const layers = [
@@ -521,6 +642,7 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
 
     function renderComparison(analysis: Analysis, workload: Usage[]) {
       pricingWorkload = workload
+      byId<HTMLDetailsElement>('comparison-details').open = false
       const comparison = compareModels(workload)
       const recorded = analysis.models.flatMap((model) => {
         const price = findModelPrice(model.model)
@@ -586,23 +708,20 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
 
     function showAnalysis(analysis: Analysis, isExample = false) {
       lastAnalysis = analysis
+      lastIsExample = isExample
+      if (!isExample && beforeIsSample) beforeAnalysis = null
+      const overviewTab = dashboardTabs[0]
+      if (overviewTab) activateDashboardTab(overviewTab)
       results.hidden = false
       clearButton.hidden = false
-      const coverage = analysis.sources.length
-        ? `${analysis.sources.join(' + ')} · ${analysis.coverage}`
-        : analysis.coverage
+      const sessionLabel = `${analysis.sessions} session${analysis.sessions === 1 ? '' : 's'}`
+      const coverage = [sessionLabel, ...analysis.sources, analysis.coverage].join(' · ')
       byId('coverage').textContent = isExample ? `Illustrative sample · ${coverage}` : coverage
 
       const summary = byId<HTMLDivElement>('summary')
       summary.replaceChildren()
-      const recordedCost = analysis.models.length && analysis.models.every((model) => findModelPrice(model.model))
-        ? estimatedCost(...analysis.models.reduce<[number | null, number | null]>(([low, high], model) => {
-          const estimate = compareModels(analysis.workload.filter((record) => record.model === model.model))
-            .find(({ price }) => price.id === findModelPrice(model.model)?.id)?.estimate
-          return estimate?.low == null || low === null || high === null
-            ? [null, null] : [low + estimate.low, high + (estimate.high ?? estimate.low)]
-        }, [0, 0]))
-        : '—'
+      const cost = sessionCost(analysis)
+      const recordedCost = cost ? estimatedCost(...cost) : '—'
       const cacheShare = analysis.totals.input.value && analysis.totals.read.value !== null
         ? percentFormat.format(analysis.totals.read.value / analysis.totals.input.value) : '—'
       const peakContext = Math.max(0, ...analysis.calls.map((call) => call.input ?? 0))
@@ -610,11 +729,8 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
         ['Model calls', tokenTotal(analysis.totals.requests)],
         ['Input from cache', cacheShare],
         ['Peak context per call', peakContext ? compactFormat.format(peakContext) : '—'],
-        ['Input tokens', tokenTotal(analysis.totals.input)],
-        ['Output tokens', tokenTotal(analysis.totals.output)],
         ['Estimated API cost', recordedCost],
       ]
-      if (analysis.sessions > 1) facts.unshift(['Sessions', numberFormat.format(analysis.sessions)])
       if (analysis.totals.nanoAiu.value !== null) facts.push(['Copilot nano-AIU', tokenTotal(analysis.totals.nanoAiu)])
       for (const [label, value] of facts) {
         const item = element('div')
@@ -624,7 +740,16 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
 
       const notes = findings(analysis)
       byId('findings-panel').hidden = notes.length === 0
-      byId('findings-list').replaceChildren(...notes.map((note) => element('li', '', note)))
+      byId('findings-list').replaceChildren(...notes.slice(0, 3).map((note) => element('li', '', note)))
+      const remainingFindings = notes.slice(3)
+      const moreFindings = byId<HTMLDetailsElement>('more-findings')
+      moreFindings.hidden = remainingFindings.length === 0
+      moreFindings.open = false
+      moreFindings.querySelector('summary')!.textContent =
+        `Show ${remainingFindings.length} more finding${remainingFindings.length === 1 ? '' : 's'}`
+      byId('additional-findings-list').replaceChildren(
+        ...remainingFindings.map((note) => element('li', '', note)),
+      )
 
       renderTokenMix(analysis)
       renderTimeline(analysis.calls)
@@ -674,9 +799,105 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
 
       const warningPanel = byId<HTMLElement>('warnings-panel')
       const warningList = byId<HTMLUListElement>('warnings-list')
+      byId('warnings-heading').textContent = `Coverage notes (${analysis.warnings.length})`
       warningList.replaceChildren()
       warningPanel.hidden = analysis.warnings.length === 0
       for (const warning of analysis.warnings) warningList.append(element('li', '', warning))
+      renderCompare()
+    }
+
+    const signedPercent = new Intl.NumberFormat('en-US', {
+      style: 'percent', maximumFractionDigits: 0, signDisplay: 'exceptZero',
+    })
+    function change(before: number | null, after: number | null, points = false) {
+      if (before === null || after === null) return '—'
+      if (points) {
+        const delta = Math.round((after - before) * 100)
+        return `${delta > 0 ? '+' : delta < 0 ? '−' : ''}${Math.abs(delta)} pts`
+      }
+      if (before === 0) return after === 0 ? '0%' : 'new'
+      return signedPercent.format((after - before) / before).replace('-', '−')
+    }
+
+    const costMidpoint = (cost: SessionMetrics['cost']) => cost && (cost[0] + cost[1]) / 2
+    const compareRows: [string, (m: SessionMetrics) => number | null, (m: SessionMetrics) => string, boolean?][] = [
+      ['Model calls', (m) => m.calls, (m) => m.calls === null ? '—' : numberFormat.format(m.calls)],
+      ['Input tokens', (m) => m.input, (m) => m.input === null ? '—' : compactFormat.format(m.input)],
+      ['Input from cache', (m) => m.cacheShare, (m) => m.cacheShare === null ? '—' : percentFormat.format(m.cacheShare), true],
+      ['Peak context per call', (m) => m.peakContext, (m) => m.peakContext === null ? '—' : compactFormat.format(m.peakContext)],
+      ['Output tokens', (m) => m.output, (m) => m.output === null ? '—' : compactFormat.format(m.output)],
+      ['Estimated API cost', (m) => costMidpoint(m.cost), (m) => m.cost ? estimatedCost(...m.cost) : '—'],
+      ['Tool calls', (m) => m.toolCalls, (m) => numberFormat.format(m.toolCalls)],
+      ['Failures', (m) => m.failures, (m) => numberFormat.format(m.failures)],
+    ]
+
+    function renderCompare() {
+      const ready = Boolean(beforeAnalysis && lastAnalysis)
+      byId('compare-signatures').hidden = !ready
+      byId('compare-table-wrap').hidden = !ready
+      byId('compare-pick').hidden = ready
+      byId('compare-intro').hidden = ready
+      byId('clear-before').hidden = !beforeAnalysis
+      byId('sample-before').hidden = !lastIsExample
+      if (!beforeAnalysis || !lastAnalysis) {
+        byId('compare-headline').textContent = ''
+        byId('compare-body').replaceChildren()
+        byId('compare-signatures').replaceChildren()
+        return
+      }
+      const runs = [['Before', beforeAnalysis], ['After', lastAnalysis]] as const
+      const metrics = runs.map(([, analysis]) => sessionMetrics(analysis))
+      const [before, after] = metrics
+
+      const max = Math.max(...runs.map(([, analysis]) => tokenParts(analysis).total))
+      const signatures = byId('compare-signatures')
+      signatures.replaceChildren()
+      for (const [label, analysis] of runs) {
+        const total = tokenParts(analysis).total
+        const row = element('div', 'compare-row')
+        const track = element('div', 'compare-track')
+        const mix = element('div', 'token-mix')
+        mix.setAttribute('role', 'img')
+        mix.style.width = `${max ? (total / max) * 100 : 0}%`
+        fillTokenBar(mix, analysis)
+        track.append(mix)
+        row.append(element('span', 'compare-label', label), track, element('span', 'token-total', `${compactFormat.format(total)} tokens`))
+        signatures.append(row)
+      }
+      const legend = element('ul', 'legend')
+      for (const part of tokenParts(lastAnalysis).parts) {
+        const item = element('li')
+        item.append(element('span', `swatch ${part.className}`), part.name)
+        legend.append(item)
+      }
+      signatures.append(legend)
+
+      byId('compare-body').replaceChildren(...compareRows.map(([label, value, display, points]) => {
+        const row = element('tr')
+        row.append(cell('th', label, 'row'), cell('td', display(before)), cell('td', display(after)),
+          cell('td', change(value(before), value(after), points)))
+        return row
+      }))
+
+      const notes: string[] = []
+      const costBefore = costMidpoint(before.cost)
+      const costAfter = costMidpoint(after.cost)
+      if (costBefore && costAfter !== null) {
+        const delta = (costAfter - costBefore) / costBefore
+        notes.push(Math.abs(delta) < 0.005 ? 'Estimated cost held steady'
+          : `Estimated cost ${delta < 0 ? 'fell' : 'rose'} ${signedPercent.format(Math.abs(delta)).replace('+', '')}`)
+      }
+      if (before.cacheShare !== null && after.cacheShare !== null) {
+        notes.push(`cache reuse went from ${percentFormat.format(before.cacheShare)} to ${percentFormat.format(after.cacheShare)}`)
+      }
+      if (before.calls !== null && after.calls !== null && before.calls !== after.calls) {
+        notes.push(`${numberFormat.format(after.calls)} model calls instead of ${numberFormat.format(before.calls)}`)
+      }
+      const headline = notes.length ? `${notes.join('; ')}.` : 'Compared below.'
+      const mismatch = beforeAnalysis.sources.join() !== lastAnalysis.sources.join()
+        ? ' The runs come from different tools, so treat differences with care.' : ''
+      byId('compare-headline').textContent =
+        `${headline.charAt(0).toUpperCase()}${headline.slice(1)}${mismatch}${lastIsExample ? ' Illustrative sample.' : ''}`
     }
 
     let busy = false
@@ -685,6 +906,8 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
     function setBusy(value: boolean) {
       busy = value
       fileInput.disabled = value
+      byId<HTMLInputElement>('before-files').disabled = value
+      byId<HTMLButtonElement>('sample-before').disabled = value
       byId<HTMLButtonElement>('demo-button').disabled = value
       byId<HTMLButtonElement>('manual-submit').disabled = value
       clearButton.disabled = value
@@ -694,24 +917,33 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       results.hidden = true
       clearButton.hidden = true
       lastAnalysis = null
+      lastIsExample = false
       pricingWorkload = []
       timelinePoints = []
       timelineIndex = -1
       byId('timeline-tip').hidden = true
-      for (const id of ['summary', 'findings-list', 'token-mix', 'token-legend', 'timeline', 'cost-chart', 'comparison-sort-body', 'recorded-body', 'comparison-body', 'tools-chart', 'warnings-list']) {
+      byId('token-total').textContent = ''
+      byId<HTMLDetailsElement>('more-findings').open = false
+      byId<HTMLDetailsElement>('more-findings').hidden = true
+      for (const id of ['summary', 'findings-list', 'additional-findings-list', 'token-mix', 'token-legend', 'timeline', 'cost-chart', 'comparison-sort-body', 'recorded-body', 'comparison-body', 'tools-chart', 'warnings-list']) {
         byId(id).replaceChildren()
       }
       for (const id of ['coverage', 'failure-count']) byId(id).textContent = ''
       for (const id of ['findings-panel', 'timeline-panel', 'recorded-models', 'tool-activity', 'warnings-panel']) byId<HTMLElement>(id).hidden = true
     }
 
-    function analyze(request: WorkerRequest, label: string, focusResults = true) {
+    let analysisTarget: 'after' | 'before' = 'after'
+    const report = (message: string) => {
+      byId(analysisTarget === 'before' ? 'compare-headline' : 'status').textContent = message
+    }
+    function analyze(request: WorkerRequest, label: string, focusResults = true, target: 'after' | 'before' = 'after') {
       if (busy) return
-      clearAnalysis()
+      analysisTarget = target
+      if (target === 'after') clearAnalysis()
       analysisIsExample = Boolean(request.demo)
       focusResultsAfterAnalysis = focusResults
       setBusy(true)
-      status.textContent = label
+      report(label)
       worker.postMessage(request)
     }
 
@@ -743,7 +975,12 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
 
     worker.addEventListener('message', ({ data }: MessageEvent<WorkerResponse>) => {
       if (data.type === 'progress') {
-        status.textContent = `Read ${data.done} of ${data.total} files locally…`
+        report(`Read ${data.done} of ${data.total} files locally…`)
+      } else if (data.type === 'result' && analysisTarget === 'before') {
+        setBusy(false)
+        beforeAnalysis = data.analysis
+        beforeIsSample = false
+        renderCompare()
       } else if (data.type === 'result') {
         setBusy(false)
         showAnalysis(data.analysis, analysisIsExample)
@@ -753,18 +990,37 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
         if (focusResultsAfterAnalysis) results.focus()
       } else {
         setBusy(false)
-        status.textContent = data.message
+        report(data.message)
       }
     })
     worker.addEventListener('error', () => {
       setBusy(false)
-      status.textContent = 'The local analysis worker stopped unexpectedly. Try a smaller export.'
+      report('The local analysis worker stopped unexpectedly. Try a smaller export.')
     })
 
     byId<HTMLButtonElement>('demo-button').addEventListener('click', () => analyze({ demo: demoEvents }, 'Loading sample report…'))
     byId<HTMLButtonElement>('clear-button').addEventListener('click', () => {
+      beforeAnalysis = null
       clearAnalysis()
+      renderCompare()
       status.textContent = 'Results cleared.'
+    })
+
+    const beforeInput = byId<HTMLInputElement>('before-files')
+    beforeInput.addEventListener('change', () => {
+      const files = Array.from(beforeInput.files ?? [])
+      if (files.length) analyze({ files }, `Reading ${files.length} file${files.length === 1 ? '' : 's'} locally…`, false, 'before')
+      beforeInput.value = ''
+    })
+    byId<HTMLButtonElement>('sample-before').addEventListener('click', () => {
+      beforeAnalysis = analyzeUsage([parseUsage(demoBeforeEvents)])
+      beforeIsSample = true
+      renderCompare()
+    })
+    byId<HTMLButtonElement>('clear-before').addEventListener('click', () => {
+      beforeAnalysis = null
+      renderCompare()
+      byId<HTMLInputElement>('before-files').focus()
     })
 
     for (const radio of document.querySelectorAll<HTMLInputElement>('input[name="timeline-mode"]')) {
@@ -849,6 +1105,11 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       --calc-panel: var(--theme-surface);
       --calc-muted: var(--theme-muted, #8d9287);
       --calc-line: var(--theme-rule, #2a2d27);
+      --signature-fresh: #72b7f2;
+      --signature-read: #86d28d;
+      --signature-write: #efb44c;
+      --signature-output: #bd97de;
+      --signature-ink: #171717;
       margin-top: 1rem;
     }
 
@@ -927,7 +1188,8 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
     }
 
     .actions button,
-    .actions a {
+    .actions a,
+    .actions .file-button {
       min-height: 2.5rem;
       padding: 0.45rem 0.75rem;
       border: 1px solid var(--calc-line);
@@ -938,6 +1200,91 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       font-size: 0.85rem;
       text-decoration: none;
       cursor: pointer;
+    }
+
+    .file-button {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .file-button:focus-within {
+      outline: 2px solid var(--theme-text);
+      outline-offset: 2px;
+    }
+
+    .link-button {
+      padding: 0.25rem 0;
+      border: 0;
+      background: none;
+      color: var(--calc-muted);
+      font: inherit;
+      font-size: 0.78rem;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .compare-headline {
+      margin: 0.75rem 0 0;
+      font-size: 0.95rem;
+    }
+
+    .compare-headline:empty {
+      display: none;
+    }
+
+    .compare-signatures {
+      display: grid;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+
+    .compare-signatures :global(.compare-row) {
+      display: grid;
+      grid-template-columns: 4rem minmax(0, 1fr) 6.5rem;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .compare-signatures :global(.compare-label) {
+      font-size: 0.8rem;
+    }
+
+    .calculator .compare-signatures :global(.token-mix) {
+      margin-top: 0;
+    }
+
+    .compare-signatures :global(.token-total) {
+      text-align: right;
+    }
+
+    #compare-table-wrap {
+      margin-top: 0.75rem;
+    }
+
+    #compare-table-wrap :global(th),
+    #compare-table-wrap :global(td) {
+      padding-inline: 0.3rem;
+      white-space: normal;
+    }
+
+    #compare-table-wrap :global(td:last-child) {
+      white-space: nowrap;
+    }
+
+    .compare-signatures :global(.legend) {
+      margin: 0.25rem 0 0;
+      font-size: 0.75rem;
+    }
+
+    @media (max-width: 36rem) {
+      .compare-signatures :global(.compare-row) {
+        grid-template-columns: 3.25rem minmax(0, 1fr);
+      }
+
+      .compare-signatures :global(.compare-row .token-total) {
+        grid-column: 2;
+        text-align: left;
+      }
     }
 
     .actions .quiet {
@@ -1025,28 +1372,30 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
     }
 
     .results {
-      margin-top: 2rem;
+      margin-top: 1.5rem;
     }
 
-    .results > h2 {
+    .results-head h2 {
+      margin: 0;
       font-size: 1.1rem;
+    }
+
+    .results-head .coverage {
+      margin: 0.3rem 0 0;
     }
 
     .summary {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 1px;
+      grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
       margin-top: 1rem;
-      border: 1px solid var(--calc-line);
-      background: var(--calc-line);
+      border-block: 1px solid var(--calc-line);
     }
 
     .summary > :global(div) {
       display: grid;
       gap: 0.25rem;
       min-width: 0;
-      padding: 0.8rem;
-      background: var(--theme-bg);
+      padding: 0.7rem 0.8rem 0.7rem 0;
     }
 
     .summary :global(span) {
@@ -1056,6 +1405,64 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
 
     .summary :global(strong) {
       overflow-wrap: anywhere;
+      font-size: 1.05rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .dashboard-tabs {
+      display: flex;
+      gap: 1.25rem;
+      margin-top: 1rem;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--calc-line);
+    }
+
+    .dashboard-tabs button {
+      flex: 0 0 auto;
+      min-height: 2.75rem;
+      padding: 0.55rem 0;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      color: var(--calc-muted);
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .dashboard-tabs button[aria-selected="true"] {
+      border-bottom-color: var(--theme-text);
+      color: var(--theme-text);
+    }
+
+    .dashboard-tabs button:hover {
+      color: var(--theme-text);
+    }
+
+    .tab-panel {
+      margin-top: 1rem;
+    }
+
+    .tab-panel:focus-visible {
+      outline-offset: 4px;
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(16rem, 0.9fr);
+      align-items: start;
+      gap: 1rem;
+    }
+
+    .overview-side {
+      display: grid;
+      align-content: start;
+      gap: 1rem;
+    }
+
+    .overview-grid > .panel,
+    .overview-side > .panel,
+    .tab-panel > .panel + .panel {
+      margin-top: 0;
     }
 
     .table-wrap {
@@ -1116,19 +1523,40 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       overflow-wrap: anywhere;
     }
 
-    .calculator :global(.segment.fresh) { background: var(--theme-text); }
-    .calculator :global(.segment.read) { background: color-mix(in srgb, var(--theme-text) 35%, transparent); }
-    .calculator :global(.segment.write) { background: var(--theme-muted); }
-    .calculator :global(.segment.output) { background: var(--theme-highlight); }
+    .calculator :global(.segment.fresh) { background: var(--signature-fresh); }
+    .calculator :global(.segment.read) { background: var(--signature-read); }
+    .calculator :global(.segment.write) { background: var(--signature-write); }
+    .calculator :global(.segment.output) { background: var(--signature-output); }
 
-    .token-mix {
+    .calculator :global(.token-mix) {
       display: flex;
-      height: 2.5rem;
-      gap: 2px;
-      margin-top: 1rem;
+      height: 2.25rem;
+      gap: 1px;
+      margin-top: 0.85rem;
+      overflow: hidden;
+      border: 1px solid var(--calc-line);
+      background: var(--calc-line);
     }
 
-    .legend {
+    .calculator :global(.token-mix .segment) {
+      display: grid;
+      min-width: 0;
+      place-items: center;
+      overflow: hidden;
+      color: var(--signature-ink);
+      font-size: 0.72rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .calculator :global(.token-total) {
+      color: var(--calc-muted);
+      font-size: 0.78rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .calculator :global(.legend) {
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem 1.5rem;
@@ -1138,7 +1566,7 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       font-size: 0.875rem;
     }
 
-    .swatch {
+    .calculator :global(.swatch) {
       display: inline-block;
       width: 0.75rem;
       height: 0.75rem;
@@ -1146,10 +1574,18 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       vertical-align: -0.05rem;
     }
 
-    .calculator :global(.swatch.fresh) { background: var(--theme-text); }
-    .calculator :global(.swatch.read) { background: color-mix(in srgb, var(--theme-text) 35%, transparent); }
-    .calculator :global(.swatch.write) { background: var(--theme-muted); }
-    .calculator :global(.swatch.output) { background: var(--theme-highlight); outline: 1px solid var(--theme-rule-strong); }
+    .calculator :global(.swatch.fresh) { background: var(--signature-fresh); }
+    .calculator :global(.swatch.read) { background: var(--signature-read); }
+    .calculator :global(.swatch.write) { background: var(--signature-write); }
+    .calculator :global(.swatch.output) { background: var(--signature-output); }
+
+    .signature-panel .legend {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.55rem 0.8rem;
+      margin-top: 0.75rem;
+      font-size: 0.75rem;
+    }
 
     .chart-head {
       display: flex;
@@ -1201,9 +1637,9 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
 
     .calculator :global(.context-chart .grid) { stroke: var(--theme-rule); }
     .calculator :global(.context-chart .axis) { fill: var(--calc-muted); font-size: 11px; font-family: inherit; }
-    .calculator :global(.context-chart .area.read) { fill: color-mix(in srgb, var(--theme-text) 35%, transparent); }
-    .calculator :global(.context-chart .area.fresh) { fill: var(--theme-text); }
-    .calculator :global(.context-chart .area.output) { fill: var(--theme-highlight); }
+    .calculator :global(.context-chart .area.read) { fill: var(--signature-read); }
+    .calculator :global(.context-chart .area.fresh) { fill: var(--signature-fresh); }
+    .calculator :global(.context-chart .area.output) { fill: var(--signature-output); }
     .calculator :global(.context-chart .edge) { fill: none; stroke: var(--theme-rule-strong); stroke-width: 1; vector-effect: non-scaling-stroke; }
     .calculator :global(.context-chart .hit) { fill: transparent; }
     .calculator :global(.context-chart .guide line) { stroke: var(--theme-text); stroke-dasharray: 3 3; }
@@ -1229,6 +1665,16 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       gap: 0.5rem;
       margin: 0.75rem 0 0;
       padding-left: 1.1rem;
+    }
+
+    .more-findings {
+      margin-top: 0.75rem;
+    }
+
+    .more-findings summary {
+      color: var(--calc-muted);
+      cursor: pointer;
+      font-size: 0.82rem;
     }
 
     .calculator .bar-chart {
@@ -1281,6 +1727,35 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       margin: 1rem 0 0.5rem;
     }
 
+    .import-panel > summary,
+    .manual-entry > summary,
+    .warnings > summary {
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .import-content {
+      margin-top: 0.75rem;
+    }
+
+    .import-content > p:first-child {
+      margin-top: 0;
+    }
+
+    .manual-entry {
+      margin-top: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--calc-line);
+    }
+
+    .manual-entry > p {
+      color: var(--calc-muted);
+    }
+
+    .warnings ul {
+      margin-bottom: 0;
+    }
+
     .sortable th button {
       padding: 0;
       border: 0;
@@ -1311,7 +1786,6 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
 
     @media (max-width: 600px) {
       .token-inputs,
-      .summary,
       .sources div {
         grid-template-columns: minmax(0, 1fr);
         gap: 0.25rem;
@@ -1325,6 +1799,16 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       .calculator :global(.bar-track) {
         grid-column: 1 / -1;
         grid-row: 2;
+      }
+    }
+
+    @media (max-width: 48rem) {
+      .overview-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
   </style>

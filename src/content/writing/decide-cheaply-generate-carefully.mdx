@@ -5,9 +5,8 @@ description: "OpenAI, TypeSafe and Microsoft all shipped models that can't write
 date: "2026-10-11"
 tags: ["ai", "governance", "agents", "platform-engineering"]
 published: false
+hero: "decision"
 ---
-
-import DecisionAnatomy from '../../components/DecisionAnatomy.astro'
 
 <aside class="author-disclosure" aria-label="Author disclosure">
   <strong>Disclosure:</strong> I work at Microsoft. This is my personal view,
@@ -50,8 +49,6 @@ worth it, because a vague plan wastes far more than tokens. Once the plan is
 ready, the many small calls along the way can go to something small,
 calibrated and logged.
 
-<DecisionAnatomy variant="planning" />
-
 I'll use two releases as worked examples of two broader categories, not as
 products to pick.
 
@@ -84,8 +81,6 @@ cost.
 They don't compete. They answer the same question at different layers:
 *which effort should this task get?*
 
-<DecisionAnatomy variant="layers" />
-
 | Dimension | Decision model (Decision-1) | Orchestrator (HydraFusion) |
 | --- | --- | --- |
 | What it is | A building block: score fixed options | A finished workflow: route, draft, critique, escalate |
@@ -104,8 +99,6 @@ test and own, whichever vendor's model makes them.
 Look at the Cascade pattern. Its quality gate is exactly the kind of call a
 decision model is designed for. I expect most internal agents will end up
 needing the same three parts: a router, a gate and a judge.
-
-<DecisionAnatomy variant="patterns" />
 
 > GitHub hasn't said what powers HydraFusion's internal routing or gates. The
 > parallel here is architectural, not a claim about its implementation.
@@ -130,8 +123,6 @@ I don't trust any vendor's benchmark more than a team's own data, mine
 included. Each experiment below is small enough for a two-week pilot, uses data
 you already have and ends with a number. Swap in whichever models you already
 use.
-
-<DecisionAnatomy variant="experiments" />
 
 ### Delivery
 
@@ -192,27 +183,27 @@ check through a branch ruleset so the policy runs on every pull request.
 
 I wouldn't start with a model comparison. I'd start with one decision that
 happens often, has a clear answer and costs something when it goes wrong.
-Then I'd work through six steps:
 
-<DecisionAnatomy variant="pilot" />
+Rather than describe the steps, I built them:
+[**ragmha/decision-pilot**](https://github.com/ragmha/decision-pilot) runs
+experiments 2 and 3, issue routing and the tool-call gate, end to end. It replays
+labelled history, reports calibration, picks act and review thresholds on one
+split and checks them on another, then runs as a GitHub Actions workflow in
+shadow mode. It only labels issues when you switch it on, and only in the
+confident band. Every decision is logged with its probability, model and config
+version.
 
-1. **Pick one decision.** Issue routing, for example, not the whole support
-   workflow. Define the options, who owns the decision and what a mistake costs.
-2. **Measure today's baseline.** Record accuracy, time to resolution and cost
-   per successful outcome, including retries and human corrections. A cheaper
-   model call isn't necessarily a cheaper workflow.
-3. **Replay historical data.** Use labelled examples the model hasn't been
-   tuned on, including ambiguous and uncommon cases. Compare against the current
-   approach, whether that's a person, a rule or another model.
-4. **Set act, review and reject thresholds.** Choose them from measured
-   calibration and the consequences of each error, not a convenient number.
-   Define what happens when the model times out or can't make a reliable choice.
-5. **Run in shadow mode.** Log predictions without changing real outcomes.
-   Compare them with actual decisions, capture disagreements and check whether
-   the proposed review queue would reduce work or create more interruptions.
-6. **Expand only when the evidence holds.** Agree on acceptable quality,
-   latency and total cost before the pilot. Roll out gradually only if it meets
-   those targets, with an owner, versioned decision logs and a rollback path.
+```sh
+git clone https://github.com/ragmha/decision-pilot && cd decision-pilot
+python -m decision_pilot replay routing   # offline, no account needed
+python -m decision_pilot replay gate
+```
+
+It runs offline with a mock provider and switches to Decision-1 in Foundry when
+you set an endpoint. The data is synthetic, so swap in your own labelled issues
+or recorded tool calls, and measure today's baseline first: accuracy, time to
+resolution and cost per outcome, including retries and human corrections. A
+cheaper model call isn't necessarily a cheaper workflow.
 
 For me, that's the bridge between a convincing demo and a useful system:
 **a cheap decision is only useful if it improves the outcome of the whole

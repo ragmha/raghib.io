@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, test } from 'node:test'
-import { analyzeUsage, demoEvents, estimateCost, findings, manualUsage, parseTokenInput, parseUsage } from '../src/lib/agent-usage'
+import { analyzeUsage, demoBeforeEvents, demoEvents, estimateCost, findings, manualUsage, parseTokenInput, parseUsage, sessionMetrics } from '../src/lib/agent-usage'
 import type { Usage } from '../src/lib/agent-usage'
 import { findModelPrice } from '../src/lib/model-pricing'
 
@@ -186,5 +186,23 @@ describe('agent usage analysis', () => {
     assert.ok(notes.some((note) => /input tokens for every token it wrote/.test(note)))
     assert.ok(notes.some((note) => /Context peaked at .* on call \d+ of 10/.test(note)))
     assert.ok(notes.some((note) => /models were used/.test(note)))
+  })
+
+  test('sample before run differs only in cache reuse', () => {
+    const after = sessionMetrics(analyzeUsage([parseUsage(demoEvents)]))
+    const before = sessionMetrics(analyzeUsage([parseUsage(demoBeforeEvents)]))
+    assert.equal(before.calls, after.calls)
+    assert.equal(before.input, after.input)
+    assert.equal(before.output, after.output)
+    assert.equal(before.toolCalls, after.toolCalls)
+    assert.ok(before.cacheShare! < after.cacheShare!)
+    assert.ok(before.cost && after.cost && before.cost[0] > after.cost[0])
+  })
+
+  test('session cost is unknown when a model has no price', () => {
+    const analysis = analyzeUsage([parseUsage(JSON.stringify({
+      type: 'assistant.usage', data: { model: 'unknown-model-x', inputTokens: 10, outputTokens: 5 },
+    }))])
+    assert.equal(sessionMetrics(analysis).cost, null)
   })
 })

@@ -1,0 +1,26 @@
+---
+import '../../scripts/vendor/anatomy/iso.css'
+import '../styles/anatomy.css'
+import { decisionHeroSvg } from '../lib/decision-hero.mjs'
+---
+
+<figure class="decision-hero iso">
+  <div class="decision-hero-inner">
+    <div class="decision-hero-copy">
+      <pre class="decision-hero-code"><code><span class="c">// the smart if-statement</span>
+p = small_model.decide(request)
+
+<span class="k">if</span> p &gt;= 0.90  <span class="g">generate()</span>
+<span class="k">elif</span> p &gt;= 0.60 <span class="m">review()</span>
+<span class="k">else</span>           <span class="r">stop()</span></code></pre>
+      <p class="decision-hero-line">
+        A small model decides the path. A capable model does the work.
+      </p>
+    </div>
+    <div class="decision-hero-art" set:html={decisionHeroSvg} />
+  </div>
+  <figcaption>
+    Illustrative thresholds. Teams set their own cutoffs from evidence,
+    calibration and the cost of mistakes.
+  </figcaption>
+</figure>

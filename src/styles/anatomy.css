@@ -1,140 +1,136 @@
-.prose > .anatomy-figure {
+.decision-hero {
+  position: relative;
+  left: 50%;
+  width: min(90rem, 100vw - 2rem);
+  margin: -1rem 0 3.5rem;
+  padding: clamp(1.25rem, 3vw, 2.5rem) clamp(1rem, 3vw, 2.5rem) 1.25rem;
+  transform: translateX(-50%);
+  color: var(--theme-text);
+  background: var(--theme-surface);
+  border-block: 1px solid var(--theme-rule);
+  --anatomy-page: var(--theme-bg);
   --anatomy-card: var(--theme-surface);
   --anatomy-paper: var(--theme-surface);
-  --anatomy-mono: 'JetBrains Mono', monospace;
-  padding: 1.25rem;
-  border: 1px solid var(--theme-rule-strong);
-  background: var(--theme-surface);
-  text-align: left;
-  overflow: hidden;
+  --anatomy-face: color-mix(in srgb, var(--theme-surface), var(--theme-text) 5%);
+  --anatomy-top: color-mix(in srgb, var(--theme-surface), var(--theme-text) 10%);
+  --anatomy-shade-0: color-mix(in srgb, var(--theme-surface), var(--theme-bg) 40%);
+  --anatomy-shade-1: color-mix(in srgb, var(--theme-surface), var(--theme-bg) 28%);
+  --anatomy-shade-2: color-mix(in srgb, var(--theme-surface), var(--theme-bg) 16%);
+  --anatomy-shade-3: var(--theme-surface);
+  --anatomy-lit-top: var(--theme-surface);
+  --anatomy-lit-shade: color-mix(in srgb, var(--theme-surface), var(--theme-text) 6%);
+  --anatomy-text: var(--theme-muted);
+  --anatomy-strong: var(--theme-text);
+  --anatomy-hi: var(--theme-text);
+  --anatomy-mid: var(--theme-muted);
+  --anatomy-lo: var(--theme-faint);
+  --anatomy-faint: var(--theme-rule);
+  --anatomy-lit: var(--theme-text);
+  --anatomy-halo: var(--theme-bg);
+  --anatomy-halo-opacity: .4;
+  --anatomy-dot: var(--theme-text);
+  --anatomy-red: #ff6b6b;
+  --anatomy-green: #6be0a0;
 }
 
-[data-theme='light'] .anatomy-figure {
-  --anatomy-paper: #f3f3f3;
-  --anatomy-face: #fff;
-  --anatomy-top: #fff;
-  --anatomy-shade-0: #d8d8d8;
-  --anatomy-shade-1: #e0e0e0;
-  --anatomy-shade-2: #e8e8e8;
-  --anatomy-shade-3: #eee;
-  --anatomy-lit-top: #fff;
-  --anatomy-lit-shade: #e8e8e8;
-  --anatomy-hi: #282828;
-  --anatomy-mid: #737373;
-  --anatomy-lo: #a0a0a0;
-  --anatomy-faint: #c8c8c8;
-  --anatomy-lit: #0d0d0d;
-  --anatomy-dot: #282828;
+html[data-theme='light'] .decision-hero {
+  --anatomy-red: #c9363b;
+  --anatomy-green: #218653;
+  --anatomy-halo: #8a8a80;
+  --anatomy-halo-opacity: .28;
 }
 
-.anatomy-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  color: var(--theme-muted);
-  font-size: 0.7rem;
-  line-height: 1.5;
+.decision-hero-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+  gap: clamp(1rem, 3vw, 3rem);
+  align-items: center;
+  max-width: 84rem;
+  margin: 0 auto;
 }
 
-.anatomy-header span:last-child { text-align: right; }
-
-.anatomy-drawing {
-  margin: 0.5rem -0.5rem;
-}
-
-.anatomy-drawing [data-selected] .iso-edge {
-  stroke: var(--anatomy-lit);
-}
-
-.anatomy-drawing [data-selected] .iso-top {
-  fill: var(--anatomy-lit-top);
-}
-
-.anatomy-drawing [data-indicator] .iso-top {
-  fill: var(--anatomy-lit);
-}
-
-.anatomy-explainer {
-  margin: 0.5rem 0 1rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--theme-rule-strong);
-}
-
-.prose .anatomy-explainer h3 {
-  margin: 0 0 0.5rem;
-  font-size: 0.8rem;
-  line-height: 1.5;
-}
-
-.prose .anatomy-explainer ol {
+.decision-hero-code {
   margin: 0;
-  padding-left: 1.5rem;
-}
-
-.prose .anatomy-explainer li {
-  padding: 0.25rem 0.5rem;
-  color: var(--theme-muted);
-  font-size: 0.75rem;
+  padding: 0;
+  overflow: visible;
+  color: var(--theme-text);
+  background: none;
+  border: 0;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: clamp(.9rem, 1.35vw, 1.1rem);
   line-height: 1.7;
+  white-space: pre;
 }
 
-.prose .anatomy-explainer li[data-selected] {
-  color: var(--theme-text);
-  background: color-mix(in srgb, var(--theme-highlight) 12%, transparent);
+.decision-hero-code .c { color: var(--theme-faint); }
+.decision-hero-code .k { color: var(--theme-muted); }
+.decision-hero-code .g { color: var(--anatomy-green); }
+.decision-hero-code .m { color: var(--theme-text); }
+.decision-hero-code .r { color: var(--anatomy-red); }
+
+.decision-hero-line {
+  margin: 1.5rem 0 0;
+  max-width: 20rem;
+  font-size: clamp(1.1rem, 1.8vw, 1.4rem);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -.01em;
 }
 
-.prose .anatomy-instruction {
-  margin: 0 0 0.5rem;
+.decision-hero-art {
+  min-width: 0;
+}
+
+.decision-hero-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.decision-hero-label rect {
+  fill: var(--anatomy-card);
+  stroke: var(--anatomy-mid);
+  stroke-width: 1;
+}
+
+.decision-hero-label text {
+  fill: var(--anatomy-strong);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: .035em;
+}
+
+.decision-hero-arrow {
+  fill: none;
+  stroke: var(--anatomy-mid);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.decision-hero-arrow[data-tone='green'] {
+  stroke: var(--anatomy-green);
+}
+
+.decision-hero-arrow[data-tone='red'] {
+  stroke: var(--anatomy-red);
+}
+
+.decision-hero figcaption {
+  max-width: 84rem;
+  margin: 1rem auto 0;
   color: var(--theme-muted);
-  font-size: 0.7rem;
+  font-size: .8rem;
+  line-height: 1.5;
 }
 
-.anatomy-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
+@media (max-width: 64rem) {
+  .decision-hero-inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
 
-.anatomy-controls[hidden] { display: none; }
-
-.anatomy-controls button {
-  padding: 0.5rem 0.65rem;
-  min-height: 44px;
-  border: 1px solid var(--theme-rule-strong);
-  background: transparent;
-  color: var(--theme-muted);
-  font: inherit;
-  font-size: 0.72rem;
-  cursor: pointer;
-}
-
-.anatomy-controls button[aria-pressed='true'] {
-  background: var(--theme-highlight);
-  border-color: var(--theme-highlight);
-  color: var(--theme-highlight-text);
-}
-
-.prose .anatomy-readout {
-  min-height: 5.5em;
-  margin: 1rem 0 0;
-  font-size: 0.8rem;
-  line-height: 1.8;
-  color: var(--theme-text);
-}
-
-.prose > .anatomy-figure figcaption {
-  padding-top: 1rem;
-  border-top: 1px solid var(--theme-rule-strong);
-  font-size: 0.74rem;
-  letter-spacing: 0;
-  text-transform: none;
-  line-height: 1.8;
-  color: var(--theme-muted);
-}
-
-@media (max-width: 480px) {
-  .prose > .anatomy-figure { padding: 1rem; }
-  .anatomy-header { font-size: 0.64rem; }
-  .anatomy-controls button { flex: 1 1 auto; }
-  .prose .anatomy-readout { min-height: 8em; }
+  .decision-hero-line {
+    max-width: none;
+  }
 }

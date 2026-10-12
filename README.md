@@ -50,7 +50,8 @@ overrides (category, description, demo/extra links) live in
 and shows how the agent used the model: an interactive per-call context chart
 (hover, tap, or arrow keys; per-call or running total), plain-language findings
 on cache reuse, context growth and output ratio, token mix, per-model usage and
-tool activity. Estimated costs on other models come last. Nothing is uploaded.
+tool activity. Estimated costs on other models come last. A Before / after tab
+compares a second run of the same task (cost, cache reuse, context, calls). Nothing is uploaded.
 Inspired by Steve Kinney's
 [model calculator](https://stevekinney.com/experiments/model-calculator).
 
@@ -131,16 +132,15 @@ and dark palettes. At build time, `src/lib/rehype-inline-diagrams.mjs` inlines
 Opened directly, the files still follow the OS theme. Palette roles live in
 `scripts/theme-diagrams.mjs`; preserve pure black/white SVG mask colors.
 
-The decision-model post uses `DecisionAnatomy.astro` instead of Excalidraw.
-Its five interactive isometric figures are built server-side by
-`src/lib/decision-anatomy.mjs` with the MIT-licensed
-[Anatomy](https://github.com/wheresryan22/anatomy) geometry kit. The vendored kit
-and license live in `scripts/vendor/anatomy/` (upstream commit
-`689dcf966e63d92be10a5d593c6e19e10acd4422`). Controls illuminate a mechanism
-and update its explanation; they are illustrations, not model evaluations.
-The figures inherit the site's theme and retain full explanations without JS.
-To check the figures against a running dev server, run
-`ANATOMY_TEST_URL=http://localhost:4329/writing/decide-cheaply-generate-carefully/ node --test tests/decision-anatomy.test.mjs`.
+The decision-model post uses one isometric hero, built server-side by
+`src/lib/decision-hero.mjs` with the MIT-licensed
+[Anatomy](https://github.com/wheresryan22/anatomy) geometry kit. The vendored
+kit and license live in `scripts/vendor/anatomy/` (upstream commit
+`689dcf966e63d92be10a5d593c6e19e10acd4422`). A plain-language key explains
+the input, small decision model and example routes without requiring JavaScript.
+The hero inherits the site's theme.
+To verify it in a browser, start the dev server and run
+`DECISION_HERO_TEST_URL=http://localhost:4329/writing/decide-cheaply-generate-carefully/ node --test tests/decision-hero.browser.mjs`.
 
 JetBrains Mono uses `font-display: optional` and width-matched fallback text to
 avoid rewrapping content after the first paint. On slow first visits, the system
