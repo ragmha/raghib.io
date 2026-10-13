@@ -6,6 +6,10 @@ import rehypeParts from './src/lib/rehype-parts.mjs'
 
 export default defineConfig({
   site: 'https://raghib.io',
+  image: {
+    layout: 'constrained',
+    responsiveStyles: true,
+  },
   integrations: [
     mdx(),
     sitemap({
