@@ -9,6 +9,7 @@ import { createServer } from 'node:http'
 import { readFile, readdir, stat } from 'node:fs/promises'
 import { extname, resolve, sep } from 'node:path'
 import { chromium } from 'playwright'
+import { outputFileRoute } from './lib/output-route.mjs'
 
 const CRITICAL_CSS_BUDGET = 14 * 1024
 const RENDER_BLOCKING_CSS_BUDGET = 40 * 1024
@@ -100,7 +101,7 @@ try {
       }
     }, await readFile(resolve(root, file), 'utf8'))
     if (page.redirect || page.noindex) continue
-    const route = `/${file.replace(/index\.html$/, '')}`
+    const route = outputFileRoute(file)
 
     for (const script of page.headScripts) {
       const deferred = script.async !== undefined || script.defer !== undefined || script.type === 'module'

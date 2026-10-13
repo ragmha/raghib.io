@@ -5,7 +5,7 @@ import { runInNewContext } from 'node:vm'
 import { activeSection, railPosition } from '../src/lib/reading-progress.mjs'
 
 const source = readFileSync(new URL('../src/scripts/contents.js', import.meta.url), 'utf8')
-  .replace(/^import .* from .*\n/, '')
+  .replace(/^import .* from .*\r?\n/, '')
 const disclosureSource = readFileSync(
   new URL('../src/scripts/contents-disclosure.js', import.meta.url), 'utf8',
 )
