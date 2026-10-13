@@ -52,8 +52,13 @@ and restrained hierarchy rather than simulated commands or dense chrome.
   with a `4rem` gap
 - Article: heading, author/date/reading metadata, body, return link, and a
   progressively enhanced contents rail
+- At 60rem and below, articles use the full reading column with an inline,
+  tap-sized Contents disclosure instead of the fixed desktop rail.
 - At 600px and below: a single content column with wrapping navigation and
   reduced spacing; wide code and diagrams scroll internally
+- Concept diagrams with portrait exports switch to stacked compositions below
+  60rem. They fit the column without horizontal scrolling or shrinking labels
+  into unreadable text; other wide technical diagrams retain their scroll region.
 
 ## Components
 
@@ -62,6 +67,12 @@ and restrained hierarchy rather than simulated commands or dense chrome.
 - Callouts use a full one-pixel border and a compact semantic label.
 - Code blocks use a solid near-black surface and one-pixel border.
 - Images remain square-edged enough to read as evidence, not decorative media.
+- The Copilot credit-journey illustration uses black ink on white paper:
+  original GHCP-user and GH-admin figures, a desk and whiteboard, open
+  handwritten dialogue, and no comic-card frames. Automation is the admin's
+  tool, not a third persona. The user has headphones and casual clothing;
+  the admin has glasses, an ID badge, and a policy clipboard. Both layouts
+  retain these cues so the roles are recognizable without reading the labels.
 - Focus uses a visible two-pixel theme-highlight outline with offset.
 
 ## Motion

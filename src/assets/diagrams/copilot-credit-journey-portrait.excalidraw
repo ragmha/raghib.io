@@ -1,0 +1,3291 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://aka.ms/excalidraw",
+  "elements": [
+    {
+      "id": "user-dialogue",
+      "type": "text",
+      "x": 20,
+      "y": 20,
+      "width": 269.814453125,
+      "height": 140,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "a0",
+      "roundness": null,
+      "seed": 1570687787,
+      "version": 2,
+      "versionNonce": 1687973446,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "copyId": "user-dialogue",
+        "allocatedWidth": 400
+      },
+      "text": "I hit 1,900 credits.\nThe task isn't finished.",
+      "fontSize": 28,
+      "fontFamily": 5,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "I hit 1,900 credits.\nThe task isn't finished.",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "user-speech",
+      "type": "line",
+      "x": 115,
+      "y": 100,
+      "width": 15,
+      "height": 45,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "a1",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1036530421,
+      "version": 2,
+      "versionNonce": 341639450,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -4,
+          23
+        ],
+        [
+          -15,
+          45
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "ghcp-user-head",
+      "type": "ellipse",
+      "x": 80,
+      "y": 190,
+      "width": 41.4,
+      "height": 52.9,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "ghcp-user"
+      ],
+      "frameId": null,
+      "index": "a2",
+      "roundness": null,
+      "seed": 1154934066,
+      "version": 2,
+      "versionNonce": 750957958,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "ghcp-user",
+        "actorId": "ghcp-user",
+        "visualIdentity": "casual-user"
+      }
+    },
+    {
+      "id": "ghcp-user-headphone-band",
+      "type": "line",
+      "x": 73.1,
+      "y": 219.9,
+      "width": 52.900000000000006,
+      "height": 39.099999999999994,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "ghcp-user"
+      ],
+      "frameId": null,
+      "index": "a3",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1785179623,
+      "version": 2,
+      "versionNonce": 2115096026,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "ghcp-user",
+        "actorId": "ghcp-user",
+        "visualIdentity": "casual-user",
+        "personaCue": "headphones"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          -23
+        ],
+        [
+          11.5,
+          -37.95000000000002
+        ],
+        [
+          32.2,
+          -39.099999999999994
+        ],
+        [
+          49.45,
+          -25.30000000000001
+        ],
+        [
+          52.900000000000006,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "ghcp-user-headphone-left",
+      "type": "line",
+      "x": 69.65,
+      "y": 210.7,
+      "width": 8.049999999999997,
+      "height": 19.55000000000001,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "ghcp-user"
+      ],
+      "frameId": null,
+      "index": "a4",
+      "roundness": null,
+      "seed": 1785481145,
+      "version": 2,
+      "versionNonce": 2132677830,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "ghcp-user",
+        "actorId": "ghcp-user",
+        "visualIdentity": "casual-user",
+        "personaCue": "headphones",
+        "prop": "headphones"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          8.049999999999997,
+          0
+        ],
+        [
+          8.049999999999997,
+          19.55000000000001
+        ],
+        [
+          0,
+          19.55000000000001
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "ghcp-user-headphone-right",
+      "type": "line",
+      "x": 117.94999999999999,
+      "y": 210.7,
+      "width": 8.050000000000011,
+      "height": 19.55000000000001,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "ghcp-user"
+      ],
+      "frameId": null,
+      "index": "a5",
+      "roundness": null,
+      "seed": 1668485259,
+      "version": 2,
+      "versionNonce": 420414106,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "ghcp-user",
+        "actorId": "ghcp-user",
+        "visualIdentity": "casual-user",
+        "personaCue": "headphones",
+        "prop": "headphones"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          8.050000000000011,
+          0
+        ],
+        [
+          8.050000000000011,
+          19.55000000000001
+        ],
+        [
+          0,
+          19.55000000000001
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "ghcp-user-eye",
+      "type": "line",
+      "x": 106.45,
+      "y": 218.75,
+      "width": 2.299999999999997,
+      "height": 0,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "ghcp-user"
+      ],
+      "frameId": null,
+      "index": "a6",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1769095328,
+      "version": 2,
+      "versionNonce": 88837126,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "ghcp-user",
+        "actorId": "ghcp-user",
+        "visualIdentity": "casual-user"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          2.299999999999997,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "ghcp-user-mouth",
+      "type": "line",
+      "x": 105.3,
+      "y": 233.7,
+      "width": 10.350000000000009,
+      "height": 2.299999999999983,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "ghcp-user"
+      ],
+      "frameId": null,
+      "index": "a7",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1448153013,
+      "version": 2,
+      "versionNonce": 1879547738,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "ghcp-user",
+        "actorId": "ghcp-user",
+        "visualIdentity": "casual-user"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          6.8999999999999915,
+          -1.1499999999999773
+        ],
+        [
+          10.350000000000009,
+          1.1500000000000057
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "ghcp-user-neck",
+      "type": "line",
+      "x": 100.7,
+      "y": 242.9,
+      "width": 0,
+      "height": 13.799999999999983,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "ghcp-user"
+      ],
+      "frameId": null,
+      "index": "a8",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1155112881,
+      "version": 2,
+      "versionNonce": 759700294,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "ghcp-user",
+        "actorId": "ghcp-user",
+        "visualIdentity": "casual-user"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          13.799999999999983
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "ghcp-user-hood",
+      "type": "line",
+      "x": 90.35,
+      "y": 248.65,
+      "width": 21.85000000000001,
+      "height": 27.599999999999994,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "ghcp-user"
+      ],
+      "frameId": null,
+      "index": "a9",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1154944110,
+      "version": 2,
+      "versionNonce": 1062118426,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "ghcp-user",
+        "actorId": "ghcp-user",
+        "visualIdentity": "casual-user",
+        "personaCue": "casual-clothing"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -10.349999999999994,
+          5.749999999999972
+        ],
+        [
+          -13.799999999999997,
+          16.099999999999994
+        ],
+        [
+          -3.4499999999999886,
+          27.599999999999994
+        ],
+        [
+          8.050000000000011,
+          19.549999999999983
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "ghcp-user-sleeve",
+      "type": "line",
+      "x": 99.55,
+      "y": 259,
+      "width": 18.39999999999999,
+      "height": 20.69999999999999,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "ghcp-user"
+      ],
+      "frameId": null,
+      "index": "aA",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 2111584250,
+      "version": 2,
+      "versionNonce": 493929094,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "ghcp-user",
+        "actorId": "ghcp-user",
+        "visualIdentity": "casual-user",
+        "personaCue": "casual-clothing"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          18.39999999999999,
+          9.199999999999989
+        ],
+        [
+          12.649999999999991,
+          20.69999999999999
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "ghcp-user-back",
+      "type": "line",
+      "x": 100.7,
+      "y": 256.7,
+      "width": 35.64999999999999,
+      "height": 63.25,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "ghcp-user"
+      ],
+      "frameId": null,
+      "index": "aB",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1154751545,
+      "version": 2,
+      "versionNonce": 1087836378,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "ghcp-user",
+        "actorId": "ghcp-user",
+        "visualIdentity": "casual-user"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -18.400000000000006,
+          32.19999999999999
+        ],
+        [
+          -19.549999999999997,
+          58.650000000000034
+        ],
+        [
+          16.099999999999994,
+          63.25
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "ghcp-user-typing-arm",
+      "type": "line",
+      "x": 98.4,
+      "y": 260.15,
+      "width": 75.9,
+      "height": 26.450000000000045,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "ghcp-user"
+      ],
+      "frameId": null,
+      "index": "aC",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 2101342937,
+      "version": 2,
+      "versionNonce": 679641542,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "ghcp-user",
+        "actorId": "ghcp-user",
+        "visualIdentity": "casual-user"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          31.049999999999983,
+          26.450000000000045
+        ],
+        [
+          75.9,
+          24.150000000000034
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "ghcp-user-resting-arm",
+      "type": "line",
+      "x": 84.6,
+      "y": 287.75,
+      "width": 88.54999999999998,
+      "height": 12.649999999999977,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "ghcp-user"
+      ],
+      "frameId": null,
+      "index": "aD",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 624860172,
+      "version": 2,
+      "versionNonce": 2016667034,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "ghcp-user",
+        "actorId": "ghcp-user",
+        "visualIdentity": "casual-user"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          34.5,
+          12.649999999999977
+        ],
+        [
+          88.54999999999998,
+          1.1499999999999773
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "ghcp-user-left-leg",
+      "type": "line",
+      "x": 114.5,
+      "y": 319.95,
+      "width": 46,
+      "height": 65.55000000000001,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "ghcp-user"
+      ],
+      "frameId": null,
+      "index": "aE",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 815888794,
+      "version": 2,
+      "versionNonce": 1100634374,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "ghcp-user",
+        "actorId": "ghcp-user",
+        "visualIdentity": "casual-user"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          28.75,
+          14.949999999999989
+        ],
+        [
+          26.44999999999999,
+          65.55000000000001
+        ],
+        [
+          46,
+          65.55000000000001
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "ghcp-user-right-leg",
+      "type": "line",
+      "x": 114.5,
+      "y": 319.95,
+      "width": 16.10000000000001,
+      "height": 73.59999999999997,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "ghcp-user"
+      ],
+      "frameId": null,
+      "index": "aF",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 551884491,
+      "version": 2,
+      "versionNonce": 2123899482,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "ghcp-user",
+        "actorId": "ghcp-user",
+        "visualIdentity": "casual-user"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -12.650000000000006,
+          28.75
+        ],
+        [
+          -14.950000000000003,
+          73.59999999999997
+        ],
+        [
+          1.1500000000000057,
+          73.59999999999997
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "desk-top",
+      "type": "line",
+      "x": 70,
+      "y": 290,
+      "width": 303.6,
+      "height": 9.899999999999977,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "aG",
+      "roundness": null,
+      "seed": 691405809,
+      "version": 2,
+      "versionNonce": 1882540102,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "prop": "desk"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          302.5,
+          1.1000000000000227
+        ],
+        [
+          303.6,
+          9.899999999999977
+        ],
+        [
+          0,
+          9.899999999999977
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "desk-leg-left",
+      "type": "line",
+      "x": 86.5,
+      "y": 301,
+      "width": 2.200000000000003,
+      "height": 126.5,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "aH",
+      "roundness": null,
+      "seed": 65560235,
+      "version": 2,
+      "versionNonce": 1322698522,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "prop": "desk"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          2.200000000000003,
+          126.5
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "desk-leg-right",
+      "type": "line",
+      "x": 357.1,
+      "y": 299.9,
+      "width": 4.399999999999977,
+      "height": 127.60000000000002,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "aI",
+      "roundness": null,
+      "seed": 2038028280,
+      "version": 2,
+      "versionNonce": 1144016774,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "prop": "desk"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -4.399999999999977,
+          127.60000000000002
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "desk-brace",
+      "type": "line",
+      "x": 88.7,
+      "y": 417.6,
+      "width": 264.00000000000006,
+      "height": 3.3000000000000114,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "aJ",
+      "roundness": null,
+      "seed": 851989006,
+      "version": 2,
+      "versionNonce": 291689434,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "prop": "desk"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          83.60000000000001,
+          -3.3000000000000114
+        ],
+        [
+          184.8,
+          -1.1000000000000227
+        ],
+        [
+          264.00000000000006,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "desk-chair-back",
+      "type": "line",
+      "x": 62.3,
+      "y": 240.5,
+      "width": 62.7,
+      "height": 112.19999999999999,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "aK",
+      "roundness": null,
+      "seed": 1331194869,
+      "version": 2,
+      "versionNonce": 1237872326,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "prop": "desk"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          112.19999999999999
+        ],
+        [
+          62.7,
+          112.19999999999999
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "desk-chair-leg",
+      "type": "line",
+      "x": 63.4,
+      "y": 352.7,
+      "width": 0,
+      "height": 72.60000000000002,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "aL",
+      "roundness": null,
+      "seed": 597140834,
+      "version": 2,
+      "versionNonce": 1750026394,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "prop": "desk"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          72.60000000000002
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "desk-laptop",
+      "type": "line",
+      "x": 202,
+      "y": 205.3,
+      "width": 137.5,
+      "height": 82.5,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "aM",
+      "roundness": null,
+      "seed": 912910687,
+      "version": 2,
+      "versionNonce": 2107287046,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "prop": "desk"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          132,
+          -1.1000000000000227
+        ],
+        [
+          137.5,
+          80.30000000000001
+        ],
+        [
+          5.5,
+          81.39999999999998
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "desk-keyboard",
+      "type": "line",
+      "x": 167.9,
+      "y": 287.8,
+      "width": 190.3,
+      "height": 3.3000000000000114,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "aN",
+      "roundness": null,
+      "seed": 1034590765,
+      "version": 2,
+      "versionNonce": 995042650,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "prop": "desk"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          174.9,
+          -1.1000000000000227
+        ],
+        [
+          187.00000000000003,
+          2.1999999999999886
+        ],
+        [
+          -3.299999999999983,
+          2.1999999999999886
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "desk-pause-left",
+      "type": "line",
+      "x": 259.20000000000005,
+      "y": 227.3,
+      "width": 0,
+      "height": 31.899999999999977,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "aO",
+      "roundness": null,
+      "seed": 1100975747,
+      "version": 2,
+      "versionNonce": 1084486982,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "prop": "desk"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          31.899999999999977
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "desk-pause-right",
+      "type": "line",
+      "x": 279,
+      "y": 227.3,
+      "width": 0,
+      "height": 31.899999999999977,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "aP",
+      "roundness": null,
+      "seed": 1923654433,
+      "version": 2,
+      "versionNonce": 62220826,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "prop": "desk"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          31.899999999999977
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "user-label",
+      "type": "text",
+      "x": 20,
+      "y": 460,
+      "width": 131.87890625,
+      "height": 70,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "aQ",
+      "roundness": null,
+      "seed": 1273448065,
+      "version": 2,
+      "versionNonce": 1279351942,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "copyId": "user-label",
+        "allocatedWidth": 400
+      },
+      "text": "GHCP user",
+      "fontSize": 28,
+      "fontFamily": 5,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "GHCP user",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "admin-dialogue",
+      "type": "text",
+      "x": 20,
+      "y": 575,
+      "width": 367.349609375,
+      "height": 140,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "aR",
+      "roundness": null,
+      "seed": 1905135397,
+      "version": 2,
+      "versionNonce": 410326746,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "copyId": "admin-dialogue",
+        "allocatedWidth": 400
+      },
+      "text": "I'll verify Luna-only access,\nthen approve 100 credits ($1).",
+      "fontSize": 28,
+      "fontFamily": 5,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "I'll verify Luna-only access,\nthen approve 100 credits ($1).",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "admin-speech",
+      "type": "line",
+      "x": 105,
+      "y": 666,
+      "width": 25,
+      "height": 45,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "aS",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 46935408,
+      "version": 2,
+      "versionNonce": 640670662,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -5,
+          28
+        ],
+        [
+          -25,
+          45
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "gh-admin-head",
+      "type": "ellipse",
+      "x": 36,
+      "y": 760,
+      "width": 34.199999999999996,
+      "height": 43.699999999999996,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "gh-admin"
+      ],
+      "frameId": null,
+      "index": "aT",
+      "roundness": null,
+      "seed": 1195189148,
+      "version": 2,
+      "versionNonce": 2048994202,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "gh-admin",
+        "actorId": "gh-admin",
+        "visualIdentity": "policy-admin"
+      }
+    },
+    {
+      "id": "gh-admin-glasses-left",
+      "type": "line",
+      "x": 37.9,
+      "y": 778.05,
+      "width": 11.399999999999999,
+      "height": 10.450000000000045,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "gh-admin"
+      ],
+      "frameId": null,
+      "index": "aU",
+      "roundness": null,
+      "seed": 1699852677,
+      "version": 2,
+      "versionNonce": 344748806,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "gh-admin",
+        "actorId": "gh-admin",
+        "visualIdentity": "policy-admin",
+        "personaCue": "glasses",
+        "prop": "glasses"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          11.399999999999999,
+          0
+        ],
+        [
+          11.399999999999999,
+          10.450000000000045
+        ],
+        [
+          0,
+          10.450000000000045
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "gh-admin-glasses-bridge",
+      "type": "line",
+      "x": 49.3,
+      "y": 781.85,
+      "width": 5.700000000000003,
+      "height": 0,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "gh-admin"
+      ],
+      "frameId": null,
+      "index": "aV",
+      "roundness": null,
+      "seed": 1196641671,
+      "version": 2,
+      "versionNonce": 518826074,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "gh-admin",
+        "actorId": "gh-admin",
+        "visualIdentity": "policy-admin",
+        "personaCue": "glasses",
+        "prop": "glasses"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          5.700000000000003,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "gh-admin-glasses-right",
+      "type": "line",
+      "x": 55,
+      "y": 778.05,
+      "width": 11.400000000000006,
+      "height": 10.450000000000045,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "gh-admin"
+      ],
+      "frameId": null,
+      "index": "aW",
+      "roundness": null,
+      "seed": 1161486430,
+      "version": 2,
+      "versionNonce": 299115078,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "gh-admin",
+        "actorId": "gh-admin",
+        "visualIdentity": "policy-admin",
+        "personaCue": "glasses",
+        "prop": "glasses"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          11.400000000000006,
+          0
+        ],
+        [
+          11.400000000000006,
+          10.450000000000045
+        ],
+        [
+          0,
+          10.450000000000045
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "gh-admin-mouth",
+      "type": "line",
+      "x": 48.35,
+      "y": 796.1,
+      "width": 9.499999999999993,
+      "height": 0,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "gh-admin"
+      ],
+      "frameId": null,
+      "index": "aX",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 548576876,
+      "version": 2,
+      "versionNonce": 1051364634,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "gh-admin",
+        "actorId": "gh-admin",
+        "visualIdentity": "policy-admin"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          9.499999999999993,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "gh-admin-neck",
+      "type": "line",
+      "x": 53.099999999999994,
+      "y": 803.7,
+      "width": 0.9499999999999957,
+      "height": 14.25,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "gh-admin"
+      ],
+      "frameId": null,
+      "index": "aY",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1195367963,
+      "version": 2,
+      "versionNonce": 1088678278,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "gh-admin",
+        "actorId": "gh-admin",
+        "visualIdentity": "policy-admin"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -0.9499999999999957,
+          14.25
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "gh-admin-body",
+      "type": "line",
+      "x": 52.15,
+      "y": 817.95,
+      "width": 4.75,
+      "height": 89.29999999999995,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "gh-admin"
+      ],
+      "frameId": null,
+      "index": "aZ",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1195020126,
+      "version": 2,
+      "versionNonce": 516807130,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "gh-admin",
+        "actorId": "gh-admin",
+        "visualIdentity": "policy-admin"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          3.8000000000000043,
+          31.34999999999991
+        ],
+        [
+          1.8999999999999986,
+          77.89999999999998
+        ],
+        [
+          4.75,
+          89.29999999999995
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "gh-admin-left-leg",
+      "type": "line",
+      "x": 56.9,
+      "y": 907.25,
+      "width": 16.15,
+      "height": 79.79999999999995,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "gh-admin"
+      ],
+      "frameId": null,
+      "index": "aa",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 2139118467,
+      "version": 2,
+      "versionNonce": 1626917062,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "gh-admin",
+        "actorId": "gh-admin",
+        "visualIdentity": "policy-admin"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -10.449999999999996,
+          36.10000000000002
+        ],
+        [
+          -16.15,
+          79.79999999999995
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "gh-admin-right-leg",
+      "type": "line",
+      "x": 56.9,
+      "y": 907.25,
+      "width": 20.9,
+      "height": 79.79999999999995,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "gh-admin"
+      ],
+      "frameId": null,
+      "index": "ab",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 769815043,
+      "version": 2,
+      "versionNonce": 1583976090,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "gh-admin",
+        "actorId": "gh-admin",
+        "visualIdentity": "policy-admin"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          11.399999999999999,
+          38.950000000000045
+        ],
+        [
+          20.9,
+          79.79999999999995
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "gh-admin-clipboard-arm",
+      "type": "line",
+      "x": 51.2,
+      "y": 823.65,
+      "width": 21.85,
+      "height": 49.39999999999998,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "gh-admin"
+      ],
+      "frameId": null,
+      "index": "ac",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1214643786,
+      "version": 2,
+      "versionNonce": 1102036998,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "gh-admin",
+        "actorId": "gh-admin",
+        "visualIdentity": "policy-admin"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -19.950000000000003,
+          25.649999999999977
+        ],
+        [
+          -21.85,
+          40.85000000000002
+        ],
+        [
+          -13.300000000000004,
+          49.39999999999998
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "gh-admin-pointing-arm",
+      "type": "line",
+      "x": 55.95,
+      "y": 823.65,
+      "width": 80.74999999999999,
+      "height": 33.25,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "gh-admin"
+      ],
+      "frameId": null,
+      "index": "ad",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1547335964,
+      "version": 2,
+      "versionNonce": 1110485850,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "gh-admin",
+        "actorId": "gh-admin",
+        "visualIdentity": "policy-admin"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          35.14999999999999,
+          16.149999999999977
+        ],
+        [
+          64.6,
+          -13.299999999999955
+        ],
+        [
+          80.74999999999999,
+          -17.100000000000023
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "gh-admin-hair",
+      "type": "line",
+      "x": 36.95,
+      "y": 776.15,
+      "width": 31.349999999999994,
+      "height": 16.149999999999977,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "gh-admin"
+      ],
+      "frameId": null,
+      "index": "ae",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1195185566,
+      "version": 2,
+      "versionNonce": 923127622,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "gh-admin",
+        "actorId": "gh-admin",
+        "visualIdentity": "policy-admin"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          5.699999999999996,
+          -12.350000000000023
+        ],
+        [
+          14.25,
+          -16.149999999999977
+        ],
+        [
+          25.64999999999999,
+          -10.449999999999932
+        ],
+        [
+          31.349999999999994,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "gh-admin-lanyard",
+      "type": "line",
+      "x": 46.45,
+      "y": 817,
+      "width": 15.200000000000003,
+      "height": 24.700000000000045,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "gh-admin"
+      ],
+      "frameId": null,
+      "index": "af",
+      "roundness": {
+        "type": 2
+      },
+      "seed": 1901737144,
+      "version": 2,
+      "versionNonce": 7745562,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "gh-admin",
+        "actorId": "gh-admin",
+        "visualIdentity": "policy-admin",
+        "personaCue": "id-badge"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -0.9500000000000028,
+          12.350000000000023
+        ],
+        [
+          7.599999999999994,
+          24.700000000000045
+        ],
+        [
+          14.25,
+          11.399999999999977
+        ],
+        [
+          12.349999999999994,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "gh-admin-badge",
+      "type": "line",
+      "x": 47.4,
+      "y": 841.7,
+      "width": 15.199999999999996,
+      "height": 19.949999999999932,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "gh-admin"
+      ],
+      "frameId": null,
+      "index": "ag",
+      "roundness": null,
+      "seed": 537984328,
+      "version": 2,
+      "versionNonce": 223868550,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "gh-admin",
+        "actorId": "gh-admin",
+        "visualIdentity": "policy-admin",
+        "personaCue": "id-badge",
+        "prop": "id-badge"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          15.199999999999996,
+          0
+        ],
+        [
+          15.199999999999996,
+          19.949999999999932
+        ],
+        [
+          0,
+          19.949999999999932
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "gh-admin-badge-line",
+      "type": "line",
+      "x": 50.25,
+      "y": 855.95,
+      "width": 9.5,
+      "height": 0,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "gh-admin"
+      ],
+      "frameId": null,
+      "index": "ah",
+      "roundness": null,
+      "seed": 563011930,
+      "version": 2,
+      "versionNonce": 221060314,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "gh-admin",
+        "actorId": "gh-admin",
+        "visualIdentity": "policy-admin",
+        "personaCue": "id-badge",
+        "prop": "id-badge"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          9.5,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "gh-admin-clipboard",
+      "type": "line",
+      "x": 24.6,
+      "y": 872.1,
+      "width": 20.9,
+      "height": 44.64999999999998,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "gh-admin"
+      ],
+      "frameId": null,
+      "index": "ai",
+      "roundness": null,
+      "seed": 739697852,
+      "version": 2,
+      "versionNonce": 2103653830,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "gh-admin",
+        "actorId": "gh-admin",
+        "visualIdentity": "policy-admin",
+        "personaCue": "policy-clipboard",
+        "prop": "clipboard"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          20.9,
+          0
+        ],
+        [
+          20.9,
+          44.64999999999998
+        ],
+        [
+          0,
+          44.64999999999998
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "gh-admin-clipboard-clip",
+      "type": "line",
+      "x": 31.25,
+      "y": 868.3,
+      "width": 7.600000000000001,
+      "height": 7.600000000000023,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "gh-admin"
+      ],
+      "frameId": null,
+      "index": "aj",
+      "roundness": null,
+      "seed": 1146789155,
+      "version": 2,
+      "versionNonce": 1709732250,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "gh-admin",
+        "actorId": "gh-admin",
+        "visualIdentity": "policy-admin",
+        "personaCue": "policy-clipboard",
+        "prop": "clipboard"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          7.600000000000001,
+          0
+        ],
+        [
+          7.600000000000001,
+          7.600000000000023
+        ],
+        [
+          0,
+          7.600000000000023
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "gh-admin-clipboard-rule-0",
+      "type": "line",
+      "x": 29.35,
+      "y": 885.4,
+      "width": 11.399999999999999,
+      "height": 0,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "gh-admin"
+      ],
+      "frameId": null,
+      "index": "ak",
+      "roundness": null,
+      "seed": 843094769,
+      "version": 2,
+      "versionNonce": 541363462,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "gh-admin",
+        "actorId": "gh-admin",
+        "visualIdentity": "policy-admin",
+        "personaCue": "policy-clipboard",
+        "prop": "clipboard"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          11.399999999999999,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "gh-admin-clipboard-rule-1",
+      "type": "line",
+      "x": 29.35,
+      "y": 895.85,
+      "width": 11.399999999999999,
+      "height": 0,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "gh-admin"
+      ],
+      "frameId": null,
+      "index": "al",
+      "roundness": null,
+      "seed": 843094770,
+      "version": 2,
+      "versionNonce": 1574645338,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "gh-admin",
+        "actorId": "gh-admin",
+        "visualIdentity": "policy-admin",
+        "personaCue": "policy-clipboard",
+        "prop": "clipboard"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          11.399999999999999,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "gh-admin-clipboard-rule-2",
+      "type": "line",
+      "x": 29.35,
+      "y": 906.3,
+      "width": 11.399999999999999,
+      "height": 0,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [
+        "gh-admin"
+      ],
+      "frameId": null,
+      "index": "am",
+      "roundness": null,
+      "seed": 843094771,
+      "version": 2,
+      "versionNonce": 1668873286,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "actorRole": "gh-admin",
+        "actorId": "gh-admin",
+        "visualIdentity": "policy-admin",
+        "personaCue": "policy-clipboard",
+        "prop": "clipboard"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          11.399999999999999,
+          0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "budget-board",
+      "type": "rectangle",
+      "x": 140,
+      "y": 750,
+      "width": 280,
+      "height": 290,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "an",
+      "roundness": null,
+      "seed": 994815661,
+      "version": 2,
+      "versionNonce": 1775784730,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "prop": "whiteboard"
+      }
+    },
+    {
+      "id": "board-title",
+      "type": "text",
+      "x": 160,
+      "y": 765,
+      "width": 187.38671875,
+      "height": 70,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "ao",
+      "roundness": null,
+      "seed": 1960138371,
+      "version": 2,
+      "versionNonce": 2094891910,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "copyId": "board-title",
+        "allocatedWidth": 240
+      },
+      "text": "Total credit cap",
+      "fontSize": 28,
+      "fontFamily": 5,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "Total credit cap",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "board-row-0",
+      "type": "text",
+      "x": 160,
+      "y": 840,
+      "width": 172.361328125,
+      "height": 70,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "ap",
+      "roundness": null,
+      "seed": 1958470952,
+      "version": 2,
+      "versionNonce": 1817370586,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "copyId": "board-row-0",
+        "allocatedWidth": 240
+      },
+      "text": "Normal: 1,900",
+      "fontSize": 28,
+      "fontFamily": 5,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "Normal: 1,900",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "board-row-1",
+      "type": "text",
+      "x": 160,
+      "y": 905,
+      "width": 139.302734375,
+      "height": 70,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "aq",
+      "roundness": null,
+      "seed": 1958470953,
+      "version": 2,
+      "versionNonce": 1588536006,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "copyId": "board-row-1",
+        "allocatedWidth": 240
+      },
+      "text": "Luna: 2,000",
+      "fontSize": 28,
+      "fontFamily": 5,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "Luna: 2,000",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "board-row-2",
+      "type": "text",
+      "x": 160,
+      "y": 970,
+      "width": 194.11328125,
+      "height": 70,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "ar",
+      "roundness": null,
+      "seed": 1958470954,
+      "version": 2,
+      "versionNonce": 22926490,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "copyId": "board-row-2",
+        "allocatedWidth": 240
+      },
+      "text": "After $20: 4,000",
+      "fontSize": 28,
+      "fontFamily": 5,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "After $20: 4,000",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "board-rule-0",
+      "type": "line",
+      "x": 145,
+      "y": 820,
+      "width": 270,
+      "height": 1,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "as",
+      "roundness": null,
+      "seed": 588324534,
+      "version": 2,
+      "versionNonce": 730520070,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "prop": "whiteboard"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          270,
+          -1
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "board-rule-1",
+      "type": "line",
+      "x": 145,
+      "y": 890,
+      "width": 270,
+      "height": 1,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "at",
+      "roundness": null,
+      "seed": 588324535,
+      "version": 2,
+      "versionNonce": 1252798810,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "prop": "whiteboard"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          270,
+          -1
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "board-rule-2",
+      "type": "line",
+      "x": 145,
+      "y": 955,
+      "width": 270,
+      "height": 1,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "au",
+      "roundness": null,
+      "seed": 588324536,
+      "version": 2,
+      "versionNonce": 711829830,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "prop": "whiteboard"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          270,
+          -1
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": null
+    },
+    {
+      "id": "admin-label",
+      "type": "text",
+      "x": 20,
+      "y": 1080,
+      "width": 346.677734375,
+      "height": 70,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "av",
+      "roundness": null,
+      "seed": 1033704647,
+      "version": 2,
+      "versionNonce": 999355930,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "copyId": "admin-label",
+        "allocatedWidth": 400
+      },
+      "text": "GH admin: budgets + policy",
+      "fontSize": 28,
+      "fontFamily": 5,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "GH admin: budgets + policy",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "note-grace",
+      "type": "text",
+      "x": 20,
+      "y": 1210,
+      "width": 308.546875,
+      "height": 210,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "aw",
+      "roundness": null,
+      "seed": 857035309,
+      "version": 2,
+      "versionNonce": 984912006,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "copyId": "note-grace",
+        "allocatedWidth": 400
+      },
+      "text": "Grace is once per month.\nIf used up, credit use\npauses again.",
+      "fontSize": 28,
+      "fontFamily": 5,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "Grace is once per month.\nIf used up, credit use\npauses again.",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "note-automation",
+      "type": "text",
+      "x": 20,
+      "y": 1470,
+      "width": 346.677734375,
+      "height": 280,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "ax",
+      "roundness": null,
+      "seed": 1900866339,
+      "version": 2,
+      "versionNonce": 1694442202,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "copyId": "note-automation",
+        "allocatedWidth": 400,
+        "automationOwner": "gh-admin",
+        "prop": "automation"
+      },
+      "text": "GH admin: budgets + policy\nAutomation I own:\nchecks usage and\nchanges model teams.",
+      "fontSize": 28,
+      "fontFamily": 5,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "GH admin: budgets + policy\nAutomation I own:\nchecks usage and\nchanges model teams.",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "note-top-up",
+      "type": "text",
+      "x": 20,
+      "y": 1800,
+      "width": 361.9765625,
+      "height": 140,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "ay",
+      "roundness": null,
+      "seed": 1168094752,
+      "version": 2,
+      "versionNonce": 1209831366,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "copyId": "note-top-up",
+        "allocatedWidth": 400
+      },
+      "text": "An approved $20 top-up\nrestores all approved models.",
+      "fontSize": 28,
+      "fontFamily": 5,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "An approved $20 top-up\nrestores all approved models.",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "note-reset",
+      "type": "text",
+      "x": 20,
+      "y": 1990,
+      "width": 340.169921875,
+      "height": 140,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 1.8,
+      "strokeStyle": "solid",
+      "roughness": 0.8,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "az",
+      "roundness": null,
+      "seed": 866824132,
+      "version": 2,
+      "versionNonce": 1099544474,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1791814516800,
+      "link": null,
+      "locked": false,
+      "customData": {
+        "illustrationOrigin": "original",
+        "copyId": "note-reset",
+        "allocatedWidth": 400
+      },
+      "text": "Next month: 1,900 credits.\nTemporary increases expire.",
+      "fontSize": 28,
+      "fontFamily": 5,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "Next month: 1,900 credits.\nTemporary increases expire.",
+      "autoResize": true,
+      "lineHeight": 1.25
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff",
+    "exportBackground": true,
+    "exportWithDarkMode": false,
+    "exportEmbedScene": false
+  },
+  "files": {}
+}

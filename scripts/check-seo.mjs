@@ -4,6 +4,7 @@ import { resolve, sep } from 'node:path'
 import { chromium } from 'playwright'
 import { getSeoMetadata } from '../src/lib/seo.ts'
 import { assertPublicationsMatch, readPublication } from './lib/seo-publications.mjs'
+import { outputFileRoute } from './lib/output-route.mjs'
 
 const root = resolve('dist')
 const site = new URL(`https://${(await readFile('public/CNAME', 'utf8')).trim()}`)
@@ -97,7 +98,7 @@ try {
       }
     }, await readFile(resolve(root, file), 'utf8'))
     if (metadata.redirect || metadata.noindex) continue
-    const path = `/${file.replace(/index\.html$/, '')}`
+    const path = outputFileRoute(file)
     const expected = new URL(path, site).href
     assert.equal(metadata.canonical, expected, `Canonical URL for ${file}`)
     assert.equal(metadata.canonicalCount, 1, `One canonical URL for ${file}`)

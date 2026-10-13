@@ -1,13 +1,16 @@
 import { getCollection, type CollectionEntry } from 'astro:content'
+import { indexWritingPosts } from './writing-index'
 
 export type WritingEntry = CollectionEntry<'writing'>
 
 export async function getPublishedPosts(): Promise<WritingEntry[]> {
-  const posts = await getCollection('writing', ({ data }) => data.published)
+  return getVisiblePosts()
+}
 
-  return posts.sort(
-    (a, b) => b.data.date.getTime() - a.data.date.getTime()
-  )
+export async function getVisiblePosts(
+  { includeDrafts = false }: { includeDrafts?: boolean } = {},
+): Promise<WritingEntry[]> {
+  return indexWritingPosts(await getCollection('writing'), { includeDrafts })
 }
 
 export function getPostSlug(post: WritingEntry): string {
