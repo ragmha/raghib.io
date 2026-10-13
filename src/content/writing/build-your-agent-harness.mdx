@@ -1,7 +1,7 @@
 ---
 title: "Build an AI Agent Harness From First Principles with TypeScript and Bun"
 seoTitle: "Build an AI Agent Harness in TypeScript and Bun"
-description: "A complete step-by-step tutorial: build a provider-neutral agent harness with typed tools, a bounded loop, evaluations, durable events, policy gates and human approval. No API key required."
+description: "Build a TypeScript agent harness with tool validation, durable approvals and recovery, then extend it into a workspace-scoped coding agent. No API key required."
 date: "2026-10-11"
 tags: ["ai", "agents", "typescript", "bun", "tutorial"]
 published: false
@@ -33,7 +33,7 @@ flowchart LR
     events -- "resume" --> context
 ```
 
-This walkthrough follows the [build-your-harness](https://github.com/ragmha/build-your-harness) exercise. Every code block below is the complete file, and every one of them passes the exercise's 38 tests.
+This walkthrough follows the [build-your-harness](https://github.com/ragmha/build-your-harness) exercise. The core harness steps are covered by its 38 tests. The final coding-agent section is an extension beyond the exercise; its file tools are shown separately and are not included in that test count.
 
 ## Prerequisites
 
@@ -1697,6 +1697,158 @@ Ran 38 tests across 6 files.
 
 If you copied the template to GitHub, push to `main` after each step and the exercise grades your work in Actions.
 
+## Turn the harness into a coding agent
+
+The same loop can power a small coding agent: the model reads a file, lists a directory, proposes a change, then explains what it did. This is the core idea behind [“How to code Claude Code in ~200 lines of code”](https://youtu.be/s7ZzkdvCMDY): the first useful coding agent is a model loop connected to a few tools, not a giant framework.
+
+Keep its reach narrow. Give it one workspace directory, no shell tool, and three file tools. Reading and listing are harmless; editing is a write, so route it through the durable harness's existing approval policy.
+
+### Add workspace-scoped file tools
+
+These tools use Bun's built-in file APIs and Node's path helpers. Every requested path is resolved and canonicalised before use, so `../` paths and symlinks that point outside the workspace are rejected. `list_files` shows only the immediate directory and skips symlinks; it does not recursively walk the workspace.
+
+```ts title="src/tools/filesystem.ts"
+import { readdir, readFile, realpath, writeFile } from "node:fs/promises";
+import { isAbsolute, relative, resolve, sep } from "node:path";
+import { z } from "zod";
+import { ToolRegistry } from "./registry";
+
+async function workspacePath(root: string, requested: string): Promise<string> {
+  if (isAbsolute(requested)) throw new Error("Use a workspace-relative path");
+
+  const workspace = await realpath(root);
+  const path = await realpath(resolve(workspace, requested || "."));
+  const fromRoot = relative(workspace, path);
+  if (fromRoot === ".." || fromRoot.startsWith(`..${sep}`) || isAbsolute(fromRoot)) {
+    throw new Error("Path is outside the workspace");
+  }
+  return path;
+}
+
+export function registerFileTools(tools: ToolRegistry, root: string): void {
+  tools.register({
+    name: "list_files",
+    description: "List files and directories directly inside a workspace directory.",
+    schema: z.object({ path: z.string().default("") }),
+    async execute({ path }) {
+      const entries = await readdir(await workspacePath(root, path ?? ""), {
+        withFileTypes: true,
+      });
+      return entries
+        .filter((entry) => !entry.isSymbolicLink())
+        .map((entry) => ({
+          name: entry.name,
+          type: entry.isDirectory() ? "directory" : "file",
+        }));
+    },
+  });
+
+  tools.register({
+    name: "read_file",
+    description: "Read a UTF-8 text file inside the workspace.",
+    schema: z.object({ path: z.string().min(1) }),
+    async execute({ path }) {
+      return await readFile(await workspacePath(root, path), "utf8");
+    },
+  });
+
+  tools.register({
+    name: "edit_file",
+    description: "Replace one exact, unique text range in an existing workspace file.",
+    effect: "write",
+    schema: z.object({
+      path: z.string().min(1),
+      oldText: z.string().min(1),
+      newText: z.string(),
+    }),
+    async execute({ path, oldText, newText }) {
+      const file = await workspacePath(root, path);
+      const contents = await readFile(file, "utf8");
+      const start = contents.indexOf(oldText);
+      if (start < 0 || contents.indexOf(oldText, start + oldText.length) >= 0) {
+        throw new Error("Expected text must match exactly once; file was not changed");
+      }
+      await writeFile(
+        file,
+        contents.slice(0, start) + newText + contents.slice(start + oldText.length),
+      );
+      return { path, changed: true };
+    },
+  });
+}
+```
+
+Register the tools and make policy explicit. The durable harness records the decision before it acts; a paused edit can be approved later, while a denied call never reaches `writeFile`.
+
+```ts title="src/coding-agent.ts"
+import { DurableHarness } from "./durable/harness";
+import { InMemoryRunStore } from "./durable/in-memory-store";
+import { StaticToolPolicy } from "./durable/policy";
+import { ScriptedModel } from "./providers/scripted-model";
+import { registerFileTools } from "./tools/filesystem";
+import { ToolRegistry } from "./tools/registry";
+
+const tools = new ToolRegistry();
+registerFileTools(tools, "./workspace");
+
+const policy = new StaticToolPolicy({
+  list_files: { kind: "allow" },
+  read_file: { kind: "allow" },
+  edit_file: { kind: "require_approval", reason: "Review the proposed file change" },
+});
+
+const model = new ScriptedModel([
+  {
+    content: "",
+    toolCalls: [{
+      id: "read-1",
+      name: "read_file",
+      arguments: { path: "notes.txt" },
+    }],
+  },
+  {
+    content: "",
+    toolCalls: [{
+      id: "edit-1",
+      name: "edit_file",
+      arguments: { path: "notes.txt", oldText: "TODO", newText: "Done" },
+    }],
+  },
+  { content: "Updated notes.txt." },
+]);
+
+const harness = new DurableHarness(
+  model,
+  tools,
+  new InMemoryRunStore(),
+  policy,
+);
+const run = await harness.start("coding-demo", [
+  { role: "user", content: "Replace TODO with Done in notes.txt." },
+]);
+if (run.status === "waiting_for_approval") {
+  console.log(run.status);
+  console.log(JSON.stringify(run.approval.toolCall.arguments));
+}
+```
+
+With `workspace/notes.txt` containing `TODO`, the demo reads the file, then pauses before editing:
+
+```text
+waiting_for_approval
+{"path":"notes.txt","oldText":"TODO","newText":"Done"}
+```
+
+Review the arguments, then resume with `harness.resolveApproval(...)` as in the earlier approval demo. The edit operation is intentionally exact-match, not “rewrite this file however you like.” If the model's old text is missing or ambiguous, it fails without writing. A stronger editor can add a diff preview and ask for approval on the diff itself; the essential rule remains the same: validate the target, show the exact change, then authorize that specific write.
+
+### Swap in a real model
+
+`ScriptedModel` already implements `ModelAdapter`. To use a real provider, write an adapter whose `complete(request, signal)` sends `request.messages` and `request.tools` to that provider, then maps its response into `ModelResponse`. Pass the signal to the HTTP client and keep credentials in environment variables. Provider APIs use different tool-call formats, so that mapping is the only provider-specific code; the registry, validation, approval gate, event log and recovery code stay the same.
+
+Start with the scripted model and switch only after the file tools and approval flow pass their tests.
+
+This is a small coding agent, not a production clone of Claude Code. It has no shell access, recursive search, patch application, terminal session, or multi-file plan. Add a capability only when a real task needs it; keep each new write behind approval.
+
 ## Summary
 
 You now have a complete agent harness in about a dozen small files with two dependencies. It:
@@ -1707,7 +1859,8 @@ You now have a complete agent harness in about a dozen small files with two depe
 - traces every step without leaking that trace into the prompt;
 - projects context deliberately and proves behaviour with evaluations;
 - recovers after a crash without repeating paid or dangerous work;
-- asks a person before acting, and resumes safely afterwards.
+- asks a person before acting, and resumes safely afterwards;
+- can be extended into a coding agent with workspace-scoped file tools.
 
 None of this depends on a particular model, cloud or industry. Whether your agent triages support tickets, reconciles invoices or files maintenance orders, the questions are the same: which actions exist, who may approve them, what happens on retry, and how you will know it still works tomorrow.
 
