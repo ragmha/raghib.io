@@ -4,6 +4,7 @@ import { Picture } from 'astro:assets'
 import WritingLayout from '../../layouts/WritingLayout.astro'
 import PartsNav from '../../components/PartsNav.astro'
 import DecisionHero from '../../components/DecisionHero.astro'
+import RfpSandboxHero from '../../components/RfpSandboxHero.astro'
 import {
   estimateReadingTime,
   getPostCategory,
@@ -89,6 +90,7 @@ const published = new Intl.DateTimeFormat('en-US', {
       </header>
 
       {post.data.hero === 'decision' && <DecisionHero />}
+      {post.data.hero === 'rfp-sandbox' && <RfpSandboxHero />}
 
       <div class="post-body">
         <aside class="sidebar">
