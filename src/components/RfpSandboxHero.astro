@@ -1,0 +1,33 @@
+---
+import '../../scripts/vendor/anatomy/iso.css'
+import '../styles/anatomy.css'
+import { rfpSandboxHeroSvg } from '../lib/rfp-sandbox-hero.mjs'
+---
+
+<figure class="decision-hero iso rfp-sandbox-hero">
+  <div class="decision-hero-inner">
+    <div class="decision-hero-copy">
+      <pre class="decision-hero-code"><code><span class="c">CLAIM: MFA enforced</span>
+CHECK: 11 / 12
+<span class="r">RESULT: CONTRADICTED</span>
+
+<span class="g">supported</span> · stale · unknown</code></pre>
+      <p class="decision-hero-line">
+        An answer is more useful when the evidence can disagree with it.
+      </p>
+    </div>
+    <div class="decision-hero-art" set:html={rfpSandboxHeroSvg} />
+  </div>
+  <figcaption>
+    Illustrative flow; MFA and audit observations are synthetic. Geometry built
+    with <a href="https://github.com/wheresryan22/anatomy">Anatomy</a>, an
+    MIT-licensed isometric illustration toolkit.
+  </figcaption>
+</figure>
+
+<style is:global>
+  .rfp-sandbox-label[data-tone='green'] text { fill: var(--anatomy-green); }
+  .rfp-sandbox-label[data-tone='red'] text { fill: var(--anatomy-red); }
+  .rfp-sandbox-label[data-tone='blue'] text { fill: var(--anatomy-blue); }
+  .rfp-sandbox-label[data-tone='mid'] text { fill: var(--anatomy-mid); }
+</style>

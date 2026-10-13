@@ -43,6 +43,11 @@ provides Microsoft 365 context through a CLI and a Model Context Protocol
 (MCP) server. A **[GitHub Copilot SDK](https://github.com/github/copilot-sdk)**
 session can query it and turn the response into structured action items.
 
+Work IQ's `ask` already does the summarising, because it is Microsoft 365
+Copilot answering over your meetings, chats and mail. The SDK only turns that
+answer into structured items. A summary says what needs doing. It doesn't say
+whose it is or how urgent.
+
 That gets the work onto the page. It doesn't settle the priorities.
 
 For that, there are two paths worth comparing. Ask the generative LLM to choose
@@ -66,7 +71,7 @@ uncertainty.
 flowchart TD
     accTitle: Work IQ to a reviewed to-do list
     accDescr: Work IQ and the Copilot SDK produce a reviewed evidence snapshot. The same snapshot, or synthetic tasks, goes to an LLM and Decision-1. Their proposals are compared before separating personal work, later work, uncertain items, handoffs and recorded decisions.
-    sources(["Meetings and Teams chats"]) --> workiq["Work IQ + Copilot SDK"]
+    sources(["Meetings and Teams chats"]) --> workiq["Work IQ summary + SDK"]
     workiq --> review["Review a local evidence snapshot"]
     sample["Or start with synthetic tasks"] --> compare
     review --> compare["Same state and rubric"]
