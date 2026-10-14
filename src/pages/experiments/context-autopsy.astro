@@ -51,9 +51,9 @@ const appJsonLd = JSON.stringify({
 
 <SiteLayout
   title="What’s Under the Prompt? Agent Token Analyzer"
-  heading="What’s Under the Prompt?"
   description={description}
 >
+  <Fragment slot="heading">What’s Under the Prompt?</Fragment>
   <script is:inline type="application/ld+json" set:html={appJsonLd} />
   <div class="calculator">
     <p class="intro">
