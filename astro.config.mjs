@@ -3,6 +3,7 @@ import mdx from '@astrojs/mdx'
 import rehypeMermaid from 'rehype-mermaid'
 import sitemap from '@astrojs/sitemap'
 import rehypeParts from './src/lib/rehype-parts.mjs'
+import rehypeInlineDiagrams from './src/lib/rehype-inline-diagrams.mjs'
 
 export default defineConfig({
   site: 'https://raghib.io',
@@ -53,6 +54,7 @@ export default defineConfig({
         },
       ],
       rehypeParts,
+      rehypeInlineDiagrams,
     ],
   },
 })

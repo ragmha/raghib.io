@@ -1,0 +1,50 @@
+---
+import ArchiveLayout from '../../../layouts/ArchiveLayout.astro'
+import PostList from '../../../components/PostList.astro'
+import {
+  estimateReadingTime,
+  formatDate,
+  getPostCategory,
+  getPostSlug,
+  getPostTags,
+  getPublishedPosts,
+  getTaxonomySlug,
+} from '../../../lib/posts'
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts()
+  const categories = [...new Set(posts.map(getPostCategory))]
+
+  return categories.map((category) => ({
+    params: { category: getTaxonomySlug(category) },
+    props: {
+      category,
+      posts: posts.filter((post) => getPostCategory(post) === category),
+    },
+  }))
+}
+
+const { category, posts } = Astro.props
+const description = `Essays and practical guides about ${category.toLowerCase()}, software, and the decisions behind building technology.`
+---
+
+<ArchiveLayout
+  title={`${category} writing`}
+  count={posts.length}
+  itemLabel="article"
+  description={description}
+>
+  <p>{description}</p>
+  <PostList
+    posts={posts.map((post) => ({
+      href: `/writing/${getPostSlug(post)}/`,
+      date: formatDate(post.data.date),
+      title: post.data.title,
+      description: post.data.description,
+      readingTime: estimateReadingTime(post.body),
+      category: getPostCategory(post),
+      tags: getPostTags(post),
+    }))}
+  />
+  <p><a href="/writing/">All writing</a></p>
+</ArchiveLayout>

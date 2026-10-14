@@ -1,21 +1,13 @@
 ---
 // Contents navigation for a single document's own section headings, sourced
 // from Astro's heading extraction.
-import contentsDisclosure from '../scripts/contents-disclosure.js?raw'
-
-interface Heading {
-  slug: string
-  text: string
-  depth: number
-}
-
 interface Props {
-  headings: Heading[]
-  title: string
-  readingTime: string
+  headings: { slug: string; text: string; depth: number }[]
+  title?: string
+  readingTime?: string
 }
 
-const { headings, title, readingTime } = Astro.props
+const { headings, title = 'On this page', readingTime } = Astro.props
 const parts = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 4)
 ---
 
@@ -26,14 +18,13 @@ const parts = headings.filter((heading) => heading.depth >= 2 && heading.depth <
       aria-label="Toggle contents" aria-controls="article-contents" aria-expanded="false" hidden>
       <span class="contents-toggle-label">Contents</span>
     </button>
-    <script is:inline set:html={contentsDisclosure}></script>
     <nav id="article-contents" class="parts" aria-label="Contents" data-contents-nav>
       <div class="parts-rail" aria-hidden="true">
         <span class="parts-window" data-reading-window></span>
       </div>
       <div class="parts-summary">
         <a class="parts-title" href="#post-title" data-part-link="post-title">{title}</a>
-        <p>{readingTime.toLowerCase()}</p>
+        {readingTime && <p>{readingTime.toLowerCase()}</p>}
       </div>
       <ol>
         {parts.map((part) => (

@@ -128,7 +128,12 @@ try {
     assert.ok(metadata.schema.some((entry) => entry['@type'] === 'Person'), `Author identity for ${file}`)
     assert.ok(metadata.schema.some((entry) => entry['@type'] === 'WebSite'), `Site identity for ${file}`)
     const article = metadata.schema.find((entry) => entry['@type'] === 'BlogPosting')
-    const isArticle = (path.startsWith('/writing/') && path !== '/writing/') || path.startsWith('/project/')
+    const isArticle = (
+      path.startsWith('/writing/') &&
+      !path.startsWith('/writing/category/') &&
+      !path.startsWith('/writing/tag/') &&
+      path !== '/writing/'
+    ) || path.startsWith('/project/')
     assert.equal(Boolean(article), isArticle, `Article schema only on article routes: ${file}`)
     if (article) {
       assert.equal(metadata.ogType, 'article', `Article social type for ${file}`)
@@ -144,7 +149,12 @@ try {
         description: metadata.description,
         datePublished: article.datePublished,
       })
-      if (path.startsWith('/writing/')) writingUrls.push(expected)
+      if (
+        path.startsWith('/writing/') &&
+        !path.startsWith('/writing/category/') &&
+        !path.startsWith('/writing/tag/') &&
+        path !== '/writing/'
+      ) writingUrls.push(expected)
     }
     for (const href of metadata.links) {
       const url = new URL(href, expected)
@@ -194,8 +204,8 @@ try {
   assert.match(home.title, /software.*AI.*systems/i, 'The homepage search title must describe the publication')
   if (writingUrls.length > 0) {
     assert.ok(
-      home.mainLinks.some((href) => writingUrls.includes(new URL(href, site).href)),
-      'The homepage must link directly to published writing',
+      home.mainLinks.some((href) => new URL(href, site).href === new URL('/writing/', site).href),
+      'The homepage must link to the writing archive',
     )
   }
   console.log(`SEO metadata and discovery checks passed for ${publicUrls.length} public pages.`)

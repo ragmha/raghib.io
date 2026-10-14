@@ -2,12 +2,18 @@
 import ArchiveLayout from '../../layouts/ArchiveLayout.astro'
 import PostList from '../../components/PostList.astro'
 import {
+  estimateReadingTime,
   formatDate,
+  getPostCategory,
   getPostSlug,
+  getPostTags,
+  getTaxonomySlug,
   getPublishedPosts,
 } from '../../lib/posts'
 
 const posts = await getPublishedPosts()
+const categories = [...new Set(posts.map(getPostCategory))].sort()
+const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort()
 ---
 
 <ArchiveLayout
@@ -23,8 +29,29 @@ const posts = await getPublishedPosts()
         date: formatDate(post.data.date),
         title: post.data.title,
         description: post.data.description,
+        readingTime: estimateReadingTime(post.body),
+        category: getPostCategory(post),
+        tags: getPostTags(post),
       }))}
     />
+    <section class="taxonomy-index" aria-label="Browse writing by topic">
+      <h2>Browse by category</h2>
+      <ul>
+        {categories.map((category) => (
+          <li>
+            <a href={`/writing/category/${getTaxonomySlug(category)}/`}>{category}</a>
+          </li>
+        ))}
+      </ul>
+      <h2>Browse by tag</h2>
+      <ul>
+        {tags.map((tag) => (
+          <li>
+            <a href={`/writing/tag/${getTaxonomySlug(tag)}/`}>{tag}</a>
+          </li>
+        ))}
+      </ul>
+    </section>
   ) : (
     <p class="empty-writing">No posts published yet.</p>
   )}
@@ -34,5 +61,18 @@ const posts = await getPublishedPosts()
   .prose .empty-writing {
     color: var(--ink-muted);
     text-align: center;
+  }
+
+  .taxonomy-index ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 1rem;
+    list-style: none;
+    margin: 0 0 1.5rem;
+    padding: 0;
+  }
+
+  .taxonomy-index li {
+    margin: 0;
   }
 </style>

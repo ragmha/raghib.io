@@ -1,0 +1,60 @@
+---
+import ArchiveLayout from '../../../layouts/ArchiveLayout.astro'
+import PostList from '../../../components/PostList.astro'
+import {
+  estimateReadingTime,
+  formatDate,
+  getPostCategory,
+  getPostSlug,
+  getPostTags,
+  getPublishedPosts,
+  getTagLabel,
+  getTaxonomySlug,
+} from '../../../lib/posts'
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts()
+  const tags = new Map<string, string>()
+
+  for (const post of posts) {
+    for (const tag of post.data.tags) {
+      tags.set(getTaxonomySlug(tag), tag)
+    }
+  }
+
+  return [...tags].map(([slug, tag]) => ({
+    params: { tag: slug },
+    props: {
+      tag,
+      posts: posts.filter((post) =>
+        post.data.tags.some((postTag) => getTaxonomySlug(postTag) === slug),
+      ),
+    },
+  }))
+}
+
+const { tag, posts } = Astro.props
+const label = getTagLabel(tag)
+const description = `Articles tagged ${label}, with practical perspectives on software, technology, and engineering.`
+---
+
+<ArchiveLayout
+  title={`Writing tagged ${label}`}
+  count={posts.length}
+  itemLabel="article"
+  description={description}
+>
+  <p>{description}</p>
+  <PostList
+    posts={posts.map((post) => ({
+      href: `/writing/${getPostSlug(post)}/`,
+      date: formatDate(post.data.date),
+      title: post.data.title,
+      description: post.data.description,
+      readingTime: estimateReadingTime(post.body),
+      category: getPostCategory(post),
+      tags: getPostTags(post),
+    }))}
+  />
+  <p><a href="/writing/">All writing</a></p>
+</ArchiveLayout>

@@ -1,0 +1,452 @@
+---
+title: "Advent of Copilot CLI: 50 Tips, From First Prompt to Agent Fleets"
+seoTitle: "Advent of Copilot CLI: 50 GitHub Copilot CLI Tips"
+description: "Fifty GitHub Copilot CLI tips, from first-day shortcuts to subagents, hooks, computer use, and multi-model orchestration. Every command was checked against a real install."
+date: "2026-12-01"
+tags: ["ai", "copilot", "cli", "dx"]
+published: false
+---
+
+Every December, [Advent of Code](https://adventofcode.com/) turns programming practice into a daily ritual: one small puzzle, opened like a door on an advent calendar. That rhythm suits a terminal agent too. Small, repeatable habits teach more than a feature tour.
+
+This is an advent calendar for GitHub Copilot CLI. December has twenty-five doors; the CLI had more worth saying, so this calendar has fifty. The tips are arranged from the first things worth learning to the patterns that change how work gets divided. Every command here was checked against Copilot CLI 1.0.96 and GitHub's own documentation. The tool moves quickly, so run `/changelog` if something looks different on your machine.
+
+A terminal agent is not useful because it can do everything. It is useful because you can decide, precisely, what it should do next. Most of these tips are about that decision.
+
+---
+
+## Getting started
+
+Give the agent a map before you give it work.
+
+### 1. `AGENTS.md` — write the onboarding doc once
+
+Start with an `AGENTS.md` at the repository root: build and test commands, architecture, and the conventions a new contributor would otherwise learn the hard way. Copilot CLI reads this shared instruction file, so your guidance does not have to be tied to one agent.
+
+Keep it concrete:
+
+```markdown
+# Repository guidance
+
+Run `bun run build` before handing off code changes.
+Validate every request body before it reaches a handler.
+```
+
+Want a generated starting point? `/init` (or `copilot init` from your shell) reads the codebase and writes `.github/copilot-instructions.md`. That is Copilot's native instruction file, not `AGENTS.md`. Review the generated guidance and keep shared rules in `AGENTS.md` rather than maintaining duplicate instructions. Copilot-specific path-scoped rules can live in `.github/instructions/**/*.instructions.md` with `applyTo` frontmatter.
+
+Run `/instructions` to see which files loaded and to toggle them for the session.
+
+### 2. `@` and `#` — point, don't paste
+
+Type `@` to pull a file into context, with fuzzy completion as you type. Type `#` followed by a number to attach a GitHub issue or pull request.
+
+```text
+Refactor @src/lib/posts.ts to match the approach discussed in #42
+```
+
+One precise reference beats three paragraphs of description.
+
+### 3. Paste a screenshot
+
+`Ctrl+V` pastes clipboard content as an attachment, and `Alt+V` pastes an image. A screenshot of a broken layout or an error dialog often explains the problem faster than any description.
+
+### 4. `/memory` — let lessons outlive the session
+
+Copilot can remember facts across sessions: a command that turned out to matter, a convention you corrected twice. `/memory` shows what is stored and turns the feature on or off. If you script the CLI, memory is off by default in prompt mode; add `--enable-memory` when you want it.
+
+---
+
+## Shortcuts worth memorizing
+
+These cost nothing to learn and get used dozens of times a day.
+
+### 5. `!` and `$` — run the command yourself
+
+```text
+! git status
+! bun test
+```
+
+A leading `!` runs the command in your shell directly. No model call, no approval prompt, no tokens. Enter `!` on an empty prompt to stay in shell mode for several commands, or a lone `$` to hand the terminal over to your real interactive shell until you exit.
+
+{/* <video src="/videos/04-shell.mp4" controls muted playsinline preload="none" width="1200" height="640"></video> */}
+
+### 6. `Esc` twice and `/rewind` — try the strange idea
+
+Press `Esc` twice to interrupt a running turn. If the model has not started answering yet, your prompt goes back into the input box, ready to edit.
+
+When the idea has already played out and you dislike it, `/rewind` (or `/undo`) opens a picker of earlier turns. Roll back the conversation only, or the conversation _and_ the files Copilot changed. That makes "what if we…" cheap to try. Shell side effects such as installs and network calls are not undone, so read before you approve.
+
+{/* <video src="/videos/05-rewind.mp4" controls muted playsinline preload="none" width="1200" height="640"></video> */}
+
+### 7. `Ctrl+R` and `Ctrl+F` — find what was already said
+
+`Ctrl+R` searches every prompt you have sent, so last Tuesday's good prompt is still there. `Ctrl+F` (or `/search`) searches the conversation timeline itself, which helps when the answer you need scrolled away an hour ago.
+
+### 8. `Ctrl+Q` — queue the next thought
+
+While Copilot is busy, type your next instruction and press `Ctrl+Q` (or `Ctrl+Enter`). It runs after the current task finishes. Prompts, shell commands, and many slash commands can all be queued, so you can line up "now run the tests" without breaking the agent's focus.
+
+{/* <video src="/videos/07-queue.mp4" controls muted playsinline preload="none" width="1200" height="640"></video> */}
+
+### 9. `/ask` — a side question that leaves no trace
+
+```text
+/ask what does --frozen-lockfile do again?
+```
+
+The answer appears, but the exchange stays out of the conversation history. The main thread stays on task.
+
+### 10. `/refine` and `Ctrl+G` — fix the prompt, not the output
+
+Typed a rambling, half-formed request? Press `Ctrl+X` then `/` and run `/refine`. Copilot rewrites the draft into a clear prompt for you to review before anything runs. For longer prompts, `Ctrl+G` opens the input in `$EDITOR`.
+
+### 11. `/vim` — modal editing in the prompt box
+
+Vim mode is now available to everyone. `/vim` turns on motions, text objects, and the rest of the muscle memory you already have; run it again to turn it off. Set `editorMode` to `vim` to keep it on.
+
+### 12. `/voice` — talk instead of type
+
+`/voice on`, or `Ctrl+Space`, starts dictation. Some prompts are easier to say than to type, especially the long, explanatory kind. `/voice devices` picks the microphone.
+
+---
+
+## Sessions
+
+Sessions persist, which makes them more like branches than chats.
+
+### 13. `--continue` and `--resume` — pick up where you stopped
+
+```bash
+copilot --continue   # the most recent session
+copilot --resume     # choose from a picker
+```
+
+A closed terminal or a dead battery is no longer a reason to rebuild context.
+
+### 14. Name your sessions
+
+```bash
+copilot --name "search-migration"
+copilot --resume "search-migration"
+```
+
+Inside a session, `/rename` sets a name, or generates one from the conversation if you leave it blank. Named sessions are as easy to return to as branches.
+
+### 15. `/fork` — explore without losing your place
+
+`/fork` copies the current session into a new one, so you can chase an alternative without disturbing the original thread. `/fork worktree` goes further and puts the fork in a fresh git worktree, giving the experiment its own files as well as its own context.
+
+### 16. `/worktree` and `/move` — isolate the work, not just the chat
+
+`/worktree` creates a new git worktree and switches into it, leaving your uncommitted changes where they were. `/move` does the opposite: it carries your uncommitted changes _into_ a new worktree. Pass either one a task description and it becomes the opening prompt. Parallel work stops colliding in one directory.
+
+### 17. `Ctrl+E` before the first message — local or cloud
+
+In a new, empty session, `Ctrl+E` opens an environment picker: run the conversation on your machine, or in a cloud environment that keeps working after you close the laptop. The choice is made before anything is provisioned.
+
+### 18. `/share` and `/remote` — hand the session to someone
+
+`/share` writes the session to Markdown, HTML, or a GitHub gist: a record of what was tried and why. `/remote` lets you or someone else continue the live session from GitHub on the web or mobile. One is a receipt; the other is a handover.
+
+---
+
+## Staying oriented
+
+Long sessions fail quietly. These keep the state visible.
+
+### 19. `/context` and `/compact` — see what fills the window
+
+`/context` shows what is consuming the context window: instructions, tool definitions, files, and conversation. When it gets crowded, `/compact` summarizes the history so far. Add a focus such as `/compact keep the API decisions` to tell it what must survive.
+
+Compact at a natural break, not in the middle of a delicate change.
+
+### 20. `/statusline`, `/usage`, and `/limits` — know where you stand
+
+`/statusline` chooses what appears in the footer: model, branch, context use, and more. `/usage` shows what the session has consumed. `/limits set max-ai-credits` sets a soft cap per response, which is worth doing before you leave an agent running unattended.
+
+### 21. `/keep-alive` — don't let the laptop nap mid-task
+
+A long autopilot run is wasted if the machine sleeps halfway through. `/keep-alive busy` prevents sleep only while the agent is working; `/keep-alive 2h` sets a fixed window.
+
+### 22. `/env` and `/diagnose` — debug your setup, not your code
+
+When Copilot ignores an instruction or a tool is missing, `/env` lists exactly what loaded: instructions, MCP servers, skills, agents, hooks, plugins, and language servers. `/diagnose` analyzes the session log when something went wrong and you want to know why.
+
+---
+
+## Planning and judgment
+
+The expensive mistakes happen before the first edit.
+
+### 23. Plan mode — think first, edit later
+
+Press `Shift+Tab` to cycle between standard, plan, and autopilot modes, or run `/plan` with a request. In plan mode, Copilot reads the codebase, asks questions, and writes a plan, but changes nothing until you approve it.
+
+For a well-understood task, `copilot --plan --mode autopilot` starts in plan mode and moves straight into execution once the plan is ready.
+
+{/* <video src="/videos/16-plan-mode.mp4" controls muted playsinline preload="none" width="1200" height="640"></video> */}
+
+### 24. `/model` and reasoning effort — choose the brain for the job
+
+`/model` switches models for the current session; `auto` lets Copilot choose. From the shell, `--reasoning-effort` trades speed for depth:
+
+```bash
+copilot --model auto --reasoning-effort high
+```
+
+A rename does not need the same thinking budget as a concurrency bug.
+
+### 25. `/model plan` — a different brain for planning
+
+`/model plan` picks a model used only while you are in plan mode, then switches back when you leave it. Plan with a deep reasoner; execute with something faster.
+
+### 26. HydraFusion — orchestration instead of a model
+
+HydraFusion is a research preview that appears in the model picker but is not a single model. For each task it chooses a workflow: one model solves it directly, a cheaper model drafts and a quality gate decides whether to escalate, or a model from a different family critiques the draft before one revision. Run `/experimental on`, then pick **HydraFusion** in `/model`.
+
+The interesting idea is not the cost. It is that choosing _how_ to solve a problem has become part of the tool, not just choosing _who_ solves it.
+
+### 27. `/rubber-duck` — ask for a second opinion
+
+`/rubber-duck` sends the current plan or implementation to a separate agent for critique. A fresh context has not been persuaded by the session's earlier reasoning, which is exactly why it catches problems the first agent talked itself past.
+
+### 28. `/research` — a cited answer before a line of code
+
+```text
+/research how do other static site generators handle draft previews?
+```
+
+`/research` runs a deep investigation across GitHub and the web and returns a report with sources. Use it when the real question is "what are the options?", not "write the code".
+
+---
+
+## Permissions and safety
+
+Autonomy is useful only inside boundaries you chose on purpose.
+
+### 29. Allow and deny with patterns
+
+Approve categories of work, not individual clicks:
+
+```bash
+copilot --allow-tool='shell(git:*)' --deny-tool='shell(git push)'
+copilot --allow-tool='write' --deny-tool='write(.env)'
+copilot --allow-url=github.com
+```
+
+Deny rules always win, even over `--allow-all-tools`. Inside a session, `/permissions` switches modes and `/reset-allowed-tools` forgets what you approved earlier.
+
+### 30. `/sandbox` — let the OS enforce the boundary
+
+`/sandbox` configures OS-level limits on what shell commands can read, write, and reach over the network. `/sandbox policy` shows the effective rules. Permission prompts ask; a sandbox enforces. Using both means a bad command fails safely instead of depending on a tired approval.
+
+### 31. `--yolo` — the escape hatch, labeled honestly
+
+```bash
+copilot --yolo
+```
+
+This allows every tool, path, and URL without asking. It is the same as `--allow-all`, and `/allow-all` does the same inside a session. Use it in a throwaway container or a disposable worktree, not on a machine with credentials you care about.
+
+### 32. Hooks — deterministic rules around a probabilistic agent
+
+Hooks run your scripts at fixed points in the agent's lifecycle: `sessionStart`, `userPromptSubmitted`, `preToolUse`, `postToolUse`, `permissionRequest`, `subagentStop`, `preCompact`, and more. Put them in `.github/hooks/*.json` and they travel with the repository.
+
+A `preToolUse` hook can block a dangerous command before it runs. A `postToolUse` hook can run a formatter after every edit. The model can forget an instruction; a hook cannot.
+
+---
+
+## Automation
+
+The same agent works without a person at the keyboard.
+
+### 33. `-p` — Copilot as a Unix tool
+
+```bash
+copilot -p "Summarize what changed on this branch" -s
+git diff | copilot -p "Explain these changes for a reviewer" -s
+copilot -p "Fix the lint errors" --allow-tool='write' --allow-tool='shell(bun:*)'
+```
+
+`-p` runs one prompt and exits. `-s` prints only the answer, ready for a pipe. Grant only the permissions the script needs; in non-interactive mode, an unapproved tool simply fails.
+
+### 34. `/delegate` — send it to the cloud and get a PR back
+
+`/delegate` hands the current session to Copilot's cloud agent on GitHub, which continues working and opens a pull request. Add `--base` to choose the target branch. Plan locally, delegate the long implementation, and review the result like any other PR.
+
+{/* Record manually (Cmd+Shift+5): /delegate opens a real PR, so it has no VHS tape. */}
+{/* <video src="/videos/24-delegate.mp4" controls muted playsinline preload="none" width="1200" height="640"></video> */}
+
+### 35. `/pr auto` — drive the pull request to green
+
+`/pr create` opens a pull request that follows the repository's template. `/pr fix` addresses review comments and failing checks. `/pr auto` keeps going until the PR is green, then stops; `/pr automerge` also merges it. The last mile of a change is often the most tedious, and now it can be delegated too.
+
+### 36. `/diff`, `/review`, and `/security-review` — review before anyone else does
+
+`/diff` shows the changes in the working directory. `/review` runs a code-review agent over them, and `/security-review` checks staged and unstaged changes for vulnerabilities. Fifteen seconds before you push is cheaper than a review cycle after.
+
+### 37. `/after` and `/every` — schedule the agent
+
+```text
+/after 30m check whether the deploy finished
+/every 1h run the tests and tell me if anything broke
+```
+
+`/after` schedules a one-off prompt or slash command in the current session; `/every` repeats it. Run either with no arguments to manage the schedule. It is cron for intentions, not just commands.
+
+### 38. Dynamic workflows — repeatable multi-agent runs
+
+A dynamic workflow is a scripted orchestration of several agents with phases and progress. Run one without opening a chat:
+
+```bash
+copilot workflow run release-notes --args '{"since":"v2.3.0"}'
+```
+
+`/workflows` shows runs, phases, and agents as they progress. Dynamic workflows require a token-based billing plan.
+
+---
+
+## Agents and extensibility
+
+This is where the CLI stops being one assistant and becomes a small team.
+
+### 39. Subagents and `/tasks` — keep the main context clean
+
+Copilot can hand exploration, test runs, and research to subagents. Each one works in its own context and returns a summary instead of filling yours with raw output. `/tasks` shows what is running, and `Ctrl+X` then `b` sends a slow command or task to the background. `/subagents` sets which model each kind of subagent uses.
+
+### 40. `/fleet` — parallelize independent work
+
+```text
+/fleet update every package README to the new install command
+```
+
+Fleet mode splits work into parallel subagents. It suits wide, independent changes, not tightly coupled ones where each step depends on the last. From the shell, add `--fleet` to `-p` or `-i`.
+
+{/* <video src="/videos/27-fleet.mp4" controls muted playsinline preload="none" width="1200" height="640"></video> */}
+
+### 41. `/autopilot` — keep going until the work is done
+
+Autopilot lets Copilot continue without waiting for you between steps until it decides the task is complete. Give it an objective, a credit limit with `--max-ai-credits`, and permissions you are comfortable with. Return to a result, not a question.
+
+### 42. Skills — package expertise once
+
+A skill follows the open [Agent Skills](https://agentskills.io) format: a folder with a `SKILL.md` and any scripts or references it needs. Copilot loads it when the task matches. Use `.agents/skills/<skill-name>/SKILL.md` for project skills and `~/.agents/skills/<skill-name>/SKILL.md` for personal skills shared across projects. These are supported Copilot CLI locations, and the format is portable across compatible agents. `/skills` and `copilot skill` manage them.
+
+The distinction is simple: `AGENTS.md` describes how to work in the repository; `.agents/skills/` packages task-specific expertise. Agent Skills is the format's name, not a directory called `agent-skills`.
+
+### 43. `/chronicle` — learn from your own history
+
+`/chronicle standup` summarizes recent sessions into a standup. `/chronicle tips` reviews how you work and suggests improvements, including cost. `/chronicle skills create` goes further: it notices repeated patterns in your sessions and drafts skills for you to review. Your history becomes training material for your setup.
+
+### 44. Custom agents — a specialist with a job description
+
+An `.agent.md` file in `.github/agents/` defines an agent with its own instructions, tools, and model. Run one with `/agent` or `copilot --agent reviewer`. A reviewer that cannot write files is easier to trust than a generalist told to be careful.
+
+Custom agents are a Copilot-specific extension, distinct from `AGENTS.md` and Agent Skills. Keep them in `.github/agents/`; `.agents/agents/` is not a documented Copilot CLI discovery path.
+
+### 45. MCP, plugins, and LSP — connect the agent to everything else
+
+`/mcp` connects external tools such as issue trackers, databases, browsers, and internal APIs. `/plugin` installs bundles of skills, agents, hooks, and MCP servers in one step, so a whole setup can be shared without a page of instructions. `/lsp` adds language servers, giving Copilot the same definitions, references, and diagnostics your editor sees.
+
+### 46. `/computer` — beyond the terminal
+
+Computer use is in public preview on macOS and Windows. Run `/computer on` and Copilot can operate desktop applications: read what is on screen, click, type, scroll, and move information between apps. It asks before controlling each app, and `/computer off` turns it off.
+
+This matters most for software that never had an API: the legacy admin panel, the vendor tool, the spreadsheet that runs a department. Describe the outcome, the apps involved, and the constraints.
+
+{/* Record manually (Cmd+Shift+5): computer use drives GUI apps outside the terminal. */}
+{/* <video src="/videos/46-computer-use.mp4" controls muted playsinline preload="none" width="1200" height="640"></video> */}
+
+### 47. `/ide` — share an editor with the agent
+
+`/ide` connects the session to a VS Code workspace, so Copilot can see what you have open and selected, and you can review its diffs in the editor you already use.
+
+---
+
+## Beyond the session
+
+The CLI is also a tool for configuring and observing itself.
+
+### 48. `copilot config` and shell completion
+
+```bash
+copilot config --list
+copilot config editorMode vim
+source <(copilot completion zsh)
+```
+
+`copilot config` reads and changes settings without opening a session, which makes a setup scriptable. Completion is available for bash, zsh, and fish.
+
+### 49. OpenTelemetry — watch what your agents actually do
+
+Set `COPILOT_OTEL_ENABLED=true`, or point `OTEL_EXPORTER_OTLP_ENDPOINT` at a collector, and the CLI exports traces and metrics for every model call, tool execution, and token count. They follow the OTel GenAI conventions, so any compatible backend works. `copilot help monitoring` has the details.
+
+You would not run a production service without telemetry. An agent with access to your repository deserves the same.
+
+### 50. Bring your own model
+
+Set `COPILOT_PROVIDER_BASE_URL` and Copilot CLI uses your own model provider instead of GitHub's routing: OpenAI-compatible, Azure, Anthropic, or a local server such as Ollama. `copilot help providers` lists the options. Useful for offline work, regulated environments, or simply testing a new model.
+
+---
+
+## Quick reference
+
+### Shortcuts
+
+| Shortcut | What it does |
+| --- | --- |
+| `!command` · `$` | Run a shell command · hand over to your shell |
+| `@file` / `#123` | Attach a file / an issue or PR |
+| `Ctrl+V` / `Alt+V` | Paste an attachment / an image |
+| `Esc` `Esc` | Interrupt the current turn |
+| `Shift+Tab` | Cycle standard → plan → autopilot |
+| `Ctrl+R` · `Ctrl+F` | Search prompt history · the timeline |
+| `Ctrl+Q` | Queue a message while busy |
+| `Ctrl+G` | Edit the prompt in `$EDITOR` |
+| `Ctrl+E` (new session) | Choose local or cloud |
+| `Ctrl+Space` | Voice dictation |
+| `Ctrl+X` then `/` | Run a slash command mid-prompt |
+| `Ctrl+X` then `b` | Send a task to the background |
+
+### Slash commands
+
+| Command | Purpose |
+| --- | --- |
+| `/init` · `/instructions` | Generate Copilot-native instructions; inspect loaded guidance |
+| `/context` · `/compact` | Inspect and shrink the context window |
+| `/plan` · `/rubber-duck` · `/research` | Think before building |
+| `/rewind` · `/fork` · `/worktree` | Undo, branch, isolate |
+| `/review` · `/security-review` | Review changes before pushing |
+| `/delegate` · `/pr auto` | Hand off; drive a PR to green |
+| `/after` · `/every` | Schedule prompts |
+| `/fleet` · `/autopilot` · `/tasks` | Parallel and unattended work |
+| `/chronicle` | Insights and skills from your history |
+| `/computer` · `/ide` | Desktop apps; editor connection |
+| `/sandbox` · `/permissions` | Set boundaries |
+| `/vim` · `/voice` | Edit and dictate prompts |
+
+### Flags
+
+| Flag | Purpose |
+| --- | --- |
+| `-p "…"` · `-s` | Headless prompt; answer only |
+| `--continue` · `--resume [name]` | Return to a session |
+| `--name` | Name a new session |
+| `--plan --mode autopilot` | Plan, then execute |
+| `--model` · `--reasoning-effort` | Choose model and depth |
+| `--allow-tool` · `--deny-tool` | Pattern permissions |
+| `--fleet` | Parallel subagents in prompt mode |
+| `--yolo` | Allow everything (use carefully) |
+
+---
+
+## Closing thoughts
+
+Read the list again and a pattern appears. The tips that matter most are not the ones that make the agent do more. They are the ones that let you decide what it does: plan before editing, rewind when wrong, deny before allowing, hooks instead of hopes, a separate critic, a credit limit before autopilot, telemetry on everything.
+
+The newest features push the same way. Computer use reaches into software that was never automatable, and HydraFusion decides how a problem should be solved, not just which model solves it. Both expand what the agent can do. Both make the question of who decides more important, not less.
+
+That holds in any industry where software meets judgment. An agent you can steer precisely is worth more than a more powerful one you cannot.
+
+Fifty tips is a snapshot of a tool that changes weekly. If one of your habits belongs on this list, I would like to hear it.

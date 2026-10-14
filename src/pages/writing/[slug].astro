@@ -4,6 +4,7 @@ import { Picture } from 'astro:assets'
 import WritingLayout from '../../layouts/WritingLayout.astro'
 import PartsNav from '../../components/PartsNav.astro'
 import TagList from '../../components/TagList.astro'
+import RfpSandboxHero from '../../components/RfpSandboxHero.astro'
 import { SITE_NAME } from '../../lib/seo'
 import {
   estimateReadingTime,
@@ -69,9 +70,8 @@ const readingTime = estimateReadingTime(post.body)
           </p>
           <TagList category={getPostCategory(post)} tags={getPostTags(post)} />
         </header>
-
+        {post.data.hero === 'rfp-sandbox' && <RfpSandboxHero />}
         <Content />
-
         <hr class="rule-dotted" />
         <p class="doc-end"><a href="/writing/">← All writing</a></p>
       </article>

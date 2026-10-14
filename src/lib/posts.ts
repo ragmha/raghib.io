@@ -44,6 +44,10 @@ const CATEGORIES = [
 
 export type WritingCategory = (typeof CATEGORIES)[number]
 
+export function getTaxonomySlug(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+}
+
 const CATEGORY_RULES: Array<{
   category: WritingCategory
   keywords: string[]
@@ -113,6 +117,10 @@ const TAG_LABELS: Record<string, string> = {
   writing: 'Writing',
 }
 
+export function getTagLabel(tag: string): string {
+  return TAG_LABELS[tag.toLowerCase()] ?? tag
+}
+
 // Together with the category badge this keeps each post at three labels.
 const MAX_TAGS = 2
 
@@ -128,11 +136,12 @@ export function getPostTags(post: WritingEntry): string[] {
 
   return post.data.tags
     .map((tag, index) => {
-      const label = TAG_LABELS[tag.toLowerCase()] ?? tag
+      const label = getTagLabel(tag)
       const tagText = normalizeTagText(tag)
       const labelText = normalizeTagText(label)
 
       return {
+        tag,
         label,
         index,
         // Prefer tags the title or description actually talks about.
@@ -145,7 +154,7 @@ export function getPostTags(post: WritingEntry): string[] {
     .filter(({ label }) => label.toLowerCase() !== category)
     .sort((a, b) => b.score - a.score || a.index - b.index)
     .slice(0, MAX_TAGS)
-    .map(({ label }) => label)
+    .map(({ tag }) => tag)
 }
 
 // Fixed palette so each tag always gets the same color across the site.
