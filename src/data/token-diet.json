@@ -57,6 +57,8 @@
       "hookChars": 0,
       "proseChars": 789,
       "argChars": 2263,
+      "testRuns": 3,
+      "testRunsUnpiped": 0,
       "rtk": null,
       "calls": [
         {
@@ -177,6 +179,8 @@
       "hookChars": 0,
       "proseChars": 943,
       "argChars": 2186,
+      "testRuns": 5,
+      "testRunsUnpiped": 0,
       "rtk": null,
       "calls": [
         {
@@ -306,6 +310,8 @@
       "hookChars": 0,
       "proseChars": 896,
       "argChars": 2869,
+      "testRuns": 6,
+      "testRunsUnpiped": 0,
       "rtk": null,
       "calls": [
         {
@@ -504,6 +510,8 @@
       "hookChars": 0,
       "proseChars": 842,
       "argChars": 2453,
+      "testRuns": 3,
+      "testRunsUnpiped": 0,
       "rtk": null,
       "calls": [
         {
@@ -639,6 +647,8 @@
       "hookChars": 0,
       "proseChars": 789,
       "argChars": 2808,
+      "testRuns": 3,
+      "testRunsUnpiped": 0,
       "rtk": null,
       "calls": [
         {
@@ -816,6 +826,8 @@
       "hookChars": 0,
       "proseChars": 830,
       "argChars": 2795,
+      "testRuns": 5,
+      "testRunsUnpiped": 0,
       "rtk": null,
       "calls": [
         {
@@ -1023,6 +1035,8 @@
       "hookChars": 0,
       "proseChars": 825,
       "argChars": 3098,
+      "testRuns": 6,
+      "testRunsUnpiped": 0,
       "rtk": null,
       "calls": [
         {
@@ -1200,6 +1214,8 @@
       "hookChars": 0,
       "proseChars": 706,
       "argChars": 2296,
+      "testRuns": 3,
+      "testRunsUnpiped": 0,
       "rtk": null,
       "calls": [
         {
@@ -1329,6 +1345,8 @@
       "hookChars": 0,
       "proseChars": 721,
       "argChars": 2722,
+      "testRuns": 5,
+      "testRunsUnpiped": 0,
       "rtk": null,
       "calls": [
         {
@@ -1503,6 +1521,8 @@
       "hookChars": 0,
       "proseChars": 624,
       "argChars": 3381,
+      "testRuns": 9,
+      "testRunsUnpiped": 0,
       "rtk": null,
       "calls": [
         {
@@ -1704,6 +1724,8 @@
       "hookChars": 4466,
       "proseChars": 1003,
       "argChars": 2581,
+      "testRuns": 4,
+      "testRunsUnpiped": 0,
       "rtk": null,
       "calls": [
         {
@@ -1848,6 +1870,8 @@
       "hookChars": 4466,
       "proseChars": 702,
       "argChars": 3007,
+      "testRuns": 4,
+      "testRunsUnpiped": 0,
       "rtk": null,
       "calls": [
         {
@@ -2010,6 +2034,8 @@
       "hookChars": 4466,
       "proseChars": 920,
       "argChars": 3074,
+      "testRuns": 6,
+      "testRunsUnpiped": 0,
       "rtk": null,
       "calls": [
         {
@@ -2211,6 +2237,8 @@
       "hookChars": 4466,
       "proseChars": 883,
       "argChars": 2239,
+      "testRuns": 2,
+      "testRunsUnpiped": 0,
       "rtk": null,
       "calls": [
         {
@@ -2325,6 +2353,8 @@
       "hookChars": 4466,
       "proseChars": 738,
       "argChars": 2829,
+      "testRuns": 4,
+      "testRunsUnpiped": 0,
       "rtk": null,
       "calls": [
         {
@@ -2514,6 +2544,8 @@
       "hookChars": 0,
       "proseChars": 1010,
       "argChars": 2910,
+      "testRuns": 5,
+      "testRunsUnpiped": 0,
       "rtk": {
         "commands": 12,
         "input": 9654,
@@ -2711,6 +2743,8 @@
       "hookChars": 0,
       "proseChars": 880,
       "argChars": 2346,
+      "testRuns": 3,
+      "testRunsUnpiped": 0,
       "rtk": {
         "commands": 10,
         "input": 9585,
@@ -2845,6 +2879,8 @@
       "hookChars": 0,
       "proseChars": 765,
       "argChars": 2424,
+      "testRuns": 4,
+      "testRunsUnpiped": 0,
       "rtk": {
         "commands": 11,
         "input": 13194,
@@ -3015,6 +3051,8 @@
       "hookChars": 0,
       "proseChars": 1060,
       "argChars": 2293,
+      "testRuns": 4,
+      "testRunsUnpiped": 0,
       "rtk": {
         "commands": 11,
         "input": 10970,
@@ -3164,6 +3202,8 @@
       "hookChars": 0,
       "proseChars": 708,
       "argChars": 3046,
+      "testRuns": 4,
+      "testRunsUnpiped": 0,
       "rtk": {
         "commands": 11,
         "input": 18974,
@@ -3328,6 +3368,8 @@
       "hookChars": 4466,
       "proseChars": 753,
       "argChars": 2559,
+      "testRuns": 4,
+      "testRunsUnpiped": 0,
       "rtk": {
         "commands": 9,
         "input": 3186,
@@ -3489,6 +3531,8 @@
       "hookChars": 4466,
       "proseChars": 696,
       "argChars": 3179,
+      "testRuns": 7,
+      "testRunsUnpiped": 0,
       "rtk": {
         "commands": 16,
         "input": 7674,
@@ -3680,6 +3724,8 @@
       "hookChars": 4466,
       "proseChars": 845,
       "argChars": 3864,
+      "testRuns": 8,
+      "testRunsUnpiped": 0,
       "rtk": {
         "commands": 13,
         "input": 7337,
@@ -3937,6 +3983,8 @@
       "hookChars": 4466,
       "proseChars": 633,
       "argChars": 2679,
+      "testRuns": 3,
+      "testRunsUnpiped": 0,
       "rtk": {
         "commands": 10,
         "input": 9184,
@@ -4098,6 +4146,8 @@
       "hookChars": 4466,
       "proseChars": 730,
       "argChars": 2390,
+      "testRuns": 4,
+      "testRunsUnpiped": 0,
       "rtk": {
         "commands": 19,
         "input": 2954,
