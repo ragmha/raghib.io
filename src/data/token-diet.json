@@ -53,7 +53,7 @@
         "cacheWrite": 31023,
         "output": 1899
       },
-      "skills": 3,
+      "skills": 2,
       "hookChars": 0,
       "proseChars": 789,
       "argChars": 2263,
@@ -173,7 +173,7 @@
         "cacheWrite": 23538,
         "output": 1725
       },
-      "skills": 3,
+      "skills": 2,
       "hookChars": 0,
       "proseChars": 943,
       "argChars": 2186,
@@ -302,7 +302,7 @@
         "cacheWrite": 26587,
         "output": 2475
       },
-      "skills": 3,
+      "skills": 2,
       "hookChars": 0,
       "proseChars": 896,
       "argChars": 2869,
@@ -500,7 +500,7 @@
         "cacheWrite": 31036,
         "output": 2105
       },
-      "skills": 3,
+      "skills": 2,
       "hookChars": 0,
       "proseChars": 842,
       "argChars": 2453,
@@ -635,7 +635,7 @@
         "cacheWrite": 28294,
         "output": 2422
       },
-      "skills": 3,
+      "skills": 2,
       "hookChars": 0,
       "proseChars": 789,
       "argChars": 2808,
@@ -812,7 +812,7 @@
         "cacheWrite": 26451,
         "output": 2448
       },
-      "skills": 3,
+      "skills": 2,
       "hookChars": 0,
       "proseChars": 830,
       "argChars": 2795,
@@ -1019,7 +1019,7 @@
         "cacheWrite": 26885,
         "output": 2505
       },
-      "skills": 3,
+      "skills": 2,
       "hookChars": 0,
       "proseChars": 825,
       "argChars": 3098,
@@ -1196,7 +1196,7 @@
         "cacheWrite": 30233,
         "output": 1811
       },
-      "skills": 3,
+      "skills": 2,
       "hookChars": 0,
       "proseChars": 706,
       "argChars": 2296,
@@ -1325,7 +1325,7 @@
         "cacheWrite": 34421,
         "output": 2336
       },
-      "skills": 3,
+      "skills": 2,
       "hookChars": 0,
       "proseChars": 721,
       "argChars": 2722,
@@ -1499,7 +1499,7 @@
         "cacheWrite": 27513,
         "output": 2788
       },
-      "skills": 3,
+      "skills": 2,
       "hookChars": 0,
       "proseChars": 624,
       "argChars": 3381,
@@ -1700,7 +1700,7 @@
         "cacheWrite": 28954,
         "output": 2215
       },
-      "skills": 23,
+      "skills": 22,
       "hookChars": 4466,
       "proseChars": 1003,
       "argChars": 2581,
@@ -1844,7 +1844,7 @@
         "cacheWrite": 29549,
         "output": 2426
       },
-      "skills": 23,
+      "skills": 22,
       "hookChars": 4466,
       "proseChars": 702,
       "argChars": 3007,
@@ -2006,7 +2006,7 @@
         "cacheWrite": 29553,
         "output": 2743
       },
-      "skills": 23,
+      "skills": 22,
       "hookChars": 4466,
       "proseChars": 920,
       "argChars": 3074,
@@ -2207,7 +2207,7 @@
         "cacheWrite": 35374,
         "output": 1758
       },
-      "skills": 23,
+      "skills": 22,
       "hookChars": 4466,
       "proseChars": 883,
       "argChars": 2239,
@@ -2321,7 +2321,7 @@
         "cacheWrite": 27590,
         "output": 2501
       },
-      "skills": 23,
+      "skills": 22,
       "hookChars": 4466,
       "proseChars": 738,
       "argChars": 2829,
@@ -2510,7 +2510,7 @@
         "cacheWrite": 28501,
         "output": 2691
       },
-      "skills": 3,
+      "skills": 2,
       "hookChars": 0,
       "proseChars": 1010,
       "argChars": 2910,
@@ -2707,7 +2707,7 @@
         "cacheWrite": 24472,
         "output": 1681
       },
-      "skills": 3,
+      "skills": 2,
       "hookChars": 0,
       "proseChars": 880,
       "argChars": 2346,
@@ -2841,7 +2841,7 @@
         "cacheWrite": 27895,
         "output": 2008
       },
-      "skills": 3,
+      "skills": 2,
       "hookChars": 0,
       "proseChars": 765,
       "argChars": 2424,
@@ -3011,7 +3011,7 @@
         "cacheWrite": 16722,
         "output": 1726
       },
-      "skills": 3,
+      "skills": 2,
       "hookChars": 0,
       "proseChars": 1060,
       "argChars": 2293,
@@ -3160,7 +3160,7 @@
         "cacheWrite": 25137,
         "output": 2407
       },
-      "skills": 3,
+      "skills": 2,
       "hookChars": 0,
       "proseChars": 708,
       "argChars": 3046,
@@ -3324,7 +3324,7 @@
         "cacheWrite": 30123,
         "output": 2122
       },
-      "skills": 23,
+      "skills": 22,
       "hookChars": 4466,
       "proseChars": 753,
       "argChars": 2559,
@@ -3485,7 +3485,7 @@
         "cacheWrite": 35160,
         "output": 2334
       },
-      "skills": 23,
+      "skills": 22,
       "hookChars": 4466,
       "proseChars": 696,
       "argChars": 3179,
@@ -3676,7 +3676,7 @@
         "cacheWrite": 36709,
         "output": 3151
       },
-      "skills": 23,
+      "skills": 22,
       "hookChars": 4466,
       "proseChars": 845,
       "argChars": 3864,
@@ -3933,7 +3933,7 @@
         "cacheWrite": 33735,
         "output": 2119
       },
-      "skills": 23,
+      "skills": 22,
       "hookChars": 4466,
       "proseChars": 633,
       "argChars": 2679,
@@ -4094,7 +4094,7 @@
         "cacheWrite": 30508,
         "output": 1852
       },
-      "skills": 23,
+      "skills": 22,
       "hookChars": 4466,
       "proseChars": 730,
       "argChars": 2390,
