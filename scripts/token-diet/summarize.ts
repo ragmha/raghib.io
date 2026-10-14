@@ -57,6 +57,8 @@ const runs = readdirSync(join(work, 'runs'))
     let argChars = 0
     let hookChars = 0
     let skills = 0
+    let testRuns = 0
+    let testRunsUnpiped = 0
 
     for (const { type, timestamp, data } of events) {
       if (type === 'session.start') start = Date.parse(timestamp)
@@ -88,6 +90,11 @@ const runs = readdirSync(join(work, 'runs'))
           const args = request.arguments ?? {}
           const tool = { name: request.name, ok: false, label: redact(String(args.command ?? args.path ?? '')), outTokens: 0 }
           argChars += JSON.stringify(args).length
+          for (const part of request.name === 'bash' ? String(args.command).split(/&&|;|\n/) : []) {
+            if (!/\bpytest\b/.test(part)) continue
+            testRuns++
+            if (!part.includes('|')) testRunsUnpiped++
+          }
           const call = byApiCall.get(data.apiCallId)
           check(call, `${id}: tool request without a model call`)
           call!.tools.push(tool)
@@ -136,6 +143,8 @@ const runs = readdirSync(join(work, 'runs'))
       hookChars,
       proseChars,
       argChars,
+      testRuns,
+      testRunsUnpiped,
       rtk,
       calls,
     }
