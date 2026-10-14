@@ -8,38 +8,19 @@ const latestPosts = (await getPublishedPosts()).slice(0, 3)
 
 <SiteLayout
   title="Software, AI & Systems"
-  heading="How technology becomes useful"
   description="Independent writing by Raghib Hasan on AI, software, and the systems that turn promising technology into useful, trustworthy work."
 >
+  <Fragment slot="heading">Tinkering with <s>AI</s> SI</Fragment>
+
   <div class="home-about" id="about">
     <p>
-      I’m interested in what it takes to turn AI capability into something
-      people actually use—and how that changes the software, organizations,
-      and services around it.
+      I build software and start things. Here I write about turning AI into
+      things people actually use.
     </p>
 
-    <p>I’m currently a Strategic Solution Engineer at Microsoft.</p>
-
-    <p>Previously:</p>
-    <ul>
-      <li>
-        Worked as an Entrepreneur in Residence, raising capital and pitching
-        new ventures
-      </li>
-      <li>
-        Built the end-to-end online grocery shopping experience and the
-        organization behind it. My work in quick commerce later included
-        helping bring robot delivery to Finland
-      </li>
-      <li>
-        Shipped end-to-end web and mobile software for major B2C, B2B, and
-        startup clients
-      </li>
-    </ul>
-
     <p>
-      You can reach me on
-      <a href="https://www.linkedin.com/in/ragmha/">LinkedIn</a>.
+      <a href="https://www.linkedin.com/in/ragmha/">LinkedIn</a> ·
+      <a href="https://github.com/ragmha">GitHub</a>
     </p>
   </div>
 
@@ -53,7 +34,6 @@ const latestPosts = (await getPublishedPosts()).slice(0, 3)
         href: `/writing/${getPostSlug(post)}/`,
         date: formatDate(post.data.date),
         title: post.data.title,
-        description: post.data.description,
       }))} />
     </section>
   )}
