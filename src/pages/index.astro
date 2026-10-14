@@ -8,14 +8,15 @@ const latestPosts = (await getPublishedPosts()).slice(0, 3)
 
 <SiteLayout
   title="Software, AI & Systems"
-  heading="How technology becomes useful"
   description="Independent writing by Raghib Hasan on AI, software, and the systems that turn promising technology into useful, trustworthy work."
 >
+  <Fragment slot="heading">Tinkering with <s>AI</s> SI</Fragment>
+
   <div class="home-about" id="about">
     <p>
-      I help turn AI into things people actually use. Before that, I built
-      e-commerce platforms, mobile and serverless apps, and accessible design
-      systems, worked with robots, and was an entrepreneur in residence.
+      I help turn AI into things people actually use. Before that:
+      entrepreneur, design engineer, product engineer, and full-stack
+      developer.
     </p>
 
     <p>
