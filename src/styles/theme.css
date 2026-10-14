@@ -9,6 +9,10 @@
   --theme-highlight: #dcdcdc;
   --theme-highlight-text: #000;
   --theme-code-bg: #181818;
+  --theme-red: #ff6b6b;
+  --theme-green: #6be0a0;
+  --theme-blue: #6b9bff;
+  --theme-diagram-halo: #000;
   color-scheme: dark;
   background: var(--theme-bg);
 }
@@ -24,6 +28,10 @@
   --theme-highlight: #282828;
   --theme-highlight-text: #fff;
   --theme-code-bg: #f3f3f3;
+  --theme-red: #c9363b;
+  --theme-green: #218653;
+  --theme-blue: #3e63dd;
+  --theme-diagram-halo: #8a8a80;
   color-scheme: light;
 }
 

@@ -13,11 +13,11 @@ const sampleCost = sessionCost(sample)
 const sampleCostFormat = new Intl.NumberFormat('en-US', {
   style: 'currency', currency: 'USD', maximumSignificantDigits: 4,
 })
-const sampleCostText = sampleCost === null
+const sampleCostText = sampleCost.low === null || sampleCost.high === null
   ? '—'
-  : Math.abs(sampleCost[1] - sampleCost[0]) < 0.000001
-    ? sampleCostFormat.format(sampleCost[0])
-    : `${sampleCostFormat.format(sampleCost[0])}–${sampleCostFormat.format(sampleCost[1])}`
+  : Math.abs(sampleCost.high - sampleCost.low) < 0.000001
+    ? sampleCostFormat.format(sampleCost.low)
+    : `${sampleCostFormat.format(sampleCost.low)}–${sampleCostFormat.format(sampleCost.high)}`
 const sampleFacts = [
   ['Model calls', count(sample.totals.requests)],
   ['Input from cache', sample.totals.input.value && sample.totals.read.value !== null
@@ -716,7 +716,7 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       const summary = byId<HTMLDivElement>('summary')
       summary.replaceChildren()
       const cost = sessionCost(analysis)
-      const recordedCost = cost ? estimatedCost(...cost) : '—'
+      const recordedCost = estimatedCost(cost.low, cost.high)
       const cacheShare = analysis.totals.input.value && analysis.totals.read.value !== null
         ? percentFormat.format(analysis.totals.read.value / analysis.totals.input.value) : '—'
       const peakContext = Math.max(0, ...analysis.calls.map((call) => call.input ?? 0))
@@ -816,8 +816,11 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
         return
       }
       if (!modelSelect.value) {
-        const cheapest = compareModels(pricingWorkload)
-          .find(({ price, estimate }) => price.id !== current?.id && estimate.low !== null)
+        const recorded = new Set(pricingWorkload.map((record) => findModelPrice(record.model)?.id))
+        const comparison = compareModels(pricingWorkload)
+        const cheapest = comparison.find(({ price, estimate }) =>
+          estimate.low !== null && (current ? price.id !== current.id : !recorded.has(price.id)))
+          ?? comparison.find(({ estimate }) => estimate.low !== null)
         modelSelect.value = cheapest?.price.id ?? modelSelect.options[0].value
       }
       const alternative = findModelPrice(modelSelect.value)
@@ -984,6 +987,9 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
 
     for (const id of ['savings-model', 'savings-current', 'savings-runs']) {
       byId(id).addEventListener('input', renderSavings)
+    }
+    for (const id of ['savings-model', 'savings-current']) {
+      byId(id).addEventListener('change', renderSavings)
     }
     let savingsWidth = 0
     new ResizeObserver(([entry]) => {

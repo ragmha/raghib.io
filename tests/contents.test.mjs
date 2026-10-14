@@ -15,14 +15,6 @@ async function page({ hidden = false, missing = false } = {}) {
   const positions = [200, 600, 1000, 1600]
   const rail = [0, 100, 160, 240]
   const marker = { style: {} }
-  const toggle = {
-    hidden: true,
-    attributes: {},
-    handlers: {},
-    addEventListener(event, handler) { this.handlers[event] = handler },
-    setAttribute(key, value) { this.attributes[key] = value },
-  }
-  const sidebar = { dataset: {}, querySelector: () => toggle }
   let resized
   let context
   const navTop = () => Math.max(96, 100 - context.scrollY)
@@ -42,7 +34,6 @@ async function page({ hidden = false, missing = false } = {}) {
   const nav = {
     dataset: {},
     offsetHeight: 320,
-    closest: () => sidebar,
     querySelector: () => marker,
     querySelectorAll: () => links,
     getBoundingClientRect: () => ({ top: navTop() }),
@@ -89,7 +80,7 @@ async function page({ hidden = false, missing = false } = {}) {
   }
   flush()
   return {
-    nav, sidebar, toggle, links, marker, errors, calls, positions, flush,
+    nav, links, marker, errors, calls, positions, flush,
     active: () => links.findIndex((link) => link.attributes['aria-current'] === 'location'),
     scroll: (y) => { context.scrollY = y; events.get('scroll')() },
     event: (name) => events.get(name)(),
@@ -103,18 +94,6 @@ test('contents selects the article title initially and enhances its reading indi
   assert.equal(p.active(), 0)
   assert.equal(p.nav.dataset.enhanced, '')
   assert.match(p.marker.style.transform, /^translateY\(.+px\) scaleY\(.+\)$/)
-})
-
-test('contents toggle stays hidden until enhancement and updates its accessible state', async () => {
-  const p = await page()
-  assert.equal(p.toggle.hidden, false)
-  assert.equal(p.toggle.attributes['aria-expanded'], undefined)
-  p.toggle.handlers.click()
-  assert.equal(p.sidebar.dataset.expanded, 'true')
-  assert.equal(p.toggle.attributes['aria-expanded'], 'true')
-  p.toggle.handlers.click()
-  assert.equal(p.sidebar.dataset.expanded, 'false')
-  assert.equal(p.toggle.attributes['aria-expanded'], 'false')
 })
 
 test('scrolling tracks real heading targets and moves the reading window', async () => {

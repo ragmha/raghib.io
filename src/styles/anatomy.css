@@ -26,17 +26,15 @@
   --anatomy-lo: var(--theme-faint);
   --anatomy-faint: var(--theme-rule);
   --anatomy-lit: var(--theme-text);
-  --anatomy-halo: var(--theme-bg);
+  --anatomy-halo: var(--theme-diagram-halo);
   --anatomy-halo-opacity: .4;
   --anatomy-dot: var(--theme-text);
-  --anatomy-red: #ff6b6b;
-  --anatomy-green: #6be0a0;
+  --anatomy-red: var(--theme-red);
+  --anatomy-green: var(--theme-green);
+  --anatomy-blue: var(--theme-blue);
 }
 
 html[data-theme='light'] .decision-hero {
-  --anatomy-red: #c9363b;
-  --anatomy-green: #218653;
-  --anatomy-halo: #8a8a80;
   --anatomy-halo-opacity: .28;
 }
 

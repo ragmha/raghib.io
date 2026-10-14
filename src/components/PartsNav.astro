@@ -3,28 +3,20 @@
 // from Astro's heading extraction.
 interface Props {
   headings: { slug: string; text: string; depth: number }[]
-  title?: string
-  readingTime?: string
 }
 
-const { headings, title = 'On this page', readingTime } = Astro.props
+const { headings } = Astro.props
 const parts = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 4)
 ---
 
 {
   parts.length > 0 && (
-    <>
-    <button class="contents-toggle" type="button" data-contents-toggle
-      aria-label="Toggle contents" aria-controls="article-contents" aria-expanded="false" hidden>
-      <span class="contents-toggle-label">Contents</span>
-    </button>
     <nav id="article-contents" class="parts" aria-label="Contents" data-contents-nav>
       <div class="parts-rail" aria-hidden="true">
         <span class="parts-window" data-reading-window></span>
       </div>
       <div class="parts-summary">
-        <a class="parts-title" href="#post-title" data-part-link="post-title">{title}</a>
-        {readingTime && <p>{readingTime.toLowerCase()}</p>}
+        <a class="parts-title" href="#post-title" data-part-link="post-title">On this page</a>
       </div>
       <ol>
         {parts.map((part) => (
@@ -36,7 +28,6 @@ const parts = headings.filter((heading) => heading.depth >= 2 && heading.depth <
         ))}
       </ol>
     </nav>
-    </>
   )
 }
 

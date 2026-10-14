@@ -68,12 +68,16 @@ const published = new Intl.DateTimeFormat('en-US', {
           <p class="draft-notice">Draft preview — not published. Review the account and conclusions before publishing.</p>
         )}
         <nav class="post-crumbs" aria-label="Breadcrumb">
-          <a href="/writing/">Writing</a> / <a href={categoryHref}>{category}</a>
+          <a href="/writing/">Writing</a> / {post.data.published
+            ? <a href={categoryHref}>{category}</a>
+            : <span>{category}</span>}
         </nav>
         <h1 id="post-title">{post.data.title}</h1>
         <p class="post-lede">{post.data.description}</p>
         <dl class="post-facts">
-          <div><dt>Category:</dt><dd><a href={categoryHref}>{category}</a></dd></div>
+          <div><dt>Category:</dt><dd>{post.data.published
+            ? <a href={categoryHref}>{category}</a>
+            : <span>{category}</span>}</dd></div>
           <div><dt>Published:</dt><dd><time datetime={post.data.date.toISOString()}>{published}</time></dd></div>
           <div><dt>Reading time:</dt><dd>{minutes} minute{minutes === 1 ? '' : 's'}</dd></div>
           {post.data.tags.length > 0 && (
@@ -81,7 +85,9 @@ const published = new Intl.DateTimeFormat('en-US', {
               <dt>Tags:</dt>
               <dd>
                 {post.data.tags.map((tag, i) => (
-                  <>{i > 0 && ', '}<a href={`/writing/tag/${getTaxonomySlug(tag)}/`}>{getTagLabel(tag)}</a></>
+                  <>{i > 0 && ', '}{post.data.published
+                    ? <a href={`/writing/tag/${getTaxonomySlug(tag)}/`}>{getTagLabel(tag)}</a>
+                    : <span>{getTagLabel(tag)}</span>}</>
                 ))}
               </dd>
             </div>

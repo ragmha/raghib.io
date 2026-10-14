@@ -127,12 +127,18 @@ desktop reading layouts with:
 node scripts/check-writing-responsive.mjs
 ```
 
+For a server on another port, set `WRITING_TEST_URL`, for example
+`WRITING_TEST_URL=http://localhost:4322 node scripts/check-writing-responsive.mjs`.
+
 This exercises portrait image selection, diagram legibility, contents navigation,
-the no-JavaScript fallback, and an existing published article.
+the always-visible contents list, the no-JavaScript fallback, and an existing
+published article.
+
 After exporting an SVG, run `bun run theme:diagrams` to apply the shared light
 and dark palettes. At build time, `src/lib/rehype-inline-diagrams.mjs` inlines
 `<img src="/diagrams/*.svg">` in posts so diagrams follow the site's
 `data-theme` toggle; Safari only shows the OS theme to SVGs loaded as images.
+Images inside `<picture>` remain native images so responsive sources still work.
 Opened directly, the files still follow the OS theme. Palette roles live in
 `scripts/theme-diagrams.mjs`; preserve pure black/white SVG mask colors.
 

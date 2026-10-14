@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, test } from 'node:test'
-import { analyzeUsage, demoEvents, estimateCost, findings, manualUsage, parseTokenInput, parseUsage, projectModelSavings, sessionCost } from '../src/lib/agent-usage'
+import { analyzeUsage, demoEvents, estimateCost, estimateWorkloadCost, findings, manualUsage, parseTokenInput, parseUsage, projectModelSavings, sessionCost } from '../src/lib/agent-usage'
 import type { Usage } from '../src/lib/agent-usage'
 import { findModelPrice } from '../src/lib/model-pricing'
 
@@ -180,6 +180,41 @@ describe('agent usage analysis', () => {
     assert.equal(analysis.calls.length, 10)
   })
 
+  test('projects the same usage on a cheaper model without changing token counts', () => {
+    const analysis = analyzeUsage([parseUsage(demoEvents)])
+    const current = sessionCost(analysis)
+    assert.ok(current.low !== null && current.high !== null)
+    const alternative = findModelPrice('gpt-5-mini')!
+    const projection = projectModelSavings(analysis.workload, alternative, 100)
+    if (!projection.available) throw new Error(projection.reason)
+    assert.ok(projection.current[0] < projection.current[1])
+    assert.ok(projection.alternative[0] <= projection.alternative[1])
+    assert.ok(projection.savings[0] > 0)
+    const single = projectModelSavings(
+      [manualUsage('gpt-5.5', 100_000, 0, 0, 1_000)], alternative, 100,
+    )
+    if (!single.available) throw new Error(single.reason)
+    assert.equal(single.current[0], 53)
+    assert.ok(Math.abs(single.alternative[0] - 2.7) < 1e-9)
+    assert.ok(Math.abs(single.savings[0] - 50.3) < 1e-9)
+  })
+
+  test('preserves mixed-model pricing bounds and reasons in the session cost API', () => {
+    const workload = [
+      manualUsage('claude-opus-5', 0, 0, 1_000_000, 0),
+      manualUsage('gpt-5-mini', 1_000_000, 0, 0, 0),
+    ]
+    const analysis = analyzeUsage([{ usage: workload, tools: [], warnings: [], recognized: 2, sources: [] }])
+    const estimate = estimateWorkloadCost(workload)
+    assert.equal(estimate.low, 6.5)
+    assert.equal(estimate.high, 10.25)
+    assert.match(estimate.reason ?? '', /cache-write TTL/)
+    assert.deepEqual(sessionCost(analysis), estimate)
+    const override = findModelPrice('gpt-5-mini')!
+    assert.deepEqual(sessionCost(analysis, override), estimateCost(workload, override))
+    assert.deepEqual(estimateWorkloadCost([]), { low: null, high: null, reason: 'No usage available.' })
+  })
+
   test('summarizes how the model was used in plain language', () => {
     const notes = findings(analyzeUsage([parseUsage(demoEvents)]))
     assert.ok(notes.some((note) => /from cache|served from cache/.test(note)))
@@ -192,7 +227,10 @@ describe('agent usage analysis', () => {
     const analysis = analyzeUsage([parseUsage(JSON.stringify({
       type: 'assistant.usage', data: { model: 'unknown-model-x', inputTokens: 10, outputTokens: 5 },
     }))])
-    assert.equal(sessionCost(analysis), null)
+    const cost = sessionCost(analysis)
+    assert.equal(cost.low, null)
+    assert.equal(cost.high, null)
+    assert.match(cost.reason ?? '', /no verified rate/)
   })
 
   test('projects savings by repeating the workload, not inflating per-call context', () => {

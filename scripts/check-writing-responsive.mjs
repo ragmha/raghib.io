@@ -3,7 +3,7 @@ import { readFile, mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { chromium } from 'playwright'
 
-const origin = 'http://127.0.0.1:4321'
+const origin = process.env.WRITING_TEST_URL ?? 'http://127.0.0.1:4321'
 const route = '/writing/keep-shipping-copilot-budget-limits-part-1/'
 const screenshotDirectory = process.env.RESPONSIVE_SCREENSHOTS
 if (screenshotDirectory) await mkdir(screenshotDirectory, { recursive: true })
@@ -33,28 +33,19 @@ try {
       sidebarPosition: getComputedStyle(document.querySelector('.sidebar')).position,
     }))
     assert.ok(dimensions.pageWidth <= width, `Page overflow at ${width}px`)
-    if (width <= 960) {
-      assert.equal(dimensions.sidebarPosition, 'static')
+    assert.equal(dimensions.sidebarPosition, width < 1024 ? 'static' : 'sticky')
+    if (width < 1024) {
       assert.ok(dimensions.articleWidth >= width - 48, `Unused article column at ${width}px`)
-      const toggle = page.getByRole('button', { name: 'Toggle contents' })
-      const toggleSize = await toggle.boundingBox()
-      assert.ok(toggleSize.width >= 44 && toggleSize.height >= 44, 'Contents target must be tap-sized')
-      const nav = page.getByRole('navigation', { name: 'Contents' })
-      assert.equal(await nav.isVisible(), false)
-      await toggle.click()
-      assert.equal(await nav.isVisible(), true)
-      assert.equal(await toggle.getAttribute('aria-expanded'), 'true')
-      await toggle.press('Escape')
-      assert.equal(await nav.isVisible(), false)
-      await toggle.press('Enter')
-      const link = nav.locator('a[data-part-link]').nth(1)
-      const href = await link.getAttribute('href')
-      await link.click()
-      assert.equal(await toggle.getAttribute('aria-expanded'), 'false')
-      assert.equal(await nav.isVisible(), false)
-      assert.ok(page.url().endsWith(href), 'Contents link must navigate to the requested heading')
-      await page.evaluate(() => scrollTo(0, 0))
     }
+    assert.equal(await page.getByRole('button', { name: 'Toggle contents' }).count(), 0)
+    const nav = page.getByRole('navigation', { name: 'Contents' })
+    assert.equal(await nav.isVisible(), true)
+    const link = nav.locator('a[data-part-link]').nth(1)
+    const href = await link.getAttribute('href')
+    await link.click()
+    assert.equal(await nav.isVisible(), true)
+    assert.ok(page.url().endsWith(href), 'Contents link must navigate to the requested heading')
+    await page.evaluate(() => scrollTo(0, 0))
 
     if (screenshotDirectory && [390, 640, 1440].includes(width)) {
       await page.screenshot({ path: join(screenshotDirectory, `${width}-opening.png`) })
@@ -108,7 +99,7 @@ try {
   const fallbackPage = await fallback.newPage()
   await fallbackPage.goto(origin + route, { waitUntil: 'load' })
   assert.ok(await fallbackPage.getByRole('navigation', { name: 'Contents' }).isVisible())
-  assert.equal(await fallbackPage.getByRole('button', { name: 'Toggle contents' }).isVisible(), false)
+  assert.equal(await fallbackPage.getByRole('button', { name: 'Toggle contents' }).count(), 0)
   assert.ok(await fallbackPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
   await fallback.close()
 
@@ -119,6 +110,28 @@ try {
   assert.ok(await published.locator('.diagram-scroll').count() > 0, 'Existing wide diagrams retain scrolling')
   await published.close()
 
+  const preview = await browser.newPage()
+  await preview.goto(`${origin}/writing/advent-of-copilot-cli/`, { waitUntil: 'networkidle' })
+  assert.ok(await preview.locator('.draft-notice').isVisible())
+  assert.match(await preview.locator('meta[name="robots"]').getAttribute('content'), /noindex/)
+  assert.equal(await preview.locator('.post-head a[href^="/writing/tag/"], .post-head a[href^="/writing/category/"]').count(), 0,
+    'Draft metadata must not link to archives that may not exist')
+
+  await preview.goto(`${origin}/writing/not-every-action-item-is-mine/`, { waitUntil: 'networkidle' })
+  for (const theme of ['dark', 'light']) {
+    const colors = await preview.evaluate(theme => {
+      document.documentElement.dataset.theme = theme
+      const svg = document.querySelector('svg.flowchart')
+      const node = svg.querySelector('.node rect')
+      const label = svg.querySelector('.nodeLabel')
+      return { fill: getComputedStyle(node).fill, text: getComputedStyle(label).color }
+    }, theme)
+    assert.deepEqual(colors, theme === 'dark'
+      ? { fill: 'rgb(24, 24, 24)', text: 'rgb(255, 255, 255)' }
+      : { fill: 'rgb(243, 243, 243)', text: 'rgb(13, 13, 13)' })
+  }
+  await preview.close()
+
   if (screenshotDirectory) {
     await writeFile(join(screenshotDirectory, 'measurements.json'), JSON.stringify(measurements, null, 2))
   }
@@ -126,7 +139,7 @@ try {
     status: 'passed',
     viewports: measurements.map(({ width, height }) => `${width}x${height}`),
     diagramMinimumTextPx: Math.min(...measurements.flatMap(({ diagrams }) => diagrams.map(({ minimumText }) => minimumText))),
-    checks: ['column width', 'portrait sources', 'no diagram clipping', 'readable labels', 'contents interaction', 'no-JS fallback', 'published article'],
+    checks: ['column width', 'portrait sources', 'no diagram clipping', 'readable labels', 'contents interaction', 'no-JS fallback', 'published article', 'draft metadata', 'diagram themes'],
   }, null, 2))
 } finally {
   await browser.close()

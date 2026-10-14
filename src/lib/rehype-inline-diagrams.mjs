@@ -22,6 +22,7 @@ export default function rehypeInlineDiagrams() {
         (node.type === 'element' && node.tagName === 'img') ||
         (node.type?.startsWith('mdxJsx') && node.name === 'img')
       if (!isImage || !parent || index === undefined) return
+      if (parent.tagName === 'picture' || parent.name === 'picture') return
 
       const { src, alt, width, height } = attributesOf(node)
       const match = /^\/diagrams\/([\w-]+\.svg)$/.exec(src ?? '')

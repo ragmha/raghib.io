@@ -133,64 +133,6 @@ mark {
   padding-top: 0.25rem;
 }
 
-.shell:has(.sidebar[data-enhanced]) > main {
-  grid-row: 1;
-}
-
-.sidebar[data-enhanced] {
-  position: fixed;
-  z-index: 4;
-  top: 6rem;
-  left: max(0px, calc((100vw - var(--layout-width)) / 2 + var(--layout-gutter) - var(--sidebar) - 2rem));
-  width: 20px;
-  max-height: calc(100svh - 6rem - var(--layout-gutter));
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: none;
-  padding: 0;
-}
-
-.sidebar[data-enhanced] .parts {
-  width: min(var(--sidebar), calc(100vw - 2 * var(--layout-gutter)));
-}
-
-.sidebar[data-enhanced]:is([data-expanded='true'], :has(.parts:focus-within)) {
-  width: min(var(--sidebar), calc(100vw - 2 * var(--layout-gutter)));
-  background: var(--paper);
-  scrollbar-width: thin;
-}
-
-.contents-toggle {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  width: 20px;
-  height: 32px;
-  padding: 0;
-  border: 0;
-  background: var(--paper);
-  color: var(--ink);
-  cursor: pointer;
-}
-
-.contents-toggle::before {
-  content: '';
-  position: absolute;
-  left: 3px;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: var(--rule-strong);
-}
-
-.contents-toggle:is(:hover, :focus-visible, [aria-expanded='true'])::before {
-  background: var(--ink);
-}
-
-.contents-toggle-label {
-  display: none;
-}
-
 main {
   min-width: 0;
   max-width: var(--measure);
@@ -826,55 +768,9 @@ main {
     row-gap: 1.25rem;
   }
 
-  .shell:has(> .sidebar) > main,
-  .shell:has(.sidebar[data-enhanced]) > main {
+  .shell:has(> .sidebar) > main {
     grid-row: 2;
     padding-top: 0;
-  }
-
-  .sidebar[data-enhanced],
-  .sidebar[data-enhanced]:is([data-expanded='true'], :has(.parts:focus-within)),
-  .sidebar[data-enhanced]:hover {
-    position: static;
-    width: 100%;
-    max-height: none;
-    overflow: visible;
-    background: none;
-  }
-
-  .sidebar[data-enhanced] .parts {
-    display: none;
-    width: 100%;
-  }
-
-  .sidebar[data-enhanced][data-expanded='true'] .parts {
-    display: block;
-    margin-top: 1rem;
-  }
-
-  .sidebar[data-enhanced] .parts-summary,
-  .sidebar[data-enhanced] .part-title {
-    opacity: 1;
-    transform: none;
-  }
-
-  .contents-toggle {
-    position: static;
-    width: auto;
-    min-width: 44px;
-    height: auto;
-    min-height: 44px;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid var(--rule-strong);
-    font: inherit;
-  }
-
-  .contents-toggle::before {
-    display: none;
-  }
-
-  .contents-toggle-label {
-    display: inline;
   }
 
   .sidebar .parts a {

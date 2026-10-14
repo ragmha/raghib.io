@@ -31,6 +31,8 @@ typography remain this site's own.
 
 Dark is the default; the theme toggle persists the reader's choice. Neutral
 surfaces and restrained highlights communicate interaction, selection, and focus.
+Semantic illustration accents (red, green and blue) and the diagram halo also
+use shared theme tokens; page styles must not introduce their own accent palette.
 
 ## Typography
 

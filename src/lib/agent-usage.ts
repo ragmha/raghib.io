@@ -526,23 +526,17 @@ export function compareModels(records: Usage[]) {
     .sort((a, b) => (a.estimate.low ?? Infinity) - (b.estimate.low ?? Infinity))
 }
 
-export function sessionCost(analysis: Analysis): [number, number] | null {
-  if (!analysis.models.length) return null
-  let low = 0
-  let high = 0
-  for (const model of analysis.models) {
-    const price = findModelPrice(model.model)
-    const estimate = price && estimateCost(analysis.workload.filter((record) => record.model === model.model), price)
-    if (!estimate || estimate.low === null) return null
-    low += estimate.low
-    high += estimate.high ?? estimate.low
-  }
-  return [low, high]
+export function estimateWorkloadCost(records: Usage[], price?: ModelPrice): Estimate {
+  return estimateCost(records, price)
+}
+
+export function sessionCost(analysis: Analysis, price?: ModelPrice): Estimate {
+  return estimateWorkloadCost(analysis.workload, price)
 }
 
 export function projectModelSavings(records: Usage[], alternative: ModelPrice, runs: number, currentModel?: ModelPrice) {
   if (!Number.isSafeInteger(runs) || runs < 1) throw new Error('Use a positive whole number of task runs.')
-  const current = estimateCost(records, currentModel)
+  const current = estimateWorkloadCost(records, currentModel)
   const proposed = estimateCost(records, alternative)
   if (current.low === null || current.high === null) {
     return { available: false, reason: current.reason ?? 'Current model cost is unavailable.' } as const
