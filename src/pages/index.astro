@@ -14,15 +14,17 @@ const latestPosts = (await getPublishedPosts()).slice(0, 3)
   <div class="home-about" id="about">
     <p>
       I help turn AI into things people actually use. Before that, I built an
-      online grocery experience and the organization behind it, helped bring
-      robot delivery to Finland, and shipped web and mobile software for
-      startups and large companies.
+      online grocery service and helped bring robot delivery to Finland.
     </p>
 
     <p>
       I write here to share what I learn about AI, software, and how they
-      change the way organizations work. You can reach me on
-      <a href="https://www.linkedin.com/in/ragmha/">LinkedIn</a>.
+      change the way organizations work.
+    </p>
+
+    <p>
+      <a href="https://www.linkedin.com/in/ragmha/">LinkedIn</a> ·
+      <a href="https://github.com/ragmha">GitHub</a>
     </p>
   </div>
 
@@ -36,7 +38,6 @@ const latestPosts = (await getPublishedPosts()).slice(0, 3)
         href: `/writing/${getPostSlug(post)}/`,
         date: formatDate(post.data.date),
         title: post.data.title,
-        description: post.data.description,
       }))} />
     </section>
   )}
