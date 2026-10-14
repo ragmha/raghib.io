@@ -51,6 +51,15 @@ writeup at `/project/<project-name>/writings/`, authored as MDX in
 `src/content/project-writeups/`; set `published: true` when it's ready to go
 live. Writeups are separate from the Writing archive/RSS feed.
 
+A post can open with a full-bleed cover image. Put the image in
+`src/assets/covers/` and add it to the frontmatter:
+
+```yaml
+cover:
+  src: ../../assets/covers/my-post.jpg
+  alt: "What the image shows"
+```
+
 Rendered diagrams live in `public/diagrams/`; editable `.excalidraw` sources live
 in `src/assets/diagrams/`. Edit a source in Excalidraw, then export the matching
 SVG. Keep SVG diagrams as native `<img>` elements with explicit `width`, `height`,

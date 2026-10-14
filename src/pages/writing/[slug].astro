@@ -1,5 +1,6 @@
 ---
 import { render, type CollectionEntry } from 'astro:content'
+import { Picture } from 'astro:assets'
 import WritingLayout from '../../layouts/WritingLayout.astro'
 import PartsNav from '../../components/PartsNav.astro'
 import TagList from '../../components/TagList.astro'
@@ -40,6 +41,17 @@ const readingTime = estimateReadingTime(post.body)
     image: post.data.socialImage,
   }}
 >
+  {post.data.cover && (
+    <Picture
+      class="cover"
+      src={post.data.cover.src}
+      alt={post.data.cover.alt}
+      formats={['avif', 'webp']}
+      layout="full-width"
+      loading="eager"
+      fetchpriority="high"
+    />
+  )}
   <div class="shell">
     <aside class="sidebar">
       <PartsNav headings={headings} title={post.data.title} readingTime={readingTime} />
@@ -68,6 +80,16 @@ const readingTime = estimateReadingTime(post.body)
 </WritingLayout>
 
 <style>
+  /* Full-bleed hero; z-index keeps the fixed contents rail beneath it. */
+  .cover {
+    position: relative;
+    z-index: 5;
+    display: block;
+    width: 100%;
+    height: min(85svh, 75vw);
+    object-fit: cover;
+  }
+
   .draft-notice {
     padding: 0.75rem;
     border: 1px solid var(--rule-strong);

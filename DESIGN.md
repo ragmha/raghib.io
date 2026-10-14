@@ -50,7 +50,8 @@ and restrained hierarchy rather than simulated commands or dense chrome.
   recent published writing when available
 - Archives and projects: editorial content beside a `6.5rem` navigation column,
   with a `4rem` gap
-- Article: heading, author/date/reading metadata, body, return link, and a
+- Article: optional full-bleed cover image (up to 85% of viewport height),
+  heading, author/date/reading metadata, body, return link, and a
   progressively enhanced contents rail
 - At 60rem and below, articles use the full reading column with an inline,
   tap-sized Contents disclosure instead of the fixed desktop rail.
