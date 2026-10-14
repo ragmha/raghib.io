@@ -1,0 +1,1035 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro'
+import data from '../../data/token-diet.json'
+import { correlation, cost, kinds, median, medianRun, total } from '../../lib/token-diet'
+import type { Call, Kind, Run, Tokens } from '../../lib/token-diet'
+
+const runs = data.runs as Run[]
+const rates = data.rates as Tokens
+const number = new Intl.NumberFormat('en-US')
+const percent = new Intl.NumberFormat('en-US', { style: 'percent', maximumFractionDigits: 1 })
+const wholePercent = new Intl.NumberFormat('en-US', { style: 'percent', maximumFractionDigits: 0 })
+const perThousand = new Intl.NumberFormat('en-US', { maximumFractionDigits: 3 })
+const thousands = (value: number) => `${Math.round(value / 1000)}k`
+const aiu = (nano: number) => (nano / 1e9).toFixed(2)
+const signed = (value: number) => `${value < 0 ? '−' : '+'}${number.format(Math.abs(value))}`
+
+const names: Record<Kind, string> = {
+  cacheRead: 'Cache read',
+  cacheWrite: 'Cache write',
+  fresh: 'Fresh input',
+  output: 'Output',
+}
+
+const setups = [
+  { id: 'a', name: 'Baseline' },
+  { id: 'b', name: 'Principles' },
+  { id: 'c', name: 'caveman' },
+  { id: 'd', name: 'rtk' },
+  { id: 'e', name: 'All three' },
+].map((setup) => {
+  const set = runs.filter((run) => run.variant === setup.id)
+  const sizes = set.map((run) => total(run.totals))
+  const charges = set.map((run) => run.nanoAiu)
+  return {
+    ...setup,
+    lane: `${setup.id === 'a' ? 'Before' : 'After'} · ${setup.name}`,
+    set,
+    shown: medianRun(set),
+    succeeded: set.filter((run) => run.success).length,
+    tokens: median(sizes),
+    low: Math.min(...sizes),
+    high: Math.max(...sizes),
+    calls: median(set.map((run) => run.calls.length)),
+    aiu: median(charges),
+    aiuLow: Math.min(...charges),
+    aiuHigh: Math.max(...charges),
+    prompt: median(set.map((run) => total(run.calls[0]) - run.calls[0].output)),
+    prose: median(set.map((run) => run.proseChars)),
+    proseShare: median(set.map((run) => run.proseChars / (run.proseChars + run.argChars))),
+    biggestResult: Math.max(...set.flatMap((run) => run.calls.flatMap((call) => call.tools.map((tool) => tool.outTokens)))),
+  }
+})
+const [baseline, principles, caveman, rtk, all] = setups
+const after = setups.slice(1)
+
+const pooled = Object.fromEntries(kinds.map((kind) => [kind, runs.reduce((sum, run) => sum + run.totals[kind], 0)])) as Tokens
+const tokenShare = (kind: Kind) => percent.format(pooled[kind] / total(pooled))
+const costShare = (kind: Kind) => percent.format((pooled[kind] * rates[kind]) / cost(pooled, rates))
+const callsVsTokens = correlation(runs.map((run) => run.calls.length), runs.map((run) => total(run.totals)))
+const lastCall = median(runs.map((run) => total(run.calls[run.calls.length - 1])))
+const testRuns = runs.reduce((sum, run) => sum + run.testRuns, 0)
+const rtkSaved = median(rtk.set.map((run) => run.rtk?.saved ?? 0))
+const extraSkills = caveman.set[0].skills - baseline.set[0].skills
+const narrowestSpread = Math.min(...setups.map((setup) => setup.high - setup.low))
+const widestGap = Math.max(...setups.map((setup) => setup.tokens)) - Math.min(...setups.map((setup) => setup.tokens))
+const largest = runs.reduce((max, run) => (total(run.totals) > total(max.totals) ? run : max))
+const failed = runs.filter((run) => !run.success)
+const why = (run: Run) =>
+  !run.committed ? 'made no commit'
+    : !run.testsPass ? 'left tests failing'
+      : 'fixed the bugs but used a commit scope the repository’s guide does not allow'
+const nameOf = (run: Run) => setups.find((setup) => setup.id === run.variant)?.name ?? run.variant
+
+// Race: each setup's median run, call by call, on one token axis.
+const axis = Math.ceil(Math.max(...setups.map((setup) => total(setup.shown.totals))) / 100_000) * 100_000
+const ticks = Array.from({ length: axis / 100_000 + 1 }, (_, i) => i * 100_000)
+const pct = (value: number, of: number) => `${((value / of) * 100).toFixed(3)}%`
+const blocks = (calls: Call[]) => {
+  let start = 0
+  return calls.map((call) => {
+    const size = total(call)
+    const block = { call, start, size }
+    start += size
+    return block
+  })
+}
+const stops = (values: number[]) => {
+  const sum = values.reduce((a, b) => a + b, 0)
+  let running = 0
+  return values.map((value, i) => `--s${i + 1}:${((running += value) / sum).toFixed(4)}`).join(';')
+}
+const pick = ({ cacheRead, cacheWrite, fresh, output }: Tokens): Tokens => ({ cacheRead, cacheWrite, fresh, output })
+const raceJson = JSON.stringify({
+  axis,
+  rates,
+  lanes: Object.fromEntries(setups.map((setup) => [setup.id, setup.shown.calls.map(pick)])),
+}).replace(/</g, '\\u003c')
+
+// Every run: one dot per run on a shared axis.
+const stripMax = Math.ceil(total(largest.totals) / 100_000) * 100_000
+const stripTicks = [0, 1, 2, 3].map((i) => (stripMax / 3) * i)
+
+const description =
+  'One bug-fix task, 25 coding-agent runs: as-is, with simple principles, caveman, rtk and all three. See where the tokens and the cost actually went.'
+---
+
+<SiteLayout
+  title="Coding Agent Token Diet: Before and After"
+  heading="Does Your Coding Agent Need a Token Diet?"
+  description={description}
+>
+  <div class="diet">
+    <p class="lede">
+      Advice for cutting a coding agent’s token use is easy to find: give it rules, make it terse, filter what
+      commands print. I tried three versions of that on one task — find and fix three bugs in a small Python
+      invoicing library, then commit the fixes — and ran each setup five times with the same agent and model.
+    </p>
+    <p>
+      <strong>Short answer: not for this task.</strong> No setup used fewer tokens than the baseline at the
+      median, and runs of the same setup differed more than the setups did.
+    </p>
+
+    <section class="race" aria-labelledby="race-title">
+      <h2 id="race-title">Before and after, call by call</h2>
+      <div class="controls">
+        <fieldset>
+          <legend>Compare the baseline with</legend>
+          {after.map((setup) => (
+            <label>
+              <input type="radio" name="after" id={`after-${setup.id}`} value={setup.id} checked={setup.id === 'e'} />
+              {setup.name}
+            </label>
+          ))}
+        </fieldset>
+        <button type="button" class="replay">Replay</button>
+      </div>
+
+      <figure>
+        <div class="lanes" style={`--divisions:${ticks.length - 1}`}>
+          {setups.map((setup) => {
+            const size = total(setup.shown.totals)
+            const meters = [
+              ['tokens', number.format(size)],
+              ['calls', String(setup.shown.calls.length)],
+              ['AIU', aiu(setup.shown.nanoAiu)],
+            ]
+            return (
+              <div class="lane" data-lane={setup.id} style={`--at:${(size / axis).toFixed(4)}`}>
+                <div class="lane-head">
+                  <span class="lane-name">
+                    {setup.lane} <span class="muted">run {setup.shown.id}</span>
+                    <span class="visually-hidden">
+                      : {number.format(size)} tokens, {setup.shown.calls.length} model calls, {aiu(setup.shown.nanoAiu)} AIU
+                    </span>
+                  </span>
+                  <dl class="meters" aria-hidden="true">
+                    {meters.map(([label, value]) => (
+                      <div>
+                        <dt>{label}</dt>
+                        <dd data-meter={label} style={`--chars:${value.length}`}>{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+                <div class="track" aria-hidden="true">
+                  <div class="blocks">
+                    {blocks(setup.shown.calls).map(({ call, start, size: callSize }, i) => (
+                      <div class="call" style={`--x:${pct(start, axis)};--w:${pct(callSize, axis)}`}>
+                        <div class="segments">
+                          {kinds.map((kind) => <span class={kind} style={`flex-grow:${call[kind]}`} />)}
+                          <span class="number">{i + 1}</span>
+                        </div>
+                        <div class="tools">
+                          {call.tools.map((tool) => (
+                            <span class:list={{ failed: !tool.ok }} title={`${tool.name}: ${tool.label}`} />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <span class="head" />
+                </div>
+              </div>
+            )
+          })}
+          <div class="axis" aria-hidden="true">
+            {ticks.map((tick) => <span style={`--x:${pct(tick, axis)}`}>{tick ? thousands(tick) : '0'}</span>)}
+          </div>
+        </div>
+
+        <div class="summary">
+          {setups.map((setup) => (
+            <div class="donut" data-lane={setup.id}>
+              <div class="rings" aria-hidden="true">
+                <span class="ring ring-tokens" style={stops(kinds.map((kind) => setup.shown.totals[kind]))} />
+                <span class="ring ring-cost" style={stops(kinds.map((kind) => setup.shown.totals[kind] * rates[kind]))} />
+              </div>
+              <span>{setup.lane}</span>
+            </div>
+          ))}
+          <div class="legend">
+            <p>Outer ring: share of tokens. Inner ring: share of AIU.</p>
+            <ul>
+              {kinds.map((kind) => (
+                <li>
+                  <span class:list={['swatch', kind]} aria-hidden="true" />
+                  {names[kind]} <span class="muted">{perThousand.format(rates[kind] / 1e6)} AIU per 1k tokens</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <figcaption>
+          Each block is one model call, as wide as the tokens it processed: cache reads, cache writes, fresh input
+          and output, left to right. The thin marks under a block are the tools that call asked for. Lanes fill at
+          the same token rate, so the run that uses fewer tokens finishes first. Each lane is that setup’s median
+          run by total tokens; the table below has all 25.
+        </figcaption>
+
+        <details class="ran">
+          <summary>What the agent ran in these runs</summary>
+          {setups.map((setup) => (
+            <section data-lane={setup.id}>
+              <h3>{setup.lane}, run {setup.shown.id}</h3>
+              <ol>
+                {setup.shown.calls.map((call) => (
+                  <li>
+                    <span class="muted">{number.format(total(call))} tokens</span>
+                    {call.tools.length
+                      ? call.tools.map((tool) => <code>{tool.name}: {tool.label}{tool.ok ? '' : ' (failed)'}</code>)
+                      : <span>final reply</span>}
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ))}
+        </details>
+      </figure>
+      <script is:inline type="application/json" id="race-data" set:html={raceJson} />
+    </section>
+
+    <section aria-labelledby="runs-title">
+      <h2 id="runs-title">Every run</h2>
+      <figure class="strip">
+        <div class="strip-rows" aria-hidden="true">
+          {setups.map((setup) => (
+            <div class="strip-row">
+              <span>{setup.name}</span>
+              <div class="strip-track">
+                <span class="median" style={`--x:${pct(setup.tokens, stripMax)}`} />
+                {setup.set.map((run) => (
+                  <span class:list={['dot', { failed: !run.success }]} style={`--x:${pct(total(run.totals), stripMax)}`} />
+                ))}
+              </div>
+            </div>
+          ))}
+          <div class="strip-row">
+            <span />
+            <div class="axis">
+              {stripTicks.map((tick) => <span style={`--x:${pct(tick, stripMax)}`}>{tick ? thousands(tick) : '0'}</span>)}
+            </div>
+          </div>
+        </div>
+        <figcaption>
+          Total tokens per run. Each dot is a run; the hollow dot is the run that failed; the line marks the median.
+        </figcaption>
+      </figure>
+
+      <div class="table-wrap">
+        <table>
+          <caption>
+            Medians over five runs per setup, failed run included. First-call prompt is what the agent sends before
+            doing anything: system prompt, {number.format(data.toolDefinitionsTokens)} tokens of tool definitions,
+            instructions, skill list and the task.
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Setup</th>
+              <th scope="col">Succeeded</th>
+              <th scope="col">Median tokens</th>
+              <th scope="col">Range</th>
+              <th scope="col">Calls</th>
+              <th scope="col">AIU</th>
+              <th scope="col">First-call prompt</th>
+            </tr>
+          </thead>
+          <tbody>
+            {setups.map((setup) => (
+              <tr>
+                <th scope="row">{setup.name}</th>
+                <td>{setup.succeeded}/{setup.set.length}</td>
+                <td>{number.format(setup.tokens)}</td>
+                <td>{thousands(setup.low)}–{thousands(setup.high)}</td>
+                <td>{setup.calls}</td>
+                <td>{aiu(setup.aiu)}</td>
+                <td>
+                  {number.format(setup.prompt)}
+                  {setup !== baseline && <span class="muted"> ({signed(setup.prompt - baseline.prompt)})</span>}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section aria-labelledby="findings-title">
+      <h2 id="findings-title">What the runs show</h2>
+      <p>
+        <strong>No setup beat the baseline.</strong> The baseline’s median run used {number.format(baseline.tokens)}
+        tokens. The medians for {after.map((setup) => setup.name.toLowerCase()).join(', ')} were
+        {' '}{after.map((setup) => number.format(setup.tokens)).join(', ')}. {failed.length === 1 ? 'One run' : `${failed.length} runs`} of 25
+        failed: {failed.map((run) => `${run.id} (${nameOf(run)}) ${why(run)}`).join('; ')}.
+      </p>
+      <p>
+        <strong>Noise was bigger than the differences.</strong> Within every setup, the largest run used at least
+        {' '}{number.format(narrowestSpread)} more tokens than the smallest; the widest gap between two setups’ medians
+        was {number.format(widestGap)}. Five runs each can’t tell these setups apart. The single largest run,
+        {' '}{largest.id} ({nameOf(largest)}), used {number.format(total(largest.totals))} tokens over
+        {' '}{largest.calls.length} calls.
+      </p>
+      <p>
+        <strong>Calls drove tokens.</strong> Across all 25 runs, total tokens tracked the number of model calls
+        (Pearson r = {callsVsTokens.toFixed(2)}). Every call re-reads the whole conversation so far; by the last call
+        of a run, that was a median {number.format(lastCall)} tokens.
+      </p>
+      <p>
+        <strong>Tokens aren’t the bill.</strong> Cache reads were {tokenShare('cacheRead')} of all tokens but
+        {' '}{costShare('cacheRead')} of the AIU. Cache writes were {tokenShare('cacheWrite')} of tokens and
+        {' '}{costShare('cacheWrite')} of AIU; output was {tokenShare('output')} of tokens and {costShare('output')}
+        of AIU. So token counts and cost can disagree: rtk’s median run count was higher than the baseline’s in
+        tokens ({number.format(rtk.tokens)} against {number.format(baseline.tokens)}) but lowest in AIU
+        ({aiu(rtk.aiu)} against {aiu(baseline.aiu)}), still inside the baseline’s own range of
+        {' '}{aiu(baseline.aiuLow)}–{aiu(baseline.aiuHigh)}.
+      </p>
+      <p>
+        <strong>Principles added little and didn’t cut calls.</strong> The six rules added
+        {' '}{number.format(principles.prompt - baseline.prompt)} tokens to the prompt. Their runs took a median of
+        {' '}{principles.calls} calls against the baseline’s {baseline.calls}.
+      </p>
+      <p>
+        <strong>caveman added context and didn’t cut prose.</strong> Installing it added
+        {' '}{number.format(caveman.prompt - baseline.prompt)} tokens to the first prompt — a
+        {' '}{number.format(caveman.set[0].hookChars)}-character session-start instruction and {extraSkills} more
+        skills in the skill list — and every later call re-reads them. Median prose per run went from
+        {' '}{number.format(baseline.prose)} to {number.format(caveman.prose)} characters. Prose is the small part
+        anyway: {wholePercent.format(1 - baseline.proseShare)} of what the baseline agent wrote was tool input, such
+        as commands and edits.
+      </p>
+      <p>
+        <strong>The agent already did rtk’s job.</strong> It ran the test suite {testRuns} times across the 25 runs
+        and piped the output through a filter such as <code>tail</code> or <code>grep</code> every time, so the
+        {' '}{number.format(data.fixture.outputLines)}-line failure report never reached the model whole. rtk still
+        shrank the biggest command result (the largest was {number.format(baseline.biggestResult)} tokens at
+        baseline, {number.format(rtk.biggestResult)} with rtk) and reported a median {number.format(rtkSaved)} tokens
+        saved per run — its own estimate, and less than one late call re-reads. Its instruction and hook added
+        {' '}{number.format(rtk.prompt - baseline.prompt)} tokens to the prompt.
+      </p>
+      <p>
+        <strong>All three together</strong> added {number.format(all.prompt - baseline.prompt)} tokens to the prompt
+        and had the highest median AIU, {aiu(all.aiu)}.
+      </p>
+    </section>
+
+    <section aria-labelledby="takeaways-title">
+      <h2 id="takeaways-title">What I’d take from it</h2>
+      <p class="muted">Opinion, from one task and one model.</p>
+      <ul>
+        <li>
+          <strong>Count calls before words.</strong> A run that needs three more calls costs more than any reply
+          style saves. Rules that help the agent get it right in fewer steps are worth more than rules about tone.
+        </li>
+        <li>
+          <strong>Price what a tool adds to every prompt.</strong> Instructions, hooks and skill lists ride along on
+          every call. A tool has to save more than that before it saves anything.
+        </li>
+        <li>
+          <strong>Check what your agent already does.</strong> This one trimmed its own command output, so an output
+          filter had little left to take. Output filters should matter more where an agent reads long, raw logs.
+        </li>
+        <li>
+          <strong>Measure with enough runs.</strong> Single sessions vary too much to judge a setup. Run your own
+          tasks many times and compare the spread, not one before and one after.
+        </li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="method-title">
+      <h2 id="method-title">How it was run</h2>
+      <dl class="method">
+        <div>
+          <dt>Task</dt>
+          <dd>
+            A small Python invoicing library with {data.fixture.tests} tests, {data.fixture.failing} of them failing
+            with {number.format(data.fixture.outputLines)} lines of test output. Three seeded bugs: money rounded half
+            to even instead of half up; a zero tax-rate override fell back to the standard rate; and in tax-exclusive
+            regions, tax was charged before a line’s share of the coupon. The prompt, the same for every run:
+            <blockquote><p>{data.prompt}</p></blockquote>
+          </dd>
+        </div>
+        <div>
+          <dt>Agent</dt>
+          <dd>
+            GitHub Copilot CLI {data.versions.copilot}, non-interactive (<code>copilot -p</code>), model
+            {' '}<code>{data.model}</code> at {data.effort} reasoning effort, memory off.
+          </dd>
+        </div>
+        <div>
+          <dt>Setups</dt>
+          <dd>
+            <ul>
+              <li><strong>Baseline:</strong> the CLI as installed.</li>
+              <li>
+                <strong>Principles:</strong> six rules in the user instructions file:
+                <ol>
+                  {data.principles.map((rule) => (
+                    <li>{rule.split('`').map((part, i) => (i % 2 ? <code>{part}</code> : part))}</li>
+                  ))}
+                </ol>
+              </li>
+              <li>
+                <strong>caveman</strong> (<a href="https://github.com/JuliusBrussee/caveman">source</a>, commit
+                {' '}{data.versions.caveman}): installed with its own installer for Copilot, which adds a
+                session-start hook that switches the agent to terse replies, and {extraSkills} skills.
+              </li>
+              <li>
+                <strong>rtk</strong> {data.versions.rtk}: <code>rtk init -g --copilot</code>, which adds an instruction
+                to run commands through rtk and a hook that rewrites them, so rtk filters their output.
+              </li>
+              <li><strong>All three:</strong> everything above in one setup.</li>
+            </ul>
+          </dd>
+        </div>
+        <div>
+          <dt>Isolation</dt>
+          <dd>
+            Every run got a fresh copy of the repository and a fresh home directory holding only its setup, with no
+            other environment from my machine. Five rounds; each round started all five setups at once.
+          </dd>
+        </div>
+        <div>
+          <dt>Success</dt>
+          <dd>
+            The fixes are committed, every commit subject follows the repository’s contributing guide, the tests are
+            unchanged, and the original tests plus a hidden acceptance test pass on the committed code.
+          </dd>
+        </div>
+        <div>
+          <dt>Measures</dt>
+          <dd>
+            Tokens per model call from the CLI’s session log. AIU is the usage charge Copilot records for each call;
+            multiplying each kind of token by the rate in the legend reproduces every recorded charge exactly.
+            Python {data.versions.python}, pytest {data.versions.pytest}.
+          </dd>
+        </div>
+        <div>
+          <dt>Limits</dt>
+          <dd>
+            One task, one agent, one model, five runs per setup. Medians include the failed run. rtk’s savings
+            figure is its own estimate. Other token-saving tools weren’t tested.
+          </dd>
+        </div>
+      </dl>
+      <p>
+        <a href="https://github.com/ragmha/raghib.io/tree/main/scripts/token-diet">The kit</a> rebuilds the
+        repository, re-runs every setup and regenerates this page’s data.
+      </p>
+    </section>
+  </div>
+
+  <script>
+    import { cost, kinds, reveal, total } from '../../lib/token-diet'
+    import type { Tokens } from '../../lib/token-diet'
+
+    const race = document.querySelector<HTMLElement>('.race')
+    const source = document.getElementById('race-data')
+    const still = matchMedia('(prefers-reduced-motion: reduce)')
+
+    if (race && source && !still.matches) {
+      const { axis, rates, lanes } = JSON.parse(source.textContent ?? '') as {
+        axis: number
+        rates: Tokens
+        lanes: Record<string, Tokens[]>
+      }
+      const number = new Intl.NumberFormat('en-US')
+      const views = Object.entries(lanes).map(([id, calls]) => ({
+        calls,
+        size: calls.reduce((sum, call) => sum + total(call), 0),
+        lane: race.querySelector<HTMLElement>(`.lane[data-lane="${id}"]`)!,
+        rings: [...race.querySelectorAll<HTMLElement>(`.donut[data-lane="${id}"] .ring`)],
+      }))
+      const replay = race.querySelector<HTMLButtonElement>('.replay')!
+      const fill = (ring: HTMLElement, values: number[]) => {
+        const sum = values.reduce((a, b) => a + b, 0)
+        let running = 0
+        values.forEach((value, i) => ring.style.setProperty(`--s${i + 1}`, String(sum ? (running += value) / sum : 0)))
+      }
+      const draw = (at: number) => {
+        for (const view of views) {
+          const shown = reveal(view.calls, at)
+          const meter = (name: string, value: string) => {
+            view.lane.querySelector(`[data-meter="${name}"]`)!.textContent = value
+          }
+          view.lane.style.setProperty('--at', String(Math.min(at, view.size) / axis))
+          meter('tokens', number.format(Math.min(at, view.size)))
+          meter('calls', String(shown.calls))
+          meter('AIU', (cost(shown.tokens, rates) / 1e9).toFixed(2))
+          fill(view.rings[0], kinds.map((kind) => shown.tokens[kind]))
+          fill(view.rings[1], kinds.map((kind) => shown.tokens[kind] * rates[kind]))
+        }
+      }
+      let frame = 0
+      const play = () => {
+        cancelAnimationFrame(frame)
+        const end = Math.max(...views.filter((view) => view.lane.getClientRects().length).map((view) => view.size))
+        const started = performance.now()
+        const step = (now: number) => {
+          const at = Math.min(((now - started) / 4000) * axis, end)
+          draw(at)
+          if (at < end) frame = requestAnimationFrame(step)
+        }
+        frame = requestAnimationFrame(step)
+      }
+
+      draw(0)
+      replay.classList.add('ready')
+      replay.addEventListener('click', play)
+      race.addEventListener('change', play)
+      const observer = new IntersectionObserver((entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return
+        observer.disconnect()
+        play()
+      }, { threshold: 0.3 })
+      observer.observe(race.querySelector('figure')!)
+    }
+  </script>
+</SiteLayout>
+
+<style>
+  .diet {
+    --c-cacheRead: var(--theme-faint);
+    --c-cacheWrite: var(--theme-blue);
+    --c-fresh: var(--theme-green);
+    --c-output: var(--theme-red);
+    margin-top: 1rem;
+  }
+
+  .diet p + p,
+  .diet section > p,
+  .diet section > ul {
+    margin-top: 1rem;
+  }
+
+  .diet h2 {
+    margin: 2.5rem 0 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .muted,
+  figcaption,
+  caption,
+  .legend p,
+  fieldset legend {
+    color: var(--theme-muted);
+  }
+
+  .diet code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* Race */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+    margin-top: 0.75rem;
+  }
+
+  fieldset {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 0.85rem;
+  }
+
+  fieldset legend {
+    width: 100%;
+    margin-bottom: 0.25rem;
+    padding: 0;
+    font-size: 0.8rem;
+  }
+
+  fieldset label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2rem;
+    cursor: pointer;
+  }
+
+  fieldset input {
+    margin: 0;
+    accent-color: var(--theme-text);
+  }
+
+  .replay {
+    visibility: hidden;
+    min-height: 2.25rem;
+    padding: 0.35rem 0.75rem;
+    border: 1px solid var(--theme-rule-strong);
+    border-radius: 0;
+    background: var(--theme-text);
+    color: var(--theme-bg);
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .replay.ready {
+    visibility: visible;
+  }
+
+  .race:has(#after-b:not(:checked)) [data-lane='b'],
+  .race:has(#after-c:not(:checked)) [data-lane='c'],
+  .race:has(#after-d:not(:checked)) [data-lane='d'],
+  .race:has(#after-e:not(:checked)) [data-lane='e'] {
+    display: none;
+  }
+
+  figure {
+    margin: 1rem 0 0;
+  }
+
+  figcaption {
+    margin-top: 1rem;
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+
+  .lane + .lane {
+    margin-top: 0.9rem;
+  }
+
+  .lane-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.15rem 1rem;
+    margin-bottom: 0.35rem;
+    font-size: 0.8rem;
+  }
+
+  .lane-name {
+    font-weight: 600;
+  }
+
+  .lane-name .muted {
+    margin-left: 0.35rem;
+    font-weight: 400;
+  }
+
+  .meters {
+    display: flex;
+    gap: 1rem;
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .meters div {
+    display: flex;
+    gap: 0.35rem;
+  }
+
+  .meters dt {
+    order: 2;
+    color: var(--theme-muted);
+  }
+
+  .meters dd {
+    width: calc(var(--chars) * 1ch);
+    margin: 0;
+    text-align: right;
+  }
+
+  .track {
+    position: relative;
+    height: 2rem;
+    overflow: hidden;
+    background-image: linear-gradient(to right, var(--theme-rule) 1px, transparent 1px);
+    background-size: calc(100% / var(--divisions)) 100%;
+  }
+
+  .blocks {
+    position: absolute;
+    inset: 0;
+    clip-path: inset(0 calc(100% - var(--at) * 100%) 0 0);
+  }
+
+  .call {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--x);
+    display: grid;
+    grid-template-rows: 1fr 0.3rem;
+    gap: 2px;
+    width: var(--w);
+    padding-right: 2px;
+    box-sizing: border-box;
+  }
+
+  .segments {
+    position: relative;
+    display: flex;
+    overflow: hidden;
+  }
+
+  .segments > span {
+    flex-basis: 0;
+    min-width: 0;
+  }
+
+  .cacheRead { background: var(--c-cacheRead); }
+  .cacheWrite { background: var(--c-cacheWrite); }
+  .fresh { background: var(--c-fresh); }
+  .output { background: var(--c-output); }
+
+  .segments .number {
+    position: absolute;
+    top: 50%;
+    left: 0.2rem;
+    color: var(--theme-bg);
+    font-size: 0.6rem;
+    line-height: 1;
+    transform: translateY(-50%);
+  }
+
+  .tools {
+    display: flex;
+    gap: 1px;
+  }
+
+  .tools span {
+    flex: 1;
+    background: var(--theme-rule-strong);
+  }
+
+  .tools .failed {
+    background: transparent;
+    outline: 1px solid var(--theme-rule-strong);
+    outline-offset: -1px;
+  }
+
+  .head {
+    position: absolute;
+    inset: 0;
+    border-left: 1px solid var(--theme-text);
+    transform: translateX(calc(var(--at) * 100%));
+    pointer-events: none;
+  }
+
+  .axis {
+    position: relative;
+    height: 1rem;
+    margin-top: 0.35rem;
+    color: var(--theme-muted);
+    font-size: 0.7rem;
+    line-height: 1;
+  }
+
+  .axis span {
+    position: absolute;
+    left: var(--x);
+    transform: translateX(-50%);
+  }
+
+  .axis span:first-child { transform: none; }
+  .axis span:last-child { transform: translateX(-100%); }
+
+  .summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 2rem;
+    margin-top: 1.5rem;
+    font-size: 0.8rem;
+  }
+
+  .donut {
+    display: grid;
+    justify-items: center;
+    gap: 0.5rem;
+  }
+
+  .rings {
+    display: grid;
+    place-items: center;
+    width: 5.5rem;
+    height: 5.5rem;
+  }
+
+  .ring {
+    grid-area: 1 / 1;
+    border-radius: 50%;
+    background: conic-gradient(
+      var(--c-cacheRead) 0 calc(var(--s1) * 100%),
+      var(--c-cacheWrite) 0 calc(var(--s2) * 100%),
+      var(--c-fresh) 0 calc(var(--s3) * 100%),
+      var(--c-output) 0 calc(var(--s4) * 100%),
+      var(--theme-rule) 0
+    );
+    -webkit-mask: radial-gradient(closest-side, transparent calc(100% - 0.6rem), #000 calc(100% - 0.6rem + 0.5px));
+    mask: radial-gradient(closest-side, transparent calc(100% - 0.6rem), #000 calc(100% - 0.6rem + 0.5px));
+  }
+
+  .ring-tokens {
+    width: 100%;
+    height: 100%;
+  }
+
+  .ring-cost {
+    width: 3.9rem;
+    height: 3.9rem;
+  }
+
+  .legend ul {
+    display: grid;
+    gap: 0.2rem;
+    margin: 0.4rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .swatch {
+    display: inline-block;
+    width: 0.7rem;
+    height: 0.7rem;
+    margin-right: 0.45rem;
+    vertical-align: -0.05rem;
+  }
+
+  .ran {
+    margin-top: 1rem;
+    font-size: 0.8rem;
+  }
+
+  .ran summary {
+    cursor: pointer;
+  }
+
+  .ran h3 {
+    margin: 1rem 0 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .ran ol {
+    margin: 0.4rem 0 0;
+    padding-left: 1.6rem;
+  }
+
+  .ran li + li {
+    margin-top: 0.3rem;
+  }
+
+  .ran li > * + * {
+    margin-left: 0.6rem;
+  }
+
+  .ran code {
+    overflow-wrap: anywhere;
+  }
+
+  /* Every run */
+  .strip-row {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 1.6rem;
+    font-size: 0.8rem;
+  }
+
+  .strip-track {
+    position: relative;
+    height: 1.6rem;
+    background: linear-gradient(var(--theme-rule), var(--theme-rule)) center / 100% 1px no-repeat;
+  }
+
+  .dot,
+  .median {
+    position: absolute;
+    top: 50%;
+    left: var(--x);
+  }
+
+  .dot {
+    width: 0.6rem;
+    height: 0.6rem;
+    margin: -0.3rem 0 0 -0.3rem;
+    border-radius: 50%;
+    background: var(--theme-muted);
+    box-shadow: 0 0 0 1px var(--theme-bg);
+  }
+
+  .dot.failed {
+    border: 1px solid var(--theme-muted);
+    background: var(--theme-bg);
+  }
+
+  .median {
+    height: 1.1rem;
+    margin-top: -0.55rem;
+    border-left: 2px solid var(--theme-text);
+    transform: translateX(-1px);
+  }
+
+  /* Table */
+  .table-wrap {
+    margin-top: 1.5rem;
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  caption {
+    padding-bottom: 0.5rem;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    text-align: left;
+  }
+
+  th,
+  td {
+    padding: 0.55rem 0.45rem;
+    border-bottom: 1px solid var(--theme-rule);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  th:first-child {
+    text-align: left;
+  }
+
+  thead th {
+    color: var(--theme-muted);
+    font-weight: 500;
+  }
+
+  tbody th {
+    font-weight: 600;
+  }
+
+  /* Takeaways and method */
+  .diet ul,
+  .diet ol {
+    padding-left: 1.25rem;
+  }
+
+  .diet section > ul li + li {
+    margin-top: 0.6rem;
+  }
+
+  .method {
+    display: grid;
+    gap: 1rem;
+    margin: 1rem 0 0;
+    font-size: 0.9rem;
+  }
+
+  .method > div {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .method dt {
+    color: var(--theme-muted);
+  }
+
+  .method dd {
+    margin: 0;
+  }
+
+  .method ul,
+  .method ol {
+    margin: 0.4rem 0 0;
+  }
+
+  .method li + li {
+    margin-top: 0.35rem;
+  }
+
+  blockquote {
+    margin: 0.6rem 0 0;
+    padding-left: 0.9rem;
+    border-left: 2px solid var(--theme-rule-strong);
+    color: var(--theme-muted);
+  }
+
+  @media (max-width: 600px) {
+    .strip-row,
+    .method > div {
+      grid-template-columns: 5rem minmax(0, 1fr);
+    }
+
+    .method > div {
+      grid-template-columns: 1fr;
+      gap: 0.25rem;
+    }
+  }
+</style>
