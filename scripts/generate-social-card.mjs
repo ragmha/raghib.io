@@ -3,13 +3,16 @@ import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
 import { SITE_DESCRIPTION, SITE_NAME } from '../src/lib/seo.ts'
 
+const [title = SITE_NAME, description = SITE_DESCRIPTION, filename = 'social-card.png'] = process.argv.slice(2)
+if (!/^[\w-]+\.png$/.test(filename)) throw new Error('Social card filename must be a PNG basename.')
+
 const [regular, bold, theme] = await Promise.all([
   readFile(new URL('../public/fonts/jetbrains-mono/JetBrainsMono-Regular.woff2', import.meta.url)),
   readFile(new URL('../public/fonts/jetbrains-mono/JetBrainsMono-Bold.woff2', import.meta.url)),
   readFile(new URL('../src/styles/theme.css', import.meta.url), 'utf8'),
 ])
 const escapeText = (text) => text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
-const output = fileURLToPath(new URL('../public/social-card.png', import.meta.url))
+const output = fileURLToPath(new URL(`../public/${filename}`, import.meta.url))
 const browser = await chromium.launch({ headless: true })
 
 try {
@@ -45,8 +48,8 @@ try {
       <body>
         <div class="domain">raghib.io</div>
         <main>
-          <h1>${escapeText(SITE_NAME)}</h1>
-          <p>${escapeText(SITE_DESCRIPTION)}</p>
+          <h1>${escapeText(title)}</h1>
+          <p>${escapeText(description)}</p>
         </main>
         <footer>Software. AI. Systems.</footer>
       </body>

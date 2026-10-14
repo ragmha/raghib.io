@@ -1,7 +1,8 @@
 ---
-title: "Keep Shipping: Rethinking GitHub Copilot Budget Limits"
-seoTitle: "Keep Shipping: A Copilot Budget Experiment"
-description: "An OpenAI-inspired case study exploring temporary budget increases and lower-cost model access when a GitHub Copilot user reaches their limit."
+title: "Keep Shipping: When an AI Budget Runs Out"
+seoTitle: "AI Budget Limits: A Safer Fallback"
+description: "Could an explicitly funded fallback help developers finish work after an AI budget limit trips—without weakening model policy? A GitHub Copilot prototype explores the trade-offs."
+socialImage: "/social-card-keep-shipping.png"
 date: "2026-10-13"
 tags: ["ai", "copilot", "governance", "case-study"]
 published: true
@@ -11,36 +12,27 @@ published: true
 are my own and do not represent Microsoft or GitHub. This is a personal case
 study, not official product guidance.
 
-**The task isn't finished. The AI budget is.**
+AI spending limits protect organizations from unexpected costs. But a hard
+stop can strand an in-progress task. The design challenge is to let useful work
+continue without turning a spending control into a bypass.
 
-Imagine a developer partway through an AI-assisted task when they reach the
-usage limit their organization configured. There is still code to understand,
-a change to finish, or a failing test to investigate. The spending control has
-done its job. But the work has not reached a convenient stopping point.
+GitHub Copilot provides one concrete case study. When a developer reaches the
+usage limit their organization configured, credit-consuming AI features pause.
+They can still write software, but the AI-assisted part of the task is
+interrupted.
 
-The developer can still work. The interruption is to the AI-assisted workflow,
-not to their ability to write software.
+Could an organization offer an explicitly funded fallback on a lower-cost
+model—one that still respects its model policy? That is the experiment behind
+this article. It is my take on the problem, inspired by OpenAI's spend controls,
+not a recommendation that every organization adopt the same policy.
 
-Looking at this as a GitHub administrator, I want predictable spending. I also
-want people to finish useful work without turning every exception into an
-administrative detour.
+## Copilot users and the budget owner
 
-That tension became the starting point for an experiment:
-
-> Could a small, funded allowance on a lower-cost model provide a useful path
-> forward when someone's normal AI budget runs out?
-
-This is the first part of a case study about how I explored that question.
-It is my take on the problem, inspired by OpenAI's spend controls, rather than
-a recommendation that every organization should adopt the same policy.
-
-## GHCP users and the GH admin
-
-**GHCP users** are the people working with GitHub Copilot. They want to finish
+**Copilot users** are the people working with GitHub Copilot. They want to finish
 the task, understand why credit-consuming features have paused, and know how to
 request more usage. In the example, one user represents that perspective.
 
-**The GH admin** owns the budget rules and model-access policy. Here, I mean
+**The budget owner** controls spending rules and model access. Here, that means
 someone authorized to manage those enterprise settings, not simply a repository
 administrator. They decide how much additional consumption to allow and when a
 temporary exception should expire.
@@ -155,7 +147,7 @@ consumption**, and can be granted only once per user per monthly cycle.
     />
   </picture>
   <figcaption>
-    The GHCP user wants to continue working. The GH admin controls the budget
+    The Copilot user wants to continue working. The budget owner controls the budget
     and uses automation to apply the policy. The board shows total limits, not
     fresh credit purchases. The admin must verify Luna-only access before
     releasing grace. If grace runs out, usage pauses again; a $20 increase
@@ -280,6 +272,9 @@ teams, and GitHub Actions. It records intended operations so retrying an
 interrupted top-up does not add the same allowance again, and it keeps temporary
 increases tied to the monthly cycle.
 
+The prototype is not published as a public repository, so this article describes
+the approach and trade-offs rather than offering a runnable implementation.
+
 I have not completed a live enterprise pilot. I do not yet have measured savings,
 delivery improvements, or evidence that this approach suits every AI-assisted
 workflow. A native budget increase may be the simpler answer in many cases.
@@ -287,12 +282,12 @@ workflow. A native budget increase may be the simpler answer in many cases.
 That does not settle the experiment either way. It tells me what to investigate
 next.
 
-## Where the series goes next
+## Follow the series
 
-The next part will turn this sketch into explicit policy: which budget applies,
-what each transition can change, and what must remain untouched. After that,
-I will walk through the implementation and its automation boundaries, then
-return to the operational trade-offs and the evidence still needed.
+This is Part 1 of the Keep Shipping case study. Part 2 will turn the sketch into
+explicit policy: which budget applies, what each transition can change, and
+what must remain untouched. [Subscribe to the writing RSS feed](/writing/feed.xml)
+to get future installments.
 
 The idea I want to carry through the series is simple:
 

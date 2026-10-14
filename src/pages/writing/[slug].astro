@@ -34,7 +34,11 @@ const readingTime = estimateReadingTime(post.body)
   title={post.data.seoTitle ?? post.data.title}
   description={post.data.description}
   noindex={!post.data.published}
-  article={{ headline: post.data.title, date: post.data.date }}
+  article={{
+    headline: post.data.title,
+    date: post.data.date,
+    image: post.data.socialImage,
+  }}
 >
   <div class="shell">
     <aside class="sidebar">

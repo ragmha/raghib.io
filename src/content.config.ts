@@ -8,6 +8,7 @@ const writing = defineCollection({
     title: z.string(),
     seoTitle: z.string().trim().min(1).optional(),
     description: z.string(),
+    socialImage: z.string().regex(/^\/(?!\/)/).optional(),
     date: z.coerce.date(),
     tags: z.array(z.string()).default([]),
     published: z.boolean().default(true),
