@@ -106,11 +106,8 @@ const description =
   'One bug-fix task, 25 coding-agent runs: as-is, with simple principles, caveman, rtk and all three. See where the tokens and the cost actually went.'
 ---
 
-<SiteLayout
-  title="Coding Agent Token Diet: Before and After"
-  heading="Does Your Coding Agent Need a Token Diet?"
-  description={description}
->
+<SiteLayout title="Coding Agent Token Diet: Before and After" description={description}>
+  <Fragment slot="heading">Does Your Coding Agent Need a Token Diet?</Fragment>
   <div class="diet">
     <p class="lede">
       Advice for cutting a coding agent’s token use is easy to find: give it rules, make it terse, filter what
