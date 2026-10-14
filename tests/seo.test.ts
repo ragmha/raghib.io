@@ -88,3 +88,20 @@ test('article metadata preserves the headline, author and date alongside a short
   assert.equal(article.author.url, 'https://raghib.io/')
   assert.equal(article.datePublished, '2026-09-18T00:00:00.000Z')
 })
+
+test('article social images override the site-wide preview in metadata and structured data', () => {
+  const metadata = getSeoMetadata({
+    url: new URL('http://localhost:4321/writing/example/'),
+    site: new URL('https://raghib.io'),
+    article: {
+      headline: 'A specific article',
+      date: new Date('2026-10-13'),
+      image: '/social-card-article.png',
+    },
+  })
+
+  assert.equal(metadata.image.url.href, 'https://raghib.io/social-card-article.png')
+  assert.equal(metadata.image.alt, 'A specific article — article preview.')
+  const article = metadata.structuredData?.['@graph'].find((entry) => entry['@type'] === 'BlogPosting')
+  assert.equal(article?.image, metadata.image.url.href)
+})

@@ -10,6 +10,7 @@ interface Props {
 
 const { noindex = false } = Astro.props
 const metadata = getSeoMetadata({ ...Astro.props, url: Astro.url, site: Astro.site })
+const analyticsToken = import.meta.env.PROD ? import.meta.env.PUBLIC_CF_BEACON_TOKEN : undefined
 ---
 
 <meta charset="UTF-8" />
@@ -39,5 +40,13 @@ const metadata = getSeoMetadata({ ...Astro.props, url: Astro.url, site: Astro.si
   <script is:inline type="application/ld+json" set:html={serializeJsonLd(metadata.structuredData)} />
 )}
 <link rel="alternate" type="application/rss+xml" href="/writing/feed.xml" />
+{analyticsToken && (
+  <script
+    is:inline
+    defer
+    src="https://static.cloudflareinsights.com/beacon.min.js"
+    data-cf-beacon={JSON.stringify({ token: analyticsToken })}
+  />
+)}
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <meta name="generator" content={Astro.generator} />

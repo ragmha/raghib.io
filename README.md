@@ -93,6 +93,17 @@ avoid rewrapping content after the first paint. On slow first visits, the system
 monospace font may remain for that page load. The header reserves space for the
 theme button before its script initializes.
 
+Article social cards can be generated with:
+
+```bash
+bun scripts/generate-social-card.mjs "Keep Shipping" "When an AI budget runs out, safer ways to keep work moving." social-card-keep-shipping.png
+```
+
+Set a post's `socialImage` frontmatter to its generated `/...png` path. To enable
+Cloudflare Web Analytics, add the site token from its dashboard as the repository
+variable `CF_WEB_ANALYTICS_TOKEN`. The token is public in the generated page;
+local development does not load analytics.
+
 ## SEO readiness before merging
 
 The `SEO readiness` workflow runs on every pull request into `main` and on

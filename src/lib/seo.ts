@@ -12,6 +12,7 @@ export function getCanonicalUrl(url: URL, site: URL | undefined): URL {
 export interface ArticleMetadata {
   headline: string
   date: Date
+  image?: string
 }
 
 interface SeoInput {
@@ -41,10 +42,12 @@ export function getSeoMetadata({
     sameAs: ['https://github.com/ragmha', 'https://www.linkedin.com/in/ragmha/'],
   }
   const image = {
-    url: new URL('/social-card.png', home),
+    url: new URL(article?.image ?? '/social-card.png', home),
     width: 1200,
     height: 630,
-    alt: `${SITE_NAME}: independent writing on software, AI, and systems.`,
+    alt: article
+      ? `${article.headline} — article preview.`
+      : `${SITE_NAME}: independent writing on software, AI, and systems.`,
   }
   const datePublished = article && !noindex ? article.date.toISOString() : undefined
   const graph = [
