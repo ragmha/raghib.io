@@ -42,6 +42,11 @@ html[data-theme='light'] .decision-hero {
   min-width: 0;
 }
 
+.decision-hero-art[hidden] {
+  display: block;
+  visibility: hidden;
+}
+
 .decision-hero-svg {
   display: block;
   width: 100%;
