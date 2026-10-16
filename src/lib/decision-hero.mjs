@@ -1,189 +1,196 @@
 import * as k from '../../scripts/vendor/anatomy/iso-kit.mjs'
 
-const WIDTH = 1200
-const HEIGHT = 650
-const TABLE = { x: -220, y: -140, w: 440, d: 280, r: 8 }
-const TOP = 48
+const WIDTH = 1500
+const HEIGHT = 740
+const DECK = 16
 
 function buildScene() {
-  const bounds = [
-    ...k.boxCorners(TABLE, -48, TOP + 14),
-    ...k.boxCorners({ x: -92, y: -50, w: 102, d: 100 }, TOP + 14, TOP + 58),
-    ...k.boxCorners({ x: 104, y: -100, w: 82, d: 42 }, TOP + 14, TOP + 35),
-  ]
-  const P = k.fitProjection(bounds, WIDTH, HEIGHT, {
-    pad: 38,
-    azimuth: 43,
-    elevation: 32,
-  })
+  const chassis = { x: -280, y: -168, w: 560, d: 336, r: 10 }
+  const P = k.fitProjection([
+    ...k.boxCorners(chassis, -22, 24),
+    ...k.boxCorners({ x: -106, y: -58, w: 110, d: 116 }, 24, 120),
+    ...k.boxCorners({ x: 124, y: -138, w: 112, d: 70 }, 24, 104),
+  ], WIDTH, HEIGHT, { pad: 64, headroom: 24, azimuth: 55, elevation: 32 })
   const at = point => k.iso(point, P)
-  const solids = []
-  const rules = []
-  const addSolid = (shape, options) => solids.push(k.solidSvg(shape, options))
-  const addSlab = (plan, z, h, tone = 'mid', options = {}) =>
-    addSolid(k.slabOf(plan, z, h, P, 6, 0.7), { tone, ...options })
-  const addCylinder = (x, y, radius, z, h, tone = 'mid', options = {}) =>
-    addSolid(k.cylinder(x, y, radius, z, h, P, 32, 0.4), { tone, ...options })
-  const addRule = (path, tone = 'lo') => rules.push(k.lineSvg(path, { tone }))
-  const addPlanOutline = (plan, z, tone = 'lo') =>
-    addRule(k.planOutline(k.insetPlan(plan, 3), z, P), tone)
-  const addFasteners = (plan, z) => {
-    const corners = k.corners(plan, 4)
-    addRule(corners.map(([x, y]) => k.ring(x, y, 1.4, z, P, 14)).join(''), 'mid')
-    solids.push(k.dotsSvg(corners.map(([x, y]) => at([x, y, z])), { size: 0.65, tone: 'hi' }))
+  const body = []
+  const annotations = []
+  const line = (path, tone = 'lo', options = {}) =>
+    body.push(k.lineSvg(path, { tone, ...options }))
+  const slab = (plan, z, height, tone = 'mid', options = {}) =>
+    body.push(k.solidSvg(k.slabOf(plan, z, height, P, 6, .8), { tone, ...options }))
+  const cylinder = (x, y, radius, z, height, tone = 'mid', options = {}) =>
+    body.push(k.solidSvg(k.cylinder(x, y, radius, z, height, P, 48, .5), { tone, ...options }))
+  const rule = (from, to, z, tone = 'lo') => line(k.lineOnTop(from, to, z, P), tone)
+  const outline = (plan, z, tone = 'lo') => line(k.planOutline(plan, z, P), tone)
+  const text = (x, y, z, value, size = 5, tone = 'mid') =>
+    body.push(k.faceTextSvg(k.topMatrix([x, y], z, P), value, { size, tone, anchor: 'middle' }))
+  const screws = (plan, z) => {
+    for (const [x, y] of k.corners(plan, 5)) {
+      cylinder(x, y, 1.5, z, .7, 'mid')
+      rule([x - .7, y], [x + .7, y], z + .7, 'hi')
+    }
   }
-  const plate = (plan, z, h, tone = 'mid') => {
-    addSlab(plan, z, h, tone)
-    addPlanOutline(plan, z + h)
-    addFasteners(plan, z + h)
+  const plate = (plan, z, height, tone = 'mid', options = {}) => {
+    slab(plan, z, height, tone, options)
+    outline(k.insetPlan(plan, 2.5), z + height, 'faint')
+    screws(plan, z + height)
   }
-  const tray = (plan, z, tone = 'mid') => {
-    const wall = 4
-    const lip = 9
-    addSlab(plan, z, 3, tone)
-    addSlab({ x: plan.x, y: plan.y, w: plan.w, d: wall, r: 1 }, z + 3, lip)
-    addSlab({ x: plan.x, y: plan.y + plan.d - wall, w: plan.w, d: wall, r: 1 }, z + 3, lip)
-    addSlab({ x: plan.x, y: plan.y + wall, w: wall, d: plan.d - wall * 2, r: 1 }, z + 3, lip)
-    addSlab({ x: plan.x + plan.w - wall, y: plan.y + wall, w: wall, d: plan.d - wall * 2, r: 1 }, z + 3, lip)
-    addPlanOutline(plan, z + 3)
+  const label = (point, value, { dx = 0, dy = 0, tone = 'mid' } = {}) => {
+    const [x, y] = at(point)
+    const end = [x + dx, y + dy]
+    annotations.push(`<g class="decision-hero-annotation">${k.lineSvg(k.pathOf([[x, y], [x, end[1]], end]), { tone: 'lo' })}<g class="decision-hero-label" data-tone="${tone}" transform="translate(${end[0]} ${end[1] - 10})"><text text-anchor="middle">${value}</text></g></g>`)
   }
-  const text = (x, y, z, value, { size = 5, tone = 'hi', anchor = 'middle' } = {}) =>
-    k.faceTextSvg(k.topMatrix([x, y], z, P), value, { size, tone, anchor })
-  const label = (x, y, value, width = 120) => {
-    const height = 31
-    return `<g class="decision-hero-label" transform="translate(${x - width / 2} ${y - height / 2})"><rect width="${width}" height="${height}" rx="3"/><text x="${width / 2}" y="21" text-anchor="middle">${value}</text></g>`
-  }
-  const flow = (points, tone = 'mid') => {
+  const rail = (points, tone = 'mid', active = false) => {
     const projected = points.map(at)
-    const [x, y] = projected.at(-1)
-    const [px, py] = projected.at(-2)
-    const angle = Math.atan2(y - py, x - px)
-    const length = 9
-    const wing = 4
-    const left = [x - length * Math.cos(angle) + wing * Math.sin(angle), y - length * Math.sin(angle) - wing * Math.cos(angle)]
-    const right = [x - length * Math.cos(angle) - wing * Math.sin(angle), y - length * Math.sin(angle) + wing * Math.cos(angle)]
     const path = k.pathOf(projected)
-    return k.lineSvg(path, { tone, flow: true }) +
-      `<path class="decision-hero-arrow" data-tone="${tone}" d="M${left[0]} ${left[1]} L${x} ${y} L${right[0]} ${right[1]}"/>`
+    line(path, 'faint', { className: 'decision-track-bed' })
+    line(path, tone, { className: 'decision-track' })
+    if (active) line(path, tone, { flow: true, className: 'decision-signal' })
+    const [x, y] = projected.at(-1)
+    body.push(`<circle class="decision-port" data-tone="${tone}" cx="${x}" cy="${y}" r="3"/>`)
   }
 
-  // Workbench, reinforcing rails, legs, feet, fasteners and a graduated front edge.
-  const feet = k.corners(TABLE, 18)
-  for (const [x, y] of feet) {
-    addCylinder(x, y, 8, -48, 5, 'lo')
-    addSlab({ x: x - 4, y: y - 4, w: 8, d: 8, r: 1 }, -43, 91, 'mid')
+  // One grounded chassis: isolating feet, milled edge, circuit channels and mounts.
+  for (const [x, y] of k.corners(chassis, 24)) {
+    cylinder(x, y, 9, -22, 7, 'lo')
+    cylinder(x, y, 6, -15, 7, 'mid')
   }
-  for (const y of [-102, 102]) {
-    addSlab({ x: -184, y, w: 368, d: 8, r: 1 }, -20, 9, 'lo')
+  plate(chassis, -8, 14, 'lo')
+  plate(k.insetPlan(chassis, 5), 6, 10, 'mid')
+  const frontScale = k.topTicks(-250, 250, 5, 5, 150, DECK + .5, [2, 5], P)
+  line(frontScale.minor, 'faint')
+  line(frontScale.major, 'lo')
+  for (const y of [-146, 144]) {
+    rule([-250, y], [250, y], DECK + .5, 'faint')
   }
-  plate(TABLE, TOP, 14, 'lo')
-  const scale = k.topTicks(-195, 195, 5, 5, TABLE.y + TABLE.d - 14, TOP + 0.8, [3, 5], P)
-  addRule(scale.minor, 'lo')
-  addRule(scale.major, 'mid')
+  for (let row = 0; row < 5; row++) {
+    rule([-252, 84 + row * 8], [-170 + row * 7, 84 + row * 8], DECK + 1, 'faint')
+    cylinder(-170 + row * 7, 84 + row * 8, 1.2, DECK + 1, .5, 'lo')
+  }
+  text(-210, 124, DECK + 1, 'EVIDENCE IN', 5)
+  text(72, 146, DECK + 1, 'POLICY / THRESHOLDS / AUDIT', 5, 'lo')
 
-  // Inputs arrive as evidence cards in an open tray.
-  const inputTray = { x: -194, y: -44, w: 76, d: 88, r: 3 }
-  tray(inputTray, TOP + 14)
-  for (let i = 0; i < 4; i++) {
-    const z = TOP + 18 + i * 1.8
-    addSlab({ x: -186, y: -35, w: 59, d: 69, r: 1 }, z, 1.2, i === 3 ? 'hi' : 'mid')
-    for (let row = 0; row < 3; row++) {
-      addRule(k.lineOnTop([-180, -27 + row * 7], [-135 - (row % 2) * 9, -27 + row * 7], z + 1.2, P), 'lo')
+  rail([[-166, -5, DECK + 2], [-128, -5, DECK + 2], [-112, 0, DECK + 2]], 'blue', true)
+  rail([[8, 0, DECK + 2], [45, 0, DECK + 2]], 'green', true)
+  rail([[77, -7, DECK + 2], [98, -7, DECK + 2], [98, -102, DECK + 2], [126, -102, DECK + 2]], 'green', true)
+  rail([[77, 0, DECK + 2], [116, 0, DECK + 2], [144, 10, DECK + 2]], 'mid')
+  rail([[77, 7, DECK + 2], [98, 7, DECK + 2], [98, 106, DECK + 2], [144, 106, DECK + 2]], 'red')
+
+  // The evidence feeder has guides, rollers and a stack of source documents.
+  const feeder = { x: -249, y: -51, w: 83, d: 104, r: 4 }
+  plate(feeder, DECK, 9)
+  for (const y of [-47, 45]) {
+    slab({ x: -246, y, w: 76, d: 5, r: 1 }, DECK + 9, 11)
+  }
+  for (let i = 0; i < 5; i++) {
+    const z = DECK + 10 + i * 2
+    slab({ x: -238 + i * 1.6, y: -36, w: 58, d: 72, r: 1 }, z, 1, i === 4 ? 'hi' : 'lo')
+  }
+  for (let row = 0; row < 7; row++) {
+    rule([-226, -27 + row * 8], [-192 - row % 3 * 5, -27 + row * 8], DECK + 19, 'mid')
+  }
+  for (const y of [-34, 34]) {
+    cylinder(-171, y, 3, DECK + 9, 7, 'blue')
+    line(k.knurl(-171, y, 3, DECK + 10, DECK + 16, 12, P), 'lo')
+  }
+
+  // The small model is a precision probability instrument, not a text terminal.
+  const core = { x: -110, y: -62, w: 118, d: 124, r: 7 }
+  plate(core, DECK, 7, 'hi')
+  for (const [x, y] of k.corners(core, 12)) {
+    cylinder(x, y, 3, DECK + 7, 34, 'mid')
+  }
+  plate({ x: -106, y: -58, w: 110, d: 116, r: 5 }, DECK + 13, 25, 'mid')
+  for (let i = 0; i < 9; i++) {
+    slab({ x: -101, y: -48 + i * 11, w: 8, d: 5, r: 1 }, DECK + 38, 8, 'lo')
+  }
+  plate({ x: -91, y: -49, w: 90, d: 98, r: 4 }, DECK + 38, 5, 'hi', { lit: true })
+  cylinder(-46, 0, 35, DECK + 43, 8, 'hi')
+  line(k.knurl(-46, 0, 35, DECK + 44, DECK + 50, 64, P), 'mid')
+  cylinder(-46, 0, 30, DECK + 51, 3, 'green', { className: 'decision-dial' })
+  const ticks = k.radialTicks(-46, 0, 27, 50, 5, DECK + 54, [2, 4], P)
+  line(ticks.minor, 'lo')
+  line(ticks.major, 'hi')
+  cylinder(-46, 0, 19, DECK + 54, 2, 'mid')
+  text(-46, -1, DECK + 56.5, '0.93', 12, 'hi')
+  text(-46, 9, DECK + 56.5, 'CONFIDENCE', 3.2)
+  const angle = -Math.PI / 2 + .93 * Math.PI * 2
+  rule(
+    [-46 + 22 * Math.cos(angle), 22 * Math.sin(angle)],
+    [-46 + 28 * Math.cos(angle), 28 * Math.sin(angle)],
+    DECK + 55,
+    'green',
+  )
+  for (let i = 0; i < 5; i++) {
+    cylinder(-77 + i * 14, 39, 1.5, DECK + 43, 1, i < 4 ? 'green' : 'lo')
+  }
+
+  // A three-contact selector makes the if-statement a physical routing mechanism.
+  const selector = { x: 43, y: -23, w: 36, d: 46, r: 3 }
+  plate(selector, DECK, 5)
+  for (const y of [-14, 0, 14]) {
+    slab({ x: 66, y: y - 3, w: 7, d: 6, r: 1 }, DECK + 5, 3, y === -14 ? 'green' : 'lo')
+  }
+  cylinder(55, 0, 4, DECK + 5, 5, 'hi')
+  line(k.pathOf([at([55, 0, DECK + 11]), at([69, -14, DECK + 11])]), 'green', { className: 'decision-contact' })
+  cylinder(69, -14, 2, DECK + 8, 2, 'green')
+  text(55, 14, DECK + 5.5, 'IF', 4, 'hi')
+
+  // Only the accepted rail powers the large model's compute bank.
+  const compute = { x: 126, y: -140, w: 112, d: 76, r: 5 }
+  plate(compute, DECK, 8, 'green')
+  for (let blade = 0; blade < 5; blade++) {
+    const z = DECK + 9 + blade * 11
+    plate({ x: 132, y: -134, w: 100, d: 64, r: 2 }, z, 7, blade === 4 ? 'hi' : 'mid', { lit: blade === 4 })
+    for (let slot = 0; slot < 8; slot++) {
+      rule([139 + slot * 11, -74], [144 + slot * 11, -74], z + 7, 'lo')
+    }
+    for (let led = 0; led < 3; led++) {
+      cylinder(221 - led * 5, -77, .9, z + 7, .7, 'green')
     }
   }
-  addCylinder(-185, -35, 2.4, TOP + 27, 2, 'hi')
-
-  // A compact decision unit presents a probability, not generated prose.
-  const decisionBase = { x: -94, y: -52, w: 110, d: 104, r: 5 }
-  plate(decisionBase, TOP + 14, 6)
-  addSlab({ x: -88, y: -46, w: 98, d: 92, r: 4 }, TOP + 20, 37, 'mid')
-  addPlanOutline({ x: -82, y: -40, w: 86, d: 80, r: 2 }, TOP + 57, 'faint')
-  const display = { x: -76, y: -30, w: 74, d: 28, r: 2 }
-  addSlab(display, TOP + 57, 2, 'lo', { flat: true })
-  addRule(k.planOutline(k.insetPlan(display, 2), TOP + 59, P), 'mid')
-  solids.push(text(-39, -16, TOP + 59, 'p = 0.93', { size: 9 }))
-  solids.push(text(-39, -6, TOP + 59, 'CONFIDENCE', { size: 4, tone: 'mid' }))
-  addCylinder(-40, 20, 12, TOP + 57, 5, 'hi')
-  addRule(k.knurl(-40, 20, 12, TOP + 58, TOP + 62, 36, P), 'mid')
-  addCylinder(-40, 20, 2.2, TOP + 62, 1, 'red')
-  addCylinder(-12, 20, 2.3, TOP + 57, 3, 'green')
-  addCylinder(0, 20, 2.3, TOP + 57, 3, 'mid')
-  addCylinder(-84, -39, 1.8, TOP + 57, 2, 'lo')
-  addCylinder(0, -39, 1.8, TOP + 57, 2, 'lo')
-
-  // The orange switch represents the policy check that routes a decision.
-  const switchBase = { x: 35, y: -15, w: 36, d: 30, r: 3 }
-  plate(switchBase, TOP + 14, 4, 'mid')
-  addSlab({ x: 39, y: -11, w: 28, d: 22, r: 2 }, TOP + 18, 8, 'hi', { className: 'decision-switch' })
-  for (const [x, y] of [[43, -7], [63, -7], [43, 7], [63, 7]]) {
-    addCylinder(x, y, 1.1, TOP + 26, 1.1, 'hi')
+  for (const x of [157, 203]) {
+    cylinder(x, -104, 17, DECK + 60, 2, 'mid')
+    for (const radius of [6, 11, 15]) line(k.ring(x, -104, radius, DECK + 62, P), 'lo')
+    const grille = k.radialTicks(x, -104, 15, 16, 1, DECK + 62, [9, 9], P)
+    line(grille.major, 'mid')
+    cylinder(x, -104, 4, DECK + 62, 1, 'hi')
   }
-  solids.push(text(53, 0, TOP + 26, 'IF', { size: 5, tone: 'hi' }))
+  text(182, -128, DECK + 60, 'GENERATION', 4.5, 'hi')
 
-  // Three separate output trays make the conditional paths literal.
-  const routes = [
-    { y: -88, label: 'GENERATE', threshold: 'p >= 0.90', tone: 'green' },
-    { y: -3, label: 'REVIEW', threshold: '0.60-0.90', tone: 'mid' },
-    { y: 82, label: 'STOP', threshold: 'p < 0.60', tone: 'red' },
-  ]
-  for (const route of routes) {
-    const path = { x: 108, y: route.y - 18, w: 82, d: 44, r: 3 }
-    tray(path, TOP + 14, route.tone)
-    const contents = route.label === 'GENERATE'
-      ? { x: 122, y: route.y - 10, w: 55, d: 26, r: 2 }
-      : route.label === 'REVIEW'
-        ? { x: 125, y: route.y - 9, w: 48, d: 24, r: 2 }
-        : { x: 131, y: route.y - 8, w: 42, d: 22, r: 2 }
-    addSlab(contents, TOP + 17, 2, route.tone === 'mid' ? 'hi' : route.tone)
-    if (route.label === 'GENERATE') {
-      addSlab({ x: 129, y: route.y - 5, w: 40, d: 18, r: 1 }, TOP + 19, 3, 'hi')
-      for (const z of [TOP + 20, TOP + 21, TOP + 22]) {
-        addRule(k.lineOnTop([134, route.y], [163, route.y], z, P), 'mid')
-      }
-    } else if (route.label === 'REVIEW') {
-      addCylinder(148, route.y, 7, TOP + 19, 4, 'hi')
-      addRule(k.ring(148, route.y, 4, TOP + 23, P, 20), 'mid')
-    } else {
-      addCylinder(152, route.y, 7, TOP + 19, 3, 'red')
-      addRule(k.lineOnTop([147, route.y - 5], [157, route.y + 5], TOP + 22, P), 'hi')
-      addRule(k.lineOnTop([147, route.y + 5], [157, route.y - 5], TOP + 22, P), 'hi')
-    }
-    const [labelX, labelY, labelWidth] = {
-      GENERATE: [1000, 238, 204],
-      REVIEW: [875, 390, 184],
-      STOP: [750, 515, 152],
-    }[route.label]
-    solids.push(label(labelX, labelY, `${route.threshold}  ${route.label}`, labelWidth))
+  // Review is an inspection window; stop is a closed physical shutter.
+  const review = { x: 144, y: -18, w: 87, d: 57, r: 4 }
+  plate(review, DECK, 6)
+  slab(k.insetPlan(review, 8), DECK + 6, 5, 'hi')
+  for (let row = 0; row < 4; row++) {
+    rule([160, -4 + row * 7], [205 - row % 2 * 14, -4 + row * 7], DECK + 11, 'mid')
   }
-
-  // Evidence flows in; the small model scores it; the IF sends it to one path.
-  solids.push(flow([[-116, 0, TOP + 26], [-95, 0, TOP + 26]], 'mid'))
-  solids.push(flow([[16, 0, TOP + 32], [35, 0, TOP + 32]], 'mid'))
-  for (const route of routes) {
-    const endY = route.y
-    solids.push(flow(
-      [[71, 0, TOP + 30], [87, 0, TOP + 30], [96, endY, TOP + 30], [108, endY, TOP + 24]],
-      route.tone,
-    ))
+  cylinder(208, 14, 10, DECK + 11, 3, 'hi')
+  line(k.ring(208, 14, 7, DECK + 14, P), 'mid')
+  rule([215, 21], [224, 30], DECK + 13, 'hi')
+  const stop = { x: 144, y: 77, w: 87, d: 59, r: 4 }
+  plate(stop, DECK, 6, 'red')
+  for (let slat = 0; slat < 7; slat++) {
+    slab({ x: 152, y: 84 + slat * 6, w: 71, d: 5, r: 1 }, DECK + 6, 4, 'lo')
   }
-  // The final model-generated artifact leaves the high-confidence tray.
-  const output = { x: 183, y: -107, w: 20, d: 18, r: 2 }
-  tray(output, TOP + 14, 'green')
-  addSlab({ x: 187, y: -104, w: 12, d: 12, r: 1 }, TOP + 17, 2, 'hi')
+  cylinder(187, 105, 12, DECK + 10, 3, 'red')
+  rule([182, 100], [192, 110], DECK + 13, 'red')
+  rule([182, 110], [192, 100], DECK + 13, 'red')
 
-  // All labels are attached visually to the relevant part; the prose key below
-  // explains the flow without relying on color or on interaction.
-  solids.push(label(430, 72, 'REQUEST + EVIDENCE', 204))
-  solids.push(label(680, 72, 'SMALL DECISION MODEL', 224))
-  solids.push(label(770, 280, 'IF / THEN', 112))
-  solids.push(label(1080, 168, 'LARGE MODEL', 132))
+  label([-230, -38, 45], 'REQUEST + EVIDENCE', { dy: -66, dx: -20 })
+  label([-46, 0, 77], 'SMALL DECISION MODEL', { dy: -90 })
+  label([57, 0, 30], 'IF / THEN', { dy: -50, dx: 16 })
+  label([185, -103, 82], 'LARGE MODEL', { dy: -80, dx: 48, tone: 'green' })
+  label([230, -103, 27], 'p >= 0.90  GENERATE', { dx: 98, dy: 12, tone: 'green' })
+  label([230, 12, 27], '0.60-0.90  REVIEW', { dx: 98, dy: 32 })
+  label([230, 107, 27], 'p < 0.60  STOP', { dx: 76, dy: 54, tone: 'red' })
 
   return k.figureSvg({
     width: WIDTH,
     height: HEIGHT,
-    label: 'An isometric AI workbench. A request and its evidence enter a small decision model. An illustrative confidence threshold sends high-confidence work to a large model for generation, uncertain work to human review and low-confidence work to stop.',
+    label: 'An isometric AI workbench reimagined as a precision decision engine. Evidence enters a small probability instrument. Its illustrative confidence of 0.93 closes a selector that powers the large model. Other tracks lead to human review or a closed stop shutter.',
     className: 'decision-hero-svg',
-    body: [...solids, ...rules],
+    body: [...body, ...annotations],
   })
 }
 

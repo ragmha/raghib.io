@@ -26,7 +26,7 @@ test('decision hero follows the site theme and fits desktop and mobile', {
 
             const hero = page.locator('.decision-hero')
             assert.equal(await hero.count(), 1)
-            assert.equal(await page.locator('.post-head + .decision-hero + .post-body').count(), 1, 'Hero sits between the post header and body')
+            assert.equal(await page.locator('.decision-cover + .post-head + .post-body').count(), 1, 'Cover illustration leads the article, above the title')
             assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'Page has no horizontal overflow')
             assert.equal(await hero.locator('[data-anatomy]').count(), 0)
             const result = await hero.evaluate(element => {
@@ -35,28 +35,14 @@ test('decision hero follows the site theme and fits desktop and mobile', {
               const viewBox = svg.viewBox.baseVal
               return {
                 paper: getComputedStyle(svg.querySelector('.iso-fill')).fill,
+                background: getComputedStyle(element).backgroundColor,
+                pageBackground: getComputedStyle(document.documentElement).backgroundColor,
                 fits: bounds.x >= 0 && bounds.y >= 0 &&
                   bounds.x + bounds.width <= viewBox.width &&
                   bounds.y + bounds.height <= viewBox.height,
-                labelTextFits: [...svg.querySelectorAll('.decision-hero-label')]
-                  .every(label => {
-                    const rect = label.querySelector('rect').getBBox()
-                    const text = label.querySelector('text').getBBox()
-                    return text.x >= rect.x && text.y >= rect.y &&
-                      text.x + text.width <= rect.x + rect.width &&
-                      text.y + text.height <= rect.y + rect.height
-                  }),
                 labelsOverlap: [...svg.querySelectorAll('.decision-hero-label')]
-                  .map(label => {
-                    const box = label.getBBox()
-                    const matrix = label.getCTM()
-                    return {
-                      x: matrix.e + box.x * matrix.a,
-                      y: matrix.f + box.y * matrix.d,
-                      width: box.width * matrix.a,
-                      height: box.height * matrix.d,
-                    }
-                  })
+                  .filter(label => getComputedStyle(label).display !== 'none')
+                  .map(label => label.getBoundingClientRect())
                   .some((left, index, labels) => labels.slice(index + 1).some(right =>
                     left.x < right.x + right.width &&
                     left.x + left.width > right.x &&
@@ -64,14 +50,17 @@ test('decision hero follows the site theme and fits desktop and mobile', {
                     left.y + left.height > right.y,
                   )),
                 overflows: element.scrollWidth > element.clientWidth,
+                movingSignals: [...svg.querySelectorAll('.decision-signal')]
+                  .some(signal => getComputedStyle(signal).animationName !== 'none'),
               }
             })
             const contextLabel = `${engine.name()} ${theme} ${width}px`
             assert.equal(result.paper, theme === 'dark' ? 'rgb(24, 24, 24)' : 'rgb(243, 243, 243)', contextLabel)
+            assert.equal(result.background, result.pageBackground, `Cover blends into the ${contextLabel} page`)
             assert.ok(result.fits, `Hero is clipped at ${contextLabel}`)
-            assert.equal(result.labelTextFits, true, `Hero label text exceeds its box at ${contextLabel}`)
             assert.equal(result.labelsOverlap, false, `Hero labels overlap at ${contextLabel}`)
             assert.equal(result.overflows, false, `Hero overflows at ${contextLabel}`)
+            assert.equal(result.movingSignals, false, `Reduced motion stops signals at ${contextLabel}`)
             assert.deepEqual(errors, [])
           } finally {
             await context.close()

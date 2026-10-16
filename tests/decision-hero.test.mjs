@@ -16,5 +16,7 @@ test('decision hero explains the illustrative decision and three routes', () => 
   ]) {
     assert.ok(decisionHeroSvg.includes(label), `SVG includes ${label}`)
   }
+  assert.ok((decisionHeroSvg.match(/class="iso-solid/g) ?? []).length >= 100, 'Engine retains detailed physical construction')
+  assert.equal((decisionHeroSvg.match(/class="iso-line decision-signal"/g) ?? []).length, 3, 'Only the input, probability and accepted route carry signals')
   assert.ok(!/NaN|undefined|<script|https?:\/\/(?!www\.w3\.org)/.test(decisionHeroSvg), 'SVG has no invalid output')
 })

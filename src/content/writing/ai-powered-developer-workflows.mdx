@@ -1,30 +1,30 @@
 ---
 title: "AI-Powered Developer Workflows"
-description: "How GitHub Copilot and AI tools are changing the way I build software"
+description: "A reflection on where AI helps in my development workflow—and where engineering judgment still matters"
 date: "2026-04-05"
 tags: ["ai", "copilot", "dx"]
 published: false
 ---
 
-## The Shift
+## Where the work moves
 
-Developer tools are going through a revolution. GitHub Copilot, Cursor, and other AI-powered tools aren't just autocomplete — they're changing how we think about writing code.
+The first thing I notice about AI coding tools is how quickly they can produce
+the routine parts of an implementation. The more useful question is what I do
+with the attention that frees up.
 
-Here's what my workflow looks like now.
+For a small example, I can describe a CSV report instead of looking up the
+grouping syntax:
 
 ## Pair Programming with Copilot
 
 I use GitHub Copilot as a pair programmer. Not a replacement — a collaborator. The key is knowing when to accept suggestions and when to think deeper.
 
 ```python
-# Before AI: I'd google "python read csv and group by column"
-# Now: I describe intent, Copilot handles the boilerplate
-
 import pandas as pd
 
 def analyze_sales(filepath: str) -> dict:
     """Read sales data and return monthly totals by region."""
-    df = pd.read_csv(filepath)
+    df = pd.read_csv(filepath, parse_dates=["date"])
     return (
         df.groupby(["region", df["date"].dt.to_period("M")])["amount"]
         .sum()
@@ -32,44 +32,31 @@ def analyze_sales(filepath: str) -> dict:
     )
 ```
 
-The speed improvement is real, but the bigger win is staying in flow state.
+That saves typing, but it does not decide whether the calculation is right for
+the business question. I still need to check the date handling, grouping and
+meaning of the totals.
 
-## The Tools That Matter
+## The tools I reach for
 
-After trying dozens of AI tools, here's what stuck:
+I use GitHub Copilot for inline suggestions and chat-driven development. I use
+Copilot CLI when I want help understanding a command, drafting a script or
+investigating a build failure.
 
-### GitHub Copilot
-Best for inline code completion and chat-driven development. The context awareness keeps getting better.
+The boundary matters more than the tool name. A generated implementation is
+still a proposal. I need to check how it fits the system before treating it as
+finished, especially when it handles data, permissions or other sensitive work.
 
-### Copilot CLI
-Terminal-first AI assistance. I use it for explaining commands, generating scripts, and debugging build failures.
+## What the code doesn't decide
 
-> AI tools are powerful but not infallible. Always review generated code —
-> especially for security-sensitive operations.
+The same shift shows up in a fetch helper. A generated implementation may
+handle the HTTP response, but it cannot decide whether caching is safe for
+this user, how credentials should refresh, or how retries interact with the
+service's limits. Those choices need system context.
 
-## The Productivity Paradox
+That is the part of AI-assisted development I want to understand better:
+whether taking routine work off the keyboard lets us spend more time on
+architecture, review and the assumptions behind a change.
 
-Here's the thing nobody talks about: AI tools can make you *faster* at writing code, but they can also make you *lazier* about understanding it.
-
-The best developers I know use AI to handle the boring parts so they can focus on architecture and design decisions.
-
-```typescript
-// AI generates the implementation
-async function fetchUserProfile(id: string): Promise<UserProfile> {
-  const res = await fetch(`/api/users/${id}`)
-  if (!res.ok) throw new Error(`Failed to fetch user: ${res.status}`)
-  return res.json()
-}
-
-// You focus on the hard questions:
-// - What's the caching strategy?
-// - How do we handle token refresh?
-// - What's the retry policy for failures?
-```
-
-## Looking Forward
-
-The pace of change is wild. Features that were cutting-edge six months ago are now table stakes. The developers who thrive will be the ones who learn to collaborate effectively with AI — not fight against it.
-
-> I'm currently exploring how AI can improve developer onboarding at scale.
-> More on that soon.
+I am also exploring where these tools help people understand an unfamiliar
+codebase. Onboarding is one place where saving keystrokes is less important
+than helping someone build a useful mental model.

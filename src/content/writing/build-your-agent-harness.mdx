@@ -7,11 +7,18 @@ tags: ["ai", "agents", "typescript", "bun", "tutorial"]
 published: false
 ---
 
-Every agent framework hides the same small machine. A model proposes the next step. Something else decides whether that step is allowed, runs it, records what happened, and knows when to stop. That something is the **harness**.
+An agent needs more than a model call. The model proposes a next step; the
+runtime validates it, checks policy, executes it, records what happened and
+decides when to stop. That runtime is the **harness**.
 
-It is worth building one by hand once. After that, framework docs read like a list of choices someone made for you, and you can tell which ones matter for your system.
+Building a small one by hand makes those boundaries easier to see. Framework
+docs then become a set of choices you can evaluate for your system, rather
+than a black box to accept wholesale.
 
-In this tutorial we build a complete harness in TypeScript with [Bun](https://bun.sh). It talks to a deterministic scripted model, so there is no API key, no network call and no randomness. Every behaviour is repeatable and testable. By the end you will have:
+In this tutorial, you will build a harness in TypeScript with
+[Bun](https://bun.sh). It uses a deterministic scripted model, so there is no
+API key, network call or randomness. The behaviour is repeatable and testable.
+By the end, you will have:
 
 - a provider-neutral model contract and a scripted model;
 - a typed tool registry that validates everything a model sends;

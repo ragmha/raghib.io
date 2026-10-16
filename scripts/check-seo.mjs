@@ -65,7 +65,7 @@ try {
       const meta = (selector) => document.querySelector(selector)?.getAttribute('content')
       return {
         title: document.title,
-        titleCount: document.querySelectorAll('title').length,
+        titleCount: document.head.querySelectorAll('title').length,
         description: meta('meta[name="description"]'),
         descriptionCount: document.querySelectorAll('meta[name="description"]').length,
         canonical: document.querySelector('link[rel="canonical"]')?.getAttribute('href'),
