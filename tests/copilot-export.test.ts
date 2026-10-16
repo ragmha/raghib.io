@@ -75,6 +75,8 @@ for (const [name, runner] of runners) {
     continue
   }
   describe(`${name} raw export helper`, () => {
+    // A test can launch seven interpreters, each with a ten-second process timeout.
+    const testOptions = { timeout: 75_000 }
     const run = (args: string[], input = '', environment: Record<string, string> = {}) => {
       const prefix = name === 'Bash' ? [] : ['-NoProfile', '-File']
       return spawnSync(runner!.executable, [...prefix, runner!.script, ...runner!.args(args)], {
@@ -97,7 +99,7 @@ for (const [name, runner] of runners) {
       })
     }
 
-    test('lists only neutral IDs and modification times, without exporting', () => {
+    test('lists only neutral IDs and modification times, without exporting', testOptions, () => {
       const result = run(['--list'])
       assert.equal(result.status, 0)
       assert.ok(result.stdout.includes('1) session-a  modified '))
@@ -106,14 +108,14 @@ for (const [name, runner] of runners) {
       assert.deepEqual(readdirSync(fixture).sort(), ['cli bin', 'copilot home'])
     })
 
-    test('requires an explicit choice and never automatically picks the newest', () => {
+    test('requires an explicit choice and never automatically picks the newest', testOptions, () => {
       const result = run([], '\n')
       assert.notEqual(result.status, 0)
       assert.match(result.stderr, /selection/i)
       assert.deepEqual(readdirSync(fixture).sort(), ['cli bin', 'copilot home'])
     })
 
-    test('selects the requested fixture through the selection UI', () => {
+    test('selects the requested fixture through the selection UI', testOptions, () => {
       const output = join(fixture, 'selected raw.jsonl')
       const result = run(['--output', output], '2\n')
       assert.equal(result.status, 0)
@@ -121,7 +123,7 @@ for (const [name, runner] of runners) {
       assert.ok(result.stdout.includes(output))
     })
 
-    test('copies the exact selected session bytes without touching the original', () => {
+    test('copies the exact selected session bytes without touching the original', testOptions, () => {
       const source = join(home, 'session-state/session-a/events.jsonl')
       const original = readFileSync(source)
       const result = run(['--session', 'session-a'])
@@ -132,7 +134,7 @@ for (const [name, runner] of runners) {
       assert.ok(!result.stdout.includes('do-not-print'))
     })
 
-    test('copies an explicit telemetry file with spaces without parsing it', () => {
+    test('copies an explicit telemetry file with spaces without parsing it', testOptions, () => {
       const source = join(fixture, 'raw telemetry.json')
       const output = join(fixture, 'new export.json')
       writeFileSync(source, raw)
@@ -143,7 +145,7 @@ for (const [name, runner] of runners) {
       assert.ok(result.stdout.includes(output))
     })
 
-    test('never overwrites an existing export or the input itself', () => {
+    test('never overwrites an existing export or the input itself', testOptions, () => {
       const source = join(home, 'session-state/session-a/events.jsonl')
       const output = join(fixture, 'existing.jsonl')
       writeFileSync(output, 'preserve output')
@@ -154,7 +156,7 @@ for (const [name, runner] of runners) {
       assert.equal(readFileSync(source, 'utf8'), `${raw}session-a\n`)
     })
 
-    test('rejects missing, empty, wrong-extension, and ambiguous inputs', () => {
+    test('rejects missing, empty, wrong-extension, and ambiguous inputs', testOptions, () => {
       const empty = join(fixture, 'empty.jsonl')
       const wrong = join(fixture, 'raw.txt')
       writeFileSync(empty, '')
@@ -173,7 +175,7 @@ for (const [name, runner] of runners) {
       assert.ok(!readdirSync(fixture).includes('copilot-export.jsonl'))
     })
 
-    test('capture uses native child-only settings, preserves arguments and CLI exit', () => {
+    test('capture uses native child-only settings, preserves arguments and CLI exit', testOptions, () => {
       runner!.stub()
       const output = join(fixture, 'future telemetry.jsonl')
       const argumentsToPass = ['argument with spaces', 'embedded"quote', '']
@@ -198,7 +200,7 @@ for (const [name, runner] of runners) {
       assert.equal(readFileSync(output, 'utf8'), '{"synthetic":true}\n')
     })
 
-    test('reports empty telemetry without replacing the CLI exit status', () => {
+    test('reports empty telemetry without replacing the CLI exit status', testOptions, () => {
       runner!.stub()
       const result = run(['--capture', '--output', 'empty capture.jsonl'], '', { STUB_EMPTY: '1', STUB_EXIT: '23' })
       assert.equal(result.status, 23)
@@ -207,7 +209,7 @@ for (const [name, runner] of runners) {
     })
 
     const symlinkTest = process.platform === 'win32' ? test.skip : test
-    symlinkTest('refuses a dangling output symlink', () => {
+    symlinkTest('refuses a dangling output symlink', testOptions, () => {
       const output = join(fixture, 'link.jsonl')
       symlinkSync(join(fixture, 'absent.jsonl'), output)
       assert.notEqual(run(['--session', 'session-a', '--output', output]).status, 0)
