@@ -76,6 +76,107 @@ Inspired by Steve Kinney's
   or workload cost.
 - Tests: `bun test --bail 1 tests/agent-usage.test.ts tests/copilot-export.test.ts`.
 
+## Where Did the Time Go?
+
+`/experiments/session-flame/` (“Where Did the Time Go?”) is a full-screen app
+that replays a coding-agent session. The page does not scroll: a header holds
+Flame, Transcript and Breakdown tabs (arrow keys move between them) and a Help
+dialog with the lane and icon key and log loading, playback controls stay fixed
+below it, and a side panel follows the
+playhead and the selected span. Each panel scrolls on its own; on narrow
+screens the side panel stacks under the tabs. The Flame tab draws the session
+as an interactive flame chart: prompts, model turns, tool calls,
+sub-agents, hooks, approvals and compactions, nested by what caused them. Idle
+stretches over a minute fold into fixed-width breaks so the work stays legible.
+Click a bar to expand it to full width: only its subtree stays, with its
+ancestors stacked above as a grey trail. Click a trail bar or press Escape to
+step out a level, and Fit or `0` to return to the whole session; Enter expands
+the selected span. The mouse wheel zooms at the pointer, and zooming or panning
+out past an expanded bar steps out to the ancestor that still covers the view.
+Drag or Shift-scroll to pan; the inspector shows each span's facts and raw
+events. Play/pause, event stepping, and a scrubbable playhead
+synchronize the flame chart with recorded prompts, responses, tool inputs and
+outputs. A story strip under the controls lights the current step of the loop
+(Prompt › Think › Act › Observe › Reply), counts turns, tool calls and results since
+the last prompt, and narrates each event in a plain sentence. The clock, scrubber,
+speed and idle-skip controls sit behind a Timeline toggle, and the header's
+Replay button hides the whole bar so the chart can use its height.
+Playback offers 1×, 4× and 16× speeds and optional long-idle-gap skipping;
+the clock always reports wall time, while the scrubber uses the chart's folded
+axis. Click or drag the ruler to seek, or press Space with the chart focused to
+play/pause. Replay stops at the end and pauses when the page is hidden or a new
+log is loaded. Event details show only what was recorded at that moment, not a
+span's future result; the separate span inspector retains the full-log view.
+The event list keeps the latest 100 events up to the playhead, with older events
+available by seeking back. Six lanes above the bars sort every event into one
+step of the agent loop (Prompt, Think, Act, Observe, Reply, System); click a
+tick to seek, and filter the transcript by step. While replaying, the work
+running at the playhead is outlined and work not yet started fades back. Line
+icons mark each kind of work (prompt, model turn, tool call, sub-agent,
+response, hook, approval, compaction, session) on bars, transcript rows
+and the playhead panel. A table counts each moment of active time once,
+split evenly across the innermost work running then. Bars run red to violet in
+order of time taken, with dark labels at 4.5:1 contrast or better on every hue.
+Nothing is uploaded.
+Inspired by [AgentViz](https://jfhelin.github.io/copilot-ledger/agentviz/).
+
+**Comparing models and context.** Choose **Compare** in the Flame view and import
+2–6 recorded Copilot CLI sessions (100 MiB combined). Select any two runs; the
+two flames keep the same elapsed-time scale across the whole imported set.
+Each starts at its first user prompt, with idle gaps left uncompressed.
+**Inspect run** opens the selected log in the existing replay and span inspector.
+The illustrative TodoMVC sample is not benchmark evidence.
+
+**Recorded runs.** The Flame view's **Model** and **Context** menus load real
+Copilot CLI logs of one TodoMVC prompt: Claude Opus 5.5, Claude Sonnet 5.5,
+GPT-6 Astra and GPT-6.1 Sol at the default and long context tiers, plus
+HydraFusion, which takes no tier. HydraFusion Max was recorded but omitted: its
+solver was still running when the 15-minute cap stopped it. Each ran once from an empty
+folder with an isolated config, all tools allowed and no way to ask for approval,
+two runs at a time. The published logs in `public/experiments/session-flame/runs/`
+keep only whitelisted fields: system prompts, local paths, file-path telemetry
+and encrypted reasoning are removed, and each log was checked to parse to the
+same spans as its raw original. `src/lib/session-flame-runs.json` lists each
+run's length, prompt limit and SHA-256. All runs share the slowest run's scale.
+The tier raised only the prompt limit; every call read well under it, so tier
+differences in these runs are run-to-run variation, not an effect of the tier.
+HydraFusion logs its fusion phases with durations but replays tool calls at
+commit, so the chart draws the phases over their real time and the tool bars as
+replays. One run per setting is a demonstration, not a benchmark.
+
+Run selectors identify recorded main models and per-call input-token ranges.
+Main-agent `session.usage_record` (or older `assistant.usage`) input tokens are
+kept separate from occasional context snapshots at compaction/shutdown, and
+recorded token limits are not treated as context used. Missing measurements stay
+unknown. The replay gauge likewise shows the last recorded reading, not an
+estimate between events. Multi-model logs, differing prompts, partial logs and
+missing readings are flagged rather than assigned synthetic durations or context
+values.
+
+For a fair TodoMVC experiment, hold the starter commit, prompts, harness/version,
+tools, permissions and acceptance tests constant. Change model **or** input
+payload, record reasoning/cache settings, and repeat each condition. Elapsed time
+includes tools, output generation and idle time; one pair cannot establish
+causation or a universal model ranking. Input token counts also depend on the
+model's tokenizer. A larger available context window alone need not widen a flame.
+**Download evidence for gist** saves a local Markdown summary with file SHA-256
+hashes, measured values, coverage warnings and reproduction requirements. It
+includes no prompt or tool contents and publishes nothing; review filenames and
+complete the methodology before sharing it.
+
+- Supported: GitHub Copilot CLI (`~/.copilot/session-state/<id>/events.jsonl`),
+  up to 100 MiB. The Copilot export helpers above work here too.
+- `src/lib/session-flame.ts` holds the parser, folded axis, lane layout, time
+  attribution, replay timing/event descriptions and palette; the page draws the
+  canvas and handles input. External-tool telemetry remains excluded from the
+  chart and replay; raw logs are not altered.
+- Tests: `bun test --bail 1 tests/session-flame.test.ts`.
+- Browser interactions (with a local dev or preview server running):
+  `SESSION_FLAME_TEST_URL=http://127.0.0.1:4321/experiments/session-flame/ node --test tests/session-flame.browser.mjs`.
+  Covers Chromium and WebKit playback, same-time events, seek/inspect behavior,
+  idle gaps, keyboard and tab controls, restart/reload, and that the app fits
+  the viewport without page scrolling at desktop and phone sizes.
+
 ## Writing and project writeups
 
 Posts live in `src/content/writing/`. A project can optionally have a longer
