@@ -75,6 +75,9 @@ CI (`bun test`, part of the required `SEO readiness` check) runs
 Copilot, Azure, OpenAI, LinkedIn, or VS Code without the disclaimer, or if the
 disclaimer is reworded or not first. It is a keyword tripwire only: competitor
 comparisons and the **Stop and flag** cases still need this skill's judgment.
+The `post-disclaimer-review` agentic workflow applies that judgment to PRs that
+change posts and leaves review comments; it is advisory and does not block
+merging.
 
 ```sh
 bun test tests/employer-disclaimer.test.mjs
