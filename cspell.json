@@ -1,0 +1,22 @@
+{
+  "version": "0.2",
+  "language": "en-US",
+  "files": ["src/content/**/*.{md,mdx}"],
+  "words": [
+    "Abramov",
+    "cutover",
+    "cutovers",
+    "dmarc",
+    "excalidraw",
+    "GHCP",
+    "groupby",
+    "Namecheap",
+    "noall",
+    "norecurse",
+    "NXDOMAIN",
+    "overbroad",
+    "raghib",
+    "ragmha",
+    "Shiki"
+  ]
+}
