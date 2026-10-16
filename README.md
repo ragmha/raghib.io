@@ -14,7 +14,7 @@ and Bun.
 ## Getting started
 
 ```bash
-git clone https://github.com/yourusername/raghib.io.git
+git clone https://github.com/ragmha/raghib.io.git
 cd raghib.io
 bun install
 bun dev
@@ -170,17 +170,21 @@ local development does not load analytics.
 
 ## SEO readiness before merging
 
-The `SEO readiness` workflow runs on every pull request into `main` and on
-merge-queue builds. Its job name is the required-check identifier: keep it
-stable when editing the workflow. A required status-check rule on `main`
-enforces the gate; merely adding a workflow does not prevent merging.
-The deployment workflow repeats the same checks before uploading the site.
+The `SEO readiness` job in `.github/workflows/seo.yml` runs on every pull
+request into `main`, on merge-queue builds, and on pushes to `main`, where it
+also uploads the site for the `deploy` job. Its job name is the required-check
+identifier: keep it stable when editing the workflow. A required status-check
+rule on `main` enforces the gate; merely adding a workflow does not prevent
+merging. The gate also runs `cspell` (American English) over posts; add real
+terms to `cspell.json`. A weekly `Link check` workflow opens or updates a
+`Broken links` issue when external links fail.
 
 Run the gate locally with:
 
 ```bash
 bunx playwright install chromium # once, if the browser is not installed
-bun test --bail
+npx cspell@8.19.4 lint --no-progress
+bun test --bail --timeout 20000
 bun run build
 bun run check:seo
 bun run check:vitals
