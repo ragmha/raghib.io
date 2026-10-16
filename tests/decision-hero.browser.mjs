@@ -25,6 +25,7 @@ test('decision hero follows the site theme and fits desktop and mobile', {
             await page.goto(url, { waitUntil: 'domcontentloaded' })
 
             const hero = page.locator('.decision-hero')
+            await hero.locator('svg[role="img"]').waitFor()
             assert.equal(await hero.count(), 1)
             assert.equal(await page.locator('.decision-cover + .post-head + .post-body').count(), 1, 'Cover illustration leads the article, above the title')
             assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'Page has no horizontal overflow')
