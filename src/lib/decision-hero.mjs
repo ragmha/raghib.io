@@ -19,7 +19,7 @@ function buildScene() {
   const slab = (plan, z, height, tone = 'mid', options = {}) =>
     body.push(k.solidSvg(k.slabOf(plan, z, height, P, 6, .8), { tone, ...options }))
   const cylinder = (x, y, radius, z, height, tone = 'mid', options = {}) =>
-    body.push(k.solidSvg(k.cylinder(x, y, radius, z, height, P, 48, .5), { tone, ...options }))
+    body.push(k.solidSvg(k.cylinder(x, y, radius, z, height, P, 24, .5), { tone, ...options }))
   const rule = (from, to, z, tone = 'lo') => line(k.lineOnTop(from, to, z, P), tone)
   const outline = (plan, z, tone = 'lo') => line(k.planOutline(plan, z, P), tone)
   const text = (x, y, z, value, size = 5, tone = 'mid') =>
