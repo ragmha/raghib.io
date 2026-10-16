@@ -14,7 +14,7 @@ and Bun.
 ## Getting started
 
 ```bash
-git clone https://github.com/yourusername/raghib.io.git
+git clone https://github.com/ragmha/raghib.io.git
 cd raghib.io
 bun install
 bun dev

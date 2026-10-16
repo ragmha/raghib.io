@@ -30,5 +30,11 @@ jobs:
           [ -s broken.txt ] || { echo "All external links work"; exit 0; }
           cat broken.txt
           open=$(gh issue list --state open --search 'Broken links in:title' --json number --jq '.[0].number')
-          if [ -n "$open" ]; then gh issue comment "$open" --body-file broken.txt
-          else gh issue create --title 'Broken links' --body-file broken.txt; fi
+          if [ -n "$open" ]; then
+            current=$(gh issue view "$open" --json body --jq .body)
+            if [ "$current" != "$(cat broken.txt)" ]; then
+              gh issue edit "$open" --body-file broken.txt
+            fi
+          else
+            gh issue create --title 'Broken links' --body-file broken.txt
+          fi
