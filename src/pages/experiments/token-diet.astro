@@ -28,6 +28,7 @@ const setups = [
   { id: 'c', name: 'caveman' },
   { id: 'd', name: 'rtk' },
   { id: 'e', name: 'All three' },
+  { id: 'f', name: 'Token Optimizer' },
 ].map((setup) => {
   const set = runs.filter((run) => run.variant === setup.id)
   const sizes = set.map((run) => total(run.totals))
@@ -51,7 +52,7 @@ const setups = [
     biggestResult: Math.max(...set.flatMap((run) => run.calls.flatMap((call) => call.tools.map((tool) => tool.outTokens)))),
   }
 })
-const [baseline, principles, caveman, rtk, all] = setups
+const [baseline, principles, caveman, rtk, all, optimizer] = setups
 const after = setups.slice(1)
 const versus = (setup: (typeof setups)[number]) => setup.tokens / baseline.tokens - 1
 const [closest, furthest] = [after.reduce((a, b) => (versus(a) < versus(b) ? a : b)), after.reduce((a, b) => (versus(a) > versus(b) ? a : b))]
@@ -64,12 +65,16 @@ const callsVsTokens = correlation(runs.map((run) => run.calls.length), runs.map(
 const lastCall = median(runs.map((run) => total(run.calls[run.calls.length - 1])))
 const sharedPrefix = runs[0].calls[0].cacheRead
 const testRuns = runs.reduce((sum, run) => sum + run.testRuns, 0)
+const unpipedTestRuns = runs.reduce((sum, run) => sum + run.testRunsUnpiped, 0)
 const rtkSaved = median(rtk.set.map((run) => run.rtk?.saved ?? 0))
 const extraSkills = caveman.set[0].skills - baseline.set[0].skills
 const narrowestSpread = Math.min(...setups.map((setup) => setup.high - setup.low))
 const widestGap = Math.max(...setups.map((setup) => setup.tokens)) - Math.min(...setups.map((setup) => setup.tokens))
 const largest = runs.reduce((max, run) => (total(run.totals) > total(max.totals) ? run : max))
 const failed = runs.filter((run) => !run.success)
+const beatBaseline = after.filter((setup) => setup.tokens < baseline.tokens)
+const mixed = after.find((setup) => setup.tokens < baseline.tokens !== setup.aiu < baseline.aiu)
+const side = (value: number, of: number) => (value < of ? 'below' : 'above')
 const why = (run: Run) =>
   !run.committed ? 'made no commit'
     : !run.testsPass ? 'left tests failing'
@@ -115,7 +120,7 @@ const stripMax = Math.ceil(total(largest.totals) / 100_000) * 100_000
 const stripTicks = [0, 1, 2, 3].map((i) => (stripMax / 3) * i)
 
 const description =
-  'One bug-fix task, 25 coding-agent runs: as-is, with simple principles, caveman, rtk and all three. See where the tokens and the cost actually went.'
+  'One bug-fix task, 30 coding-agent runs: as-is, with simple principles, caveman, rtk, all three, and Token Optimizer. See where the tokens and the cost actually went.'
 ---
 
 <SiteLayout title="Coding Agent Token Diet: Before and After" description={description}>
@@ -123,14 +128,14 @@ const description =
   <div class="diet">
     <dl class="lede">
       <dt>Claim</dt>
-      <dd>Simple principles, caveman and rtk make a coding agent use fewer tokens.</dd>
+      <dd>Do simple principles, caveman, rtk, or Token Optimizer make a coding agent use fewer tokens?</dd>
       <dt>Result</dt>
       <dd>
-        <strong>Not on this task.</strong> Each setup’s median of five runs used more than the plain agent (baseline):
-        {change(closest)} ({closest.name}) to {change(furthest)} ({furthest.name}).
+        <strong>One task, five runs per setup.</strong> Median token use ranged from {change(closest)}
+        ({closest.name}) to {change(furthest)} ({furthest.name}), versus the plain agent (baseline).
       </dd>
       <dt>Why</dt>
-      <dd>{tokenShare('cacheRead')} of tokens were history re-read on each call. None of these cut that.</dd>
+      <dd>{tokenShare('cacheRead')} of tokens were conversation history re-read on each call.</dd>
     </dl>
 
     <div class="tabs">
@@ -260,7 +265,7 @@ const description =
           Split with OpenAI’s o200k_base, an illustration: Claude’s tokenizer isn’t public. Measured, the principles
           added a median {number.format(principles.prompt - baseline.prompt)} first-call tokens (the file plus the CLI’s
           wrapper). The runs didn’t record the system prompt, {number.format(data.toolDefinitionsTokens)} tokens of tool
-          definitions, the skill list or what caveman and rtk install.
+          definitions, the skill list or what caveman, rtk and Token Optimizer install.
         </p>
       </div>
     </section>
@@ -290,14 +295,14 @@ const description =
           </div>
         </div>
         <figcaption>
-          Total tokens per run. Each dot is a run; the hollow dot is the run that failed; the line marks the median.
+          Total tokens per run. Each dot is a run;{failed.length ? ' hollow dots are failed runs;' : ''} the line marks the median.
         </figcaption>
       </figure>
 
       <div class="table-wrap">
         <table>
           <caption>
-            Medians over five runs, failed run included. First-call prompt: all the agent sends before acting —
+            Medians over five runs{failed.length ? ', failed runs included' : ''}. First-call prompt: all the agent sends before acting —
             system prompt, {number.format(data.toolDefinitionsTokens)} tokens of tool definitions, instructions, skills, task.
           </caption>
           <thead>
@@ -337,26 +342,28 @@ const description =
       <h2 id="findings-title">What the runs show</h2>
       <div class="tabs side">
         <input type="radio" name="finding" id="finding-1" checked />
-        <label for="finding-1">No setup beat the baseline</label>
+        <label for="finding-1">{beatBaseline.length ? `${beatBaseline.length} of ${after.length} setups beat the baseline` : 'No setup beat the baseline'}</label>
         <p>
         The baseline’s median run used {number.format(baseline.tokens)}
         tokens. The medians for {after.map((setup) => setup.name.toLowerCase()).join(', ')} were
-        {' '}{after.map((setup) => number.format(setup.tokens)).join(', ')}. {failed.length === 1 ? 'One run' : `${failed.length} runs`} of 25
-        failed: {failed.map((run) => `${run.id} (${nameOf(run)}) ${why(run)}`).join('; ')}.
+        {' '}{after.map((setup) => number.format(setup.tokens)).join(', ')}.
+        {failed.length
+          ? `${failed.length === 1 ? 'One run' : `${failed.length} runs`} of ${runs.length} failed: ${failed.map((run) => `${run.id} (${nameOf(run)}) ${why(run)}`).join('; ')}.`
+          : `All ${runs.length} runs succeeded.`}
         </p>
         <input type="radio" name="finding" id="finding-2" />
-        <label for="finding-2">Noise was bigger than the differences</label>
+        <label for="finding-2">Five runs are exploratory</label>
         <p>
-        Within every setup, the largest run used at least
-        {' '}{number.format(narrowestSpread)} more tokens than the smallest; the widest gap between two setups’ medians
-        was {number.format(widestGap)}. Five runs each can’t tell these setups apart. The single largest run,
+        The narrowest within-setup range was {number.format(narrowestSpread)} tokens, while the widest gap between two
+        setups’ medians was {number.format(widestGap)}. With one task and five runs per setup, treat these results as
+        exploratory rather than conclusive. The single largest run,
         {' '}{largest.id} ({nameOf(largest)}), used {number.format(total(largest.totals))} tokens over
         {' '}{largest.calls.length} calls.
         </p>
         <input type="radio" name="finding" id="finding-3" />
         <label for="finding-3">Calls drove tokens</label>
         <p>
-        Across all 25 runs, total tokens tracked the number of model calls
+        Across all {runs.length} runs, total tokens tracked the number of model calls
         (Pearson r = {callsVsTokens.toFixed(2)}). Every call re-reads the whole conversation so far, so calls grow
         as a run goes on: the last call of a run processed a median {number.format(lastCall)} tokens.
         </p>
@@ -366,10 +373,10 @@ const description =
         Cache reads were {tokenShare('cacheRead')} of all tokens but
         {' '}{costShare('cacheRead')} of the AIU. Cache writes were {tokenShare('cacheWrite')} of tokens and
         {' '}{costShare('cacheWrite')} of AIU; output was {tokenShare('output')} of tokens and {costShare('output')}
-        of AIU. So the two can disagree: rtk’s median was above the baseline’s in tokens
-        ({number.format(rtk.tokens)} against {number.format(baseline.tokens)}) but the lowest of all in AIU
-        ({aiu(rtk.aiu)} against {aiu(baseline.aiu)}), though still inside the baseline’s own range of
-        {' '}{aiu(baseline.aiuLow)}–{aiu(baseline.aiuHigh)}.
+        of AIU.
+        {mixed
+          ? `So the two can disagree: ${mixed.name}’s median was ${side(mixed.tokens, baseline.tokens)} the baseline’s in tokens (${number.format(mixed.tokens)} against ${number.format(baseline.tokens)}) but ${side(mixed.aiu, baseline.aiu)} it in AIU (${aiu(mixed.aiu)} against ${aiu(baseline.aiu)}).`
+          : 'On this task, every setup’s tokens and AIU moved in the same direction against the baseline.'}
         </p>
         <input type="radio" name="finding" id="finding-5" />
         <label for="finding-5">Principles added little</label>
@@ -394,18 +401,29 @@ const description =
         <label for="finding-7">The agent already did rtk’s job</label>
         <p>
         A plain run of the failing suite prints
-        {' '}{number.format(data.fixture.outputLines)} lines. The agent ran the suite {testRuns} times across the 25
-        runs and piped the output through a filter such as <code>tail</code> or <code>grep</code> every time, in every
-        setup. The largest single tool result was smaller with rtk ({number.format(rtk.biggestResult)} tokens, against
+        {' '}{number.format(data.fixture.outputLines)} lines. The agent ran the suite {testRuns} times across the
+        {' '}{runs.length} runs; {testRuns - unpipedTestRuns} test invocations piped output through a filter such as
+        {' '}<code>tail</code> or <code>grep</code>. The largest single tool result was smaller with rtk
+        ({number.format(rtk.biggestResult)} tokens, against
         {' '}{number.format(baseline.biggestResult)} at baseline), and rtk reported a median
         {' '}{number.format(rtkSaved)} tokens saved per run — its own estimate, and less than a single late call
         processes. Its instruction and hook added {number.format(rtk.prompt - baseline.prompt)} tokens to the prompt.
         </p>
         <input type="radio" name="finding" id="finding-8" />
-        <label for="finding-8">All three cost the most</label>
+        <label for="finding-8">Combining the three setups</label>
         <p>
         All three together added {number.format(all.prompt - baseline.prompt)} tokens to the prompt,
-        made the first call cost {aiu(all.firstAiu)} AIU and had the highest median AIU, {aiu(all.aiu)}.
+        made the first call cost {aiu(all.firstAiu)} AIU and had median total cost {aiu(all.aiu)} AIU.
+        </p>
+        <input type="radio" name="finding" id="finding-9" />
+        <label for="finding-9">Token Optimizer on this task</label>
+        <p>
+        Token Optimizer {data.versions.tokenOptimizer} installed session-start continuity restore,
+        capability-gated bash compression, post-tool nudges and stop-time rollup in an isolated Copilot home.
+        Its median used {number.format(optimizer.tokens)} tokens ({change(optimizer)} versus baseline) and
+        {aiu(optimizer.aiu)} AIU, with {optimizer.succeeded} of {optimizer.set.length} runs succeeding.
+        The adapter’s hooks added a median {number.format(median(optimizer.set.map((run) => run.hookChars)))}
+        characters of context across a run. These results cover this one task and do not establish broader savings.
         </p>
       </div>
     </section>
@@ -479,13 +497,21 @@ const description =
                 commands through rtk and a hook that rewrites them, so rtk filters their output.
               </li>
               <li><strong>All three:</strong> everything above in one setup.</li>
+              <li>
+                <strong>Token Optimizer</strong> (<a href="https://github.com/alexgreensh/token-optimizer">source</a>,
+                {' '}<a href="https://github.com/alexgreensh/token-optimizer/blob/v5.13.48/LICENSE">noncommercial license</a>,
+                {' '}{data.versions.tokenOptimizer}): installed into an isolated Copilot home. Its Copilot adapter
+                adds session-start continuity restore, capability-gated bash compression, post-tool tally/nudges,
+                and stop-time rollup.
+              </li>
             </ul>
         </div>
         <input type="radio" name="method" id="method-isolation" />
         <label for="method-isolation">Isolation</label>
         <div>
             Every run got a fresh copy of the repository and a fresh home directory holding only its setup, with no
-            other environment from my machine. Five rounds; each round started all five setups at once.
+            other environment from my machine. Five runs per setup, each capped at 100 AIU. The original setups were
+            rerun on the same Copilot CLI version as Token Optimizer.
         </div>
         <input type="radio" name="method" id="method-success" />
         <label for="method-success">Success</label>
@@ -498,14 +524,14 @@ const description =
         <div>
             Tokens per model call from the CLI’s session log. AIU is Copilot’s usage unit: the log records a rate for
             each kind of token, the same in every run (AIU per 1k tokens: {rateList}), and tokens times those rates reproduce each run’s recorded
-            total exactly. Every run’s first call found the same opening {number.format(sharedPrefix)} prompt tokens
-            already cached, so no setup started with a warmer cache. Python {data.versions.python}, pytest
+            total exactly. The first run’s opening {number.format(sharedPrefix)} prompt tokens were already cached.
+            Python {data.versions.python}, pytest
             {' '}{data.versions.pytest}.
         </div>
         <input type="radio" name="method" id="method-limits" />
         <label for="method-limits">Limits</label>
         <div>
-            One task, one agent, one model, five runs per setup. Medians include the failed run. rtk’s savings
+            One task, one agent, one model, five runs per setup. {failed.length ? 'Medians include failed runs. ' : ''}rtk’s savings
             figure is its own estimate. Other token-saving tools weren’t tested.
         </div>
       </div>

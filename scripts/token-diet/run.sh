@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Token diet: one repo with three seeded bugs, five agent setups, every run isolated.
-#   ./run.sh setup              build the fixture repo and the five template homes
+# Token diet: one repo with three seeded bugs, six agent setups, every run isolated.
+#   ./run.sh setup              build the fixture repo and the six template homes
 #   ./run.sh selfcheck          prove the verifier catches each seeded bug and passes the fixes
-#   ./run.sh run <rep> [a..e]   run variants in parallel into .work/runs/<variant><rep>
+#   ./run.sh run <rep> [a..f]   run variants in parallel into .work/runs/<variant><rep>
 #   ROUND=2 ./run.sh ...        the same for round 2 (regression hunt), under .work/r2
 #   MODEL=x EFFORT= ./run.sh run  another model into runs-x; an empty EFFORT omits the flag
 set -euo pipefail
@@ -17,6 +17,10 @@ EFFORT=${EFFORT-medium}
 CREDITS=${CREDITS:-300}
 TIMEOUT=${TIMEOUT:-1500}
 CAVEMAN=github:JuliusBrussee/caveman#d262ab3882952a59312ff3537cd86d894523c5ab
+TOKEN_OPTIMIZER_VERSION=v5.13.48
+TOKEN_OPTIMIZER_SHA=a8d77d2275fde689d0d69e644f80c057de4e7238
+TOKEN_OPTIMIZER=$WORK/tools/token-optimizer
+PYTHON_BIN=${PYTHON_BIN:-$(command -v python3)}
 ROUND=${ROUND:-1}
 case $ROUND in
 1)
@@ -80,7 +84,7 @@ EOF
 build_homes() {
   local v
   rm -rf "$WORK/homes"
-  for v in a b c d e; do
+  for v in a b c d e f; do
     mkdir -p "$WORK/homes/$v/.copilot"
     printf '{ "memory": false }\n' >"$WORK/homes/$v/.copilot/config.json"
   done
@@ -96,16 +100,37 @@ build_homes() {
   { echo; cat "$KIT/principles.md"; } >>"$WORK/homes/e/.copilot/copilot-instructions.md"
 }
 
+build_optimizer_home() {
+  mkdir -p "$WORK/tools"
+  if [ ! -d "$TOKEN_OPTIMIZER/.git" ]; then
+    git clone -q --depth 1 --branch "$TOKEN_OPTIMIZER_VERSION" \
+      https://github.com/alexgreensh/token-optimizer.git "$TOKEN_OPTIMIZER"
+  fi
+  [ "$(git -C "$TOKEN_OPTIMIZER" rev-parse HEAD)" = "$TOKEN_OPTIMIZER_SHA" ] ||
+    die "Token Optimizer checkout does not match $TOKEN_OPTIMIZER_VERSION ($TOKEN_OPTIMIZER_SHA)"
+  [ -z "$(git -C "$TOKEN_OPTIMIZER" status --porcelain)" ] ||
+    die "Token Optimizer checkout has local modifications"
+
+  local home="$WORK/homes/f"
+  mkdir -p "$home/.copilot"
+  printf '{ "memory": false }\n' >"$home/.copilot/config.json"
+  env -i HOME="$home" PATH="$(dirname "$PYTHON_BIN"):/usr/bin:/bin" LANG=en_US.UTF-8 \
+    TOKEN_OPTIMIZER_RUNTIME=copilot TOKEN_OPTIMIZER_PYTHON="$PYTHON_BIN" \
+    bash "$TOKEN_OPTIMIZER/install.sh" --copilot >/dev/null
+}
+
 setup() {
   [ -x "$WORK/tools/rtk" ] || die "put the rtk-oss 1.0.1 binary in $WORK/tools (see README.md)"
   [ -x "$VENV/bin/python" ] || { uv venv -q --python 3.12 "$VENV" && uv pip install -q --python "$VENV/bin/python" pytest==8.4.2; }
   build_repo
   # Round 2 reuses round 1's homes.
   if [ "$ROUND" = 1 ] || [ ! -d "$WORK/homes" ]; then build_homes; fi
+  build_optimizer_home
   {
     echo "copilot $("$COPILOT" --version | head -n 1)"
     echo "rtk $("$WORK/tools/rtk" --version)"
     echo "caveman ${CAVEMAN#*#}"
+    echo "tokenOptimizer $TOKEN_OPTIMIZER_VERSION"
     echo "python $("$VENV/bin/python" -c 'import platform; print(platform.python_version())')"
     echo "pytest $("$VENV/bin/python" -m pytest --version 2>&1)"
   } >"$RWORK/versions.txt"
@@ -196,7 +221,7 @@ run() {
   shift
   local pid status=0
   local -a pids=()
-  [ $# -gt 0 ] || set -- a b c d e
+  [ $# -gt 0 ] || set -- a b c d e f
   for v in "$@"; do
     run_one "$v" "$rep" &
     pids+=("$!")

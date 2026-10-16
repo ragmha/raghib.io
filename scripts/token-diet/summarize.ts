@@ -36,7 +36,7 @@ let effort: string | undefined
 let toolDefinitionsTokens: number | undefined
 
 const runs = readdirSync(runsDir)
-  .filter((id) => /^[a-e][1-5]$/.test(id))
+  .filter((id) => /^[a-f][1-5]$/.test(id))
   .sort()
   .map((id) => {
     const dir = join(runsDir, id)
@@ -161,7 +161,10 @@ const runs = readdirSync(runsDir)
     }
   })
 
-check(runs.length === 25, `expected 25 runs, found ${runs.length}`)
+check(
+  runs.length === (runs.some((run) => run.variant === 'f') ? 30 : 25),
+  `expected 25 runs, or 30 with Token Optimizer, found ${runs.length}`,
+)
 
 const pytest = spawnSync(join(venv, 'bin/python'), ['-m', 'pytest', '-q', '-p', 'no:cacheprovider'], {
   cwd: join(work, 'fixture-repo'),

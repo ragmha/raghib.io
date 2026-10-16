@@ -1,6 +1,6 @@
 # Token-diet experiment
 
-This kit compares five Copilot CLI setups on the same seeded bug-fix task:
+This kit compares six Copilot CLI setups on the same seeded bug-fix task:
 
 | Setup | What changes |
 | --- | --- |
@@ -9,6 +9,7 @@ This kit compares five Copilot CLI setups on the same seeded bug-fix task:
 | `c` | caveman |
 | `d` | rtk |
 | `e` | caveman, rtk, and the six instructions |
+| `f` | Token Optimizer |
 
 Each setup runs five times in a fresh repository copy and home directory. The
 runner verifies the committed changes against the original tests and an
@@ -24,6 +25,8 @@ the summarizer redacts paths and writes the publishable measurements to
 - `uv` and Python 3.12
 - rtk 1.0.1 executable at `scripts/token-diet/.work/tools/rtk`
 - Network access for npx to install the pinned caveman revision
+- Network access to clone Token Optimizer v5.13.48 at commit
+  `a8d77d2275fde689d0d69e644f80c057de4e7238`
 
 The script honors `COPILOT`, `NODE_BIN`, `MODEL`, `EFFORT`, `CREDITS`, and
 `TIMEOUT` environment overrides. Defaults match the recorded experiment; change
@@ -34,6 +37,8 @@ them only when intentionally producing a different dataset.
 From the repository root:
 
 ```sh
+export CREDITS=100
+
 mkdir -p scripts/token-diet/.work/tools
 cp /path/to/rtk scripts/token-diet/.work/tools/rtk
 chmod +x scripts/token-diet/.work/tools/rtk
@@ -48,14 +53,18 @@ chmod +x scripts/token-diet/.work/tools/rtk
 bun scripts/token-diet/summarize.ts
 ```
 
-`setup` creates the fixture and isolated configuration homes. `selfcheck` proves
-the verifier catches each seeded bug and rejects invalid commit subjects. Each
-`run <round>` launches all five setups concurrently. The summarizer requires all
-25 run records and checks token totals, usage charges, and redaction before
-writing the JSON file.
+`setup` creates the fixture and isolated configuration homes. The Token
+Optimizer adapter is installed only into the isolated `f` home; it does not
+touch the user's Copilot configuration. Its noncommercial license permits
+personal research and testing; see the [license](https://github.com/alexgreensh/token-optimizer/blob/v5.13.48/LICENSE).
+`selfcheck` proves the verifier catches each seeded bug and rejects invalid
+commit subjects. Each `run <round>` launches all six setups concurrently. The
+summarizer accepts the original 25 run records, or all 30 when Token Optimizer
+was run, and checks token totals, usage charges, and redaction before writing
+the JSON file.
 
 The public page is `/experiments/token-diet/`. Its animated lanes show each
-setup's median-token run; the table and dot plot show all 25 runs. The published
+setup's median-token run; the table and dot plot show every run. The published
 JSON contains aggregate call metrics and short redacted tool labels, not raw
 Copilot event logs, source paths, or credentials.
 
