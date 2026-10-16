@@ -173,8 +173,16 @@ run_one() { # run_one <variant> <rep>
 run() {
   local rep=${1:?usage: run.sh run <rep> [variants]} v
   shift
-  for v in ${*:-a b c d e}; do run_one "$v" "$rep" & done
-  wait
+  local pid status=0
+  local -a pids=()
+  for v in ${*:-a b c d e}; do
+    run_one "$v" "$rep" &
+    pids+=("$!")
+  done
+  for pid in "${pids[@]}"; do
+    wait "$pid" || status=1
+  done
+  return "$status"
 }
 
 case ${1:-} in
