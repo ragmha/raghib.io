@@ -28,11 +28,12 @@ try {
     await page.evaluate(() => document.fonts.ready)
     const dimensions = await page.evaluate(() => ({
       pageWidth: document.documentElement.scrollWidth,
+      viewportWidth: document.documentElement.clientWidth,
       articleWidth: document.querySelector('main').getBoundingClientRect().width,
       articleX: document.querySelector('main').getBoundingClientRect().x,
       sidebarPosition: getComputedStyle(document.querySelector('.sidebar')).position,
     }))
-    assert.ok(dimensions.pageWidth <= width, `Page overflow at ${width}px`)
+    assert.ok(dimensions.pageWidth <= dimensions.viewportWidth, `Page overflow at ${width}px`)
     assert.equal(dimensions.sidebarPosition, width < 1024 ? 'static' : 'sticky')
     if (width < 1024) {
       assert.ok(dimensions.articleWidth >= width - 48, `Unused article column at ${width}px`)
@@ -100,13 +101,13 @@ try {
   await fallbackPage.goto(origin + route, { waitUntil: 'load' })
   assert.ok(await fallbackPage.getByRole('navigation', { name: 'Contents' }).isVisible())
   assert.equal(await fallbackPage.getByRole('button', { name: 'Toggle contents' }).count(), 0)
-  assert.ok(await fallbackPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+  assert.ok(await fallbackPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth))
   await fallback.close()
 
   const published = await browser.newPage({ viewport: { width: 640, height: 900 } })
   await published.goto(`${origin}/writing/leaving-vercel-dns-lessons/`, { waitUntil: 'networkidle' })
   assert.ok(await published.locator('main h1').isVisible())
-  assert.ok(await published.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+  assert.ok(await published.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth))
   assert.ok(await published.locator('.diagram-scroll').count() > 0, 'Existing wide diagrams retain scrolling')
   await published.close()
 

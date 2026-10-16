@@ -173,6 +173,16 @@ describe('agent usage analysis', () => {
     assert.ok(findModelPrice('claude-opus-5.5')?.source.includes('claude'))
   })
 
+  test('applies Grok long-context rates from 200K input tokens', () => {
+    assert.equal(estimateCost([manualUsage('grok-4.7', 200_000, 0, 0, 0)], findModelPrice('grok-4.7')).low, 0.8)
+    assert.equal(estimateCost([manualUsage('grok-4.7', 199_999, 0, 0, 0)], findModelPrice('grok-4.7')).low, 0.399998)
+  })
+
+  test('matches model ids with compact or hyphenated date suffixes', () => {
+    assert.equal(findModelPrice('gpt-5.4-20260305')?.id, 'gpt-5.4')
+    assert.equal(findModelPrice('gpt-5.4-2026-03-05')?.id, 'gpt-5.4')
+  })
+
   test('demo covers all supported agent logs', () => {
     const analysis = analyzeUsage([parseUsage(demoEvents)])
     assert.deepEqual(analysis.sources, ['GitHub Copilot CLI', 'Codex CLI', 'Claude Code'])

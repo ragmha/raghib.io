@@ -63,9 +63,9 @@ export const modelPrices: ModelPrice[] = [
   { id: 'gemini-3.8-flash', name: 'Gemini 3.8 Flash', provider: 'Google', source: google, context: 'Standard', note: 'Promotional rates through Dec 31, 2026', rates: [0.75, 0.075, 0, 3.75], promotionalUntil: '2026-12-31' },
   { id: 'gemini-3.7-flash', name: 'Gemini 3.7 Flash', provider: 'Google', source: google, context: 'Standard', note: 'Promotional rates through Dec 31, 2026', rates: [0.75, 0.075, 0, 3.75], promotionalUntil: '2026-12-31' },
 
-  { id: 'grok-4.7', name: 'Grok 4.7', provider: 'xAI', source: xai, context: '<200K', rates: [2, 0.5, 0, 6], threshold: 200000, longRates: [4, 1, 0, 12] },
-  { id: 'grok-4.6', name: 'Grok 4.6', provider: 'xAI', source: xai, context: '<200K', rates: [2, 0.5, 0, 6], threshold: 200000, longRates: [4, 1, 0, 12] },
-  { id: 'grok-4.5', name: 'Grok 4.5', provider: 'xAI', source: xai, context: '<200K', rates: [2, 0.3, 0, 6], threshold: 200000, longRates: [4, 0.6, 0, 12] },
+  { id: 'grok-4.7', name: 'Grok 4.7', provider: 'xAI', source: xai, context: '<200K', rates: [2, 0.5, 0, 6], threshold: 199999, longRates: [4, 1, 0, 12] },
+  { id: 'grok-4.6', name: 'Grok 4.6', provider: 'xAI', source: xai, context: '<200K', rates: [2, 0.5, 0, 6], threshold: 199999, longRates: [4, 1, 0, 12] },
+  { id: 'grok-4.5', name: 'Grok 4.5', provider: 'xAI', source: xai, context: '<200K', rates: [2, 0.3, 0, 6], threshold: 199999, longRates: [4, 0.6, 0, 12] },
 
   { id: 'deepseek-v4-pro', name: 'DeepSeek V4 Pro', provider: 'DeepSeek', source: deepseek, context: '1M', note: 'Off-peak shown; peak rates are 2×. Cache-hit pricing differs by time.', rates: [0.66, 0.022, 0.66, 1.98], alternativeRates: [1.32, 0.044, 1.32, 3.96] },
   { id: 'deepseek-v4.1-flash', name: 'DeepSeek V4.1 Flash', provider: 'DeepSeek', source: deepseek, context: '1M', note: 'Off-peak shown; peak rates are 2×. Cache-hit pricing differs by time.', rates: [0.15, 0.003, 0.15, 0.6], alternativeRates: [0.3, 0.006, 0.3, 1.2] },
@@ -81,6 +81,6 @@ export const modelPrices: ModelPrice[] = [
 ]
 
 export function findModelPrice(model: string) {
-  const key = (value: string) => value.toLowerCase().replace(/-\d{8}$/, '').replace(/[^a-z0-9]/g, '')
+  const key = (value: string) => value.toLowerCase().replace(/-\d{8}$|-\d{4}-\d{2}-\d{2}$/, '').replace(/[^a-z0-9]/g, '')
   return modelPrices.find((price) => key(price.id) === key(model) || key(price.name) === key(model))
 }

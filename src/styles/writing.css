@@ -85,6 +85,7 @@ mark {
   top: 1rem;
   z-index: 10;
   background: var(--mark);
+  color: var(--mark-ink);
   padding: 0.5rem 0.75rem;
 }
 
@@ -95,6 +96,8 @@ mark {
   width: auto;
   margin: 0;
   padding: 0;
+  /* Full-bleed heroes use 100vw, which includes classic scrollbars; clip keeps sticky contents working. */
+  overflow-x: clip;
 }
 
 .shell {
