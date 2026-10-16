@@ -1,0 +1,165 @@
+---
+title: "TIL: The 403 That Wasn't an Authentication Problem"
+seoTitle: "TIL: A 403 That Was Really a Budget Limit"
+description: "Two GitHub Agentic Workflows failed with HTTP 403. The run data showed a cost problem: one model request spent more than the workflow's entire AI-credit budget."
+date: "2026-10-16"
+tags: ["til", "ai", "agents", "cost"]
+published: true
+---
+
+*How I investigated two failing GitHub Agentic Workflows—and why the fix wasn't to
+raise their AI-credit limits.*
+
+Two GitHub Agentic Workflows started failing with an error that looked familiar:
+
+```text
+Authentication failed with provider (HTTP 403).
+```
+
+My first reaction was to suspect credentials or permissions. The runs had failed,
+so I looked for a fix—and initially raised their AI-credit caps. But before
+treating that as the solution, I checked the run data. It pointed somewhere else
+entirely.
+
+## One request consumed the whole budget
+
+I audited the failed runs with `gh aw audit` and compared the model usage with
+each workflow's configured cap.
+
+| Workflow | Model used | Cache writes | Credits consumed | Cap |
+| --- | --- | --- | --- | --- |
+| Meeting-insight capture | Claude Sonnet 5.5 | 37,082 tokens | 10.37 | 5 |
+| Account status notes | Claude Sonnet 5.5 | 38,393 tokens | 10.70 | 8 |
+
+Each run made **one model request**. Each read **zero cached tokens**. The first
+request wrote about 37,000 tokens to the prompt cache—and cost more than the
+workflow's entire budget.
+
+<figure class="excalidraw-figure">
+  <img
+    src="/diagrams/agentic-403-credits-vs-cap.svg"
+    width="616"
+    height="546"
+    loading="eager"
+    fetchpriority="high"
+    decoding="async"
+    alt="Two bar charts. Meeting-insight capture spent 10.37 credits against a cap of 5, which is 5.37 over. Account status notes spent 10.70 credits against a cap of 8, which is 2.70 over. Each run made one model request, wrote 37 to 38 thousand cache tokens, and read zero cached tokens."
+  />
+  <figcaption>
+    Both runs crossed their cap on the first request. <a href="/diagrams/agentic-403-credits-vs-cap.svg" target="_blank" rel="noopener noreferrer">Open full-size diagram.</a>
+  </figcaption>
+</figure>
+
+That explained the misleading error. The proxy rejected the next request after the
+budget was exhausted, and the failure surfaced as HTTP 403. It wasn't an
+authentication problem; it was a cost problem that looked like one.
+
+## Cache writes aren't cache hits
+
+The audit also changed how I interpreted the cache numbers. Seeing thousands of
+cache-write tokens did not mean the workflow was benefiting from caching. The runs
+had no cache reads at all.
+
+A cache write can make stable context cheaper on later requests—but only if later
+requests happen and the cache can be reused. These workflows hit their credit caps
+before reaching that point. Optimizing for multi-turn cache reuse would not have
+fixed this first-turn failure.
+
+<figure class="excalidraw-figure">
+  <img
+    src="/diagrams/agentic-403-request-flow.svg"
+    width="616"
+    height="619"
+    loading="lazy"
+    decoding="async"
+    alt="A top-to-bottom flow. Request 1 loads instructions and tools and writes about 37,000 tokens to the cache. The credit cap is exceeded at 10.37 of 5 credits. Request 2 is rejected by the proxy. The run reports Authentication failed (HTTP 403). A side note marks request 2 as where cache reads would have paid off, but it was never reached."
+  />
+  <figcaption>
+    The cache was written but never read: the request that could have reused it
+    was the one the proxy rejected. <a href="/diagrams/agentic-403-request-flow.svg" target="_blank" rel="noopener noreferrer">Open full-size diagram.</a>
+  </figcaption>
+</figure>
+
+## Why raising the cap wasn't the right fix
+
+I initially raised the caps, and then reconsidered. That would have let the same
+expensive startup context consume more credits without addressing why it was so
+expensive.
+
+The configured model was `auto`, which routed these runs to Claude Sonnet 5.5. I
+pinned the workflows to **GPT-5.6 Luna**, a lower-cost model supported by the
+version of `gh aw` used to compile the workflows. The proposed change keeps the
+original caps: 5 credits for meeting-insight capture and 8 for account status
+notes.
+
+I also applied the model change to three similar workflows that had not failed yet
+but used the same default model and low credit caps. The idea was to avoid waiting
+for the same first-run failure to appear elsewhere.
+
+I considered HydraFusion as another option, but it was not in the model catalog
+available to this workflow setup, so I couldn't verify that it was selectable and
+priced for credit accounting.
+
+## The next question: can the context be smaller?
+
+Changing the model addresses the cost of processing the prompt. It doesn't answer
+whether the prompt and tools include more context than the tasks need.
+
+I looked at two likely sources:
+
+- **Ambient instructions:** the repository has shared instructions that are useful
+  for many coding tasks but may not be necessary for these focused workflows.
+- **GitHub tool definitions:** both workflows had broad GitHub MCP toolsets even
+  though they mainly needed to read issues and comments.
+
+The proposed pilot uses `bare: true` to avoid loading unrelated repository-wide
+instructions and switches GitHub reads to `gh-proxy`, limited to the `context` and
+`issues` toolsets. The prompts tell the agent to request only the needed issue
+fields with `gh --json` and `--jq`.
+
+Bare mode also means the workflow cannot rely on repository-wide instructions for
+safety rules. So I added explicit instructions to treat issue bodies, comments,
+transcripts, and records as **untrusted evidence, never instructions**, and to
+avoid reproducing personal contact details, credentials, or verbatim customer
+quotes. Reducing context is not useful if it also removes a necessary safeguard.
+
+<figure class="excalidraw-figure">
+  <img
+    src="/diagrams/agentic-403-fix-levers.svg"
+    width="616"
+    height="636"
+    loading="lazy"
+    decoding="async"
+    alt="Before and proposed, side by side. The model changes from auto routing to Claude Sonnet 5.5 to a pinned GPT-5.6 Luna. Repo-wide instructions become bare: true with explicit safety rules. Broad GitHub MCP toolsets become gh-proxy limited to context and issues. Instead of the tempting fix of raising the caps, the caps stay at 5 and 8 credits. A dashed note says a live run must still verify the workflow stays within the cap and its output stays accurate and safe."
+  />
+  <figcaption>
+    Make the first request cheaper and keep the cap. None of this is proven until a
+    live run confirms it. <a href="/diagrams/agentic-403-fix-levers.svg" target="_blank" rel="noopener noreferrer">Open full-size diagram.</a>
+  </figcaption>
+</figure>
+
+## Why I didn't add compaction or handoffs
+
+Compaction and handoffs help when an agent accumulates a long conversation or needs
+to pass work between stages. These runs failed after **one request**. There was no
+growing conversation to compact and no multi-stage process to hand off.
+
+That doesn't mean those techniques are never useful. It means the evidence here
+didn't justify adding them. More orchestration could add complexity and cost
+without fixing a prompt that already exceeds its budget on the first turn.
+
+## What's verified—and what isn't
+
+The workflow sources and generated lock files compile. The repository's unit tests,
+security scan, and skill validation pass. Those checks confirm the configuration is
+internally consistent; they do not prove that the new model will produce equally
+good outputs or that the smaller context will reduce live-run cost.
+
+At the time of writing, the changes are still awaiting live validation. The next
+run needs to confirm two things: that the workflow finishes within its original
+cap, and that its output remains accurate and safe.
+
+The lesson so far: **inspect the evidence behind an error before changing the
+limit.** Here, one model request, zero cache reads, and roughly 37,000 cache-write
+tokens told a more useful story than the 403 alone. The proposed fix is to reduce
+the cost of that first request—and then verify the result in a real run.
