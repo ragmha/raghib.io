@@ -133,6 +133,27 @@ try {
   }
   await preview.close()
 
+  const diagramSources = [...new Set(measurements.flatMap(({ diagrams }) =>
+    diagrams.map(({ source }) => source)))]
+  const diagramPage = await browser.newPage()
+  for (const theme of ['dark', 'light']) {
+    await diagramPage.emulateMedia({ colorScheme: theme })
+    for (const source of diagramSources) {
+      await diagramPage.goto(origin + source, { waitUntil: 'load' })
+      const colors = await diagramPage.evaluate(() => ({
+        text: [...document.querySelectorAll('text')].map(text => getComputedStyle(text).fill),
+        highlights: [...document.querySelectorAll('[fill*="--diagram-ochre-surface"]')]
+          .map(shape => getComputedStyle(shape).fill),
+      }))
+      assert.ok(colors.text.length > 0, `Diagram has readable labels: ${source}`)
+      assert.ok(colors.text.every(color => color === (theme === 'dark' ? 'rgb(255, 255, 255)' : 'rgb(13, 13, 13)')),
+        `Diagram ink must adapt to ${theme}: ${source}`)
+      assert.ok(colors.highlights.every(color => color === (theme === 'dark' ? 'rgb(48, 39, 25)' : 'rgb(244, 233, 199)')),
+        `Diagram highlights must adapt with their ink in ${theme}: ${source}`)
+    }
+  }
+  await diagramPage.close()
+
   if (screenshotDirectory) {
     await writeFile(join(screenshotDirectory, 'measurements.json'), JSON.stringify(measurements, null, 2))
   }
@@ -140,7 +161,7 @@ try {
     status: 'passed',
     viewports: measurements.map(({ width, height }) => `${width}x${height}`),
     diagramMinimumTextPx: Math.min(...measurements.flatMap(({ diagrams }) => diagrams.map(({ minimumText }) => minimumText))),
-    checks: ['column width', 'portrait sources', 'no diagram clipping', 'readable labels', 'contents interaction', 'no-JS fallback', 'published article', 'draft metadata', 'diagram themes'],
+    checks: ['column width', 'portrait sources', 'no diagram clipping', 'readable labels', 'contents interaction', 'no-JS fallback', 'published article', 'draft metadata', 'diagram themes', 'SVG ink and highlights in both themes'],
   }, null, 2))
 } finally {
   await browser.close()

@@ -3,6 +3,8 @@
 #   ./run.sh setup              build the fixture repo and the five template homes
 #   ./run.sh selfcheck          prove the verifier catches each seeded bug and passes the fixes
 #   ./run.sh run <rep> [a..e]   run variants in parallel into .work/runs/<variant><rep>
+#   ROUND=2 ./run.sh ...        the same for round 2 (regression hunt), under .work/r2
+#   MODEL=x EFFORT= ./run.sh run  another model into runs-x; an empty EFFORT omits the flag
 set -euo pipefail
 
 KIT=$(cd "$(dirname "$0")" && pwd)
@@ -11,11 +13,22 @@ VENV=$WORK/venv
 NODE_BIN=${NODE_BIN:-$(dirname "$(command -v node)")}
 COPILOT=${COPILOT:-$(command -v copilot)}
 MODEL=${MODEL:-claude-sonnet-5.5}
-EFFORT=${EFFORT:-medium}
+EFFORT=${EFFORT-medium}
 CREDITS=${CREDITS:-300}
 TIMEOUT=${TIMEOUT:-1500}
 CAVEMAN=github:JuliusBrussee/caveman#d262ab3882952a59312ff3537cd86d894523c5ab
-PROMPT="CI is red on main and finance reports wrong totals on some invoices. Find and fix the root causes, make sure the whole test suite passes, and commit the fixes following this repository's commit message convention."
+ROUND=${ROUND:-1}
+case $ROUND in
+1)
+  RWORK=$WORK
+  PROMPT="CI is red on main and finance reports wrong totals on some invoices. Find and fix the root causes, make sure the whole test suite passes, and commit the fixes following this repository's commit message convention."
+  ;;
+2) # Same bugs, buried in 38 commits after v0.9.0; see history2.py.
+  RWORK=$WORK/r2
+  PROMPT="Finance says invoice totals were right in 0.9.0 but some are wrong now, and CI is red on main. Find the commit that introduced each problem, fix the root causes, make sure the whole test suite passes, and commit the fixes following this repository's commit message convention. Then reply with an incident note for finance: for each problem, the commit that introduced it, what went wrong, and how you verified the fix."
+  ;;
+*) echo "run.sh: ROUND must be 1 or 2" >&2 && exit 1 ;;
+esac
 # CONTRIBUTING.md: scope required for feat/fix/refactor/perf; lowercase summary, no trailing period.
 SCOPES='(money|tax|discounts|invoice|format|cli|samples|release)'
 SUBJECT_RE='^((feat|fix|refactor|perf)\('"$SCOPES"'\)|(docs|test|chore)(\('"$SCOPES"'\))?): [a-z].*[^.]$'
@@ -34,8 +47,13 @@ agent_env() { # agent_env <home> <cmd...>: run with nothing from this machine bu
 }
 
 build_repo() {
-  local repo=$WORK/fixture-repo date subject paths
+  local repo=$RWORK/fixture-repo date subject paths
   rm -rf "$repo" && mkdir -p "$repo"
+  if [ "$ROUND" = 2 ]; then
+    "$VENV/bin/python" "$KIT/history2.py" "$repo"
+    git -C "$repo" rev-parse HEAD >"$RWORK/base.sha"
+    return
+  fi
   (cd "$KIT/fixture" && tar --exclude __pycache__ --exclude .pytest_cache -cf - .) | tar -xf - -C "$repo"
   git -C "$repo" init -q -b main
   while IFS='|' read -r date subject paths; do
@@ -56,7 +74,7 @@ build_repo() {
 2024-04-02T17:30:00Z|chore(release): 0.9.0|CHANGELOG.md
 EOF
   [ -z "$(git -C "$repo" status --porcelain)" ] || die "the history does not commit every fixture file"
-  git -C "$repo" rev-parse HEAD >"$WORK/base.sha"
+  git -C "$repo" rev-parse HEAD >"$RWORK/base.sha"
 }
 
 build_homes() {
@@ -82,20 +100,21 @@ setup() {
   [ -x "$WORK/tools/rtk" ] || die "put the rtk-oss 1.0.1 binary in $WORK/tools (see README.md)"
   [ -x "$VENV/bin/python" ] || { uv venv -q --python 3.12 "$VENV" && uv pip install -q --python "$VENV/bin/python" pytest==8.4.2; }
   build_repo
-  build_homes
+  # Round 2 reuses round 1's homes.
+  if [ "$ROUND" = 1 ] || [ ! -d "$WORK/homes" ]; then build_homes; fi
   {
     echo "copilot $("$COPILOT" --version | head -n 1)"
     echo "rtk $("$WORK/tools/rtk" --version)"
     echo "caveman ${CAVEMAN#*#}"
     echo "python $("$VENV/bin/python" -c 'import platform; print(platform.python_version())')"
     echo "pytest $("$VENV/bin/python" -m pytest --version 2>&1)"
-  } >"$WORK/versions.txt"
-  cat "$WORK/versions.txt"
+  } >"$RWORK/versions.txt"
+  cat "$RWORK/versions.txt"
 }
 
 verify() { # verify <repo>: JSON verdict on what the agent committed
   local repo=$1 base head subjects s tmp ok=false committed=false subject_ok=false tests_pass=false tests_changed=false
-  base=$(cat "$WORK/base.sha")
+  base=$(cat "$RWORK/base.sha")
   head=$(git -C "$repo" rev-parse HEAD)
   [ "$head" != "$base" ] && git -C "$repo" merge-base --is-ancestor "$base" "$head" && committed=true
   subjects=$(git -C "$repo" log --reverse --format=%s "$base..HEAD")
@@ -119,8 +138,8 @@ verify() { # verify <repo>: JSON verdict on what the agent committed
 }
 
 selfcheck() {
-  local dir=$WORK/selfcheck n i
-  fresh() { rm -rf "$dir" && cp -R "$WORK/fixture-repo" "$dir"; }
+  local dir=$RWORK/selfcheck n i
+  fresh() { rm -rf "$dir" && cp -R "$RWORK/fixture-repo" "$dir"; }
   fix_all_but() { # fix_all_but <n>: apply every fix in bugs.tsv except line n, then commit
     local path bug fix line=0
     while IFS=$'\t' read -r path bug fix; do
@@ -145,11 +164,12 @@ selfcheck() {
 }
 
 run_one() { # run_one <variant> <rep>
-  local v=$1 dir=$WORK/runs/$1$2 box f
+  local v=$1 dir=$RWORK/runs/$1$2 box f
+  [ "$MODEL" = claude-sonnet-5.5 ] || dir=$RWORK/runs-$MODEL/$1$2
   rm -rf "$dir" && mkdir -p "$dir"
   # The agent sees its cwd and home in the system prompt, so keep both neutral.
   box=$(cd "$(mktemp -d /tmp/ws.XXXXXX)" && pwd -P)
-  cp -R "$WORK/fixture-repo" "$box/invoicer"
+  cp -R "$RWORK/fixture-repo" "$box/invoicer"
   cp -R "$WORK/homes/$v" "$box/home"
   echo "$box" >"$dir/sandbox.txt"
   # Hook configs hold absolute paths into the template home.
@@ -157,7 +177,7 @@ run_one() { # run_one <variant> <rep>
     [ -e "$f" ] && perl -pi -e "s#\Q$WORK/homes/$v\E#$box/home#g" "$f"
   done
   (cd "$box/invoicer" && agent_env "$box/home" perl -e 'alarm shift; exec @ARGV' "$TIMEOUT" "$COPILOT" -p "$PROMPT" \
-    --model "$MODEL" --reasoning-effort "$EFFORT" --allow-all-tools --no-ask-user --no-auto-update \
+    --model "$MODEL" ${EFFORT:+--reasoning-effort "$EFFORT"} --allow-all-tools --no-ask-user --no-auto-update \
     --disable-builtin-mcps --excluded-tools session_store_sql --secret-env-vars COPILOT_GITHUB_TOKEN \
     --max-ai-credits "$CREDITS" --output-format json >"$dir/stdout.jsonl" 2>"$dir/stderr.txt") ||
     echo "exit $?" >>"$dir/stderr.txt"
@@ -166,6 +186,7 @@ run_one() { # run_one <variant> <rep>
   if [ -e "$box/home/.copilot/hooks/rtk-rewrite.json" ]; then
     (cd "$box/invoicer" && agent_env "$box/home" rtk gain -f json >"$dir/rtk-gain.json" 2>/dev/null) || true
   fi
+  rm -rf "$box/home/Library/Caches" # the CLI unpacks itself here (~180 MB a run)
   mv "$box" "$dir/sandbox"
   echo "$v$2 $(cat "$dir/verdict.json")"
 }
@@ -175,7 +196,8 @@ run() {
   shift
   local pid status=0
   local -a pids=()
-  for v in ${*:-a b c d e}; do
+  [ $# -gt 0 ] || set -- a b c d e
+  for v in "$@"; do
     run_one "$v" "$rep" &
     pids+=("$!")
   done
@@ -188,5 +210,5 @@ run() {
 case ${1:-} in
 setup | selfcheck) "$1" ;;
 run) shift && run "$@" ;;
-*) sed -n '2,5p' "$0" && exit 2 ;;
+*) sed -n '2,6p' "$0" && exit 2 ;;
 esac

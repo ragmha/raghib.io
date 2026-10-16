@@ -62,3 +62,37 @@ Copilot event logs, source paths, or credentials.
 The experiment measures one task, one model, and five runs per setup. It is a
 small demonstration, not a general benchmark; rerun it on representative tasks
 before drawing broader conclusions.
+
+## Round 2: regression hunt
+
+Round 1 gave the tools little to compress. The agent filtered pytest output
+itself, sessions were short, and replies were terse. Round 2 is deliberately
+designed to favour rtk and caveman: it produces verbose output the agent is
+unlikely to pre-filter, needs a longer investigation, and asks for a prose
+reply. Read its results with that in mind.
+
+The bugs (`bugs.tsv`), hidden test, verifier, and setup homes are the same as in
+round 1. `history2.py` deterministically builds a different repository:
+
+- The round-1 history with all three bugs fixed, tagged `v0.9.0`.
+- After the tag, 38 commits by four authors from April to June 2024. They add
+  local sales tax data, CLI options, formatting, tests, and docs.
+- Three of those commits each reintroduce one bug inside a larger change.
+
+At `HEAD`, 89 of 1,119 tests fail, plain `pytest` prints about 100 KB, and
+`git diff v0.9.0` is about 5,300 lines. The prompt asks the agent to:
+
+1. Find the commit that introduced each problem.
+2. Fix and commit.
+3. Reply with an incident note for finance.
+
+```sh
+ROUND=2 ./scripts/token-diet/run.sh setup
+ROUND=2 ./scripts/token-diet/run.sh selfcheck
+ROUND=2 ./scripts/token-diet/run.sh run 1   # through 5
+ROUND=2 bun scripts/token-diet/summarize.ts   # writes src/data/token-diet-2.json
+```
+
+Round 2 writes only under `.work/r2/`: `fixture-repo`, `base.sha`,
+`versions.txt`, and `runs/`. It reuses round 1's `.work/venv`, `.work/tools`,
+and `.work/homes`. Its `setup` builds homes only if `.work/homes` is missing.

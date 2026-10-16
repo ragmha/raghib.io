@@ -34,7 +34,6 @@ const setups = [
   const charges = set.map((run) => run.nanoAiu)
   return {
     ...setup,
-    lane: `${setup.id === 'a' ? 'Before' : 'After'} · ${setup.name}`,
     set,
     shown: medianRun(set),
     succeeded: set.filter((run) => run.success).length,
@@ -54,6 +53,9 @@ const setups = [
 })
 const [baseline, principles, caveman, rtk, all] = setups
 const after = setups.slice(1)
+const versus = (setup: (typeof setups)[number]) => setup.tokens / baseline.tokens - 1
+const [closest, furthest] = [after.reduce((a, b) => (versus(a) < versus(b) ? a : b)), after.reduce((a, b) => (versus(a) > versus(b) ? a : b))]
+const change = (setup: (typeof setups)[number]) => `${versus(setup) > 0 ? '+' : '−'}${percent.format(Math.abs(versus(setup)))}`
 
 const pooled = Object.fromEntries(kinds.map((kind) => [kind, runs.reduce((sum, run) => sum + run.totals[kind], 0)])) as Tokens
 const tokenShare = (kind: Kind) => percent.format(pooled[kind] / total(pooled))
@@ -100,8 +102,8 @@ const split = (name: string, text: string) => {
 }
 const prompt = split('Task prompt', data.prompt)
 const readings = [
-  { label: 'Before · Baseline', parts: [prompt] },
-  { label: 'After · Principles', parts: [split('Instructions file', instructions(data.principles)), prompt] },
+  { label: 'Baseline', parts: [prompt] },
+  { label: 'Principles', parts: [split('Instructions file', instructions(data.principles)), prompt] },
 ].map((reading) => ({
   ...reading,
   tokens: reading.parts.reduce((sum, part) => sum + part.ids.length, 0),
@@ -119,10 +121,17 @@ const description =
 <SiteLayout title="Coding Agent Token Diet: Before and After" description={description}>
   <Fragment slot="heading">Does Your Coding Agent Need a Token Diet?</Fragment>
   <div class="diet">
-    <p class="lede">
-      One coding task, five runs each: as-is, simple principles, caveman, rtk and all three. Did any cut tokens?
-      <strong>Not for this task.</strong>
-    </p>
+    <dl class="lede">
+      <dt>Claim</dt>
+      <dd>Simple principles, caveman and rtk make a coding agent use fewer tokens.</dd>
+      <dt>Result</dt>
+      <dd>
+        <strong>Not on this task.</strong> Each setup’s median of five runs used more than the plain agent (baseline):
+        {change(closest)} ({closest.name}) to {change(furthest)} ({furthest.name}).
+      </dd>
+      <dt>Why</dt>
+      <dd>{tokenShare('cacheRead')} of tokens were history re-read on each call. None of these cut that.</dd>
+    </dl>
 
     <div class="tabs">
     <input type="radio" name="section" id="tab-calls" checked />
@@ -154,9 +163,9 @@ const description =
             return (
               <div class="panel" data-lane={setup.id}>
                 <p class="pill">
-                  <span class="kicker">{setup.id === 'a' ? 'Before' : 'After'}</span>
                   {setup.name}
                   <span aria-hidden="true">{value('tokens', number.format(size))} tokens</span>
+                  {setup !== baseline && <span class:list={['change', versus(setup) > 0 ? 'worse' : 'better']}>{change(setup)}<span class="visually-hidden"> vs baseline</span></span>}
                   <span class="visually-hidden">
                     , run {run.id}: {number.format(size)} tokens, {run.calls.length} model calls, {aiu(run.nanoAiu)} AIU
                   </span>
@@ -237,7 +246,7 @@ const description =
               <span class="muted">· {number.format(reading.characters)} characters</span>
             </p>
             {reading.parts.map((part, i) => i && part === prompt ? (
-              <p class="part">+ {part.name} <span class="muted">· {part.ids.length} tokens, same as before</span></p>
+              <p class="part">+ {part.name} <span class="muted">· {part.ids.length} tokens, same as baseline</span></p>
             ) : (
               <>
                 <p class="part">{part.name} <span class="muted">· {part.ids.length} tokens</span></p>
@@ -736,6 +745,40 @@ const description =
     font-weight: 600;
   }
 
+  .lede {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0 1rem;
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  .lede dt {
+    color: var(--theme-muted);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    line-height: 1.65;
+    text-transform: uppercase;
+  }
+
+  .lede dd {
+    margin: 0;
+  }
+
+  .change {
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .change.worse {
+    color: var(--theme-red);
+  }
+
+  .change.better {
+    color: var(--theme-green);
+  }
+
   .pill > span[aria-hidden] {
     color: var(--theme-muted);
     font-size: 0.8rem;
@@ -1155,7 +1198,7 @@ const description =
   }
 
   .diet > .tabs {
-    margin-top: 0.5rem;
+    margin-top: 0;
   }
 
   .diet > .tabs > section {
