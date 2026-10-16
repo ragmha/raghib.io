@@ -1,0 +1,34 @@
+name: Link check
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  links:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          : > broken.txt
+          grep -rhoE 'https?://[^][[:space:]<>"'"'"'`()]+' src/content/writing src/content/project-writeups README.md \
+            | sed -E 's/[.,;:]+$//' | grep -vE '^https?://(localhost|127\.0\.0\.1)' | sort -u \
+            | while read -r url; do
+                code=$(curl -sL -o /dev/null -w '%{http_code}' --max-time 15 -A 'Mozilla/5.0 raghib.io link check' "$url" || true)
+                # 401/403/429/999 are usually bot blocking, not dead pages.
+                [[ "$code" =~ ^([23]..|401|403|429|999)$ ]] || echo "- \`$code\` $url" >> broken.txt
+              done
+          [ -s broken.txt ] || { echo "All external links work"; exit 0; }
+          cat broken.txt
+          open=$(gh issue list --state open --search 'Broken links in:title' --json number --jq '.[0].number')
+          if [ -n "$open" ]; then gh issue comment "$open" --body-file broken.txt
+          else gh issue create --title 'Broken links' --body-file broken.txt; fi
