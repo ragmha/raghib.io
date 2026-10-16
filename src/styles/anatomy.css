@@ -150,7 +150,7 @@ html[data-theme='light'] .decision-hero {
 }
 
 .decision-cover-routes {
-  display: none;
+  display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: .65rem 2rem;
