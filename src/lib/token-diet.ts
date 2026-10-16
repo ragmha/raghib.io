@@ -43,6 +43,10 @@ export interface Run {
 
 export const total = (tokens: Tokens) => kinds.reduce((sum, kind) => sum + tokens[kind], 0)
 
+/** The instructions file the principles setups installed, rebuilt from the published list. */
+export const instructions = (principles: string[]) =>
+  `# Working principles\n\n${principles.map((principle) => `- ${principle}`).join('\n')}\n`
+
 /** Charge in nano-AIU: tokens of each kind times that kind's rate. */
 export const cost = (tokens: Tokens, rates: Tokens) =>
   kinds.reduce((sum, kind) => sum + tokens[kind] * rates[kind], 0)

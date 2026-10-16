@@ -1,7 +1,8 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro'
 import data from '../../data/token-diet.json'
-import { correlation, cost, kinds, median, medianRun, total } from '../../lib/token-diet'
+import { decode, encode } from 'gpt-tokenizer/encoding/o200k_base'
+import { correlation, cost, instructions, kinds, median, medianRun, total } from '../../lib/token-diet'
 import type { Call, Kind, Run, Tokens } from '../../lib/token-diet'
 
 const runs = data.runs as Run[]
@@ -98,6 +99,21 @@ const raceJson = JSON.stringify({
   lanes: Object.fromEntries(setups.map((setup) => [setup.id, setup.shown.calls.map(pick)])),
 }).replace(/</g, '\\u003c')
 
+// Tokenizer: the text the agent reads before its first tool call, split by o200k_base.
+const split = (name: string, text: string) => {
+  const ids = encode(text)
+  return { name, text, ids, pieces: ids.map((id) => decode([id])) }
+}
+const prompt = split('Task prompt', data.prompt)
+const readings = [
+  { label: 'Before · Baseline', parts: [prompt] },
+  { label: 'After · Principles', parts: [split('Instructions file', instructions(data.principles)), prompt] },
+].map((reading) => ({
+  ...reading,
+  tokens: reading.parts.reduce((sum, part) => sum + part.ids.length, 0),
+  characters: reading.parts.reduce((sum, part) => sum + part.text.length, 0),
+}))
+
 // Every run: one dot per run on a shared axis.
 const stripMax = Math.ceil(total(largest.totals) / 100_000) * 100_000
 const stripTicks = [0, 1, 2, 3].map((i) => (stripMax / 3) * i)
@@ -135,86 +151,93 @@ const description =
       </div>
 
       <figure>
-        <div class="lanes" style={`--divisions:${ticks.length - 1}`}>
+        <div class="panels" style={`--divisions:${ticks.length - 1}`}>
           {setups.map((setup) => {
-            const size = total(setup.shown.totals)
-            const meters = [
-              ['tokens', number.format(size)],
-              ['calls', String(setup.shown.calls.length)],
-              ['AIU', aiu(setup.shown.nanoAiu)],
-            ]
+            const run = setup.shown
+            const size = total(run.totals)
+            const value = (meter: string, text: string) => (
+              <span data-meter={meter} style={`--chars:${text.length}`}>{text}</span>
+            )
             return (
-              <div class="lane" data-lane={setup.id} style={`--at:${(size / axis).toFixed(4)}`}>
-                <div class="lane-head">
-                  <span class="lane-name">
-                    {setup.lane} <span class="muted">run {setup.shown.id}</span>
-                    <span class="visually-hidden">
-                      : {number.format(size)} tokens, {setup.shown.calls.length} model calls, {aiu(setup.shown.nanoAiu)} AIU
-                    </span>
+              <div class="panel" data-lane={setup.id} style={`--at:${(size / axis).toFixed(4)}`}>
+                <p class="kicker">
+                  {setup.id === 'a' ? 'Before' : 'After'}
+                  <span class="muted"> · run {run.id}</span>
+                </p>
+                <p class="pill">
+                  {setup.name}
+                  <span aria-hidden="true">{value('tokens', number.format(size))} tokens</span>
+                  <span class="visually-hidden">
+                    : {number.format(size)} tokens, {run.calls.length} model calls, {aiu(run.nanoAiu)} AIU
                   </span>
-                  <dl class="meters" aria-hidden="true">
-                    {meters.map(([label, value]) => (
-                      <div>
-                        <dt>{label}</dt>
-                        <dd data-meter={label} style={`--chars:${value.length}`}>{value}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                </div>
-                <div class="track" aria-hidden="true">
+                </p>
+                <div class="flame" aria-hidden="true">
                   <div class="blocks">
-                    {blocks(setup.shown.calls).map(({ call, start, size: callSize }, i) => (
+                    <span class="bar session" style={`--w:${pct(size, axis)}`}>Session</span>
+                    {blocks(run.calls).map(({ call, start, size: callSize }, i) => (
                       <div class="call" style={`--x:${pct(start, axis)};--w:${pct(callSize, axis)}`}>
-                        <div class="segments">
+                        <span class="bar">Call {i + 1}</span>
+                        <span class="segments">
                           {kinds.map((kind) => <span class={kind} style={`flex-grow:${call[kind]}`} />)}
-                          <span class="number">{i + 1}</span>
-                        </div>
-                        <div class="tools">
+                        </span>
+                        <span class="tools">
                           {call.tools.map((tool) => (
-                            <span class:list={{ failed: !tool.ok }} title={`${tool.name}: ${tool.label}`} />
+                            <span class:list={['bar', { failed: !tool.ok }]} title={`${tool.name}: ${tool.label}`}>
+                              {tool.label}
+                            </span>
                           ))}
-                        </div>
+                        </span>
                       </div>
                     ))}
                   </div>
                   <span class="head" />
                 </div>
+                <div class="axis" aria-hidden="true">
+                  {ticks.map((tick) => <span style={`--x:${pct(tick, axis)}`}>{tick ? thousands(tick) : '0'}</span>)}
+                </div>
+                <div class="summary" aria-hidden="true">
+                  <p class="summary-head">Summary · {value('calls', String(run.calls.length))} calls</p>
+                  <div class="rings">
+                    <span class="ring ring-tokens" style={stops(kinds.map((kind) => run.totals[kind]))} />
+                    <span class="ring ring-cost" style={stops(kinds.map((kind) => run.totals[kind] * rates[kind]))} />
+                    <span class="ring-total">{value('center', thousands(size))}tokens</span>
+                  </div>
+                  <table>
+                    <thead>
+                      <tr><th /><th>Tokens</th><th>AIU</th></tr>
+                    </thead>
+                    <tbody>
+                      {kinds.map((kind) => (
+                        <tr>
+                          <th><span class:list={['swatch', kind]} />{names[kind]}</th>
+                          <td>{value(kind, number.format(run.totals[kind]))}</td>
+                          <td>{value(`${kind}-aiu`, aiu(run.totals[kind] * rates[kind]))}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <th>Total</th>
+                        <td>{value('total', number.format(size))}</td>
+                        <td>{value('AIU', aiu(run.nanoAiu))}</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
               </div>
             )
           })}
-          <div class="axis" aria-hidden="true">
-            {ticks.map((tick) => <span style={`--x:${pct(tick, axis)}`}>{tick ? thousands(tick) : '0'}</span>)}
-          </div>
-        </div>
-
-        <div class="summary">
-          {setups.map((setup) => (
-            <div class="donut" data-lane={setup.id}>
-              <div class="rings" aria-hidden="true">
-                <span class="ring ring-tokens" style={stops(kinds.map((kind) => setup.shown.totals[kind]))} />
-                <span class="ring ring-cost" style={stops(kinds.map((kind) => setup.shown.totals[kind] * rates[kind]))} />
-              </div>
-              <span>{setup.lane}</span>
-            </div>
-          ))}
-          <div class="legend">
-            <p>Outer ring: share of tokens. Inner ring: share of AIU.</p>
-            <ul>
-              {kinds.map((kind) => (
-                <li>
-                  <span class:list={['swatch', kind]} aria-hidden="true" />
-                  {names[kind]} <span class="muted">{perThousand.format(rates[kind] / 1e6)} AIU per 1k tokens</span>
-                </li>
-              ))}
-            </ul>
-          </div>
         </div>
 
         <figcaption>
-          Each block is one model call, as wide as the tokens it processed: cache reads, cache writes, fresh input
-          and output, left to right. The thin marks under a block are the tools that call asked for. Lanes fill at
-          the same token rate, so the run that uses fewer tokens finishes first. Each lane is that setup’s median
-          run by total tokens; the table below has all 25.
+          A flame chart of each setup’s median run by total tokens, on one token axis. The top bar is the whole
+          session. Under it is one bar per model call, as wide as the tokens it processed, then that call’s cache
+          reads, cache writes, fresh input and output, then the tools it asked for. Tools share their call’s width
+          evenly, because the logs don’t time them; outlined tools failed. Both panels fill at the same token rate,
+          so the run that uses fewer tokens finishes first. In each summary, the outer ring is the share of tokens
+          and the inner ring the share of AIU. AIU per 1k tokens:
+          {kinds.map((kind, i) => <>{i ? ', ' : ' '}{names[kind].toLowerCase()} {perThousand.format(rates[kind] / 1e6)}</>)}.
+          The table below has all 25 runs.
         </figcaption>
 
         <details class="ran">
@@ -237,6 +260,45 @@ const description =
         </details>
       </figure>
       <script is:inline type="application/json" id="race-data" set:html={raceJson} />
+    </section>
+
+    <section class="tokenizer" aria-labelledby="tokens-title">
+      <h2 id="tokens-title">What the agent reads first, in tokens</h2>
+      <p>
+        Every run starts from the same task prompt. The principles setup also installs six instructions the agent
+        reads before it does anything. Here are both texts as a tokenizer splits them.
+      </p>
+      <fieldset class="views">
+        <legend>Show</legend>
+        <label><input type="radio" name="token-view" id="token-text" checked /> Text</label>
+        <label><input type="radio" name="token-view" id="token-ids" /> Token IDs</label>
+      </fieldset>
+      <div class="readings">
+        {readings.map((reading) => (
+          <div class="reading">
+            <p class="kicker">{reading.label}</p>
+            <dl class="counts">
+              <div><dt>Tokens</dt><dd>{number.format(reading.tokens)}</dd></div>
+              <div><dt>Characters</dt><dd>{number.format(reading.characters)}</dd></div>
+            </dl>
+            {reading.parts.map((part) => (
+              <>
+                <p class="part">{part.name} <span class="muted">· {part.ids.length} tokens</span></p>
+                <p class="token-text">{part.pieces.map((piece) => <span>{piece}</span>)}</p>
+                <p class="token-ids">[{part.ids.join(', ')}]</p>
+              </>
+            ))}
+          </div>
+        ))}
+      </div>
+      <p class="note">
+        Split with OpenAI’s o200k_base tokenizer, because Anthropic doesn’t publish Claude’s, so treat these counts as
+        a close illustration rather than what the model was billed. The measured first-call prompt grew by a median
+        of {number.format(principles.prompt - baseline.prompt)} tokens with the principles: the file plus the wrapper
+        the CLI puts around instructions. Not shown, because the runs didn’t record their text: the system prompt,
+        {' '}{number.format(data.toolDefinitionsTokens)} tokens of tool definitions, the skill list, and what caveman
+        and rtk install.
+      </p>
     </section>
 
     <section aria-labelledby="runs-title">
@@ -487,11 +549,12 @@ const description =
         lanes: Record<string, Tokens[]>
       }
       const number = new Intl.NumberFormat('en-US')
+      const aiu = (nano: number) => (nano / 1e9).toFixed(2)
       const views = Object.entries(lanes).map(([id, calls]) => ({
         calls,
         size: calls.reduce((sum, call) => sum + total(call), 0),
-        lane: race.querySelector<HTMLElement>(`.lane[data-lane="${id}"]`)!,
-        rings: [...race.querySelectorAll<HTMLElement>(`.donut[data-lane="${id}"] .ring`)],
+        lane: race.querySelector<HTMLElement>(`.panel[data-lane="${id}"]`)!,
+        rings: [...race.querySelectorAll<HTMLElement>(`.panel[data-lane="${id}"] .ring`)],
       }))
       const replay = race.querySelector<HTMLButtonElement>('.replay')!
       const fill = (ring: HTMLElement, values: number[]) => {
@@ -502,13 +565,20 @@ const description =
       const draw = (at: number) => {
         for (const view of views) {
           const shown = reveal(view.calls, at)
+          const done = Math.min(at, view.size)
           const meter = (name: string, value: string) => {
             view.lane.querySelector(`[data-meter="${name}"]`)!.textContent = value
           }
-          view.lane.style.setProperty('--at', String(Math.min(at, view.size) / axis))
-          meter('tokens', number.format(Math.min(at, view.size)))
+          view.lane.style.setProperty('--at', String(done / axis))
+          meter('tokens', number.format(done))
+          meter('center', `${Math.round(done / 1000)}k`)
           meter('calls', String(shown.calls))
-          meter('AIU', (cost(shown.tokens, rates) / 1e9).toFixed(2))
+          meter('total', number.format(done))
+          meter('AIU', aiu(cost(shown.tokens, rates)))
+          for (const kind of kinds) {
+            meter(kind, number.format(shown.tokens[kind]))
+            meter(`${kind}-aiu`, aiu(shown.tokens[kind] * rates[kind]))
+          }
           fill(view.rings[0], kinds.map((kind) => shown.tokens[kind]))
           fill(view.rings[1], kinds.map((kind) => shown.tokens[kind] * rates[kind]))
         }
@@ -535,7 +605,7 @@ const description =
         observer.disconnect()
         play()
       }, { threshold: 0.5 })
-      observer.observe(race.querySelector('.lanes')!)
+      observer.observe(race.querySelector('.panels')!)
     }
   </script>
 </SiteLayout>

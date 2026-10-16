@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { describe, test } from 'node:test'
-import { correlation, cost, kinds, median, medianRun, reveal, total } from '../src/lib/token-diet'
+import { correlation, cost, instructions, kinds, median, medianRun, reveal, total } from '../src/lib/token-diet'
 import type { Run, Tokens } from '../src/lib/token-diet'
 
 const raw = readFileSync(new URL('../src/data/token-diet.json', import.meta.url), 'utf8')
-const data = JSON.parse(raw) as { rates: Tokens; runs: Run[] }
+const data = JSON.parse(raw) as { principles: string[]; rates: Tokens; runs: Run[] }
 const tokens = (cacheRead: number, cacheWrite: number, fresh: number, output: number): Tokens =>
   ({ cacheRead, cacheWrite, fresh, output })
 
@@ -89,5 +89,10 @@ describe('token diet data', () => {
     assert.equal(runs.reduce((sum, run) => sum + run.testRunsUnpiped, 0), 0, 'every test run was piped')
     assert.ok(runs.every((run) => !run.testsChanged), 'no run edited the tests')
     assert.ok(runs.every((run) => run.calls[0].cacheRead === runs[0].calls[0].cacheRead), 'same cached prefix for every run')
+  })
+
+  test('the page tokenizes the instructions file the kit installed', () => {
+    const file = readFileSync(new URL('../scripts/token-diet/principles.md', import.meta.url), 'utf8')
+    assert.equal(instructions(data.principles), file)
   })
 })

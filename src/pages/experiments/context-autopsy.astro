@@ -1,5 +1,7 @@
 ---
-import SiteLayout from '../../layouts/SiteLayout.astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import SiteHeader from '../../components/SiteHeader.astro'
+import '../../styles/site.css'
 import { modelPrices, pricingDate } from '../../lib/model-pricing'
 import { analyzeUsage, demoEvents, findings, parseUsage, sessionCost } from '../../lib/agent-usage'
 
@@ -49,181 +51,89 @@ const appJsonLd = JSON.stringify({
 }).replace(/</g, '\\u003c')
 ---
 
-<SiteLayout
+<BaseLayout
   title="What’s Under the Prompt? Agent Token Analyzer"
   description={description}
+  bodyClass="site-surface experiment-surface"
+  pageClass="site-page"
+  defaultTheme="dark"
 >
-  <Fragment slot="heading">What’s Under the Prompt?</Fragment>
   <script is:inline type="application/ld+json" set:html={appJsonLd} />
-  <div class="calculator">
-    <p class="intro">
-      Inspect context, cache reuse, output, and tools in a sample session—or your own.
-    </p>
-
-    <noscript>
-      <p class="notice">
-        Enable JavaScript to view the sample report and use the calculator.
-      </p>
-    </noscript>
-
-    <details class="panel import-panel">
-      <summary>Analyze your own session</summary>
-      <div class="import-content">
-        <p>
-          Drop JSON or JSONL logs from Copilot, Codex, Claude Code, or OpenTelemetry.
-          Files are processed locally.
-        </p>
-        <details class="sources-help">
-          <summary>Supported files and paths</summary>
-          <dl class="sources">
-            <div><dt>GitHub Copilot CLI</dt><dd><code>~/.copilot/session-state/&lt;session&gt;/events.jsonl</code></dd></div>
-            <div><dt>Codex CLI</dt><dd><code>~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl</code></dd></div>
-            <div><dt>Claude Code</dt><dd><code>~/.claude/projects/&lt;project&gt;/&lt;session&gt;.jsonl</code></dd></div>
-            <div><dt>OpenTelemetry</dt><dd>GenAI chat and tool spans as OTLP JSON</dd></div>
-          </dl>
-        </details>
-        <label class="dropzone" for="session-files">
-          <span><strong>Choose or drop logs</strong></span>
-          <span>20 files max · 20 MiB each · 50 MiB total</span>
-          <input id="session-files" type="file" accept=".json,.jsonl,application/json" multiple />
-        </label>
-        <div class="actions">
-          <button id="demo-button" type="button">Reload sample report</button>
-          <button id="clear-button" type="button" class="quiet" hidden>Clear results</button>
-        </div>
-        <p id="status" class="status" role="status" aria-live="polite">Sample report loaded. Add a session below to replace it.</p>
-
-        <details class="export-help">
-          <summary>Having trouble finding the session file?</summary>
-          <p>
-            These folders are hidden. On macOS, press <kbd>⌘</kbd><kbd>⇧</kbd><kbd>G</kbd> in
-            the file picker and paste the folder path; on Windows, paste the path with
-            <code>%USERPROFILE%</code> in place of <code>~</code>. Codex and Claude Code
-            files can be dropped directly. Copilot names each session folder by ID, so these
-            helpers list IDs and dates, then copy the chosen raw file locally.
-          </p>
-          <div class="actions">
-            <a href="/copilot-export.sh" download>Download Copilot Bash helper</a>
-            <a href="/copilot-export.ps1" download>Download Copilot PowerShell helper</a>
-          </div>
-          <pre><code>bash copilot-export.sh --list
-bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code></pre>
-          <pre><code>.\copilot-export.ps1 -List
-.\copilot-export.ps1 -Session SESSION_ID -Output copilot-events.jsonl</code></pre>
-          <p>
-            Review raw logs before sharing; they may contain private conversation or tool data.
-          </p>
-        </details>
-        <details class="manual-entry">
-          <summary>Enter token counts instead</summary>
-          <p>No session log? Enter counts to compare model prices.</p>
-          <form id="manual-form">
-            <label>
-              Model used
-              <select id="manual-model">
-                {modelPrices.map((price) => <option value={price.id}>{price.name}</option>)}
-              </select>
-            </label>
-            <div class="token-inputs">
-              <label>
-                Uncached input
-                <input id="uncached-input" inputmode="decimal" value="0" autocomplete="off" />
-              </label>
-              <label>
-                Cached input reads
-                <input id="cache-read" inputmode="decimal" value="0" autocomplete="off" />
-              </label>
-              <label>
-                Cache writes (TTL unknown)
-                <input id="cache-write" inputmode="decimal" value="0" autocomplete="off" />
-              </label>
-              <label>
-                5-minute cache writes
-                <input id="cache-write-5m" inputmode="decimal" value="0" autocomplete="off" />
-              </label>
-              <label>
-                1-hour cache writes
-                <input id="cache-write-1h" inputmode="decimal" value="0" autocomplete="off" />
-              </label>
-              <label>
-                Output + reasoning
-                <input id="output-tokens" inputmode="decimal" value="0" autocomplete="off" />
-              </label>
-            </div>
-            <p id="manual-error" class="error" role="alert" hidden></p>
-            <div class="actions">
-              <button id="manual-submit" type="submit">Compare model costs</button>
-            </div>
-          </form>
-        </details>
-      </div>
-    </details>
-
-    <section id="results" class="results" aria-labelledby="results-heading" tabindex="-1">
-      <header class="results-head">
-        <div>
-          <h2 id="results-heading">Session signature</h2>
+  <div class="workspace">
+    <SiteHeader />
+    <main class="calculator">
+      <header class="app-head">
+        <div class="app-title">
+          <h1>What’s Under the Prompt?</h1>
+          <p class="intro">Inspect context, cache reuse, output, and tools in a sample session—or your own.</p>
           <p id="coverage" class="coverage">{sampleCoverage}</p>
         </div>
+        <section id="results" class="results" aria-label="Session summary" tabindex="-1">
+          <div id="summary" class="summary">
+            {sampleFacts.map(([label, value]) => <div><span>{label}</span><strong>{value}</strong></div>)}
+          </div>
+        </section>
+        <noscript>
+          <p class="notice">Enable JavaScript to view the sample report and use the calculator.</p>
+        </noscript>
       </header>
-      <div id="summary" class="summary">
-        {sampleFacts.map(([label, value]) => <div><span>{label}</span><strong>{value}</strong></div>)}
+
+      <div class="tab-row">
+        <div class="dashboard-tabs" role="tablist" aria-label="Experiment sections">
+          <button id="overview-tab" type="button" role="tab" aria-selected="true" aria-controls="overview-panel" tabindex="0">Overview</button>
+          <button id="models-tab" type="button" role="tab" aria-selected="false" aria-controls="models-panel" tabindex="-1">Model savings</button>
+          <button id="tools-tab" type="button" role="tab" aria-label="Tools and coverage notes" aria-selected="false" aria-controls="tools-panel" tabindex="-1">Tools</button>
+          <button id="data-tab" type="button" role="tab" aria-selected="false" aria-controls="data-panel" tabindex="-1">Your session</button>
+        </div>
+        <a class="back-link" href="/experiments/">All experiments</a>
       </div>
 
-      <div class="dashboard-tabs" role="tablist" aria-label="Session report sections">
-        <button id="overview-tab" type="button" role="tab" aria-selected="true" aria-controls="overview-panel" tabindex="0">Overview</button>
-        <button id="models-tab" type="button" role="tab" aria-selected="false" aria-controls="models-panel" tabindex="-1">Model savings</button>
-        <button id="tools-tab" type="button" role="tab" aria-label="Tools and coverage notes" aria-selected="false" aria-controls="tools-panel" tabindex="-1">Tools</button>
-      </div>
+      <section id="overview-panel" class="tab-panel overview-grid" role="tabpanel" aria-labelledby="overview-tab" tabindex="0">
+        <section id="timeline-panel" class="panel timeline-panel" aria-labelledby="timeline-heading" hidden>
+          <div class="chart-head">
+            <h2 id="timeline-heading">Context, call by call</h2>
+            <fieldset class="toggle">
+              <legend class="visually-hidden">Chart view</legend>
+              <label><input type="radio" name="timeline-mode" value="call" checked /> Per call</label>
+              <label><input type="radio" name="timeline-mode" value="total" /> Running total</label>
+            </fieldset>
+          </div>
+          <p class="table-note">Hover, tap, or focus the chart and use arrow keys to inspect each call.</p>
+          <div class="chart-wrap">
+            <svg id="timeline" class="context-chart" viewBox="0 0 720 280" tabindex="0" role="img"></svg>
+            <div id="timeline-tip" class="chart-tip" role="status" aria-live="polite" hidden></div>
+          </div>
+          <ul class="legend">
+            <li><span class="swatch read"></span>Cached input</li>
+            <li><span class="swatch fresh"></span>Fresh input</li>
+            <li><span class="swatch output"></span>Output</li>
+          </ul>
+        </section>
 
-      <section id="overview-panel" class="tab-panel" role="tabpanel" aria-labelledby="overview-tab" tabindex="0">
-        <div class="overview-grid">
-          <section id="timeline-panel" class="panel timeline-panel" aria-labelledby="timeline-heading" hidden>
+        <div class="overview-side">
+          <section class="panel signature-panel" aria-labelledby="mix-heading">
             <div class="chart-head">
-              <h3 id="timeline-heading">Context, call by call</h3>
-              <fieldset class="toggle">
-                <legend class="visually-hidden">Chart view</legend>
-                <label><input type="radio" name="timeline-mode" value="call" checked /> Per call</label>
-                <label><input type="radio" name="timeline-mode" value="total" /> Running total</label>
-              </fieldset>
+              <h2 id="mix-heading">Token signature</h2>
+              <span id="token-total" class="token-total"></span>
             </div>
-            <p class="table-note">Hover, tap, or focus the chart and use arrow keys to inspect each call.</p>
-            <div class="chart-wrap">
-              <svg id="timeline" class="context-chart" viewBox="0 0 720 280" tabindex="0" role="img"></svg>
-              <div id="timeline-tip" class="chart-tip" role="status" aria-live="polite" hidden></div>
-            </div>
-            <ul class="legend">
-              <li><span class="swatch read"></span>Cached input</li>
-              <li><span class="swatch fresh"></span>Fresh input</li>
-              <li><span class="swatch output"></span>Output</li>
-            </ul>
+            <div id="token-mix" class="token-mix" role="img"></div>
+            <ul id="token-legend" class="legend"></ul>
           </section>
 
-          <div class="overview-side">
-            <section class="panel signature-panel" aria-labelledby="mix-heading">
-              <div class="chart-head">
-                <h3 id="mix-heading">Token signature</h3>
-                <span id="token-total" class="token-total"></span>
-              </div>
-              <div id="token-mix" class="token-mix" role="img"></div>
-              <ul id="token-legend" class="legend"></ul>
-            </section>
-
-            <section id="findings-panel" class="panel" aria-labelledby="findings-heading">
-              <h3 id="findings-heading">What stands out</h3>
-              <ul id="findings-list" class="findings">{sampleFindings.slice(0, 3).map((note) => <li>{note}</li>)}</ul>
-              <details id="more-findings" class="more-findings" hidden>
-                <summary>Show more findings</summary>
-                <ul id="additional-findings-list" class="findings"></ul>
-              </details>
-            </section>
-          </div>
+          <section id="findings-panel" class="panel" aria-labelledby="findings-heading">
+            <h2 id="findings-heading">What stands out</h2>
+            <ul id="findings-list" class="findings">{sampleFindings.slice(0, 3).map((note) => <li>{note}</li>)}</ul>
+            <details id="more-findings" class="more-findings" hidden>
+              <summary>Show more findings</summary>
+              <ul id="additional-findings-list" class="findings"></ul>
+            </details>
+          </section>
         </div>
       </section>
 
-      <section id="models-panel" class="tab-panel" role="tabpanel" aria-labelledby="models-tab" tabindex="0" hidden>
+      <section id="models-panel" class="tab-panel models-grid" role="tabpanel" aria-labelledby="models-tab" tabindex="0" hidden>
         <section class="panel savings-panel" aria-labelledby="savings-heading">
-          <h3 id="savings-heading">Same task. Lower cost?</h3>
+          <h2 id="savings-heading">Same task. Lower cost?</h2>
           <div class="savings-controls">
             <label for="savings-current">Current model
               <select id="savings-current">
@@ -238,7 +148,9 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
             </label>
           </div>
           <p id="savings-result" class="savings-result" role="status" aria-live="polite"></p>
-          <svg id="savings-chart" class="savings-chart" role="img" aria-label="Estimated cost over repeated task runs"></svg>
+          <div class="chart-wrap savings-wrap">
+            <svg id="savings-chart" class="savings-chart" role="img" aria-label="Estimated cost over repeated task runs"></svg>
+          </div>
           <div id="savings-legend" class="savings-legend">
             <span class="current-line"><span id="savings-current-name">Current</span> <strong id="savings-current-cost"></strong></span>
             <span class="alternative-line"><span id="savings-model-name">Alternative</span> <strong id="savings-model-cost"></strong></span>
@@ -259,15 +171,15 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
           </details>
         </section>
 
-        <section class="panel" aria-labelledby="comparison-heading">
-          <h3 id="comparison-heading" class="visually-hidden">Model rates</h3>
+        <section class="panel rates-panel" aria-labelledby="comparison-heading">
+          <h2 id="comparison-heading">Every model, same workload</h2>
+          <p class="table-note">
+            Provider-published API rates, last checked <time datetime={pricingDate}>{pricingDate}</time>.
+            Recorded models are highlighted.
+          </p>
+          <ol id="cost-chart" class="bar-chart"></ol>
           <details id="comparison-details" class="rate-table">
-            <summary>Compare all models and exact rates</summary>
-            <p class="table-note">
-              Provider-published API rates, last checked <time datetime={pricingDate}>{pricingDate}</time>.
-              Recorded models are highlighted.
-            </p>
-            <ol id="cost-chart" class="bar-chart"></ol>
+            <summary>Exact rates</summary>
             <div class="table-wrap">
               <table class="sortable">
                 <thead>
@@ -318,19 +230,111 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
         </section>
       </section>
 
-      <section id="tools-panel" class="tab-panel" role="tabpanel" aria-labelledby="tools-tab" tabindex="0" hidden>
+      <section id="tools-panel" class="tab-panel tools-grid" role="tabpanel" aria-labelledby="tools-tab" tabindex="0" hidden>
         <section id="tool-activity" class="panel" aria-labelledby="tools-heading" hidden>
-          <h3 id="tools-heading">Tools the agent reached for</h3>
+          <h2 id="tools-heading">Tools the agent reached for</h2>
           <ol id="tools-chart" class="bar-chart"></ol>
           <p id="failure-count" class="table-note"></p>
         </section>
-        <details id="warnings-panel" class="panel warnings" hidden>
-          <summary id="warnings-heading">Coverage notes</summary>
+        <section id="warnings-panel" class="panel warnings" aria-labelledby="warnings-heading" hidden>
+          <h2 id="warnings-heading">Coverage notes</h2>
           <ul id="warnings-list"></ul>
-        </details>
+        </section>
       </section>
 
-    </section>
+      <section id="data-panel" class="tab-panel data-grid" role="tabpanel" aria-labelledby="data-tab" tabindex="0" hidden>
+        <section class="panel import-panel" aria-labelledby="import-heading">
+          <h2 id="import-heading">Analyze your own session</h2>
+          <p>
+            Drop JSON or JSONL logs from Copilot, Codex, Claude Code, or OpenTelemetry.
+            Files are processed locally.
+          </p>
+          <label class="dropzone" for="session-files">
+            <span><strong>Choose or drop logs</strong></span>
+            <span>20 files max · 20 MiB each · 50 MiB total</span>
+            <input id="session-files" type="file" accept=".json,.jsonl,application/json" multiple />
+          </label>
+          <div class="actions">
+            <button id="demo-button" type="button">Reload sample report</button>
+            <button id="clear-button" type="button" class="quiet" hidden>Clear results</button>
+          </div>
+          <p id="status" class="status" role="status" aria-live="polite">Sample report loaded. Add a session to replace it.</p>
+          <details class="sources-help">
+            <summary>Supported files and paths</summary>
+            <dl class="sources">
+              <div><dt>GitHub Copilot CLI</dt><dd><code>~/.copilot/session-state/&lt;session&gt;/events.jsonl</code></dd></div>
+              <div><dt>Codex CLI</dt><dd><code>~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl</code></dd></div>
+              <div><dt>Claude Code</dt><dd><code>~/.claude/projects/&lt;project&gt;/&lt;session&gt;.jsonl</code></dd></div>
+              <div><dt>OpenTelemetry</dt><dd>GenAI chat and tool spans as OTLP JSON</dd></div>
+            </dl>
+          </details>
+          <details class="export-help">
+            <summary>Having trouble finding the session file?</summary>
+            <p>
+              These folders are hidden. On macOS, press <kbd>⌘</kbd><kbd>⇧</kbd><kbd>G</kbd> in
+              the file picker and paste the folder path; on Windows, paste the path with
+              <code>%USERPROFILE%</code> in place of <code>~</code>. Codex and Claude Code
+              files can be dropped directly. Copilot names each session folder by ID, so these
+              helpers list IDs and dates, then copy the chosen raw file locally.
+            </p>
+            <div class="actions">
+              <a href="/copilot-export.sh" download>Download Copilot Bash helper</a>
+              <a href="/copilot-export.ps1" download>Download Copilot PowerShell helper</a>
+            </div>
+            <pre><code>bash copilot-export.sh --list
+bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code></pre>
+            <pre><code>.\copilot-export.ps1 -List
+.\copilot-export.ps1 -Session SESSION_ID -Output copilot-events.jsonl</code></pre>
+            <p>
+              Review raw logs before sharing; they may contain private conversation or tool data.
+            </p>
+          </details>
+        </section>
+
+        <section class="panel manual-entry" aria-labelledby="manual-heading">
+          <h2 id="manual-heading">Enter token counts instead</h2>
+          <p>No session log? Enter counts to compare model prices.</p>
+          <form id="manual-form">
+            <label>
+              Model used
+              <select id="manual-model">
+                {modelPrices.map((price) => <option value={price.id}>{price.name}</option>)}
+              </select>
+            </label>
+            <div class="token-inputs">
+              <label>
+                Uncached input
+                <input id="uncached-input" inputmode="decimal" value="0" autocomplete="off" />
+              </label>
+              <label>
+                Cached input reads
+                <input id="cache-read" inputmode="decimal" value="0" autocomplete="off" />
+              </label>
+              <label>
+                Cache writes (TTL unknown)
+                <input id="cache-write" inputmode="decimal" value="0" autocomplete="off" />
+              </label>
+              <label>
+                5-minute cache writes
+                <input id="cache-write-5m" inputmode="decimal" value="0" autocomplete="off" />
+              </label>
+              <label>
+                1-hour cache writes
+                <input id="cache-write-1h" inputmode="decimal" value="0" autocomplete="off" />
+              </label>
+              <label>
+                Output + reasoning
+                <input id="output-tokens" inputmode="decimal" value="0" autocomplete="off" />
+              </label>
+            </div>
+            <p id="manual-error" class="error" role="alert" hidden></p>
+            <div class="actions">
+              <button id="manual-submit" type="submit">Compare model costs</button>
+            </div>
+          </form>
+        </section>
+      </section>
+    </main>
   </div>
 
   <script>
@@ -383,20 +387,27 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       if (focus) activeTab.focus()
     }
 
-    dashboardTabs.forEach((tab, index) => {
+    dashboardTabs.forEach((tab) => {
       tab.addEventListener('click', () => activateDashboardTab(tab))
       tab.addEventListener('keydown', (event) => {
-        const nextIndex = event.key === 'ArrowRight' ? (index + 1) % dashboardTabs.length
-          : event.key === 'ArrowLeft' ? (index - 1 + dashboardTabs.length) % dashboardTabs.length
+        const tabs = dashboardTabs.filter((option) => !option.hidden)
+        const index = tabs.indexOf(tab)
+        const nextIndex = event.key === 'ArrowRight' ? (index + 1) % tabs.length
+          : event.key === 'ArrowLeft' ? (index - 1 + tabs.length) % tabs.length
             : event.key === 'Home' ? 0
-              : event.key === 'End' ? dashboardTabs.length - 1
+              : event.key === 'End' ? tabs.length - 1
                 : -1
         if (nextIndex < 0) return
         event.preventDefault()
-        const nextTab = dashboardTabs[nextIndex]
+        const nextTab = tabs[nextIndex]
         if (nextTab) activateDashboardTab(nextTab, true)
       })
     })
+
+    function showReportTabs(visible: boolean) {
+      for (const tab of dashboardTabs) tab.hidden = !visible && tab.id !== 'data-tab'
+      if (!visible) activateDashboardTab(byId<HTMLButtonElement>('data-tab'))
+    }
 
     function element<K extends keyof HTMLElementTagNameMap>(tag: K, className = '', text = '') {
       const node = document.createElement(tag)
@@ -705,6 +716,7 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       lastAnalysis = analysis
       byId<HTMLSelectElement>('savings-current').value = 'recorded'
       byId<HTMLSelectElement>('savings-model').value = ''
+      showReportTabs(true)
       const overviewTab = dashboardTabs[0]
       if (overviewTab) activateDashboardTab(overviewTab)
       results.hidden = false
@@ -855,7 +867,8 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
 
       const plot = document.getElementById('savings-chart')!
       const width = Math.max(280, plot.clientWidth)
-      const left = 60, right = width - 16, top = 28, bottom = 206
+      const height = Math.max(200, plot.clientHeight || 250)
+      const left = 60, right = width - 16, top = 28, bottom = height - 44
       const currentMid = (projection.current[0] + projection.current[1]) / 2
       const alternativeMid = (projection.alternative[0] + projection.alternative[1]) / 2
       const maximum = Math.max(currentMid, alternativeMid) * 1.12 || 1
@@ -863,7 +876,7 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       const axisCost = new Intl.NumberFormat('en-US', {
         style: 'currency', currency: 'USD', notation: 'compact', maximumSignificantDigits: 3,
       })
-      plot.setAttribute('viewBox', `0 0 ${width} 250`)
+      plot.setAttribute('viewBox', `0 0 ${width} ${height}`)
       plot.setAttribute('aria-label',
         `${currentName}: ${estimatedCost(...projection.current)}. ${alternative.name}: ${estimatedCost(...projection.alternative)}. ${result} over ${runs} runs. Lines show midpoint estimates.`)
       plot.replaceChildren()
@@ -880,7 +893,7 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       }
       plot.append(
         svg('text', { x: left, y: 14 }, 'Cost (USD)'),
-        svg('text', { x: (left + right) / 2, y: 246, 'text-anchor': 'middle' }, 'Task runs'),
+        svg('text', { x: (left + right) / 2, y: height - 4, 'text-anchor': 'middle' }, 'Task runs'),
         svg('path', {
           d: `M ${left} ${bottom} L ${right} ${y(currentMid)} L ${right} ${y(alternativeMid)} Z`,
           class: 'savings-gap',
@@ -905,6 +918,7 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
     }
 
     function clearAnalysis() {
+      showReportTabs(false)
       results.hidden = true
       clearButton.hidden = true
       lastAnalysis = null
@@ -966,7 +980,7 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
         setBusy(false)
         showAnalysis(data.analysis, analysisIsExample)
         status.textContent = analysisIsExample
-          ? 'Sample report loaded. Add a session below to replace it.'
+          ? 'Sample report loaded. Add a session to replace it.'
           : 'Analysis complete. Files were processed in this browser.'
         if (focusResultsAfterAnalysis) results.focus()
       } else {
@@ -991,14 +1005,20 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
     for (const id of ['savings-model', 'savings-current']) {
       byId(id).addEventListener('change', renderSavings)
     }
-    let savingsWidth = 0
-    new ResizeObserver(([entry]) => {
-      const width = Math.round(entry.contentRect.width)
-      if (width && width !== savingsWidth) {
-        savingsWidth = width
-        if (pricingWorkload.length) renderSavings()
-      }
-    }).observe(document.getElementById('savings-chart')!)
+    // Charts sit in hidden tabs, so redraw on any size change, including when a tab is shown.
+    function onResize(target: Element, draw: () => void) {
+      let size = ''
+      let frame = 0
+      new ResizeObserver(([entry]) => {
+        const { width, height } = entry.contentRect
+        const next = width ? `${Math.round(width)}x${Math.round(height)}` : ''
+        if (next === size) return
+        size = next
+        cancelAnimationFrame(frame)
+        if (next) frame = requestAnimationFrame(draw)
+      }).observe(target)
+    }
+    onResize(byId('savings-chart'), () => { if (pricingWorkload.length) renderSavings() })
 
     for (const radio of document.querySelectorAll<HTMLInputElement>('input[name="timeline-mode"]')) {
       radio.addEventListener('change', () => {
@@ -1006,15 +1026,7 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
         drawTimeline()
       })
     }
-    let chartWidth = 0
-    let resizeFrame = 0
-    new ResizeObserver(([entry]) => {
-      const next = Math.round(entry.contentRect.width)
-      if (!next || next === chartWidth) return
-      chartWidth = next
-      cancelAnimationFrame(resizeFrame)
-      resizeFrame = requestAnimationFrame(() => { if (timelinePoints.length) drawTimeline() })
-    }).observe(byId('timeline'))
+    onResize(byId('timeline'), () => { if (timelinePoints.length) drawTimeline() })
 
     const manualForm = byId<HTMLFormElement>('manual-form')
     const manualError = byId<HTMLParagraphElement>('manual-error')
@@ -1077,10 +1089,22 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
     })
 
     showAnalysis(analyzeUsage([parseUsage(demoEvents)]), true)
-    status.textContent = 'Sample report loaded. Add a session below to replace it.'
+    status.textContent = 'Sample report loaded. Add a session to replace it.'
   </script>
 
   <style>
+    :global(body.experiment-surface .site-header) {
+      max-width: none;
+      padding: 1rem var(--app-gutter) 0;
+    }
+
+    .workspace {
+      --app-gutter: clamp(1rem, 3vw, 2.5rem);
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      height: 100dvh;
+    }
+
     .calculator {
       --calc-panel: var(--theme-surface);
       --calc-muted: var(--theme-muted, #8d9287);
@@ -1090,7 +1114,64 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       --signature-write: #efb44c;
       --signature-output: #bd97de;
       --signature-ink: #171717;
-      margin-top: 1rem;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      width: 100%;
+      max-width: 110rem;
+      min-height: 0;
+      margin: 0 auto;
+      padding: 0 var(--app-gutter);
+    }
+
+    .app-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      gap: 0.75rem 2.5rem;
+      padding-block: 1.25rem 1rem;
+    }
+
+    .app-head h1 {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 600;
+      line-height: 1.3;
+      text-wrap: balance;
+    }
+
+    .app-head .intro {
+      margin: 0.35rem 0 0;
+      max-width: 60ch;
+      font-size: 0.9rem;
+    }
+
+    .app-head .coverage {
+      margin: 0.35rem 0 0;
+      font-size: 0.75rem;
+    }
+
+    .app-head noscript {
+      grid-column: 1 / -1;
+    }
+
+    .tab-row {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 1rem;
+      border-bottom: 1px solid var(--calc-line);
+    }
+
+    .back-link {
+      flex: 0 0 auto;
+      padding-bottom: 0.7rem;
+      color: var(--calc-muted);
+      font-size: 0.8rem;
+      text-underline-offset: 0.2em;
+    }
+
+    .back-link:hover {
+      color: var(--theme-text);
     }
 
     .intro,
@@ -1100,7 +1181,6 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
 
     .notice,
     .panel {
-      margin-top: 1.5rem;
       padding: 1rem;
       border: 1px solid var(--calc-line);
       background: var(--calc-panel);
@@ -1116,15 +1196,13 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       margin: 0.5rem 0 0;
     }
 
-    .panel h2,
-    .panel h3,
-    .results > h2 {
-      margin: 0;
+    .panel :is(h2, h3) {
+      margin: 0 0 0.75rem;
       font-size: 1rem;
     }
 
-    .panel h3 {
-      margin-bottom: 0.75rem;
+    .chart-head h2 {
+      margin-bottom: 0;
     }
 
     .panel code,
@@ -1201,17 +1279,19 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       font-variant-numeric: tabular-nums;
     }
 
-    .savings-panel { --savings-accent: var(--signature-read); }
+    .savings-panel {
+      --savings-accent: var(--signature-read);
+      display: flex;
+      flex-direction: column;
+    }
     :global(:root[data-theme='light']) .savings-panel { --savings-accent: #256b37; }
 
+    .savings-wrap:has(> .savings-chart:empty) { display: none; }
+
     .savings-chart {
-      display: block;
-      width: 100%;
-      height: 250px;
       overflow: visible;
     }
 
-    .savings-chart:empty { display: none; }
     .savings-chart :global(text) { fill: var(--calc-muted); font: 11px var(--font-mono); }
     .savings-chart :global(.savings-grid) { stroke: var(--calc-line); }
     .savings-chart :global(.savings-gap) { fill: var(--savings-accent); opacity: 0.12; }
@@ -1348,50 +1428,36 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       color: #ff9b8f;
     }
 
-    .results {
-      margin-top: 1.5rem;
-    }
-
-    .results-head h2 {
-      margin: 0;
-      font-size: 1.1rem;
-    }
-
-    .results-head .coverage {
-      margin: 0.3rem 0 0;
-    }
-
     .summary {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-      margin-top: 1rem;
-      border-block: 1px solid var(--calc-line);
+      grid-template-columns: repeat(4, auto);
     }
 
     .summary > :global(div) {
       display: grid;
-      gap: 0.25rem;
+      gap: 0.2rem;
       min-width: 0;
-      padding: 0.7rem 0.8rem 0.7rem 0;
+      padding: 0.15rem 1.25rem;
+      border-left: 1px solid var(--calc-line);
     }
 
     .summary :global(span) {
       color: var(--calc-muted);
-      font-size: 0.75rem;
+      font-size: 0.72rem;
+      white-space: nowrap;
     }
 
     .summary :global(strong) {
-      overflow-wrap: anywhere;
-      font-size: 1.05rem;
+      font-size: 1.15rem;
       font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
 
     .dashboard-tabs {
       display: flex;
-      gap: 1.25rem;
-      margin-top: 1rem;
+      gap: 1.5rem;
       overflow-x: auto;
-      border-bottom: 1px solid var(--calc-line);
+      scrollbar-width: none;
     }
 
     .dashboard-tabs button {
@@ -1416,18 +1482,36 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
     }
 
     .tab-panel {
-      margin-top: 1rem;
+      display: grid;
+      grid-row: 3;
+      grid-template-rows: minmax(0, 1fr);
+      gap: 1rem;
+      min-height: 0;
+      padding-block: 1rem var(--app-gutter);
     }
 
     .tab-panel:focus-visible {
-      outline-offset: 4px;
+      outline-offset: -2px;
+    }
+
+    .tab-panel > .panel,
+    .overview-side {
+      min-height: 0;
+      overflow: auto;
+      overscroll-behavior: contain;
     }
 
     .overview-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.55fr) minmax(16rem, 0.9fr);
-      align-items: start;
-      gap: 1rem;
+      grid-template-columns: minmax(0, 1.6fr) minmax(18rem, 0.9fr);
+    }
+
+    .models-grid {
+      grid-template-columns: minmax(0, 1.4fr) minmax(20rem, 1fr);
+    }
+
+    .tools-grid,
+    .data-grid {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
     }
 
     .overview-side {
@@ -1436,10 +1520,9 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       gap: 1rem;
     }
 
-    .overview-grid > .panel,
-    .overview-side > .panel,
-    .tab-panel > .panel + .panel {
-      margin-top: 0;
+    .timeline-panel {
+      display: flex;
+      flex-direction: column;
     }
 
     .table-wrap {
@@ -1592,19 +1675,22 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
 
     .chart-wrap {
       position: relative;
+      flex: 1 1 0;
+      min-height: 12rem;
       margin-top: 1rem;
     }
 
-    .context-chart {
+    .chart-wrap > svg {
+      position: absolute;
+      inset: 0;
       display: block;
       width: 100%;
-      height: 17.5rem;
-      touch-action: pan-y;
-      cursor: crosshair;
+      height: 100%;
     }
 
-    @media (max-width: 36rem) {
-      .context-chart { height: 14rem; }
+    .context-chart {
+      touch-action: pan-y;
+      cursor: crosshair;
     }
 
     .context-chart:focus-visible {
@@ -1699,30 +1785,30 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       font-variant-numeric: tabular-nums;
     }
 
+    .rates-panel .bar-chart :global(li) {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.2rem 1rem;
+    }
+
+    .rates-panel :global(.bar-track) {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+
     .rate-table summary {
       cursor: pointer;
       margin: 1rem 0 0.5rem;
     }
 
-    .import-panel > summary,
-    .manual-entry > summary,
-    .warnings > summary {
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .import-content {
-      margin-top: 0.75rem;
-    }
-
-    .import-content > p:first-child {
-      margin-top: 0;
-    }
-
-    .manual-entry {
+    .sources-help,
+    .export-help {
       margin-top: 1rem;
       padding-top: 0.75rem;
       border-top: 1px solid var(--calc-line);
+    }
+
+    .sources-help summary {
+      cursor: pointer;
     }
 
     .manual-entry > p {
@@ -1779,14 +1865,63 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       }
     }
 
-    @media (max-width: 48rem) {
-      .overview-grid {
+    @media (max-width: 64rem) {
+      .app-head {
         grid-template-columns: minmax(0, 1fr);
       }
 
+      .summary > :global(div:first-child) {
+        padding-left: 0;
+        border-left: 0;
+      }
+    }
+
+    /* Small or short screens: keep the tabs, let the page scroll naturally. */
+    @media (max-width: 48rem), (max-height: 36rem) {
+      .workspace {
+        height: auto;
+        min-height: 100dvh;
+      }
+
+      .calculator,
+      .tab-panel {
+        grid-template-rows: none;
+      }
+
+      .tab-panel {
+        grid-row: auto;
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .tab-panel > .panel,
+      .overview-side {
+        overflow: visible;
+      }
+
+      .chart-wrap {
+        flex: 0 0 auto;
+        height: 15rem;
+      }
+    }
+
+    @media (max-width: 48rem) {
       .summary {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem 0;
+      }
+
+      .summary > :global(div:nth-child(odd)) {
+        padding-left: 0;
+        border-left: 0;
+      }
+
+      .summary :global(strong) {
+        white-space: normal;
+      }
+
+      .back-link {
+        display: none;
       }
     }
   </style>
-</SiteLayout>
+</BaseLayout>
