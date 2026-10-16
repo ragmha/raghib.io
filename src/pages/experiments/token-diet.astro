@@ -170,7 +170,7 @@ const roundTwoHasOptimizer = roundTwoSetups.some((setup) => setup.id === 'f')
 const roundTwoVersions = roundTwoData.versions as Record<string, string>
 
 const description =
-  'One bug-fix task, 30 coding-agent runs: as-is, with simple principles, caveman, rtk, all three, and Token Optimizer. See where the tokens and the cost actually went.'
+  `Two bug-fix tasks, ${number.format(runs.length + roundTwoRuns.length)} coding-agent runs. Compare token use and Copilot AIU across simple instructions, hooks, output filters, and a longer regression hunt.`
 ---
 
 <SiteLayout title="Coding Agent Token Diet: Before and After" description={description}>

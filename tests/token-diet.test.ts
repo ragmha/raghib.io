@@ -48,6 +48,7 @@ describe('token diet data', () => {
   test('round two has five runs per recorded setup with reconciled usage', () => {
     const variants = new Set(roundTwo.runs.map((run) => run.variant))
     assert.ok(['a', 'b', 'c', 'd', 'e'].every((variant) => variants.has(variant)))
+    assert.ok([...variants].every((variant) => 'abcdef'.includes(variant)))
     assert.ok(variants.size === 5 || variants.size === 6)
     assert.equal(roundTwo.runs.length, variants.size * 5)
     for (const variant of variants) {
