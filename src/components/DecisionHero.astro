@@ -5,7 +5,7 @@ import '../styles/anatomy.css'
 ---
 
 <figure class="decision-hero decision-cover iso">
-  <div class="decision-hero-art" data-src="/decision-hero.svg">
+  <div class="decision-hero-art" data-src="/decision-hero.svg" hidden>
     <svg class="iso-svg decision-hero-svg" viewBox="0 0 1500 740" aria-hidden="true"></svg>
   </div>
   <figcaption>
@@ -27,7 +27,10 @@ import '../styles/anatomy.css'
     for (const art of document.querySelectorAll<HTMLElement>('.decision-hero-art[data-src]')) {
       fetch(art.dataset.src!)
         .then((response) => (response.ok ? response.text() : Promise.reject()))
-        .then((svg) => { art.innerHTML = svg })
+        .then((svg) => {
+          art.innerHTML = svg
+          art.hidden = false
+        })
         .catch(() => {})
     }
   </script>

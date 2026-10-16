@@ -27,6 +27,7 @@ test('decision hero follows the site theme and fits desktop and mobile', {
             const hero = page.locator('.decision-hero')
             await hero.locator('svg[role="img"]').waitFor()
             assert.equal(await hero.count(), 1)
+            assert.equal(await hero.locator('.decision-cover-routes').isVisible(), true, 'Static routing key is visible')
             assert.equal(await page.locator('.decision-cover + .post-head + .post-body').count(), 1, 'Cover illustration leads the article, above the title')
             assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'Page has no horizontal overflow')
             assert.equal(await hero.locator('[data-anatomy]').count(), 0)
@@ -55,6 +56,7 @@ test('decision hero follows the site theme and fits desktop and mobile', {
                   .some(signal => getComputedStyle(signal).animationName !== 'none'),
               }
             })
+
             const contextLabel = `${engine.name()} ${theme} ${width}px`
             assert.equal(result.paper, theme === 'dark' ? 'rgb(24, 24, 24)' : 'rgb(243, 243, 243)', contextLabel)
             assert.equal(result.background, result.pageBackground, `Cover blends into the ${contextLabel} page`)
@@ -71,5 +73,42 @@ test('decision hero follows the site theme and fits desktop and mobile', {
     } finally {
       await browser.close()
     }
+  }
+})
+
+test('decision hero keeps its static key without an illustration', {
+  skip: !url,
+}, async () => {
+  const browser = await chromium.launch()
+  try {
+    const noScript = await browser.newContext({
+      viewport: { width: 1024, height: 900 },
+      javaScriptEnabled: false,
+    })
+    try {
+      const page = await noScript.newPage()
+      await page.goto(url, { waitUntil: 'domcontentloaded' })
+      assert.equal(await page.locator('.decision-cover-routes').isVisible(), true)
+      assert.equal(await page.locator('.decision-hero-art').isVisible(), false)
+    } finally {
+      await noScript.close()
+    }
+
+    const failedRequest = await browser.newContext({ viewport: { width: 1024, height: 900 } })
+    try {
+      const page = await failedRequest.newPage()
+      await page.route('**/decision-hero.svg', route => route.abort())
+      const requestFailure = page.waitForEvent('requestfailed', {
+        predicate: request => request.url().endsWith('/decision-hero.svg'),
+      })
+      await page.goto(url, { waitUntil: 'domcontentloaded' })
+      await requestFailure
+      assert.equal(await page.locator('.decision-cover-routes').isVisible(), true)
+      assert.equal(await page.locator('.decision-hero-art').isVisible(), false)
+    } finally {
+      await failedRequest.close()
+    }
+  } finally {
+    await browser.close()
   }
 })
