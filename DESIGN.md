@@ -74,12 +74,14 @@ and restrained hierarchy rather than simulated commands or dense chrome.
 - Callouts use a full one-pixel border and a compact semantic label.
 - Code blocks use a solid near-black surface and one-pixel border.
 - Images remain square-edged enough to read as evidence, not decorative media.
-- The Copilot credit-journey illustration uses black ink on white paper:
+- The Copilot credit-journey illustration uses an ink-on-paper treatment:
   original GHCP-user and GH-admin figures, a desk and whiteboard, open
   handwritten dialogue, and no comic-card frames. Automation is the admin's
   tool, not a third persona. The user has headphones and casual clothing;
   the admin has glasses, an ID badge, and a policy clipboard. Both layouts
   retain these cues so the roles are recognizable without reading the labels.
+- Diagram ink, paper, and highlighted surfaces adapt together through
+  `scripts/theme-diagrams.mjs`; dark surfaces must not retain black export text.
 - Focus uses a visible two-pixel theme-highlight outline with offset.
 
 ## Motion

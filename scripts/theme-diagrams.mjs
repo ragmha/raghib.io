@@ -3,14 +3,14 @@ import { fileURLToPath } from 'node:url'
 
 const palettes = [
   ['paper', ['#f7f5f0', '#262a33'], '#ffffff', '#000000'],
-  ['ink', ['#1c1b18', '#dedfe3'], '#0d0d0d', '#ffffff'],
+  ['ink', ['#1c1b18', '#dedfe3', '#000000', '#111111'], '#0d0d0d', '#ffffff'],
   ['surface', ['#f2f0e7', '#ffffff'], '#f3f3f3', '#181818'],
   ['muted', ['#6f6d63', '#b8bac0'], '#5d5d5d', '#b9b9b9'],
   ['rule', ['#c9c5b6', '#3b414a'], '#d8d8d8', '#424242'],
   ['green-ink', ['#47603e'], '#47603e', '#a6c994'],
   ['green-surface', ['#e2ecd9'], '#e2ecd9', '#1d2c19'],
   ['ochre-ink', ['#816121'], '#816121', '#e1bf73'],
-  ['ochre-surface', ['#f4e9c7'], '#f4e9c7', '#302719'],
+  ['ochre-surface', ['#f4e9c7', '#e9f56c'], '#f4e9c7', '#302719'],
   ['red-ink', ['#9b493e'], '#9b493e', '#eea397'],
   ['red-surface', ['#f6ded7'], '#f6ded7', '#321e1a'],
   ['blue', ['#91adc9'], '#426685', '#91adc9'],
