@@ -70,9 +70,12 @@ over it; tell the author:
 
 ## Check
 
-```sh
-grep -L "^\*\*Disclaimer:\*\*" src/content/writing/*.mdx
-```
+CI (`bun test`, part of the required `SEO readiness` check) runs
+`tests/employer-disclaimer.test.mjs`. It fails if a post mentions Microsoft,
+Copilot, Azure, OpenAI, LinkedIn, or VS Code without the disclaimer, or if the
+disclaimer is reworded or not first. It is a keyword tripwire only: competitor
+comparisons and the **Stop and flag** cases still need this skill's judgment.
 
-Lists posts without it. Review each against **Decide**; empty output is not
-the goal, a correct decision per post is.
+```sh
+bun test tests/employer-disclaimer.test.mjs
+```
