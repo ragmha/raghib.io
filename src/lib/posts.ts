@@ -1,15 +1,15 @@
 import { getCollection, type CollectionEntry } from 'astro:content'
 import { indexWritingPosts } from './writing-index'
 
-export type WritingEntry = CollectionEntry<'writing'>
+export type WritingEntry = CollectionEntry<'writing' | 'writingFi'>
 
-export async function getPublishedPosts(): Promise<WritingEntry[]> {
+export async function getPublishedPosts(): Promise<CollectionEntry<'writing'>[]> {
   return getVisiblePosts()
 }
 
 export async function getVisiblePosts(
   { includeDrafts = false }: { includeDrafts?: boolean } = {},
-): Promise<WritingEntry[]> {
+): Promise<CollectionEntry<'writing'>[]> {
   return indexWritingPosts(await getCollection('writing'), { includeDrafts })
 }
 
@@ -17,8 +17,8 @@ export function getPostSlug(post: WritingEntry): string {
   return post.id.replace(/\.(md|mdx)$/, '')
 }
 
-export function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('en-GB', {
+export function formatDate(date: Date, locale = 'en-GB'): string {
+  return new Intl.DateTimeFormat(locale, {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -28,9 +28,9 @@ export function formatDate(date: Date): string {
     .toUpperCase()
 }
 
-export function estimateReadingTime(body: string | undefined): string {
+export function estimateReadingTime(body: string | undefined, label = 'MIN READ'): string {
   const words = body?.trim().split(/\s+/).filter(Boolean).length ?? 0
-  return `${Math.max(1, Math.ceil(words / 220))} MIN READ`
+  return `${Math.max(1, Math.ceil(words / 220))} ${label}`
 }
 
 const CATEGORIES = [

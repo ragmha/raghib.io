@@ -6,9 +6,12 @@ interface Props {
   description?: string
   noindex?: boolean
   article?: ArticleMetadata
+  lang?: string
+  // Language code to site path of every version of this page, including itself.
+  alternates?: Record<string, string>
 }
 
-const { noindex = false } = Astro.props
+const { noindex = false, alternates } = Astro.props
 const metadata = getSeoMetadata({ ...Astro.props, url: Astro.url, site: Astro.site })
 const analyticsToken = import.meta.env.PROD ? import.meta.env.PUBLIC_CF_BEACON_TOKEN : undefined
 ---
@@ -19,6 +22,9 @@ const analyticsToken = import.meta.env.PROD ? import.meta.env.PUBLIC_CF_BEACON_T
 <meta name="description" content={metadata.description} />
 <meta name="author" content={SITE_NAME} />
 <link rel="canonical" href={metadata.canonical.href} />
+{alternates && Object.entries({ ...alternates, 'x-default': alternates.en }).map(([hreflang, path]) => (
+  <link rel="alternate" hreflang={hreflang} href={new URL(path, metadata.canonical).href} />
+))}
 {noindex && <meta name="robots" content="noindex, nofollow" />}
 <meta property="og:type" content={metadata.openGraphType} />
 <meta property="og:site_name" content={SITE_NAME} />

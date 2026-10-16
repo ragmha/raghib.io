@@ -12,6 +12,8 @@ interface Props {
   description?: string
   noindex?: boolean
   article?: ArticleMetadata
+  lang?: string
+  alternates?: Record<string, string>
 }
 
 const {
@@ -19,14 +21,16 @@ const {
   description,
   noindex = false,
   article,
+  lang = 'en',
+  alternates,
 } = Astro.props
 
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
   <head>
-    <SeoHead title={title} description={description} noindex={noindex} article={article} />
+    <SeoHead title={title} description={description} noindex={noindex} article={article} lang={lang} alternates={alternates} />
     <ThemeInit />
   </head>
   <body>

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { parseDocument } from 'yaml'
 
 export function readPublication(source, collection, file) {
-  if (!['writing', 'projectWriteups'].includes(collection)) {
+  if (!['writing', 'writingFi', 'projectWriteups'].includes(collection)) {
     throw new Error(`${file}: unknown content collection "${collection}"`)
   }
   const match = source.match(/^\uFEFF?---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/)
@@ -13,7 +13,7 @@ export function readPublication(source, collection, file) {
   if (!data || typeof data !== 'object' || Array.isArray(data)) {
     throw new Error(`${file}: frontmatter must be an object`)
   }
-  const published = data.published === undefined ? collection === 'writing' : data.published
+  const published = data.published === undefined ? collection !== 'projectWriteups' : data.published
   if (typeof published !== 'boolean') throw new Error(`${file}: published must be a boolean`)
   if (!published) return null
 

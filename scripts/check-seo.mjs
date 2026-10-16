@@ -16,9 +16,10 @@ function outputPath(url) {
 const expectedArticles = []
 for (const [collection, directory] of [
   ['writing', 'src/content/writing'],
+  ['writingFi', 'src/content/writing-fi'],
   ['projectWriteups', 'src/content/project-writeups'],
 ]) {
-  for (const file of (await readdir(directory, { recursive: true })).filter((file) => /\.(md|mdx)$/.test(file))) {
+  for (const file of (await readdir(directory, { recursive: true }).catch(() => [])).filter((file) => /\.(md|mdx)$/.test(file))) {
     const publication = readPublication(await readFile(resolve(directory, file), 'utf8'), collection, file)
     if (publication) {
       expectedArticles.push({
@@ -128,7 +129,7 @@ try {
     assert.ok(metadata.schema.some((entry) => entry['@type'] === 'Person'), `Author identity for ${file}`)
     assert.ok(metadata.schema.some((entry) => entry['@type'] === 'WebSite'), `Site identity for ${file}`)
     const article = metadata.schema.find((entry) => entry['@type'] === 'BlogPosting')
-    const isArticle = (path.startsWith('/writing/') && path !== '/writing/') || path.startsWith('/project/')
+    const isArticle = /^\/(fi\/)?writing\/./.test(path) || path.startsWith('/project/')
     assert.equal(Boolean(article), isArticle, `Article schema only on article routes: ${file}`)
     if (article) {
       assert.equal(metadata.ogType, 'article', `Article social type for ${file}`)
@@ -138,7 +139,7 @@ try {
       assert.ok(Number.isFinite(Date.parse(article.datePublished)), `Valid publication date for ${file}`)
       assert.equal(article.author.name, 'Raghib Hasan', `Article author for ${file}`)
       renderedArticles.push({
-        collection: path.startsWith('/writing/') ? 'writing' : 'projectWriteups',
+        collection: path.startsWith('/writing/') ? 'writing' : path.startsWith('/fi/') ? 'writingFi' : 'projectWriteups',
         headline: article.headline,
         searchTitle: metadata.title,
         description: metadata.description,

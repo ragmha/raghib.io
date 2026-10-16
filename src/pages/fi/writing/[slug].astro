@@ -1,0 +1,14 @@
+---
+import { getCollection } from 'astro:content'
+import Post from '../../writing/[slug].astro'
+import { getPostSlug } from '../../../lib/posts'
+import { indexWritingPosts } from '../../../lib/writing-index'
+
+// Translations are written by .github/workflows/translate-to-fi.md.
+export async function getStaticPaths() {
+  const posts = indexWritingPosts(await getCollection('writingFi'), { includeDrafts: import.meta.env.DEV })
+  return posts.map((post) => ({ params: { slug: getPostSlug(post) }, props: { post } }))
+}
+---
+
+<Post {...Astro.props} />

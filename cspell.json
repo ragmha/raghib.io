@@ -2,6 +2,7 @@
   "version": "0.2",
   "language": "en-US",
   "files": ["src/content/**/*.{md,mdx}"],
+  "ignorePaths": ["src/content/writing-fi/**"],
   "words": [
     "Abramov",
     "cutover",

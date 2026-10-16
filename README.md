@@ -51,6 +51,15 @@ writeup at `/project/<project-name>/writings/`, authored as MDX in
 `src/content/project-writeups/`; set `published: true` when it's ready to go
 live. Writeups are separate from the Writing archive/RSS feed.
 
+Finnish translations live in `src/content/writing-fi/` under the English file
+name and are served at `/fi/writing/<slug>/`, with `hreflang` links between the
+two versions. Don't write them by hand: `.github/workflows/translate-to-fi.md`
+(a GitHub Agentic Workflow) runs on every push to `src/content/writing/`,
+translates new published posts, patches only the changed passages of existing
+translations, and opens a draft `[translate-fi]` PR for review. Translations
+stay out of the RSS feed and cspell. After editing the workflow, run
+`gh aw compile translate-to-fi`; run it manually with `gh aw run translate-to-fi`.
+
 Rendered diagrams live in `public/diagrams/`; editable `.excalidraw` sources live
 in `src/assets/diagrams/`. Edit a source in Excalidraw, then export the matching
 SVG. Keep SVG diagrams as native `<img>` elements with explicit `width`, `height`,

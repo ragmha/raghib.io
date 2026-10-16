@@ -22,6 +22,7 @@ interface SeoInput {
   description?: string
   article?: ArticleMetadata
   noindex?: boolean
+  lang?: string
 }
 
 export function getSeoMetadata({
@@ -31,6 +32,7 @@ export function getSeoMetadata({
   description = SITE_DESCRIPTION,
   article,
   noindex = false,
+  lang = 'en',
 }: SeoInput) {
   const canonical = getCanonicalUrl(url, site)
   const home = new URL('/', canonical)
@@ -69,7 +71,7 @@ export function getSeoMetadata({
       headline: article.headline,
       description,
       datePublished,
-      inLanguage: 'en',
+      inLanguage: lang,
       image: image.url.href,
       author,
       publisher: { '@id': author['@id'] },

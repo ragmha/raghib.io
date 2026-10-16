@@ -1,5 +1,5 @@
 ---
-import { render, type CollectionEntry } from 'astro:content'
+import { getEntry, render } from 'astro:content'
 import WritingLayout from '../../layouts/WritingLayout.astro'
 import PartsNav from '../../components/PartsNav.astro'
 import TagList from '../../components/TagList.astro'
@@ -11,6 +11,7 @@ import {
   getPostTags,
   getPostSlug,
   getVisiblePosts,
+  type WritingEntry,
 } from '../../lib/posts'
 
 export async function getStaticPaths() {
@@ -21,19 +22,35 @@ export async function getStaticPaths() {
   }))
 }
 
+// Also renders Finnish posts for src/pages/fi/writing/[slug].astro.
 interface Props {
-  post: CollectionEntry<'writing'>
+  post: WritingEntry
 }
 
 const { post } = Astro.props
+const fi = post.collection === 'writingFi'
+const slug = getPostSlug(post)
+const original = fi ? await getEntry('writing', post.id) : post
+const translation = fi ? post : await getEntry('writingFi', post.id)
+const visible = (entry?: WritingEntry) => Boolean(entry && (entry.data.published || import.meta.env.DEV))
+const alternates = visible(original) && visible(translation)
+  ? { en: `/writing/${slug}/`, fi: `/fi/writing/${slug}/` }
+  : undefined
+const t = fi
+  ? { locale: 'fi-FI', minutes: 'MIN LUKUAIKA', all: '← Kaikki kirjoitukset', draft: 'Luonnoksen esikatselu — ei julkaistu.' }
+  : { locale: 'en-GB', minutes: 'MIN READ', all: '← All writing', draft: 'Draft preview — not published. Review the account and conclusions before publishing.' }
+// Labels come from the English original so both languages tag a post the same way.
+const labelled = original ?? post
 const { Content, headings } = await render(post)
-const readingTime = estimateReadingTime(post.body)
+const readingTime = estimateReadingTime(post.body, t.minutes)
 ---
 
 <WritingLayout
   title={post.data.seoTitle ?? post.data.title}
   description={post.data.description}
   noindex={!post.data.published}
+  lang={fi ? 'fi' : 'en'}
+  alternates={alternates}
   article={{
     headline: post.data.title,
     date: post.data.date,
@@ -48,20 +65,23 @@ const readingTime = estimateReadingTime(post.body)
       <article class="prose">
         <header class="doc-head">
           {!post.data.published && (
-            <p class="draft-notice">Draft preview — not published. Review the account and conclusions before publishing.</p>
+            <p class="draft-notice">{t.draft}</p>
           )}
           <h1 id="post-title">{post.data.title}</h1>
           <p class="doc-meta">
             <a href="/#about" rel="author">{SITE_NAME}</a> ·
-            <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time> · {readingTime}
+            <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date, t.locale)}</time> · {readingTime}
+            {alternates && (fi
+              ? <> · <a href={alternates.en} hreflang="en" lang="en">English</a></>
+              : <> · <a href={alternates.fi} hreflang="fi" lang="fi">Suomeksi</a></>)}
           </p>
-          <TagList category={getPostCategory(post)} tags={getPostTags(post)} />
+          <TagList category={getPostCategory(labelled)} tags={getPostTags(labelled)} />
         </header>
 
         <Content />
 
         <hr class="rule-dotted" />
-        <p class="doc-end"><a href="/writing/">← All writing</a></p>
+        <p class="doc-end"><a href="/writing/">{t.all}</a></p>
       </article>
     </main>
   </div>
