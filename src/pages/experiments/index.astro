@@ -4,7 +4,7 @@ import ArchiveLayout from '../../layouts/ArchiveLayout.astro'
 
 <ArchiveLayout
   title="Experiments"
-  count={1}
+  count={2}
   itemLabel="experiment"
   description="Interactive experiments and technical demonstrations by Raghib Hasan."
 >
@@ -12,6 +12,10 @@ import ArchiveLayout from '../../layouts/ArchiveLayout.astro'
     <li>
       <h2><a href="/experiments/context-autopsy/">What’s Under the Prompt?</a></h2>
       <p>See what happens under the hood when you prompt: context growth, cache reuse, model calls, tools, and cost elsewhere.</p>
+    </li>
+    <li>
+      <h2><a href="/experiments/token-diet/">Does Your Coding Agent Need a Token Diet?</a></h2>
+      <p>Compare a coding agent’s token use before and after simple principles, caveman, and rtk across 25 runs.</p>
     </li>
   </ul>
 </ArchiveLayout>
