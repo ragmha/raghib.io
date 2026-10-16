@@ -59,9 +59,11 @@ touch the user's Copilot configuration. Its noncommercial license permits
 personal research and testing; see the [license](https://github.com/alexgreensh/token-optimizer/blob/v5.13.48/LICENSE).
 `selfcheck` proves the verifier catches each seeded bug and rejects invalid
 commit subjects. Each `run <round>` launches all six setups concurrently. The
-summarizer accepts the original 25 run records, or all 30 when Token Optimizer
-was run, and checks token totals, usage charges, and redaction before writing
-the JSON file.
+summarizer requires all 30 runs before writing the canonical Round 1 dataset,
+so a missing Token Optimizer setup cannot replace the published comparison.
+Round 2 and non-default model summaries accept 25 runs across the original
+setups or all 30 with Token Optimizer. Every summary checks token totals, usage
+charges, and redaction before writing the JSON file.
 
 The public page is `/experiments/token-diet/`. Round 1 and the regression-hunt
 Round 2 have separate views, each with its own call waterfall, measurements,

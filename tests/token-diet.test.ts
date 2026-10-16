@@ -40,12 +40,9 @@ describe('token diet math', () => {
 })
 
 describe('token diet data', () => {
-  test('has five runs for every measured setup', () => {
-    const variants = new Set(data.runs.map((run) => run.variant))
-    assert.ok(['a', 'b', 'c', 'd', 'e'].every((variant) => variants.has(variant)))
-    assert.ok([...variants].every((variant) => 'abcdef'.includes(variant)))
-    assert.equal(data.runs.length, variants.size * 5)
-    for (const variant of variants) {
+  test('canonical round one contains five runs of all six setups', () => {
+    assert.equal(data.runs.length, 30)
+    for (const variant of 'abcdef') {
       assert.equal(data.runs.filter((run) => run.variant === variant).length, 5)
     }
   })

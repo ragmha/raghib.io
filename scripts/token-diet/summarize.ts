@@ -161,9 +161,13 @@ const runs = readdirSync(runsDir)
     }
   })
 
+const canonicalRoundOne = round === 1 && suffix === ''
+const validRunCount = canonicalRoundOne ? runs.length === 30 : runs.length === 25 || runs.length === 30
 check(
-  runs.length === (runs.some((run) => run.variant === 'f') ? 30 : 25),
-  `expected 25 runs, or 30 with Token Optimizer, found ${runs.length}`,
+  validRunCount,
+  canonicalRoundOne
+    ? `expected all 30 runs before writing the canonical Round 1 dataset, found ${runs.length}`
+    : `expected 25 runs, or 30 with Token Optimizer, found ${runs.length}`,
 )
 
 const pytest = spawnSync(join(venv, 'bin/python'), ['-m', 'pytest', '-q', '-p', 'no:cacheprovider'], {
