@@ -6,6 +6,8 @@ import type { Run, Tokens } from '../src/lib/token-diet'
 
 const raw = readFileSync(new URL('../src/data/token-diet.json', import.meta.url), 'utf8')
 const data = JSON.parse(raw) as { principles: string[]; rates: Tokens; runs: Run[] }
+const roundTwoRaw = readFileSync(new URL('../src/data/token-diet-2.json', import.meta.url), 'utf8')
+const roundTwo = JSON.parse(roundTwoRaw) as { rates: Tokens; runs: Run[] }
 const tokens = (cacheRead: number, cacheWrite: number, fresh: number, output: number): Tokens =>
   ({ cacheRead, cacheWrite, fresh, output })
 
@@ -41,6 +43,22 @@ describe('token diet data', () => {
   test('has five runs of each setup', () => {
     assert.equal(data.runs.length, 30)
     for (const variant of 'abcdef') assert.equal(data.runs.filter((run) => run.variant === variant).length, 5)
+  })
+
+  test('round two has five runs per recorded setup with reconciled usage', () => {
+    const variants = new Set(roundTwo.runs.map((run) => run.variant))
+    assert.ok(['a', 'b', 'c', 'd', 'e'].every((variant) => variants.has(variant)))
+    assert.ok(variants.size === 5 || variants.size === 6)
+    assert.equal(roundTwo.runs.length, variants.size * 5)
+    for (const variant of variants) {
+      assert.equal(roundTwo.runs.filter((run) => run.variant === variant).length, 5)
+    }
+    for (const run of roundTwo.runs) {
+      for (const kind of kinds) {
+        assert.equal(run.calls.reduce((sum, call) => sum + call[kind], 0), run.totals[kind], `${run.id} ${kind}`)
+      }
+      assert.equal(cost(run.totals, roundTwo.rates), run.nanoAiu, `${run.id} charge`)
+    }
   })
 
   test('calls add up to the session totals and the recorded charge', () => {

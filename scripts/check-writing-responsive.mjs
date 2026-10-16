@@ -145,9 +145,17 @@ try {
         highlights: [...document.querySelectorAll('[fill*="--diagram-ochre-surface"]')]
           .map(shape => getComputedStyle(shape).fill),
       }))
+      const requiresHighlights = /\/copilot-(?:budget-and-model-access|additive-model-access)(?:-portrait)?\.svg$/.test(source)
+      const hasNoHighlights = /\/copilot-credit-journey(?:-portrait)?\.svg$/.test(source)
       assert.ok(colors.text.length > 0, `Diagram has readable labels: ${source}`)
       assert.ok(colors.text.every(color => color === (theme === 'dark' ? 'rgb(255, 255, 255)' : 'rgb(13, 13, 13)')),
         `Diagram ink must adapt to ${theme}: ${source}`)
+      if (requiresHighlights) {
+        assert.ok(colors.highlights.length > 0, `Budget/access diagram must retain highlight fills: ${source}`)
+      }
+      if (hasNoHighlights) {
+        assert.equal(colors.highlights.length, 0, `Credit-journey diagram intentionally has no highlights: ${source}`)
+      }
       assert.ok(colors.highlights.every(color => color === (theme === 'dark' ? 'rgb(48, 39, 25)' : 'rgb(244, 233, 199)')),
         `Diagram highlights must adapt with their ink in ${theme}: ${source}`)
     }

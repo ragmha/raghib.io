@@ -63,10 +63,11 @@ summarizer accepts the original 25 run records, or all 30 when Token Optimizer
 was run, and checks token totals, usage charges, and redaction before writing
 the JSON file.
 
-The public page is `/experiments/token-diet/`. Its animated lanes show each
-setup's median-token run; the table and dot plot show every run. The published
-JSON contains aggregate call metrics and short redacted tool labels, not raw
-Copilot event logs, source paths, or credentials.
+The public page is `/experiments/token-diet/`. Round 1 and the regression-hunt
+Round 2 have separate views, each with its own call waterfall, measurements,
+task prompt, method, and conclusions. The published JSON contains aggregate
+call metrics and short redacted tool labels, not raw Copilot event logs, source
+paths, or credentials.
 
 The experiment measures one task, one model, and five runs per setup. It is a
 small demonstration, not a general benchmark; rerun it on representative tasks
