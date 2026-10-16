@@ -74,7 +74,7 @@ const why = (run: Run) =>
       : 'fixed the bugs but used a commit scope the repository’s guide does not allow'
 const nameOf = (run: Run) => setups.find((setup) => setup.id === run.variant)?.name ?? run.variant
 
-// Race: each setup's median run, call by call, on one token axis.
+// Flame chart: each setup's median run, call by call, on one token axis.
 const axis = Math.ceil(Math.max(...setups.map((setup) => total(setup.shown.totals))) / 100_000) * 100_000
 const ticks = Array.from({ length: axis / 100_000 + 1 }, (_, i) => i * 100_000)
 const pct = (value: number, of: number) => `${((value / of) * 100).toFixed(3)}%`
@@ -93,6 +93,7 @@ const stops = (values: number[]) => {
   return values.map((value, i) => `--s${i + 1}:${((running += value) / sum).toFixed(4)}`).join(';')
 }
 const pick = ({ cacheRead, cacheWrite, fresh, output }: Tokens): Tokens => ({ cacheRead, cacheWrite, fresh, output })
+const rateList = kinds.map((kind) => `${names[kind].toLowerCase()} ${perThousand.format(rates[kind] / 1e6)}`).join(', ')
 const raceJson = JSON.stringify({
   axis,
   rates,
@@ -235,9 +236,7 @@ const description =
           reads, cache writes, fresh input and output, then the tools it asked for. Tools share their call’s width
           evenly, because the logs don’t time them; outlined tools failed. Both panels fill at the same token rate,
           so the run that uses fewer tokens finishes first. In each summary, the outer ring is the share of tokens
-          and the inner ring the share of AIU. AIU per 1k tokens:
-          {kinds.map((kind, i) => <>{i ? ', ' : ' '}{names[kind].toLowerCase()} {perThousand.format(rates[kind] / 1e6)}</>)}.
-          The table below has all 25 runs.
+          and the inner ring the share of AIU. AIU per 1k tokens: {rateList}. The table below has all 25 runs.
         </figcaption>
 
         <details class="ran">
@@ -634,7 +633,7 @@ const description =
   .muted,
   figcaption,
   caption,
-  .legend p,
+  .kicker,
   fieldset legend {
     color: var(--theme-muted);
   }
@@ -727,55 +726,55 @@ const description =
     line-height: 1.5;
   }
 
-  .lane + .lane {
-    margin-top: 0.9rem;
+  .panels {
+    --row: 1.3rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem 1.5rem;
   }
 
-  .lane-head {
-    display: flex;
+  .kicker {
+    margin: 0;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .pill {
+    display: inline-flex;
     flex-wrap: wrap;
     align-items: baseline;
-    justify-content: space-between;
-    gap: 0.15rem 1rem;
-    margin-bottom: 0.35rem;
-    font-size: 0.8rem;
-  }
-
-  .lane-name {
+    gap: 0 0.6rem;
+    margin: 0.4rem 0 0.9rem;
+    padding: 0.3rem 1rem;
+    border: 1px solid var(--theme-rule-strong);
+    border-radius: 999px;
+    font-size: 1.1rem;
     font-weight: 600;
   }
 
-  .lane-name .muted {
-    margin-left: 0.35rem;
+  .pill > span[aria-hidden] {
+    color: var(--theme-muted);
+    font-size: 0.8rem;
     font-weight: 400;
   }
 
-  .meters {
-    display: flex;
-    gap: 1rem;
-    margin: 0;
+  .pill [data-meter] {
+    color: var(--theme-text);
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  [data-meter] {
+    display: inline-block;
+    min-width: calc(var(--chars) * 1ch);
     font-variant-numeric: tabular-nums;
-  }
-
-  .meters div {
-    display: flex;
-    gap: 0.35rem;
-  }
-
-  .meters dt {
-    order: 2;
-    color: var(--theme-muted);
-  }
-
-  .meters dd {
-    width: calc(var(--chars) * 1ch);
-    margin: 0;
     text-align: right;
   }
 
-  .track {
+  .flame {
     position: relative;
-    height: 2rem;
+    height: calc(var(--row) * 4 + 3px);
     overflow: hidden;
     background-image: linear-gradient(to right, var(--theme-rule) 1px, transparent 1px);
     background-size: calc(100% / var(--divisions)) 100%;
@@ -787,23 +786,48 @@ const description =
     clip-path: inset(0 calc(100% - var(--at) * 100%) 0 0);
   }
 
-  .call {
+  .bar {
+    display: block;
+    min-width: 0;
+    height: var(--row);
+    padding: 0 0.25rem;
+    overflow: hidden;
+    box-sizing: border-box;
+    background: color-mix(in srgb, var(--theme-text) 14%, var(--theme-bg));
+    font-size: 0.65rem;
+    line-height: var(--row);
+    white-space: nowrap;
+  }
+
+  .session {
     position: absolute;
     top: 0;
-    bottom: 0;
+    left: 0;
+    width: var(--w);
+    background: color-mix(in srgb, var(--theme-text) 24%, var(--theme-bg));
+  }
+
+  .call {
+    position: absolute;
+    top: calc(var(--row) + 1px);
     left: var(--x);
     display: grid;
-    grid-template-rows: 1fr 0.3rem;
-    gap: 2px;
+    grid-template-rows: repeat(3, var(--row));
+    gap: 1px;
     width: var(--w);
-    padding-right: 2px;
+    padding-right: 1px;
     box-sizing: border-box;
   }
 
-  .segments {
-    position: relative;
+  .segments,
+  .tools {
     display: flex;
+    min-width: 0;
     overflow: hidden;
+  }
+
+  .tools {
+    gap: 1px;
   }
 
   .segments > span {
@@ -816,30 +840,15 @@ const description =
   .fresh { background: var(--c-fresh); }
   .output { background: var(--c-output); }
 
-  .segments .number {
-    position: absolute;
-    top: 50%;
-    left: 0.2rem;
-    color: var(--theme-bg);
-    font-size: 0.6rem;
-    line-height: 1;
-    transform: translateY(-50%);
-  }
-
-  .tools {
-    display: flex;
-    gap: 1px;
-  }
-
-  .tools span {
+  .tools .bar {
     flex: 1;
-    background: var(--theme-rule-strong);
+    padding: 0 0.15rem;
+    background: color-mix(in srgb, var(--theme-text) 8%, var(--theme-bg));
   }
 
   .tools .failed {
     background: transparent;
-    outline: 1px solid var(--theme-rule-strong);
-    outline-offset: -1px;
+    box-shadow: inset 0 0 0 1px var(--theme-red);
   }
 
   .head {
@@ -869,25 +878,26 @@ const description =
   .axis span:last-child { transform: translateX(-100%); }
 
   .summary {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
-    gap: 1rem 2rem;
-    margin-top: 1.5rem;
-    font-size: 0.8rem;
+    gap: 0.6rem 1.25rem;
+    margin-top: 1.25rem;
+    font-size: 0.75rem;
   }
 
-  .donut {
-    display: grid;
-    justify-items: center;
-    gap: 0.5rem;
+  .summary-head {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid var(--theme-rule);
   }
 
   .rings {
     display: grid;
     place-items: center;
-    width: 5.5rem;
-    height: 5.5rem;
+    width: 6.5rem;
+    height: 6.5rem;
   }
 
   .ring {
@@ -910,16 +920,45 @@ const description =
   }
 
   .ring-cost {
-    width: 3.9rem;
-    height: 3.9rem;
+    width: 4.9rem;
+    height: 4.9rem;
   }
 
-  .legend ul {
+  .ring-total {
+    grid-area: 1 / 1;
     display: grid;
-    gap: 0.2rem;
-    margin: 0.4rem 0 0;
-    padding: 0;
-    list-style: none;
+    justify-items: center;
+    color: var(--theme-muted);
+    font-size: 0.6rem;
+    line-height: 1.3;
+  }
+
+  .ring-total [data-meter] {
+    color: var(--theme-text);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .summary table {
+    font-size: 0.72rem;
+  }
+
+  .summary th,
+  .summary td {
+    padding: 0.15rem 0 0.15rem 0.5rem;
+    border: 0;
+    font-weight: 400;
+  }
+
+  .summary th:first-child {
+    padding-left: 0;
+  }
+
+  .summary tfoot > tr > * {
+    padding-top: 0.3rem;
+    border-top: 1px solid var(--theme-rule);
+    font-weight: 600;
   }
 
   .swatch {
@@ -928,6 +967,81 @@ const description =
     height: 0.7rem;
     margin-right: 0.45rem;
     vertical-align: -0.05rem;
+  }
+
+  /* Tokenizer */
+  .views {
+    margin-top: 1rem;
+  }
+
+  .readings {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .counts {
+    display: flex;
+    gap: 0.75rem;
+    margin: 0.5rem 0 0;
+  }
+
+  .counts div {
+    padding: 0.35rem 0.75rem;
+    border: 1px solid var(--theme-rule-strong);
+  }
+
+  .counts dt {
+    color: var(--theme-muted);
+    font-size: 0.7rem;
+  }
+
+  .counts dd {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .part {
+    margin: 1rem 0 0.35rem;
+    font-size: 0.75rem;
+  }
+
+  .token-text,
+  .token-ids {
+    margin: 0;
+    padding: 0.6rem 0.75rem;
+    background: var(--theme-surface);
+    font-size: 0.78rem;
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+  }
+
+  .token-text {
+    white-space: pre-wrap;
+  }
+
+  .token-text span:nth-child(4n + 1) { background: color-mix(in srgb, var(--theme-blue) 30%, var(--theme-surface)); }
+  .token-text span:nth-child(4n + 2) { background: color-mix(in srgb, var(--theme-green) 30%, var(--theme-surface)); }
+  .token-text span:nth-child(4n + 3) { background: color-mix(in srgb, var(--theme-red) 30%, var(--theme-surface)); }
+  .token-text span:nth-child(4n) { background: color-mix(in srgb, var(--theme-faint) 35%, var(--theme-surface)); }
+
+  .tokenizer:has(#token-text:checked) .token-ids,
+  .tokenizer:has(#token-ids:checked) .token-text {
+    display: none;
+  }
+
+  .note {
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 44rem) {
+    .panels,
+    .readings {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 
   .ran {
