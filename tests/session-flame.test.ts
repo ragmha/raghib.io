@@ -414,16 +414,69 @@ describe('session replay', () => {
     assert.equal(narrate(timeline[1]), 'That model call read 20k tokens of its 200k limit and took 1.50 s.')
   })
 
+  test('keeps parent-tool-only child models separate from the following main turn', () => {
+    const { timeline } = parseSession(log([
+      [0, 'session.start', { selectedModel: 'main-model' }],
+      [100, 'user.message', { content: 'Go' }],
+      [200, 'tool.execution_start', { toolCallId: 'task-1', toolName: 'task' }],
+      [300, 'subagent.started', { toolCallId: 'task-1', agentName: 'explore' }, 'child-1'],
+      [400, 'session.usage_record', {
+        parentToolCallId: 'task-1', usage: { model: 'child-model', inputTokens: 1000 },
+      }],
+      [500, 'assistant.turn_start', { turnId: 'main-turn' }],
+    ]))
+    const childCall = timeline.findIndex(({ event }) => event.type === 'session.usage_record')
+    const mainTurn = timeline.findIndex(({ event }) => event.type === 'assistant.turn_start')
+    assert.equal(modelAt(timeline, childCall), 'child-model')
+    assert.equal(modelAt(timeline, mainTurn), 'main-model')
+  })
+
+  test('ignores child usage records when selecting main-agent context readings', () => {
+    for (const [childIdentity, agentId] of [
+      [{ parentToolCallId: 'task-1' }, undefined],
+      [{}, 'child-1'],
+    ] as const) {
+      const { timeline } = parseSession(log([
+        [0, 'session.start'],
+        [100, 'user.message', { content: 'Go' }],
+        [200, 'tool.execution_start', { toolCallId: 'task-1', toolName: 'task' }],
+        [300, 'subagent.started', { toolCallId: 'task-1', agentName: 'explore' }, 'child-1'],
+        [400, 'session.usage_record', {
+          ...childIdentity, usage: { inputTokens: 99_000, maxPromptTokens: 500_000 },
+        }, agentId],
+        [500, 'session.shutdown', { currentTokens: 5000, tokenLimit: 10_000 }],
+      ]))
+      const shutdown = timeline.findIndex(({ event }) => event.type === 'session.shutdown')
+      assert.deepEqual(contextAt(timeline, shutdown), { at: 500, tokens: 5000, limit: 10_000 })
+    }
+  })
+
+  test('uses the current call’s model and leaves its missing context limit unknown', () => {
+    const { timeline } = parseSession(log([
+      [0, 'user.message', { content: 'Go' }],
+      [100, 'session.usage_record', {
+        usage: { model: 'solver-model', inputTokens: 20_000, maxPromptTokens: 272_000 },
+      }],
+      [200, 'session.usage_record', {
+        usage: { model: 'judge-model', inputTokens: 30_000 },
+      }],
+    ]))
+    assert.equal(modelAt(timeline, 2), 'judge-model')
+    assert.deepEqual(contextAt(timeline, 2), { at: 200, tokens: 30_000, limit: undefined })
+  })
+
   test('draws HydraFusion phases over their reported time instead of folding them as idle', () => {
     const session = parseSession(log([
       [0, 'session.fusion_resolved', { syntheticModel: 'hydrafusion', hint: 'A solver works, then a judge reviews.' }],
       [10, 'user.message', { content: 'Go' }],
       [70_000, 'session.usage_record', { usage: { inputTokens: 14_000, duration: 69_000 } }],
       [130_000, 'assistant.fusion_phase_completed', {
-        role: 'solver', model: 'gpt-6.1-sol', status: 'succeeded', durationMs: 130_000, usage: { requestCount: 8 },
+        role: 'solver', model: 'gpt-6.1-sol', status: 'succeeded', durationMs: 130_000,
+        usage: { requestCount: 8, inputTokens: 146_087 },
       }],
       [140_000, 'assistant.fusion_phase_completed', {
         role: 'judge', model: 'gpt-6-luna', status: 'succeeded', verdict: 'accept', durationMs: 9_000,
+        usage: { inputTokens: 8670 },
       }],
       [140_100, 'tool.execution_start', { toolCallId: 't1', toolName: 'create' }],
       [140_101, 'tool.execution_complete', { toolCallId: 't1', success: true }],
@@ -434,6 +487,9 @@ describe('session replay', () => {
     assert.deepEqual([solver.kind, solver.parent?.kind, solver.start, solver.end, solver.detail], ['agent', 'prompt', 10, 130_000, 'gpt-6.1-sol'])
     assert.deepEqual([judge.start, judge.end], [131_000, 140_000])
     assert.deepEqual(solver.facts, [['Model', 'gpt-6.1-sol'], ['Model calls', '8']])
+    assert.deepEqual(contextAt(session.timeline, session.timeline.length - 1), {
+      at: 70_000, tokens: 14_000, limit: undefined,
+    })
     const said = session.timeline.map(narrate)
     assert.equal(said[0], 'A solver works, then a judge reviews.')
     assert.match(said.find((line) => line.startsWith('Fusion solver'))!, /^Fusion solver on gpt-6\.1-sol finishes after 2m 10s\. .*replays/)
