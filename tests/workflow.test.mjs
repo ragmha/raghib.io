@@ -9,6 +9,8 @@ const workflow = parse(readFileSync(new URL('../.github/workflows/seo.yml', impo
 
 test('the required SEO check runs on PRs, merge queues, and main pushes', () => {
   assert.deepEqual(workflow.on.pull_request.branches, ['main'])
+  assert.equal(workflow.on.pull_request.paths, undefined)
+  assert.equal(workflow.on.pull_request['paths-ignore'], undefined)
   assert.ok(Object.hasOwn(workflow.on, 'merge_group'))
   assert.deepEqual(workflow.on.push.branches, ['main'])
   assert.equal(workflow.jobs.seo.name, 'SEO readiness')
