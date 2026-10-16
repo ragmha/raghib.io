@@ -21,6 +21,9 @@ jobs:
     name: SEO readiness
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: read
     env:
       PUBLIC_CF_BEACON_TOKEN: ${{ github.ref == 'refs/heads/main' && vars.CF_WEB_ANALYTICS_TOKEN || '' }}
     steps:
