@@ -10,9 +10,9 @@ test('decision hero explains the illustrative decision and three routes', () => 
     'SMALL DECISION MODEL',
     'IF / THEN',
     'LARGE MODEL',
-    'p >= 0.90  GENERATE',
+    'p &gt;= 0.90  GENERATE',
     '0.60-0.90  REVIEW',
-    'p < 0.60  STOP',
+    'p &lt; 0.60  STOP',
   ]) {
     assert.ok(decisionHeroSvg.includes(label), `SVG includes ${label}`)
   }
