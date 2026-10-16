@@ -85,7 +85,7 @@ const appJsonLd = JSON.stringify({
           <button id="tools-tab" type="button" role="tab" aria-label="Tools and coverage notes" aria-selected="false" aria-controls="tools-panel" tabindex="-1">Tools</button>
           <button id="data-tab" type="button" role="tab" aria-selected="false" aria-controls="data-panel" tabindex="-1">Your session</button>
         </div>
-        <a class="back-link" href="/experiments/">All experiments</a>
+        <a class="all-link" href="/experiments/">All experiments</a>
       </div>
 
       <section id="overview-panel" class="tab-panel overview-grid" role="tabpanel" aria-labelledby="overview-tab" tabindex="0">
@@ -1098,6 +1098,10 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       padding: 1rem var(--app-gutter) 0;
     }
 
+    :global(body.experiment-surface .header-controls) {
+      width: auto;
+    }
+
     .workspace {
       --app-gutter: clamp(1rem, 3vw, 2.5rem);
       display: grid;
@@ -1162,7 +1166,7 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       border-bottom: 1px solid var(--calc-line);
     }
 
-    .back-link {
+    .all-link {
       flex: 0 0 auto;
       padding-bottom: 0.7rem;
       color: var(--calc-muted);
@@ -1170,8 +1174,12 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       text-underline-offset: 0.2em;
     }
 
-    .back-link:hover {
+    .all-link:hover {
       color: var(--theme-text);
+    }
+
+    .calculator section + section {
+      margin-top: 0;
     }
 
     .intro,
@@ -1919,7 +1927,19 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
         white-space: normal;
       }
 
-      .back-link {
+      .summary > :global(div) {
+        align-content: start;
+      }
+
+      .dashboard-tabs {
+        gap: clamp(0.75rem, 3vw, 1rem);
+      }
+
+      .dashboard-tabs button {
+        font-size: clamp(0.78rem, 3.5vw, 0.85rem);
+      }
+
+      .all-link {
         display: none;
       }
     }
