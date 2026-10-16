@@ -71,9 +71,26 @@ describe('recorded session comparison', () => {
     ])
     assert.deepEqual(e.input, { min: 19000, max: 20600, samples: 2 })
     assert.deepEqual(e.limits, [922000])
+    assert.deepEqual(e.models, ['gpt-test'])
     assert.deepEqual(e.tiers, ['long_context'])
     assert.deepEqual(e.efforts, ['medium'])
     assert.match(comparisonMarkdown([run([[0, 'user.message']], 'a'), { ...run([[0, 'user.message']], 'b'), evidence: e }]), /\| long\\_context \/ medium \|/)
+  })
+
+  test('collects models nested in main and parent-tool-only child usage records', () => {
+    const { evidence } = run([
+      [0, 'session.start', { selectedModel: 'main-model' }],
+      [100, 'user.message', { content: 'Build TodoMVC' }],
+      [200, 'tool.execution_start', { toolCallId: 'task-1', toolName: 'task' }],
+      [300, 'subagent.started', { toolCallId: 'task-1', agentName: 'explore' }, 'child-1'],
+      [400, 'session.usage_record', {
+        usage: { model: 'child-model', inputTokens: 1000 }, parentToolCallId: 'task-1',
+      }],
+      [500, 'session.usage_record', { usage: { model: 'main-usage-model', inputTokens: 2000 } }],
+    ])
+    assert.deepEqual(evidence.models, ['main-model', 'main-usage-model'])
+    assert.deepEqual(evidence.agentModels, ['child-model'])
+    assert.ok(evidence.warnings.some((warning) => warning.includes('not a single-model run')))
   })
 
   test('missing values stay unknown and zero is a real reading', () => {

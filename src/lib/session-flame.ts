@@ -108,6 +108,8 @@ type Data = Record<string, unknown>
 
 const record = (value: unknown): Data =>
   value && typeof value === 'object' && !Array.isArray(value) ? value as Data : {}
+export const isMainAgentEvent = (event: RawEvent) =>
+  !event.agentId && !record(event.data).parentToolCallId && !event.type.startsWith('subagent.')
 const text = (value: unknown) => typeof value === 'string' ? value : ''
 const count = (value: unknown) => typeof value === 'number' && Number.isFinite(value) ? value : undefined
 const figure = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value)
@@ -951,14 +953,21 @@ export function loopSoFar(timeline: TimelineEvent[], index: number) {
   return counts
 }
 
+function agentOf(span: Span) {
+  for (let node: Span | null = span; node; node = node.parent) {
+    if (node.kind === 'agent') return node
+  }
+  return null
+}
+
 /** The model behind the event at index: the last one named by the same agent, or the session's selected model. */
 export function modelAt(timeline: TimelineEvent[], index: number) {
-  const agentId = timeline[index]?.event.agentId
+  const agent = timeline[index] ? agentOf(timeline[index].span) : null
   for (let at = index; at >= 0; at--) {
-    const { event } = timeline[at]
-    if (event.agentId !== agentId) continue
+    const { event, span } = timeline[at]
+    if (agentOf(span) !== agent) continue
     const data = record(event.data)
-    const model = text(data.newModel) || text(data.model) || text(data.selectedModel)
+    const model = text(data.newModel) || text(data.model) || text(data.selectedModel) || text(record(data.usage).model)
     if (model) return model
   }
   return ''
@@ -978,15 +987,21 @@ export interface ContextReading {
 export function contextAt(timeline: TimelineEvent[], index: number): ContextReading | undefined {
   let reading: ContextReading | undefined
   // Shutdown counts tokens its own way, so it would read as a jump after per-call prompt sizes.
-  const perCall = timeline.some(({ event }) => event.type === 'session.usage_record')
+  const perCall = timeline.some(({ event }) => isMainAgentEvent(event) && event.type === 'session.usage_record')
   for (let at = index; at >= 0; at--) {
     const { event } = timeline[at]
-    if (event.agentId || (perCall && event.type === 'session.shutdown')) continue
+    if (!isMainAgentEvent(event) || (perCall && event.type === 'session.shutdown')) continue
     const data = record(event.data)
-    const usage = record(data.usage)
-    const size = count(usage.inputTokens) ?? count(data.postCompactionTokens) ?? count(data.currentTokens)
-    const limit = count(usage.maxPromptTokens) ?? count(data.tokenLimit)
-    if (!reading && size !== undefined) reading = { at: timeline[at].at, tokens: size, limit }
+    const isUsageRecord = event.type === 'session.usage_record'
+    const usage = isUsageRecord ? record(data.usage) : {}
+    const size = isUsageRecord
+      ? count(usage.inputTokens)
+      : count(data.postCompactionTokens) ?? count(data.currentTokens)
+    const limit = isUsageRecord ? count(usage.maxPromptTokens) : count(data.tokenLimit)
+    if (!reading && size !== undefined) {
+      reading = { at: timeline[at].at, tokens: size, limit }
+      if (isUsageRecord) break
+    }
     if (reading && !reading.limit && limit) reading.limit = limit
     if (reading?.limit) break
   }

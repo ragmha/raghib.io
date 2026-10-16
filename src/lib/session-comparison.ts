@@ -1,4 +1,4 @@
-import { formatDuration, formatTokens, type Session, type Span } from './session-flame'
+import { formatDuration, formatTokens, isMainAgentEvent, type Session, type Span } from './session-flame'
 
 export interface TokenRange {
   min: number
@@ -44,7 +44,7 @@ function range(values: number[]): TokenRange | undefined {
 
 /** Per-call input and occasional context snapshots are different measurements; never substitute one for the other. */
 export function runEvidence(session: Session): RunEvidence {
-  const main = session.timeline.filter(({ event }) => !event.agentId && !event.data?.parentToolCallId && !event.type.startsWith('subagent.'))
+  const main = session.timeline.filter(({ event }) => isMainAgentEvent(event))
   const promptEvents = main.filter(({ event }) => event.type === 'user.message')
   const start = promptEvents[0]?.at ?? 0
   const models = new Set<string>()
@@ -59,8 +59,11 @@ export function runEvidence(session: Session): RunEvidence {
   const usageType = main.some(({ event }) => event.type === 'session.usage_record') ? 'session.usage_record' : 'assistant.usage'
   for (const { event, at } of session.timeline) {
     const data = event.data ?? {}
-    const subagent = Boolean(event.agentId || data.parentToolCallId || event.type.startsWith('subagent.'))
-    for (const model of [data.model, data.selectedModel, data.newModel]) {
+    const subagent = !isMainAgentEvent(event)
+    const usage = data.usage && typeof data.usage === 'object' && !Array.isArray(data.usage)
+      ? data.usage as Record<string, unknown>
+      : {}
+    for (const model of [data.model, data.selectedModel, data.newModel, usage.model]) {
       if (typeof model === 'string' && model.trim()) (subagent ? agentModels : models).add(model)
     }
     if (!subagent && event.type === 'session.start') {
