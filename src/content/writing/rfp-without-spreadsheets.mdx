@@ -73,23 +73,16 @@ unchecked, so the buyer knows where to ask next.
 
 ## What the sample doesn't prove
 
-<<<<<<< HEAD
 Because my starting question was about MCP, I added an optional FastMCP server
 that exposes `list_claims` and `get_answer` over local stdio. It serves the
 recorded report, including its date and scope; it can't deploy resources or run
 checks. The README covers setup and teardown.
-=======
-This is deliberately not a complete vendor application. Token checks use a password
-grant, not browser SSO or PKCE. Permission checks exercise a Python function, not a
-real export endpoint. Revocation is observed after disabling, not measured as an
-instantaneous guarantee. The sample proves those narrow behaviors, not production readiness.
->>>>>>> origin/main
 
 This is deliberately not a complete vendor application. Token checks use a
 password grant, not browser SSO or PKCE. Permission checks exercise a Python
 function, not a real export endpoint. Revocation is observed after disabling,
 not measured as an instantaneous guarantee. The sample proves those narrow
-behaviours, not production readiness.
+behaviors, not production readiness.
 
 ## Running it inside the buyer's network
 
