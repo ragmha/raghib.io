@@ -1,11 +1,13 @@
 ---
 import '../../scripts/vendor/anatomy/iso.css'
 import '../styles/anatomy.css'
-import { decisionHeroSvg } from '../lib/decision-hero.mjs'
+// The ~580 KB illustration loads after the title so it doesn't delay LCP; inlining it keeps theme styles.
 ---
 
 <figure class="decision-hero decision-cover iso">
-  <div class="decision-hero-art" set:html={decisionHeroSvg} />
+  <div class="decision-hero-art" data-src="/decision-hero.svg">
+    <svg class="iso-svg decision-hero-svg" viewBox="0 0 1500 740" aria-hidden="true"></svg>
+  </div>
   <figcaption>
     <p class="decision-cover-thesis">
       A small model decides the path.
@@ -21,4 +23,12 @@ import { decisionHeroSvg } from '../lib/decision-hero.mjs'
       and the cost of mistakes.
     </p>
   </figcaption>
+  <script>
+    for (const art of document.querySelectorAll<HTMLElement>('.decision-hero-art[data-src]')) {
+      fetch(art.dataset.src!)
+        .then((response) => (response.ok ? response.text() : Promise.reject()))
+        .then((svg) => { art.innerHTML = svg })
+        .catch(() => {})
+    }
+  </script>
 </figure>
