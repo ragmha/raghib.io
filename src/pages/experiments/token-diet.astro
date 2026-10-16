@@ -1,6 +1,7 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro'
 import data from '../../data/token-diet.json'
+import roundTwoData from '../../data/token-diet-2.json'
 import { decode, encode } from 'gpt-tokenizer/encoding/o200k_base'
 import { correlation, cost, instructions, kinds, median, medianRun, total } from '../../lib/token-diet'
 import type { Call, Kind, Run, Tokens } from '../../lib/token-diet'
@@ -118,6 +119,55 @@ const readings = [
 // Every run: one dot per run on a shared axis.
 const stripMax = Math.ceil(total(largest.totals) / 100_000) * 100_000
 const stripTicks = [0, 1, 2, 3].map((i) => (stripMax / 3) * i)
+
+const roundTwoRuns = roundTwoData.runs as Run[]
+const roundTwoOptions = [
+  { id: 'a', name: 'Baseline', method: 'The CLI as installed.' },
+  { id: 'b', name: 'Principles', method: 'Six rules in the user instructions file.' },
+  { id: 'c', name: 'caveman', method: 'A session-start hook that switches the agent to terse replies, plus its skills.' },
+  { id: 'd', name: 'rtk', method: 'An instruction and hook that route commands through rtk to filter their output.' },
+  { id: 'e', name: 'All three', method: 'Principles, caveman, and rtk together.' },
+  { id: 'f', name: 'Token Optimizer', method: 'The Copilot adapter installed into an isolated home.' },
+]
+const roundTwoSetups = roundTwoOptions
+  .filter((setup) => roundTwoRuns.some((run) => run.variant === setup.id))
+  .map((setup) => {
+    const set = roundTwoRuns.filter((run) => run.variant === setup.id)
+    const sizes = set.map((run) => total(run.totals))
+    return {
+      ...setup,
+      set,
+      shown: medianRun(set),
+      succeeded: set.filter((run) => run.success).length,
+      tokens: median(sizes),
+      low: Math.min(...sizes),
+      high: Math.max(...sizes),
+      calls: median(set.map((run) => run.calls.length)),
+      aiu: median(set.map((run) => run.nanoAiu)),
+    }
+  })
+const roundTwoBaseline = roundTwoSetups[0]
+const roundTwoBestTokens = roundTwoSetups.reduce((best, setup) => setup.tokens < best.tokens ? setup : best)
+const roundTwoBestAiu = roundTwoSetups.reduce((best, setup) => setup.aiu < best.aiu ? setup : best)
+const roundTwoDelta = (setup: (typeof roundTwoSetups)[number]) => {
+  const delta = setup.tokens / roundTwoBaseline.tokens - 1
+  return delta === 0 ? '0%' : `${delta > 0 ? '+' : '−'}${percent.format(Math.abs(delta))}`
+}
+const roundTwoFailed = roundTwoRuns.filter((run) => !run.success)
+const roundTwoSpread = roundTwoSetups.map((setup) => setup.high - setup.low)
+const roundTwoCallAxis = Math.ceil(
+  Math.max(...roundTwoSetups.flatMap((setup) => setup.shown.calls.map(total))) / 10_000,
+) * 10_000
+const roundTwoStripMax = Math.ceil(
+  Math.max(...roundTwoRuns.map((run) => total(run.totals))) / 100_000,
+) * 100_000
+const roundTwoStripTicks = [0, 1, 2, 3].map((i) => (roundTwoStripMax / 3) * i)
+const roundTwoRates = roundTwoData.rates as Tokens
+const roundTwoRateList = kinds
+  .map((kind) => `${names[kind].toLowerCase()} ${perThousand.format(roundTwoRates[kind] / 1e6)}`)
+  .join(', ')
+const roundTwoHasOptimizer = roundTwoSetups.some((setup) => setup.id === 'f')
+const roundTwoVersions = roundTwoData.versions as Record<string, string>
 
 const description =
   'One bug-fix task, 30 coding-agent runs: as-is, with simple principles, caveman, rtk, all three, and Token Optimizer. See where the tokens and the cost actually went.'
@@ -538,6 +588,168 @@ const description =
       <p>
         <a href="https://github.com/ragmha/raghib.io/tree/main/scripts/token-diet">The kit</a> rebuilds the
         repository, re-runs every setup and regenerates this page’s data.
+      </p>
+    </section>
+
+    <input type="radio" name="section" id="tab-round-two" />
+    <label for="tab-round-two">Round 2</label>
+    <section aria-labelledby="round-two-title">
+      <h2 id="round-two-title">Round 2: Regression hunt</h2>
+      <p>
+        Round 1 gave the tools little to compress. This second task buries the same three invoice bugs in a longer
+        history, produces verbose test output, and asks for a written incident note. It is designed to give command
+        filtering and terse replies more opportunity to help; compare it separately from Round 1.
+      </p>
+
+      <h3>Round-two waterfall</h3>
+      <figure class="race round-two-race">
+        <div class="panels">
+          {roundTwoSetups.map((setup) => {
+            const run = setup.shown
+            return (
+              <div class="panel">
+                <p class="pill">
+                  {setup.name}
+                  <span aria-hidden="true">{number.format(total(run.totals))} tokens</span>
+                  <span class="visually-hidden">
+                    , median-token run {run.id}: {number.format(total(run.totals))} tokens, {run.calls.length} model calls,
+                    {aiu(run.nanoAiu)} AIU
+                  </span>
+                </p>
+                <ol class="waterfall" style={`--divisions:${roundTwoCallAxis / 10_000};--rows:${run.calls.length}`}>
+                  {run.calls.map((call, i) => (
+                    <li>
+                      <span aria-hidden="true">{i + 1}</span>
+                      <span class="what" title={what(call)}>{what(call)}</span>
+                      <span class="track" aria-hidden="true">
+                        <span class="bar" style={`--w:${pct(total(call), roundTwoCallAxis)}`}>
+                          {kinds.map((kind) => <span class={kind} style={`flex-grow:${call[kind]}`} />)}
+                        </span>
+                      </span>
+                      <span>{thousands(total(call))}<span class="visually-hidden"> tokens</span></span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )
+          })}
+        </div>
+        <figcaption>
+          One row per call in each setup’s median-token run; gridlines every 10k tokens. Grey is the conversation
+          re-read on every call.
+        </figcaption>
+      </figure>
+
+      <h3>Every round-two run</h3>
+      <figure class="strip">
+        <div class="strip-rows" aria-hidden="true">
+          {roundTwoSetups.map((setup) => (
+            <div class="strip-row">
+              <span>{setup.name}</span>
+              <div class="strip-track">
+                <span class="median" style={`--x:${pct(setup.tokens, roundTwoStripMax)}`} />
+                {setup.set.map((run) => (
+                  <span class:list={['dot', { failed: !run.success }]} style={`--x:${pct(total(run.totals), roundTwoStripMax)}`} />
+                ))}
+              </div>
+            </div>
+          ))}
+          <div class="strip-row">
+            <span />
+            <div class="axis">
+              {roundTwoStripTicks.map((tick) => (
+                <span style={`--x:${pct(tick, roundTwoStripMax)}`}>{tick ? thousands(tick) : '0'}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+        <figcaption>
+          Total tokens per run. Each dot is a run; hollow dots are failed runs; the line marks the median.
+        </figcaption>
+      </figure>
+
+      <div class="table-wrap">
+        <table>
+          <caption>
+            Round 2 medians over {roundTwoSetups[0].set.length} runs per setup. A first-call prompt includes the
+            system prompt, {number.format(roundTwoData.toolDefinitionsTokens)} tool-definition tokens, instructions,
+            skills, and task.
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Setup</th>
+              <th scope="col">Succeeded</th>
+              <th scope="col">Median tokens</th>
+              <th scope="col">Range</th>
+              <th scope="col">Calls</th>
+              <th scope="col">AIU</th>
+              <th scope="col">vs baseline</th>
+            </tr>
+          </thead>
+          <tbody>
+            {roundTwoSetups.map((setup) => (
+              <tr>
+                <th scope="row">{setup.name}</th>
+                <td>{setup.succeeded}/{setup.set.length}</td>
+                <td>{number.format(setup.tokens)}</td>
+                <td>{thousands(setup.low)}–{thousands(setup.high)}</td>
+                <td>{setup.calls}</td>
+                <td>{aiu(setup.aiu)}</td>
+                <td>{setup === roundTwoBaseline ? '—' : roundTwoDelta(setup)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <h3>What Round 2 found</h3>
+      <ul>
+        <li>
+          <strong>Tokens:</strong> {roundTwoBestTokens.name} had the lowest median at
+          {' '}{number.format(roundTwoBestTokens.tokens)} tokens ({roundTwoDelta(roundTwoBestTokens)} versus the
+          {' '}baseline’s {number.format(roundTwoBaseline.tokens)}).
+        </li>
+        <li>
+          <strong>Usage:</strong> {roundTwoBestAiu.name} had the lowest median charge at {aiu(roundTwoBestAiu.aiu)}
+          {' '}AIU, against {aiu(roundTwoBaseline.aiu)} for baseline. Token count and usage charge are different measures.
+        </li>
+        <li>
+          <strong>Outcomes:</strong> {roundTwoRuns.length - roundTwoFailed.length} of {roundTwoRuns.length} runs succeeded.
+          {roundTwoFailed.length
+            ? ` Failed runs: ${roundTwoFailed.map((run) => `${run.id} (${nameOf(run)})`).join(', ')}.`
+            : ' Every run passed the verifier.'}
+        </li>
+        <li>
+          <strong>Variation:</strong> within-setup ranges spanned
+          {' '}{number.format(Math.min(...roundTwoSpread))} to {number.format(Math.max(...roundTwoSpread))} tokens.
+          Five runs on one task are exploratory, not evidence of general savings.
+        </li>
+      </ul>
+
+      <h3>Round-two task and method</h3>
+      <p>
+        The fixture starts from the known-good 0.9.0 release, then adds 38 commits; three later commits each
+        reintroduce one of the bugs. The full test suite has {number.format(roundTwoData.fixture.tests)} tests,
+        including {number.format(roundTwoData.fixture.failing)} failures before the fix and
+        {' '}{number.format(roundTwoData.fixture.outputLines)} lines of pytest output.
+      </p>
+      <blockquote><p>{roundTwoData.prompt}</p></blockquote>
+      <p>
+        Copilot CLI {roundTwoVersions.copilot}, {roundTwoData.model} at {roundTwoData.effort} reasoning effort;
+        Python {roundTwoVersions.python}, pytest {roundTwoVersions.pytest}. Each run used a fresh repository copy
+        and an isolated setup home. The same five-run median, token, AIU, range, and success measures are used here,
+        but this dataset has its own baseline and is not pooled with Round 1.
+      </p>
+      <ul>
+        {roundTwoSetups.map((setup) => (
+          <li><strong>{setup.name}:</strong> {setup.method}</li>
+        ))}
+      </ul>
+      <p>
+        Round-two token rates per 1k: {roundTwoRateList}. The recorded token counts and charges are reported separately.
+        {roundTwoHasOptimizer
+          ? ` Token Optimizer ${roundTwoVersions.tokenOptimizer} is included in this round.`
+          : ' Token Optimizer was added after these runs and was not measured in Round 2.'}
       </p>
     </section>
     </div>
