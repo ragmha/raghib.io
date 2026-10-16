@@ -285,15 +285,6 @@ main {
   color: var(--ink);
 }
 
-.prose .author-disclosure {
-  padding: 1rem 1.25rem;
-  border: 1px solid var(--rule);
-  background: color-mix(in srgb, var(--ink) 5%, var(--paper));
-  color: var(--ink-muted);
-  font-size: 0.85rem;
-  line-height: 1.65;
-}
-
 .doc-head {
   text-align: center;
   margin: 0 0 var(--prose-block-space, 2rem);

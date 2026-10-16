@@ -89,7 +89,7 @@ const appJsonLd = JSON.stringify({
       </div>
 
       <section id="overview-panel" class="tab-panel overview-grid" role="tabpanel" aria-labelledby="overview-tab" tabindex="0">
-        <section id="timeline-panel" class="panel timeline-panel" aria-labelledby="timeline-heading" hidden>
+        <section id="timeline-panel" class="panel timeline-panel" aria-labelledby="timeline-heading" hidden={sample.calls.filter((call) => call.input !== null || call.output !== null).length < 2}>
           <div class="chart-head">
             <h2 id="timeline-heading">Context, call by call</h2>
             <fieldset class="toggle">
