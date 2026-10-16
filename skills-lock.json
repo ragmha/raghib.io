@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "engineering-blog-post": {
+      "source": "samber/developer-relations-skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering-blog-post/SKILL.md",
+      "computedHash": "3edc505c216b4ec560d904f2e820f006e78e283066f92bbbcccd3db0105d559f"
+    },
+    "seo-audit": {
+      "source": "coreyhaines31/marketingskills",
+      "sourceType": "github",
+      "skillPath": "skills/seo-audit/SKILL.md",
+      "computedHash": "01f9f8a3feb3ea69c6c212d61189c610f96ef2cc363adc27fd314d78254bf6ae"
+    }
+  }
+}
