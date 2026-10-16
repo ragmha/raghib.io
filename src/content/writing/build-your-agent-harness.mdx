@@ -19,7 +19,7 @@ than a black box to accept wholesale.
 
 In this tutorial, you will build a harness in TypeScript with
 [Bun](https://bun.sh). It uses a deterministic scripted model, so there is no
-API key, network call or randomness. The behaviour is repeatable and testable.
+API key, network call or randomness. The behavior is repeatable and testable.
 By the end, you will have:
 
 - a provider-neutral model contract and a scripted model;
@@ -247,7 +247,7 @@ export const lookupCodeTool: Tool<{ code: string }, { found: boolean; value: str
 };
 ```
 
-The schema does double duty. It is converted to JSON Schema to tell the model what the tool accepts, and it parses the model's reply before anything runs. One source of truth means the advertised shape and the enforced shape cannot drift apart. The `transform` also normalises input, so `alpha` and `ALPHA` find the same entry.
+The schema does double duty. It is converted to JSON Schema to tell the model what the tool accepts, and it parses the model's reply before anything runs. One source of truth means the advertised shape and the enforced shape cannot drift apart. The `transform` also normalizes input, so `alpha` and `ALPHA` find the same entry.
 
 ### The registry is the allowlist
 
@@ -457,7 +457,7 @@ A few things to notice:
 - **The run ends when the model stops asking for tools.** No tool calls means the content is the final answer.
 - **`maxSteps` is checked before each model request**, so a confused model cannot loop forever and quietly spend your budget.
 - **`AbortSignal.any`** merges the caller's signal and the deadline. The model and every tool get the same signal.
-- **Model and tool calls share one `try`**, so every failure emits `run.failed` and is normalised to `ABORTED` when cancellation caused it.
+- **Model and tool calls share one `try`**, so every failure emits `run.failed` and is normalized to `ABORTED` when cancellation caused it.
 - **The trace is not the context.** Trace events describe execution for you. They are never sent to the model.
 - **`options.context`** is used in Step 3. Without it, the model sees the full history.
 
@@ -662,7 +662,7 @@ function toBlocks(history: readonly Message[]): Message[][] {
 
 One rule makes it correct: an assistant tool call and its tool results form an indivisible block. The projection may exceed the budget rather than send a tool result whose call was cut off, which most providers reject. The budget is a message count, not a tokenizer, to keep the idea visible.
 
-### Evaluate behaviour
+### Evaluate behavior
 
 `evals/evals.json` pairs a prompt with a scripted model and an expected answer:
 
@@ -999,7 +999,7 @@ Four objects, four jobs:
 1. `RunEvent` records what happened. The event list is the source of truth.
 2. `RunState` is the current control position.
 3. `RunSnapshot` is state plus message history.
-4. `RunCheckpoint` caches a snapshot up to one version. It is only an optimisation.
+4. `RunCheckpoint` caches a snapshot up to one version. It is only an optimization.
 
 ### The reducer
 
@@ -1225,7 +1225,7 @@ export function envelope(
 }
 ```
 
-It survives reconstructing the harness inside one process, which is enough to test restart behaviour. In production, the same interface would sit on a database.
+It survives reconstructing the harness inside one process, which is enough to test restart behavior. In production, the same interface would sit on a database.
 
 ## Step 5: Add policy gates and idempotent effects
 
@@ -1268,7 +1268,7 @@ The fallback is `deny`: a tool nobody configured does not run. `Object.hasOwn` m
 
 ### Close the effect-before-commit window
 
-A write tool can succeed, then the process can die before `tool.completed` is recorded. On retry, the tool would run again. The fix is an idempotency key derived from the run, tool, call ID and canonicalised arguments, which a destination uses to return the original result instead of repeating the effect. The sample destination honours it atomically:
+A write tool can succeed, then the process can die before `tool.completed` is recorded. On retry, the tool would run again. The fix is an idempotency key derived from the run, tool, call ID and canonicalized arguments, which a destination uses to return the original result instead of repeating the effect. The sample destination honours it atomically:
 
 ```ts title="src/durable/effect-sink.ts"
 export interface EffectRecord<T> {
@@ -1714,7 +1714,7 @@ Keep its reach narrow. Give it one workspace directory, no shell tool, and three
 
 ### Add workspace-scoped file tools
 
-These tools use Bun's built-in file APIs and Node's path helpers. Every requested path is resolved and canonicalised before use, so `../` paths and symlinks that point outside the workspace are rejected. `list_files` shows only the immediate directory and skips symlinks; it does not recursively walk the workspace.
+These tools use Bun's built-in file APIs and Node's path helpers. Every requested path is resolved and canonicalized before use, so `../` paths and symlinks that point outside the workspace are rejected. `list_files` shows only the immediate directory and skips symlinks; it does not recursively walk the workspace.
 
 ```ts title="src/tools/filesystem.ts"
 import { readdir, readFile, realpath, writeFile } from "node:fs/promises";
@@ -1866,7 +1866,7 @@ You now have a complete agent harness in about a dozen small files with two depe
 - only runs allowlisted tools, with validated arguments;
 - cannot loop forever and can be cancelled at any point;
 - traces every step without leaking that trace into the prompt;
-- projects context deliberately and proves behaviour with evaluations;
+- projects context deliberately and proves behavior with evaluations;
 - recovers after a crash without repeating paid or dangerous work;
 - asks a person before acting, and resumes safely afterwards;
 - can be extended into a coding agent with workspace-scoped file tools.
@@ -1877,7 +1877,7 @@ None of this depends on a particular model, cloud or industry. Whether your agen
 
 - **Use a real model.** Write a `ModelAdapter` around any provider's chat API. Map its tool-call format to `ToolCall`, pass the `AbortSignal` to its HTTP client, and nothing else in the harness changes.
 - **Use a real store.** Implement `RunStore` on a database with a unique `(runId, version)` constraint to get the same optimistic concurrency.
-- **Expose tools over MCP.** The [Model Context Protocol tools specification](https://modelcontextprotocol.io/specification/latest/server/tools) standardises discovery and invocation between processes. The registry here is the in-process version of the same idea.
+- **Expose tools over MCP.** The [Model Context Protocol tools specification](https://modelcontextprotocol.io/specification/latest/server/tools) standardizes discovery and invocation between processes. The registry here is the in-process version of the same idea.
 
 What this deliberately leaves out is just as instructive: plugin loading, dependency injection, streaming and multi-agent orchestration. Add them when a real requirement asks for them, and you will know exactly which seam they plug into.
 

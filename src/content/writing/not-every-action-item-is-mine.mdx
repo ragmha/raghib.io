@@ -1,7 +1,7 @@
 ---
 title: "Not Every Action Item Is Mine"
 seoTitle: "Work IQ to To-Do List: LLM vs Decision Model"
-description: "Build a to-do list with Work IQ and the GitHub Copilot SDK, then compare LLM prioritisation with Microsoft-Decision-1 using the same evidence and rubric."
+description: "Build a to-do list with Work IQ and the GitHub Copilot SDK, then compare LLM prioritization with Microsoft-Decision-1 using the same evidence and rubric."
 date: "2026-10-12"
 tags: ["ai", "copilot", "agents", "productivity"]
 published: true
@@ -45,7 +45,7 @@ provides Microsoft 365 context through a CLI and a Model Context Protocol
 (MCP) server. A **[GitHub Copilot SDK](https://github.com/github/copilot-sdk)**
 session can query it and turn the response into structured action items.
 
-Work IQ's `ask` already does the summarising, because it is Microsoft 365
+Work IQ's `ask` already does the summarizing, because it is Microsoft 365
 Copilot answering over your meetings, chats and mail. The SDK only turns that
 answer into structured items. A summary says what needs doing. It doesn't say
 whose it is or how urgent.
@@ -58,8 +58,8 @@ an owner and an urgency level. Or send the same evidence to
 which answers bounded questions with typed decisions and probabilities rather
 than prose.
 
-The useful distinction isn't "LLMs can't prioritise." They can. It is whether
-a specialised decision interface gives me a more useful way to handle
+The useful distinction isn't "LLMs can't prioritize." They can. It is whether
+a specialized decision interface gives me a more useful way to handle
 uncertainty.
 
 > **This is a runnable tutorial, not a benchmark report.** The six tasks below
@@ -258,7 +258,7 @@ another run.
 Work IQ's [current prerequisites](https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/work-iq/cli)
 include a Copilot Studio usage-based billing plan, a user assigned to that plan,
 and administrative consent in the Microsoft Entra tenant.
-Read its licence and accept it yourself if appropriate:
+Read its license and accept it yourself if appropriate:
 
 ```bash
 npx -y @microsoft/workiq@1.0.1 accept-eula
@@ -321,14 +321,14 @@ architecture alone: the SDK and Decision API still have different runtimes and
 output contracts. If you measure elapsed time, report that distinction too.
 
 If the ordinary LLM meets your needs, stop there. Decision-1 earns its extra
-network call only if its probabilities and routing behaviour help on your work.
+network call only if its probabilities and routing behavior help on your work.
 Microsoft's [launch benchmarks](https://commandline.microsoft.com/microsoft-decision-1-model-foundry/)
 are a reason to investigate, not results from this to-do list.
 
 ## Where I'd keep a human in the loop
 
 **Data boundaries come first.** Work IQ's access controls do not automatically
-extend to a separate inference provider. Confirm organisational policy before
+extend to a separate inference provider. Confirm organizational policy before
 sending work data to either comparison service. OpenRouter introduces a
 third-party routing service; Foundry still needs an approved deployment and
 data-handling configuration. Local snapshots, reports and SDK session history
