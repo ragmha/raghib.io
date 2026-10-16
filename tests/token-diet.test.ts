@@ -40,9 +40,14 @@ describe('token diet math', () => {
 })
 
 describe('token diet data', () => {
-  test('has five runs of each setup', () => {
-    assert.equal(data.runs.length, 30)
-    for (const variant of 'abcdef') assert.equal(data.runs.filter((run) => run.variant === variant).length, 5)
+  test('has five runs for every measured setup', () => {
+    const variants = new Set(data.runs.map((run) => run.variant))
+    assert.ok(['a', 'b', 'c', 'd', 'e'].every((variant) => variants.has(variant)))
+    assert.ok([...variants].every((variant) => 'abcdef'.includes(variant)))
+    assert.equal(data.runs.length, variants.size * 5)
+    for (const variant of variants) {
+      assert.equal(data.runs.filter((run) => run.variant === variant).length, 5)
+    }
   })
 
   test('round two has five runs per recorded setup with reconciled usage', () => {
@@ -78,10 +83,11 @@ describe('token diet data', () => {
   })
 
   test('still supports what the page says about it', () => {
-    const setups = 'abcdef'.split('').map((variant) => {
+    const setups = [...new Set(data.runs.map((run) => run.variant))].map((variant) => {
       const set = data.runs.filter((run) => run.variant === variant)
       const sizes = set.map((run) => total(run.totals))
       return {
+        variant,
         median: median(sizes),
         spread: Math.max(...sizes) - Math.min(...sizes),
         aiu: median(set.map((run) => run.nanoAiu)),
@@ -90,11 +96,15 @@ describe('token diet data', () => {
         saved: median(set.map((run) => run.rtk?.saved ?? 0)),
       }
     })
-    const [baseline, principles, , rtk, , optimizer] = setups
+    const setup = (variant: string) => setups.find((item) => item.variant === variant)!
+    const baseline = setup('a')
+    const principles = setup('b')
+    const rtk = setup('d')
+    const optimizer = setups.find((item) => item.variant === 'f')
     const runs = data.runs
     assert.ok(setups.every((setup) => Number.isFinite(setup.median)))
     assert.ok(correlation(runs.map((run) => run.calls.length), runs.map((run) => total(run.totals))) > 0.9, 'calls drive tokens')
-    assert.ok(Number.isFinite(optimizer.median), 'Token Optimizer data is included')
+    assert.ok(!optimizer || Number.isFinite(optimizer.median), 'Token Optimizer data is included when measured')
     assert.ok(runs.every((run) => run.testRuns > 0 && run.testRunsUnpiped === 0), 'every test run was piped')
     assert.ok(principles.calls > baseline.calls, 'principles did not cut calls')
     assert.ok(rtk.biggest < baseline.biggest, 'largest tool result smaller with rtk')

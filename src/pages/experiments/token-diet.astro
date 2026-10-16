@@ -23,37 +23,51 @@ const names: Record<Kind, string> = {
   output: 'Output',
 }
 
-const setups = [
+const setupOptions = [
   { id: 'a', name: 'Baseline' },
   { id: 'b', name: 'Principles' },
   { id: 'c', name: 'caveman' },
   { id: 'd', name: 'rtk' },
   { id: 'e', name: 'All three' },
   { id: 'f', name: 'Token Optimizer' },
-].map((setup) => {
-  const set = runs.filter((run) => run.variant === setup.id)
-  const sizes = set.map((run) => total(run.totals))
-  const charges = set.map((run) => run.nanoAiu)
-  return {
-    ...setup,
-    set,
-    shown: medianRun(set),
-    succeeded: set.filter((run) => run.success).length,
-    tokens: median(sizes),
-    low: Math.min(...sizes),
-    high: Math.max(...sizes),
-    calls: median(set.map((run) => run.calls.length)),
-    aiu: median(charges),
-    aiuLow: Math.min(...charges),
-    aiuHigh: Math.max(...charges),
-    prompt: median(set.map((run) => total(run.calls[0]) - run.calls[0].output)),
-    firstAiu: median(set.map((run) => cost(run.calls[0], rates))),
-    prose: median(set.map((run) => run.proseChars)),
-    proseShare: median(set.map((run) => run.proseChars / (run.proseChars + run.argChars))),
-    biggestResult: Math.max(...set.flatMap((run) => run.calls.flatMap((call) => call.tools.map((tool) => tool.outTokens)))),
-  }
-})
-const [baseline, principles, caveman, rtk, all, optimizer] = setups
+]
+const setups = setupOptions
+  .filter((setup) => runs.some((run) => run.variant === setup.id))
+  .map((setup) => {
+    const set = runs.filter((run) => run.variant === setup.id)
+    const sizes = set.map((run) => total(run.totals))
+    const charges = set.map((run) => run.nanoAiu)
+    return {
+      ...setup,
+      set,
+      shown: medianRun(set),
+      succeeded: set.filter((run) => run.success).length,
+      tokens: median(sizes),
+      low: Math.min(...sizes),
+      high: Math.max(...sizes),
+      calls: median(set.map((run) => run.calls.length)),
+      aiu: median(charges),
+      aiuLow: Math.min(...charges),
+      aiuHigh: Math.max(...charges),
+      prompt: median(set.map((run) => total(run.calls[0]) - run.calls[0].output)),
+      firstAiu: median(set.map((run) => cost(run.calls[0], rates))),
+      prose: median(set.map((run) => run.proseChars)),
+      proseShare: median(set.map((run) => run.proseChars / (run.proseChars + run.argChars))),
+      biggestResult: Math.max(...set.flatMap((run) => run.calls.flatMap((call) => call.tools.map((tool) => tool.outTokens)))),
+    }
+  })
+const setup = (id: string) => {
+  const found = setups.find((item) => item.id === id)
+  if (!found) throw new Error(`token-diet.json is missing required setup "${id}"`)
+  return found
+}
+const baseline = setup('a')
+const principles = setup('b')
+const caveman = setup('c')
+const rtk = setup('d')
+const all = setup('e')
+const optimizer = setups.find((item) => item.id === 'f')
+const versions = data.versions as Record<string, string>
 const after = setups.slice(1)
 const versus = (setup: (typeof setups)[number]) => setup.tokens / baseline.tokens - 1
 const [closest, furthest] = [after.reduce((a, b) => (versus(a) < versus(b) ? a : b)), after.reduce((a, b) => (versus(a) > versus(b) ? a : b))]
@@ -178,7 +192,9 @@ const description =
   <div class="diet">
     <dl class="lede">
       <dt>Claim</dt>
-      <dd>Do simple principles, caveman, rtk, or Token Optimizer make a coding agent use fewer tokens?</dd>
+      <dd>
+        Do simple principles, caveman, rtk{optimizer ? ', or Token Optimizer' : ''} make a coding agent use fewer tokens?
+      </dd>
       <dt>Result</dt>
       <dd>
         <strong>One task, five runs per setup.</strong> Median token use ranged from {change(closest)}
@@ -315,7 +331,7 @@ const description =
           Split with OpenAI’s o200k_base, an illustration: Claude’s tokenizer isn’t public. Measured, the principles
           added a median {number.format(principles.prompt - baseline.prompt)} first-call tokens (the file plus the CLI’s
           wrapper). The runs didn’t record the system prompt, {number.format(data.toolDefinitionsTokens)} tokens of tool
-          definitions, the skill list or what caveman, rtk and Token Optimizer install.
+          definitions, the skill list, or the setup hooks and tools.
         </p>
       </div>
     </section>
@@ -465,16 +481,20 @@ const description =
         All three together added {number.format(all.prompt - baseline.prompt)} tokens to the prompt,
         made the first call cost {aiu(all.firstAiu)} AIU and had median total cost {aiu(all.aiu)} AIU.
         </p>
-        <input type="radio" name="finding" id="finding-9" />
-        <label for="finding-9">Token Optimizer on this task</label>
-        <p>
-        Token Optimizer {data.versions.tokenOptimizer} installed session-start continuity restore,
-        capability-gated bash compression, post-tool nudges and stop-time rollup in an isolated Copilot home.
-        Its median used {number.format(optimizer.tokens)} tokens ({change(optimizer)} versus baseline) and
-        {aiu(optimizer.aiu)} AIU, with {optimizer.succeeded} of {optimizer.set.length} runs succeeding.
-        The adapter’s hooks added a median {number.format(median(optimizer.set.map((run) => run.hookChars)))}
-        characters of context across a run. These results cover this one task and do not establish broader savings.
-        </p>
+        {optimizer && (
+          <>
+            <input type="radio" name="finding" id="finding-9" />
+            <label for="finding-9">Token Optimizer on this task</label>
+            <p>
+            Token Optimizer {versions.tokenOptimizer} installed session-start continuity restore,
+            capability-gated bash compression, post-tool nudges and stop-time rollup in an isolated Copilot home.
+            Its median used {number.format(optimizer.tokens)} tokens ({change(optimizer)} versus baseline) and
+            {aiu(optimizer.aiu)} AIU, with {optimizer.succeeded} of {optimizer.set.length} runs succeeding.
+            The adapter’s hooks added a median {number.format(median(optimizer.set.map((run) => run.hookChars)))}
+            characters of context across a run. These results cover this one task and do not establish broader savings.
+            </p>
+          </>
+        )}
       </div>
     </section>
 
@@ -547,21 +567,23 @@ const description =
                 commands through rtk and a hook that rewrites them, so rtk filters their output.
               </li>
               <li><strong>All three:</strong> everything above in one setup.</li>
-              <li>
-                <strong>Token Optimizer</strong> (<a href="https://github.com/alexgreensh/token-optimizer">source</a>,
-                {' '}<a href="https://github.com/alexgreensh/token-optimizer/blob/v5.13.48/LICENSE">noncommercial license</a>,
-                {' '}{data.versions.tokenOptimizer}): installed into an isolated Copilot home. Its Copilot adapter
-                adds session-start continuity restore, capability-gated bash compression, post-tool tally/nudges,
-                and stop-time rollup.
-              </li>
+              {optimizer && (
+                <li>
+                  <strong>Token Optimizer</strong> (<a href="https://github.com/alexgreensh/token-optimizer">source</a>,
+                  {' '}<a href="https://github.com/alexgreensh/token-optimizer/blob/v5.13.48/LICENSE">noncommercial license</a>,
+                  {' '}{versions.tokenOptimizer}): installed into an isolated Copilot home. Its Copilot adapter
+                  adds session-start continuity restore, capability-gated bash compression, post-tool tally/nudges,
+                  and stop-time rollup.
+                </li>
+              )}
             </ul>
         </div>
         <input type="radio" name="method" id="method-isolation" />
         <label for="method-isolation">Isolation</label>
         <div>
             Every run got a fresh copy of the repository and a fresh home directory holding only its setup, with no
-            other environment from my machine. Five runs per setup, each capped at 100 AIU. The original setups were
-            rerun on the same Copilot CLI version as Token Optimizer.
+            other environment from my machine. Five runs per setup, each capped at 100 AIU. All setups used the same
+            Copilot CLI version.
         </div>
         <input type="radio" name="method" id="method-success" />
         <label for="method-success">Success</label>
@@ -944,7 +966,8 @@ const description =
   .race:has(#after-b:not(:checked)) [data-lane='b'],
   .race:has(#after-c:not(:checked)) [data-lane='c'],
   .race:has(#after-d:not(:checked)) [data-lane='d'],
-  .race:has(#after-e:not(:checked)) [data-lane='e'] {
+  .race:has(#after-e:not(:checked)) [data-lane='e'],
+  .race:has(#after-f:not(:checked)) [data-lane='f'] {
     display: none;
   }
 
