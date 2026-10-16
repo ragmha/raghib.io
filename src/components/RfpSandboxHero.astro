@@ -1,0 +1,39 @@
+---
+import '../../scripts/vendor/anatomy/iso.css'
+import '../styles/anatomy.css'
+import { rfpSandboxHeroSvg } from '../lib/rfp-sandbox-hero.mjs'
+---
+
+<figure class="decision-hero iso rfp-sandbox-hero">
+  <div class="rfp-sandbox-hero-art" set:html={rfpSandboxHeroSvg} />
+  <figcaption>
+    Illustrative flow; MFA and audit observations are synthetic. Geometry built
+    with <a href="https://github.com/wheresryan22/anatomy">Anatomy</a>, an
+    MIT-licensed isometric illustration toolkit.
+  </figcaption>
+</figure>
+
+<style is:global>
+  .rfp-sandbox-hero.decision-hero {
+    width: 100vw;
+    max-width: none;
+    margin: 0 0 3rem;
+    padding: clamp(1.25rem, 3vw, 2.5rem) clamp(1rem, 4vw, 4rem) 1.25rem;
+  }
+
+  .rfp-sandbox-hero-art {
+    max-width: 110rem;
+    margin-inline: auto;
+  }
+
+  .rfp-sandbox-hero-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .rfp-sandbox-label[data-tone='green'] text { fill: var(--anatomy-green); }
+  .rfp-sandbox-label[data-tone='red'] text { fill: var(--anatomy-red); }
+  .rfp-sandbox-label[data-tone='blue'] text { fill: var(--anatomy-blue); }
+  .rfp-sandbox-label[data-tone='mid'] text { fill: var(--anatomy-mid); }
+</style>

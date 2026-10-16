@@ -6,11 +6,8 @@ import { activeSection, railPosition } from '../src/lib/reading-progress.mjs'
 
 const source = readFileSync(new URL('../src/scripts/contents.js', import.meta.url), 'utf8')
   .replace(/^import .* from .*\r?\n/, '')
-const disclosureSource = readFileSync(
-  new URL('../src/scripts/contents-disclosure.js', import.meta.url), 'utf8',
-)
 
-async function page({ hidden = false, missing = false, interacting = false, disclosure = true, tracking = true } = {}) {
+async function page({ hidden = false, missing = false } = {}) {
   const events = new Map()
   const tasks = []
   const errors = []
@@ -20,26 +17,7 @@ async function page({ hidden = false, missing = false, interacting = false, disc
   const marker = { style: {} }
   let resized
   let context
-  const sidebarEvents = new Map()
-  const toggleEvents = new Map()
-  const toggle = {
-    hidden: true,
-    attributes: {},
-    focused: false,
-    setAttribute(key, value) { this.attributes[key] = value },
-    addEventListener: (event, handler) => toggleEvents.set(event, handler),
-    focus() { this.focused = true },
-  }
-  const sidebar = {
-    dataset: {},
-    scrollTop: 0,
-    clientHeight: 250,
-    querySelector: () => toggle,
-    addEventListener: (event, handler) => sidebarEvents.set(event, handler),
-    contains: (target) => target === toggle,
-    getBoundingClientRect: () => ({ top: 96, bottom: 346 }),
-  }
-  const navTop = () => Math.max(96, 100 - context.scrollY) - sidebar.scrollTop
+  const navTop = () => Math.max(96, 100 - context.scrollY)
   const links = positions.map((_, index) => ({
     dataset: { partLink: index === 0 ? 'post-title' : `section-${index}` },
     attributes: {},
@@ -58,8 +36,6 @@ async function page({ hidden = false, missing = false, interacting = false, disc
     offsetHeight: 320,
     querySelector: () => marker,
     querySelectorAll: () => links,
-    closest: () => sidebar,
-    matches: () => interacting,
     getBoundingClientRect: () => ({ top: navTop() }),
   }
   const article = { getBoundingClientRect: () => ({ bottom: 2200 - context.scrollY }) }
@@ -71,7 +47,6 @@ async function page({ hidden = false, missing = false, interacting = false, disc
     innerHeight: 500,
     document: {
       hidden,
-      currentScript: { closest: () => sidebar },
       documentElement: {},
       fonts: { ready: Promise.resolve() },
       querySelector: (selector) => ({
@@ -94,8 +69,7 @@ async function page({ hidden = false, missing = false, interacting = false, disc
     },
     console: { error: (...args) => errors.push(args) },
   }
-  if (disclosure) runInNewContext(disclosureSource, context)
-  if (tracking) runInNewContext(source, context)
+  runInNewContext(source, context)
   await Promise.resolve()
   const flush = () => {
     let count = 0
@@ -106,11 +80,7 @@ async function page({ hidden = false, missing = false, interacting = false, disc
   }
   flush()
   return {
-    nav, links, marker, sidebar, errors, calls, positions, flush, toggle,
-    togglePanel: () => toggleEvents.get('click')(),
-    escape: () => sidebarEvents.get('keydown')({ key: 'Escape' }),
-    outside: () => events.get('pointerdown')({ target: {} }),
-    followLink: () => sidebarEvents.get('click')({ target: { closest: () => links[1] } }),
+    nav, links, marker, errors, calls, positions, flush,
     active: () => links.findIndex((link) => link.attributes['aria-current'] === 'location'),
     scroll: (y) => { context.scrollY = y; events.get('scroll')() },
     event: (name) => events.get(name)(),
@@ -119,25 +89,7 @@ async function page({ hidden = false, missing = false, interacting = false, disc
   }
 }
 
-test('disclosure is ready before the asynchronous tracking module loads', async () => {
-  const p = await page({ tracking: false })
-  assert.equal(p.sidebar.dataset.enhanced, '')
-  assert.equal(p.toggle.hidden, false)
-  assert.equal(p.nav.dataset.enhanced, undefined)
-  p.togglePanel()
-  assert.equal(p.toggle.attributes['aria-expanded'], 'true')
-  p.followLink()
-  assert.equal(p.toggle.attributes['aria-expanded'], 'false')
-})
-
-test('tracking alone preserves the inline fallback when bootstrap did not run', async () => {
-  const p = await page({ disclosure: false })
-  assert.equal(p.sidebar.dataset.enhanced, undefined)
-  assert.equal(p.toggle.hidden, true)
-  assert.equal(p.active(), 0)
-})
-
-test('contents enhances visible fallback and selects the article title initially', async () => {
+test('contents selects the article title initially and enhances its reading indicator', async () => {
   const p = await page()
   assert.equal(p.active(), 0)
   assert.equal(p.nav.dataset.enhanced, '')
@@ -193,44 +145,8 @@ test('scroll updates are coalesced and content resize remeasures heading positio
   assert.equal(p.active(), 1)
 })
 
-test('sidebar follows the active link unless the reader is interacting with it', async () => {
-  const p = await page()
-  p.scroll(1504)
-  p.flush()
-  assert(p.sidebar.scrollTop > 0)
-  const focused = await page({ interacting: true })
-  focused.scroll(1504)
-  focused.flush()
-  assert.equal(focused.sidebar.scrollTop, 0)
-})
-
-test('missing targets report an error and leave the readable fallback uncollapsed', async () => {
+test('missing targets report an error and leave the contents list visible', async () => {
   const p = await page({ missing: true })
   assert.equal(p.errors.length, 1)
   assert.equal(p.nav.dataset.enhanced, undefined)
-  assert.equal(p.sidebar.dataset.enhanced, undefined)
-  assert.equal(p.toggle.hidden, true)
-})
-
-test('rail opens on tap and closes with Escape, an outside tap, or a section link', async () => {
-  const p = await page()
-  assert.equal(p.sidebar.dataset.enhanced, '')
-  assert.equal(p.toggle.hidden, false)
-  for (const close of [p.escape, p.outside, p.followLink]) {
-    p.togglePanel()
-    assert.equal(p.sidebar.dataset.expanded, 'true')
-    assert.equal(p.toggle.attributes['aria-expanded'], 'true')
-    close()
-    assert.equal(p.sidebar.dataset.expanded, 'false')
-    assert.equal(p.toggle.attributes['aria-expanded'], 'false')
-  }
-  assert.equal(p.toggle.focused, true)
-})
-
-test('pinned contents are not scrolled away from the user', async () => {
-  const p = await page()
-  p.togglePanel()
-  p.scroll(1504)
-  p.flush()
-  assert.equal(p.sidebar.scrollTop, 0)
 })

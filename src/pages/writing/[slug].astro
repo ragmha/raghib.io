@@ -1,16 +1,17 @@
 ---
 import { render, type CollectionEntry } from 'astro:content'
+import { Picture } from 'astro:assets'
 import WritingLayout from '../../layouts/WritingLayout.astro'
 import PartsNav from '../../components/PartsNav.astro'
-import TagList from '../../components/TagList.astro'
-import { SITE_NAME } from '../../lib/seo'
+import DecisionHero from '../../components/DecisionHero.astro'
+import RfpSandboxHero from '../../components/RfpSandboxHero.astro'
 import {
   estimateReadingTime,
-  formatDate,
   getPostCategory,
-  getPostTags,
   getPostSlug,
   getVisiblePosts,
+  getTagLabel,
+  getTaxonomySlug,
 } from '../../lib/posts'
 
 export async function getStaticPaths() {
@@ -28,6 +29,15 @@ interface Props {
 const { post } = Astro.props
 const { Content, headings } = await render(post)
 const readingTime = estimateReadingTime(post.body)
+const minutes = parseInt(readingTime)
+const category = getPostCategory(post)
+const categoryHref = `/writing/category/${getTaxonomySlug(category)}/`
+const published = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  timeZone: 'UTC',
+}).format(post.data.date)
 ---
 
 <WritingLayout
@@ -40,34 +50,80 @@ const readingTime = estimateReadingTime(post.body)
     image: post.data.socialImage,
   }}
 >
-  <div class="shell">
-    <aside class="sidebar">
-      <PartsNav headings={headings} title={post.data.title} readingTime={readingTime} />
-    </aside>
-    <main id="main">
-      <article class="prose">
-        <header class="doc-head">
-          {!post.data.published && (
-            <p class="draft-notice">Draft preview — not published. Review the account and conclusions before publishing.</p>
+  {post.data.cover && (
+    <Picture
+      class="cover"
+      src={post.data.cover.src}
+      alt={post.data.cover.alt}
+      formats={['avif', 'webp']}
+      layout="full-width"
+      loading="eager"
+      fetchpriority="high"
+    />
+  )}
+  <div class="shell shell-solo">
+    <main id="main" class="post-layout">
+      {post.data.hero === 'decision' && <DecisionHero />}
+      <header class="post-head">
+        {!post.data.published && (
+          <p class="draft-notice">Draft preview — not published. Review the account and conclusions before publishing.</p>
+        )}
+        <nav class="post-crumbs" aria-label="Breadcrumb">
+          <a href="/writing/">Writing</a> / {post.data.published
+            ? <a href={categoryHref}>{category}</a>
+            : <span>{category}</span>}
+        </nav>
+        <h1 id="post-title">{post.data.title}</h1>
+        <p class="post-lede">{post.data.description}</p>
+        <dl class="post-facts">
+          <div><dt>Category:</dt><dd>{post.data.published
+            ? <a href={categoryHref}>{category}</a>
+            : <span>{category}</span>}</dd></div>
+          <div><dt>Published:</dt><dd><time datetime={post.data.date.toISOString()}>{published}</time></dd></div>
+          <div><dt>Reading time:</dt><dd>{minutes} minute{minutes === 1 ? '' : 's'}</dd></div>
+          {post.data.tags.length > 0 && (
+            <div>
+              <dt>Tags:</dt>
+              <dd>
+                {post.data.tags.map((tag, i) => (
+                  <>{i > 0 && ', '}{post.data.published
+                    ? <a href={`/writing/tag/${getTaxonomySlug(tag)}/`}>{getTagLabel(tag)}</a>
+                    : <span>{getTagLabel(tag)}</span>}</>
+                ))}
+              </dd>
+            </div>
           )}
-          <h1 id="post-title">{post.data.title}</h1>
-          <p class="doc-meta">
-            <a href="/#about" rel="author">{SITE_NAME}</a> ·
-            <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time> · {readingTime}
-          </p>
-          <TagList category={getPostCategory(post)} tags={getPostTags(post)} />
-        </header>
+        </dl>
+      </header>
 
-        <Content />
+      {post.data.hero === 'rfp-sandbox' && <RfpSandboxHero />}
 
-        <hr class="rule-dotted" />
-        <p class="doc-end"><a href="/writing/">← All writing</a></p>
-      </article>
+      <div class="post-body">
+        <aside class="sidebar">
+          <PartsNav headings={headings} />
+        </aside>
+        <article class="prose">
+          <Content />
+
+          <hr class="rule-dotted" />
+          <p class="doc-end"><a href="/writing/">← All writing</a></p>
+        </article>
+      </div>
     </main>
   </div>
 </WritingLayout>
 
 <style>
+  /* Full-bleed hero; z-index keeps the fixed contents rail beneath it. */
+  .cover {
+    position: relative;
+    z-index: 5;
+    display: block;
+    width: 100%;
+    height: min(85svh, 75vw);
+    object-fit: cover;
+  }
+
   .draft-notice {
     padding: 0.75rem;
     border: 1px solid var(--rule-strong);

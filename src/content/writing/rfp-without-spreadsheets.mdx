@@ -1,0 +1,78 @@
+---
+title: "What If RFP Answers Came With a Sandbox?"
+seoTitle: "RFP Answers You Can Check, Not Just Read"
+description: "A small, runnable experiment: a vendor's RFP answers ship with a sandbox that checks them, and reports supported, contradicted, stale or unknown."
+date: "2026-10-12"
+tags: ["ai", "agents", "mcp", "terraform", "governance"]
+published: false
+hero: "rfp-sandbox"
+---
+
+A vendor questionnaire arrives. Someone copies earlier answers into a spreadsheet. The buyer still has to work out which answers are current and what supports them.
+
+The spreadsheet isn't the real problem. A buyer can't tell whether a cell that says "Yes" is a current fact, a policy intention, or a copy of something that was true two years ago.
+
+So I tried a different shape: **what if each answer came with a sandbox that checks it?**
+
+## The experiment
+
+The sample project is public at [github.com/ragmha/rfp-sandbox](https://github.com/ragmha/rfp-sandbox).
+The run below is [this recorded report](https://github.com/ragmha/rfp-sandbox/blob/fee92e337877d73dc4f5706a2ac9564c9ef3fcb8/report.json),
+pinned to the commit whose source hashes it records.
+
+To reproduce it, install Docker Compose, Terraform, and Python 3.11+, then run:
+
+```bash
+git clone https://github.com/ragmha/rfp-sandbox && cd rfp-sandbox
+docker compose up -d --wait            # stand-in for the buyer's identity provider
+terraform -chdir=terraform init
+terraform -chdir=terraform apply       # the integration the buyer reviews first
+python3 run_checks.py --check-revocation
+```
+
+The last command explicitly permits disabling and restoring a disposable test user.
+Without that flag, the revocation check stays **unknown**. For a no-infrastructure
+start, `python3 run_checks.py --self-test` exercises the checks offline.
+
+## What one run found
+
+The recorded run is from **12 October 2026**. The first three results use a live
+local Keycloak instance and synthetic users. MFA and audit-export results use
+hand-authored fixtures, not live production telemetry:
+
+| Question | Vendor's answer | Result | What the sandbox found |
+| --- | --- | --- | --- |
+| Can the sample authenticate with its identity provider? | Yes | ✅ supported | Password-grant token obtained; introspected issuer and audience matched |
+| Can groups control the sample's permissions? | Yes | ✅ supported | The authorization function allowed admin export and denied viewer export |
+| Does disabling the test user remove access? | Yes | ✅ supported | New token request blocked; previous token rejected after disabling |
+| Is MFA enforced for privileged accounts? | Yes, every one | ❌ contradicted | 11 of 12 accounts; one exception |
+| Can we export audit logs? | Yes, daily | ⏳ stale | Evidence is 253 days old |
+| Is customer data encrypted at rest? | Yes, AES-256 | ❔ unknown | No evidence provided; this sample cannot verify the claim |
+
+Six "yes" answers became three locally supported results, one contradiction, one
+stale observation, and one unknown. The checks make those decisions without a model.
+The report includes its timestamp and source/configuration hashes; rerunning later
+can change freshness results.
+
+## Small enough to inspect
+
+The README covers setup and teardown. An optional FastMCP server exposes
+`list_claims` and `get_answer` over local stdio. It serves the recorded report,
+including its date and scope; it cannot deploy resources or run checks.
+
+This is deliberately not a complete vendor application. Token checks use a password
+grant, not browser SSO or PKCE. Permission checks exercise a Python function, not a
+real export endpoint. Revocation is observed after disabling, not measured as an
+instantaneous guarantee. The sample proves those narrow behaviours, not production readiness.
+
+## The customer-hosted direction
+
+The next useful question is whether a buyer can run the evaluation inside their
+own private network, with their own identity provider. That is a direction, not a
+feature of this sample. Only local Keycloak is implemented; another provider needs
+different Terraform resources and identity checks, not just a renamed provider.
+Customer VPC deployment, SCIM, and agent-to-agent exchange remain unbuilt.
+
+I don't think this makes the spreadsheet obsolete. It changes what a "yes" can
+point to: a check with visible evidence, date and scope. The buyer still decides
+whether that evidence is enough.

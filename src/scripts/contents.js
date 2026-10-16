@@ -3,8 +3,6 @@ import { activeSection, railPosition } from '../lib/reading-progress.mjs'
 const nav = document.querySelector('[data-contents-nav]')
 const article = document.querySelector('main article')
 const marker = nav?.querySelector('[data-reading-window]')
-const sidebar = nav?.closest('.sidebar')
-const toggle = sidebar?.querySelector('[data-contents-toggle]')
 
 if (nav && article && marker) {
   const links = [...nav.querySelectorAll('[data-part-link]')]
@@ -16,12 +14,6 @@ if (nav && article && marker) {
 
   if (missing.length) {
     console.error('Contents links have no matching article headings:', missing.map(({ link }) => link.hash))
-    if (sidebar && toggle) {
-      delete sidebar.dataset.enhanced
-      delete sidebar.dataset.expanded
-      toggle.hidden = true
-      toggle.setAttribute('aria-expanded', 'false')
-    }
   } else {
     const header = document.querySelector('.site-header')
     let points = []
@@ -59,15 +51,6 @@ if (nav && article && marker) {
         for (const [index, { link }] of entries.entries()) {
           if (index === active) link.setAttribute('aria-current', 'location')
           else link.removeAttribute('aria-current')
-        }
-
-        // Follow long contents lists without interrupting someone using the nav.
-        if (sidebar && sidebar.dataset.expanded !== 'true' && !nav.matches(':hover, :focus-within')) {
-          const linkRect = entries[active].link.getBoundingClientRect()
-          const viewport = sidebar.getBoundingClientRect()
-          if (linkRect.top < viewport.top || linkRect.bottom > viewport.bottom) {
-            sidebar.scrollTop += linkRect.top - viewport.top - sidebar.clientHeight / 2
-          }
         }
       }
       const start = railPosition(points, readingTop)

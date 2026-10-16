@@ -44,12 +44,53 @@ Run `bun run sync:projects` with an authenticated `gh` CLI to refresh
 overrides (category, description, demo/extra links) live in
 `src/content/project-snapshot.ts` and survive future syncs.
 
+## What’s Under the Prompt?
+
+`/experiments/context-autopsy/` (“What’s Under the Prompt?”) reads coding-agent session logs in a Web Worker
+and shows how the agent used the model: an interactive per-call context chart
+(hover, tap, or arrow keys; per-call or running total), plain-language findings
+on cache reuse, context growth and output ratio, token mix, per-model usage and
+tool activity. Model savings uses two cost lines and a task-volume slider to
+reprice the same token workload on another model. It replaces the two-session
+before/after report: no second upload is needed. Cost ranges are preserved;
+the projection assumes unchanged token/cache usage, not equal model quality.
+These are API savings estimates, not profit or Copilot subscription savings.
+Nothing is uploaded.
+Inspired by Steve Kinney's
+[model calculator](https://stevekinney.com/experiments/model-calculator).
+
+- Supported: GitHub Copilot CLI (`~/.copilot/session-state/<id>/events.jsonl`),
+  Codex CLI (`~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl`), Claude Code
+  (`~/.claude/projects/<project>/<session>.jsonl`) and OTLP JSON GenAI spans.
+- Copilot helper: `bash public/copilot-export.sh --list`, then
+  `--session ID --output file.jsonl` (PowerShell: `copilot-export.ps1 -List`).
+  Exports are raw and unredacted.
+- `src/lib/model-pricing.ts` snapshots provider-published API rates in USD;
+  each comparison row links its source. Rates are not coding-assistant
+  subscriptions or plan allowances. Update `pricingDate` and individual model
+  entries from their provider pages when prices change.
+- Claude Code cache writes with reported TTLs are priced separately at 5 minutes
+  and 1 hour. When a log has only aggregate writes, the estimate shows the
+  provider's TTL range. Editing the session-populated token counts reprices the
+  workload live; the comparison table can be sorted by model, reference cost,
+  or workload cost.
+- Tests: `bun test --bail 1 tests/agent-usage.test.ts tests/copilot-export.test.ts`.
+
 ## Writing and project writeups
 
 Posts live in `src/content/writing/`. A project can optionally have a longer
 writeup at `/project/<project-name>/writings/`, authored as MDX in
 `src/content/project-writeups/`; set `published: true` when it's ready to go
 live. Writeups are separate from the Writing archive/RSS feed.
+
+A post can open with a full-bleed cover image. Put the image in
+`src/assets/covers/` and add it to the frontmatter:
+
+```yaml
+cover:
+  src: ../../assets/covers/my-post.jpg
+  alt: "What the image shows"
+```
 
 Rendered diagrams live in `public/diagrams/`; editable `.excalidraw` sources live
 in `src/assets/diagrams/`. Edit a source in Excalidraw, then export the matching
@@ -86,8 +127,31 @@ desktop reading layouts with:
 node scripts/check-writing-responsive.mjs
 ```
 
-This exercises portrait image selection, diagram legibility, contents controls,
-the no-JavaScript fallback, and an existing published article.
+For a server on another port, set `WRITING_TEST_URL`, for example
+`WRITING_TEST_URL=http://localhost:4322 node scripts/check-writing-responsive.mjs`.
+
+This exercises portrait image selection, diagram legibility, contents navigation,
+the always-visible contents list, the no-JavaScript fallback, and an existing
+published article.
+
+After exporting an SVG, run `bun run theme:diagrams` to apply the shared light
+and dark palettes. At build time, `src/lib/rehype-inline-diagrams.mjs` inlines
+`<img src="/diagrams/*.svg">` in posts so diagrams follow the site's
+`data-theme` toggle; Safari only shows the OS theme to SVGs loaded as images.
+Images inside `<picture>` remain native images so responsive sources still work.
+Opened directly, the files still follow the OS theme. Palette roles live in
+`scripts/theme-diagrams.mjs`; preserve pure black/white SVG mask colors.
+
+The decision-model post uses one isometric hero, built server-side by
+`src/lib/decision-hero.mjs` with the MIT-licensed
+[Anatomy](https://github.com/wheresryan22/anatomy) geometry kit. The vendored
+kit and license live in `scripts/vendor/anatomy/` (upstream commit
+`689dcf966e63d92be10a5d593c6e19e10acd4422`). A plain-language key explains
+the input, small decision model and example routes without requiring JavaScript.
+The hero inherits the site's theme.
+To verify it in a browser, start the dev server and run
+`DECISION_HERO_TEST_URL=http://localhost:4329/writing/decide-cheaply-generate-carefully/ node --test tests/decision-hero.browser.mjs`.
+
 JetBrains Mono uses `font-display: optional` and width-matched fallback text to
 avoid rewrapping content after the first paint. On slow first visits, the system
 monospace font may remain for that page load. The header reserves space for the

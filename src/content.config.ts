@@ -4,7 +4,7 @@ import { projectSnapshot } from './content/project-snapshot'
 
 const writing = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/writing' }),
-  schema: z.object({
+  schema: ({ image }) => z.object({
     title: z.string(),
     seoTitle: z.string().trim().min(1).optional(),
     description: z.string(),
@@ -12,6 +12,8 @@ const writing = defineCollection({
     date: z.coerce.date(),
     tags: z.array(z.string()).default([]),
     published: z.boolean().default(true),
+    cover: z.object({ src: image(), alt: z.string().trim().min(1) }).optional(),
+    hero: z.enum(['decision', 'rfp-sandbox']).optional(),
   }),
 })
 
