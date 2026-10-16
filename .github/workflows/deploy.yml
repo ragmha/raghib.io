@@ -17,6 +17,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-24.04
+    env:
+      PUBLIC_CF_BEACON_TOKEN: ${{ vars.CF_WEB_ANALYTICS_TOKEN }}
     steps:
       - uses: actions/checkout@v7
 
@@ -30,9 +32,12 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
+      # rehype-mermaid renders diagrams to SVG at build time via headless
+      # Chromium, so the browser must be present before `bun run build`.
+      - run: bunx playwright install --with-deps chromium
+
       - run: bun test --bail
       - run: bun run build
-      - run: bunx playwright install --with-deps chromium
       - run: bun run check:seo
       - run: bun run check:vitals
 

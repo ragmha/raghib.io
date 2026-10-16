@@ -1,0 +1,317 @@
+---
+title: "Keep Shipping: When an AI Budget Runs Out"
+seoTitle: "AI Budget Limits: A Safer Fallback"
+description: "Could an explicitly funded fallback help developers finish work after an AI budget limit trips—without weakening model policy? A GitHub Copilot prototype explores the trade-offs."
+socialImage: "/social-card-keep-shipping.png"
+date: "2026-10-13"
+tags: ["ai", "copilot", "governance", "case-study"]
+published: true
+---
+
+**Disclaimer:** I work at Microsoft. This is my personal view, based only on public information. It isn’t an official position or a product recommendation.
+
+AI spending limits protect organizations from unexpected costs. But a hard
+stop can strand an in-progress task. The design challenge is to let useful work
+continue without turning a spending control into a bypass.
+
+GitHub Copilot provides one concrete case study. When a developer reaches the
+usage limit their organization configured, credit-consuming AI features pause.
+They can still write software, but the AI-assisted part of the task is
+interrupted.
+
+Could an organization offer an explicitly funded fallback on a lower-cost
+model—one that still respects its model policy? That is the experiment behind
+this article. It is my take on the problem, inspired by OpenAI's spend controls,
+not a recommendation that every organization adopt the same policy.
+
+## Copilot users and the budget owner
+
+**Copilot users** are the people working with GitHub Copilot. They want to finish
+the task, understand why credit-consuming features have paused, and know how to
+request more usage. In the example, one user represents that perspective.
+
+**The budget owner** controls spending rules and model access. Here, that means
+someone authorized to manage those enterprise settings, not simply a repository
+administrator. They decide how much additional consumption to allow and when a
+temporary exception should expire.
+
+I built the prototype to automate some of that admin's work: checking reported
+usage, changing the managed model-team memberships, and applying approved
+budget changes. The admin still verifies Luna-only access and approves the
+additional usage. The automation carries out those decisions; it does not
+approve its own spending.
+
+## What I took from OpenAI
+
+OpenAI's [usage-limit controls for eligible ChatGPT Enterprise and Edu
+workspaces][openai-limits] separate a person's allowance from the workspace's
+overall spending control. They support defaults, individual exceptions, and
+approved temporary increases.
+
+The part that interested me was the operating model: give people a normal
+allowance, make additional usage an explicit decision, and let a temporary
+exception expire rather than become a permanent entitlement.
+
+That does not mean copying OpenAI's billing units or assuming every product
+works the same way. ChatGPT workspace controls and OpenAI API-platform controls
+are different surfaces. Neither should be treated as interchangeable with
+GitHub's billing model.
+
+GitHub also has [native requests for additional Copilot budget][github-requests]
+and [expiring individual user-level budgets][github-budgets]. I did not need to
+invent those capabilities.
+
+My extension was to connect an exception with a narrower choice of models:
+instead of immediately restoring the original set of approved models, could a
+small allowance on a lower-cost option be enough for some of the remaining work?
+
+**OpenAI inspired the allowance-and-exception pattern. The lower-cost model
+transition is my experiment, not a claim about an OpenAI feature.**
+
+## A budget and a model policy answer different questions
+
+Before building anything, I had to separate two controls that are easy to blur
+together.
+
+<figure class="excalidraw-figure responsive-diagram">
+  <picture>
+    <source
+      media="(max-width: 60rem)"
+      srcSet="/diagrams/copilot-budget-and-model-access-portrait.svg"
+      width="456"
+      height="1016"
+    />
+    <img
+      src="/diagrams/copilot-budget-and-model-access.svg"
+      width="956"
+      height="756"
+      loading="eager"
+      fetchpriority="high"
+      decoding="async"
+      alt="Two separate controls meet: the user budget determines how much someone may consume, while model policy determines which models they may use. Both must permit the request, and other applicable billing controls still apply."
+    />
+  </picture>
+  <figcaption>
+    A budget answers "how much?" Model policy answers "which models?"
+    Changing one does not supply the other. <a href="/diagrams/copilot-budget-and-model-access.svg" target="_blank" rel="noopener noreferrer">Open full-size diagram.</a>
+  </figcaption>
+</figure>
+
+An available model is not necessarily a funded model. Giving someone permission
+to use a cheaper model does not make it free, and it does not override an
+exhausted user budget.
+
+Under GitHub's [AI-credit billing model][github-billing], included credits are
+pooled at the billing-entity level. A Copilot Business seat contributes 1,900
+credits to that pool; it does not create a private 1,900-credit wallet for its
+holder.
+
+A user-level budget is an additional control over how much a person can
+consume, including both pooled and metered usage. If that budget is exhausted,
+credit-consuming features are blocked even when the pool still has capacity.
+Code completions and next edit suggestions remain available on paid plans.
+
+This meant my proposed fallback needed two things, in the right order:
+establish the intended model restriction, then make an explicitly funded
+allowance available.
+
+It could not be a way around the budget.
+
+## One user, one small allowance
+
+I chose a fictional user's monthly journey to make the idea concrete. The
+numbers below are example policy choices, not a claim that everyone should have
+the same limit.
+
+The starting allocation is **1,900 credits**. The fallback model is **GPT-6 Luna**.
+The extra allowance is **100 credits**, equivalent to **$1 of GitHub AI-credit
+consumption**, and can be granted only once per user per monthly cycle.
+
+<figure class="excalidraw-figure responsive-diagram">
+  <picture>
+    <source
+      media="(max-width: 60rem)"
+      srcSet="/diagrams/copilot-credit-journey-portrait.svg"
+      width="456"
+      height="2166"
+    />
+    <img
+      src="/diagrams/copilot-credit-journey.svg"
+      width="1001"
+      height="1126"
+      loading="lazy"
+      decoding="async"
+      alt="Two distinct black-ink personas: a GHCP user wearing headphones sits at a paused laptop; the GH admin wears glasses and an ID badge, holds a policy clipboard, and points to the budget board. The admin's automation checks usage and changes model teams. Verified Luna-only grace raises the cap from 1,900 to 2,000 credits; an approved $20 increase raises it to 4,000."
+    />
+  </picture>
+  <figcaption>
+    The Copilot user wants to continue working. The budget owner controls the budget
+    and uses automation to apply the policy. The board shows total limits, not
+    fresh credit purchases. The admin must verify Luna-only access before
+    releasing grace. If grace runs out, usage pauses again; a $20 increase
+    requires approval.
+    <a href="/diagrams/copilot-credit-journey.svg" target="_blank" rel="noopener noreferrer">Open full-size diagram.</a>
+  </figcaption>
+</figure>
+
+Here, "all models" always means the models the enterprise has approved.
+It does not include models prohibited by its security or compliance policies.
+
+The 4,000-credit example includes the 100-credit grace grant. If an increase
+arrives earlier, the calculation starts from the current cap instead. Switching
+teams never resets consumption or creates another grace allowance.
+
+There is an important administrative distinction, too. My prototype accepts an
+increment: "add $20." GitHub's native approval interface sets a new total budget.
+To add $20 to a current $20 cap there, the new total is **$40**, not $20.
+
+Raising that cap does not purchase or reserve credits. It permits more
+consumption, which can create additional charges when included capacity runs
+out. GitHub's other spending controls, including applicable enterprise,
+organization, or cost-center limits and paid-usage policy, still have to allow it.
+
+## The first surprise: a restricted team cannot subtract access
+
+My initial idea sounded simple: put an exhausted user on a temporary team that
+only has access to Luna.
+
+But GitHub's [enterprise-team model grants are additive][github-models]. If
+another team grants a model, or the enterprise enables it for everyone, adding
+a more restricted team does not take that access away.
+
+<figure class="excalidraw-figure responsive-diagram">
+  <picture>
+    <source
+      media="(max-width: 60rem)"
+      srcSet="/diagrams/copilot-additive-model-access-portrait.svg"
+      width="456"
+      height="2096"
+    />
+    <img
+      src="/diagrams/copilot-additive-model-access.svg"
+      width="956"
+      height="936"
+      loading="lazy"
+      decoding="async"
+      alt="A full-model team plus a Luna-only team still gives the user all approved models. Establishing Luna-only access requires removing the full-model grant, reviewing enterprise-wide and other team grants, and verifying the result in the client."
+    />
+  </picture>
+  <figcaption>
+    The Luna-only team is another grant, not a deny rule. Removing one full-model
+    membership is insufficient if another source still grants those models.
+    <a href="/diagrams/copilot-additive-model-access.svg" target="_blank" rel="noopener noreferrer">Open full-size diagram.</a>
+  </figcaption>
+</figure>
+
+The prototype therefore uses dedicated model-access teams and removes the
+managed full-model grant during the fallback transition. Those teams must not
+also control repository permissions or Copilot license assignments.
+
+Other grants still matter. The design cannot claim Luna-only access just
+because one membership changed successfully.
+
+There is also a broader prerequisite: enterprise teams mode changes where
+granular model policy is managed and deactivates organization-level model
+settings. That is not a small switch to enable casually for a single-user
+experiment. An existing enterprise would need to assess the effect on everyone
+else before adopting it.
+
+## The second surprise: changing membership is not proof of continuity
+
+The current prototype uses GitHub Actions and the public APIs to coordinate the
+transition. Native GitHub budgets remain responsible for spending enforcement.
+
+When it detects exhaustion, the controller keeps the exhausted cap in place,
+removes its full-model grant, and establishes the fallback membership. An
+administrator then verifies the intended model restriction in the relevant
+clients before approving release of the 100-credit allowance.
+
+That verification step is deliberate. I have not established a supported API
+signal that proves all relevant clients and existing sessions have applied the
+restriction. A successful membership response is not enough evidence, and a
+fixed delay would not make it enough.
+
+**So this is not seamless fallback. There is still a pause.**
+
+Scheduled reconciliation is not instantaneous, and changing permissions does
+not select a model in an existing conversation. The user may need to refresh
+their client or choose Luna themselves.
+
+That is the gap between the ambition and the implementation. "Keep shipping"
+is the question I am exploring, not a result I can claim simply because the
+automation runs.
+
+## What would make the experiment worthwhile?
+
+A cheaper model is only useful here if it can do the work.
+
+The remaining task might need capabilities, context, or tools that make a
+particular model unsuitable. More retries can erase an apparent saving.
+Waiting for an administrator can erase the continuity benefit.
+
+I would want to evaluate:
+
+- Whether the developer completes the task at an acceptable level of quality.
+- The total AI cost of getting to that result, not just the model's token price.
+- Time spent blocked, switching models, or waiting for approval.
+- The administrative effort required to operate and recover the workflow.
+
+The comparison is not only "expensive model versus cheap model." It is also
+"this custom transition versus a normal, approved budget increase."
+
+Compared with stopping usage, the grace allowance authorizes more consumption.
+Compared with unrestricted access to the original model set, it might reduce
+the cost of the remaining work. Whether that trade is worthwhile needs evidence.
+
+## What exists today
+
+I have built a prototype around native user budgets, dedicated enterprise model
+teams, and GitHub Actions. It records intended operations so retrying an
+interrupted top-up does not add the same allowance again, and it keeps temporary
+increases tied to the monthly cycle.
+
+The prototype is not published as a public repository, so this article describes
+the approach and trade-offs rather than offering a runnable implementation.
+
+I have not completed a live enterprise pilot. I do not yet have measured savings,
+delivery improvements, or evidence that this approach suits every AI-assisted
+workflow. A native budget increase may be the simpler answer in many cases.
+
+That does not settle the experiment either way. It tells me what to investigate
+next.
+
+## Follow the series
+
+This is Part 1 of the Keep Shipping case study. Part 2 will turn the sketch into
+explicit policy: which budget applies, what each transition can change, and
+what must remain untouched. [Subscribe to the writing RSS feed](/writing/feed.xml)
+to get future installments.
+
+The idea I want to carry through the series is simple:
+
+**A spending limit can be correct while the experience around it still deserves
+better design.**
+
+That is what "keep shipping" means in this case study: exploring a more useful
+path through a legitimate constraint, not pretending the constraint has
+disappeared.
+
+## References
+
+Product behavior and availability are time-sensitive. These are the primary
+references behind the design; check the documentation and the controls available
+in your own environment before treating the example as an implementation plan.
+The GitHub references were reviewed on 13 October 2026. The OpenAI usage-limit
+guidance was reviewed on 7 October 2026.
+
+- [OpenAI: manage usage limits, temporary increases, and workspace spending controls][openai-limits]
+- [GitHub: AI-credit billing for organizations and enterprises][github-billing]
+- [GitHub: user budgets, precedence, and expiration][github-budgets]
+- [GitHub: requests for additional Copilot budget][github-requests]
+- [GitHub: enterprise model availability and additive team grants][github-models]
+
+[openai-limits]: https://help.openai.com/en/articles/20001001
+[github-billing]: https://docs.github.com/en/copilot/concepts/billing-and-usage/organizations-and-enterprises/billing
+[github-budgets]: https://docs.github.com/en/copilot/concepts/billing-and-usage/organizations-and-enterprises/budgets
+[github-requests]: https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-budget-requests
+[github-models]: https://docs.github.com/en/enterprise-cloud@latest/copilot/how-tos/administer-copilot/manage-for-enterprise/manage-availability-of-default-models

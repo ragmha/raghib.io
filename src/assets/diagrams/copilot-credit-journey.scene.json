@@ -1,0 +1,43 @@
+{
+  "name": "copilot-credit-journey",
+  "title": "The GHCP user and the GH admin",
+  "description": "A fictional GHCP user with headphones sits at a paused laptop after reaching 1,900 credits. The GH admin has glasses, an ID badge, and a policy clipboard. The admin owns budgets and model policy, uses automation for usage checks and team changes, and verifies Luna-only access before approving 100 additional credits. A later approved $20 increase raises the total cap to 4,000. Grace is once per month and temporary increases expire.",
+  "personas": [
+    {
+      "id": "ghcp-user",
+      "label": "GHCP user",
+      "dialogue": "I hit 1,900 credits.\nThe task isn't finished."
+    },
+    {
+      "id": "gh-admin",
+      "label": "GH admin: budgets + policy",
+      "dialogue": "I'll verify Luna-only access,\nthen approve 100 credits ($1)."
+    }
+  ],
+  "board": {
+    "title": "Total credit cap",
+    "rows": [
+      "Normal: 1,900",
+      "Luna: 2,000",
+      "After $20: 4,000"
+    ]
+  },
+  "automation": {
+    "owner": "gh-admin",
+    "text": "Automation I own:\nchecks usage and\nchanges model teams."
+  },
+  "notes": [
+    {
+      "id": "grace",
+      "text": "Grace is once per month.\nIf used up, credit use\npauses again."
+    },
+    {
+      "id": "top-up",
+      "text": "An approved $20 top-up\nrestores all approved models."
+    },
+    {
+      "id": "reset",
+      "text": "Next month: 1,900 credits.\nTemporary increases expire."
+    }
+  ]
+}

@@ -10,11 +10,11 @@ import {
   getPostCategory,
   getPostTags,
   getPostSlug,
-  getPublishedPosts,
+  getVisiblePosts,
 } from '../../lib/posts'
 
 export async function getStaticPaths() {
-  const posts = await getPublishedPosts()
+  const posts = await getVisiblePosts({ includeDrafts: import.meta.env.DEV })
   return posts.map((post) => ({
     params: { slug: getPostSlug(post) },
     props: { post },
@@ -33,7 +33,12 @@ const readingTime = estimateReadingTime(post.body)
 <WritingLayout
   title={post.data.seoTitle ?? post.data.title}
   description={post.data.description}
-  article={{ headline: post.data.title, date: post.data.date }}
+  noindex={!post.data.published}
+  article={{
+    headline: post.data.title,
+    date: post.data.date,
+    image: post.data.socialImage,
+  }}
 >
   <div class="shell">
     <aside class="sidebar">
@@ -42,6 +47,9 @@ const readingTime = estimateReadingTime(post.body)
     <main id="main">
       <article class="prose">
         <header class="doc-head">
+          {!post.data.published && (
+            <p class="draft-notice">Draft preview — not published. Review the account and conclusions before publishing.</p>
+          )}
           <h1 id="post-title">{post.data.title}</h1>
           <p class="doc-meta">
             <a href="/#about" rel="author">{SITE_NAME}</a> ·
@@ -58,3 +66,12 @@ const readingTime = estimateReadingTime(post.body)
     </main>
   </div>
 </WritingLayout>
+
+<style>
+  .draft-notice {
+    padding: 0.75rem;
+    border: 1px solid var(--rule-strong);
+    color: var(--ink-muted);
+    font-size: 0.85rem;
+  }
+</style>

@@ -3,6 +3,8 @@ import { activeSection, railPosition } from '../lib/reading-progress.mjs'
 const nav = document.querySelector('[data-contents-nav]')
 const article = document.querySelector('main article')
 const marker = nav?.querySelector('[data-reading-window]')
+const sidebar = nav?.closest('.sidebar')
+const toggle = sidebar?.querySelector('[data-contents-toggle]')
 
 if (nav && article && marker) {
   const links = [...nav.querySelectorAll('[data-part-link]')]
@@ -14,36 +16,14 @@ if (nav && article && marker) {
 
   if (missing.length) {
     console.error('Contents links have no matching article headings:', missing.map(({ link }) => link.hash))
-  } else {
-    const sidebar = nav.closest('.sidebar')
-    const header = document.querySelector('.site-header')
-    const toggle = sidebar?.querySelector('[data-contents-toggle]')
-
-    function setExpanded(expanded) {
-      sidebar.dataset.expanded = String(expanded)
-      toggle.setAttribute('aria-expanded', String(expanded))
-    }
-
     if (sidebar && toggle) {
-      sidebar.dataset.enhanced = ''
-      toggle.hidden = false
-      toggle.addEventListener('click', () => {
-        setExpanded(sidebar.dataset.expanded !== 'true')
-      })
-      sidebar.addEventListener('keydown', (event) => {
-        if (event.key !== 'Escape') return
-        setExpanded(false)
-        toggle.focus({ preventScroll: true })
-      })
-      nav.addEventListener('click', (event) => {
-        if (!event.target.closest('[data-part-link]')) return
-        setExpanded(false)
-        toggle.focus({ preventScroll: true })
-      })
-      document.addEventListener('pointerdown', (event) => {
-        if (!sidebar.contains(event.target)) setExpanded(false)
-      })
+      delete sidebar.dataset.enhanced
+      delete sidebar.dataset.expanded
+      toggle.hidden = true
+      toggle.setAttribute('aria-expanded', 'false')
     }
+  } else {
+    const header = document.querySelector('.site-header')
     let points = []
     let positions = []
     let active = -1
