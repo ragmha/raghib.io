@@ -35,10 +35,11 @@ function buildScene() {
     outline(k.insetPlan(plan, 2.5), z + height, 'faint')
     screws(plan, z + height)
   }
+  const escapeXmlText = value => value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
   const label = (point, value, { dx = 0, dy = 0, tone = 'mid' } = {}) => {
     const [x, y] = at(point)
     const end = [x + dx, y + dy]
-    annotations.push(`<g class="decision-hero-annotation">${k.lineSvg(k.pathOf([[x, y], [x, end[1]], end]), { tone: 'lo' })}<g class="decision-hero-label" data-tone="${tone}" transform="translate(${end[0]} ${end[1] - 10})"><text text-anchor="middle">${value}</text></g></g>`)
+    annotations.push(`<g class="decision-hero-annotation">${k.lineSvg(k.pathOf([[x, y], [x, end[1]], end]), { tone: 'lo' })}<g class="decision-hero-label" data-tone="${tone}" transform="translate(${end[0]} ${end[1] - 10})"><text text-anchor="middle">${escapeXmlText(value)}</text></g></g>`)
   }
   const rail = (points, tone = 'mid', active = false) => {
     const projected = points.map(at)
