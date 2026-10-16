@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { test } from 'node:test'
@@ -31,7 +30,8 @@ test('site audits pass before the main-branch artifact can deploy', () => {
 test('link check creates an issue once and edits it only when findings change', () => {
   const linkWorkflow = parse(readFileSync(new URL('../.github/workflows/link-check.yml', import.meta.url), 'utf8'))
   const script = linkWorkflow.jobs.links.steps.find(step => step.run).run
-  const directory = mkdtempSync(join(tmpdir(), 'raghib-link-check-'))
+  const directory = join(process.cwd(), `.test-link-check-${process.pid}`)
+  rmSync(directory, { recursive: true, force: true })
   try {
     mkdirSync(join(directory, 'src/content/writing'), { recursive: true })
     mkdirSync(join(directory, 'src/content/project-writeups'), { recursive: true })
@@ -42,7 +42,11 @@ test('link check creates an issue once and edits it only when findings change', 
       curl() { printf '%s' "$MOCK_STATUS"; }
       gh() {
         case "$2" in
-          list) printf '%s' "$MOCK_ISSUE" ;;
+          list)
+            [[ "$*" == *"--author github-actions[bot]"* ]] || return 2
+            [[ "$*" == *'select(.title == "Broken links")'* ]] || return 2
+            printf '%s' "$MOCK_ISSUE"
+            ;;
           view) printf '%s' "$MOCK_BODY" ;;
           edit|create) printf '%s\\n' "$*" >> "$MOCK_LOG" ;;
           *) return 2 ;;

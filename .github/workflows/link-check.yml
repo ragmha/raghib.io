@@ -29,7 +29,7 @@ jobs:
               done
           [ -s broken.txt ] || { echo "All external links work"; exit 0; }
           cat broken.txt
-          open=$(gh issue list --state open --search 'Broken links in:title' --json number --jq '.[0].number')
+          open=$(gh issue list --state open --search 'Broken links in:title' --author github-actions[bot] --json number,title --jq '[.[] | select(.title == "Broken links")][0].number // empty')
           if [ -n "$open" ]; then
             current=$(gh issue view "$open" --json body --jq .body)
             if [ "$current" != "$(cat broken.txt)" ]; then
