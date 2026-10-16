@@ -1,7 +1,8 @@
 ---
 title: "TIL: The 403 That Wasn't an Authentication Problem"
-seoTitle: "TIL: A 403 That Was Really a Budget Limit"
-description: "Two GitHub Agentic Workflows failed with HTTP 403. The run data showed a cost problem: one model request spent more than the workflow's entire AI-credit budget."
+seoTitle: "TIL: Agentic Workflow 403 Was a Budget Limit"
+description: "Two GitHub Agentic Workflows failed with HTTP 403. The cause was cost, not auth: one model request spent more than the workflow's whole AI-credit budget."
+socialImage: "/social-card-til-403.png"
 date: "2026-10-16"
 tags: ["til", "ai", "agents", "cost"]
 published: true
@@ -83,7 +84,9 @@ first-request failure.
 
 Raising the caps would have let the same expensive startup context consume more
 credits without addressing why it cost so much. I kept the original caps instead:
-5 credits for meeting-insight capture and 8 for account status notes.
+5 credits for meeting-insight capture and 8 for account status notes. For what
+should happen when a budget cap does trip, see
+[Keep Shipping: When an AI Budget Runs Out](/writing/keep-shipping-copilot-budget-limits-part-1/).
 
 The configured model was `auto`, which routed these runs to Claude Sonnet 5.5. I
 pinned the workflows to **GPT-5.6 Luna**, a lower-cost model supported by the
