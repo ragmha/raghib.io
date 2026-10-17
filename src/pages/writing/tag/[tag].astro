@@ -9,27 +9,13 @@ import {
   getPostTags,
   getPublishedPosts,
   getTagLabel,
-  getTaxonomySlug,
+  getTopics,
 } from '../../../lib/posts'
 
 export async function getStaticPaths() {
-  const posts = await getPublishedPosts()
-  const tags = new Map<string, string>()
-
-  for (const post of posts) {
-    for (const tag of post.data.tags) {
-      tags.set(getTaxonomySlug(tag), tag)
-    }
-  }
-
-  return [...tags].map(([slug, tag]) => ({
+  return getTopics(await getPublishedPosts()).map(({ slug, tag, posts }) => ({
     params: { tag: slug },
-    props: {
-      tag,
-      posts: posts.filter((post) =>
-        post.data.tags.some((postTag) => getTaxonomySlug(postTag) === slug),
-      ),
-    },
+    props: { tag, posts },
   }))
 }
 
@@ -44,7 +30,13 @@ const description = `Articles tagged ${label}, with practical perspectives on so
   itemLabel="article"
   description={description}
 >
-  <p>{description}</p>
+  <header class="post-head" slot="head">
+    <nav class="post-crumbs" aria-label="Breadcrumb">
+      <a href="/writing/">Writing</a> / <a href="/writing/tag/">Topics</a> / <span aria-current="page">{label}</span>
+    </nav>
+    <h1>{label}</h1>
+    <p class="post-lede">{posts.length} article{posts.length === 1 ? '' : 's'} on this topic, newest first.</p>
+  </header>
   <PostList
     posts={posts.map((post) => ({
       href: `/writing/${getPostSlug(post)}/`,
@@ -56,5 +48,13 @@ const description = `Articles tagged ${label}, with practical perspectives on so
       tags: getPostTags(post),
     }))}
   />
-  <p><a href="/writing/">All writing</a></p>
+  <p><a href="/writing/tag/">All topics</a></p>
 </ArchiveLayout>
+
+<style>
+  /* PostList draws its own top rule. */
+  .post-head {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+</style>

@@ -121,6 +121,24 @@ export function getTagLabel(tag: string): string {
   return TAG_LABELS[tag.toLowerCase()] ?? tag
 }
 
+export type Topic = { slug: string; tag: string; posts: WritingEntry[] }
+
+// Most-written-about first; ties fall back to alphabetical.
+export function getTopics(posts: WritingEntry[]): Topic[] {
+  const topics = new Map<string, Topic>()
+  for (const post of posts) {
+    for (const tag of post.data.tags) {
+      const slug = getTaxonomySlug(tag)
+      const topic = topics.get(slug) ?? { slug, tag, posts: [] }
+      topic.posts.push(post)
+      topics.set(slug, topic)
+    }
+  }
+  return [...topics.values()].sort(
+    (a, b) => b.posts.length - a.posts.length || a.slug.localeCompare(b.slug),
+  )
+}
+
 // Together with the category badge this keeps each post at three labels.
 const MAX_TAGS = 2
 

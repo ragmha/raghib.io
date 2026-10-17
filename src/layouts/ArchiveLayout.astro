@@ -17,7 +17,9 @@ const { title, description, count, itemLabel, showHeading = true } = Astro.props
   <div class="writing-index">
     <main id="main">
       <article class="prose">
-        {showHeading ? (
+        {Astro.slots.has('head') ? (
+          <slot name="head" />
+        ) : showHeading ? (
           <header class="doc-head">
             <h1>{title}</h1>
             <p class="doc-meta">{count} {itemLabel}{count === 1 ? '' : 's'}</p>

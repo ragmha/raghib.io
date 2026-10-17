@@ -7,13 +7,15 @@ import {
   getPostCategory,
   getPostSlug,
   getPostTags,
+  getTagLabel,
   getTaxonomySlug,
   getPublishedPosts,
+  getTopics,
 } from '../../lib/posts'
 
 const posts = await getPublishedPosts()
 const categories = [...new Set(posts.map(getPostCategory))].sort()
-const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort()
+const topTopics = getTopics(posts).slice(0, 5)
 ---
 
 <ArchiveLayout
@@ -23,6 +25,13 @@ const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort()
   description="Essays and practical explorations of software, AI, systems, and responsible technology."
 >
   {posts.length > 0 ? (
+    <nav class="topic-strip" aria-label="Top topics">
+      <span>Gone deep on:</span>
+      {topTopics.map(({ slug, tag }) => (
+        <a href={`/writing/tag/${slug}/`}>{getTagLabel(tag)}</a>
+      ))}
+      <a href="/writing/tag/">All topics →</a>
+    </nav>
     <PostList
       posts={posts.map((post) => ({
         href: `/writing/${getPostSlug(post)}/`,
@@ -43,14 +52,7 @@ const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort()
           </li>
         ))}
       </ul>
-      <h2>Browse by tag</h2>
-      <ul>
-        {tags.map((tag) => (
-          <li>
-            <a href={`/writing/tag/${getTaxonomySlug(tag)}/`}>{tag}</a>
-          </li>
-        ))}
-      </ul>
+      <p><a href="/writing/tag/">Browse all topics →</a></p>
     </section>
   ) : (
     <p class="empty-writing">No posts published yet.</p>
@@ -61,6 +63,20 @@ const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort()
   .prose .empty-writing {
     color: var(--ink-muted);
     text-align: center;
+  }
+
+  .topic-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    margin: 0 0 2rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .topic-strip span {
+    color: var(--ink-faint);
   }
 
   .taxonomy-index ul {
