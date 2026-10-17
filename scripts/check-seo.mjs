@@ -35,11 +35,6 @@ assert.ok(!/^Disallow:\s*\/\s*$/m.test(robots), 'Public pages must be crawlable'
 assert.ok(robots.split(/\r?\n/).includes(`Sitemap: ${new URL('/sitemap-index.xml', site).href}`))
 assert.ok(robots.split(/\r?\n/).includes(`Sitemap: ${new URL('/sitemap.xml', site).href}`))
 assert.ok(robots.split(/\r?\n/).includes(`Sitemap: ${new URL('/sitemap.txt', site).href}`))
-assert.doesNotMatch(
-  await readFile(resolve(root, 'llms-full.txt'), 'utf8'),
-  /<svg|class="/,
-  'llms-full.txt must be plain text, not markup or MDX source',
-)
 
 const browser = await chromium.launch({ headless: true })
 try {

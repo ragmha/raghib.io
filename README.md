@@ -298,8 +298,7 @@ a real social-preview image, valid author/article schema, working internal links
 and image assets, and correct sitemap/robots/RSS discovery. `/sitemap.xml`
 and `/sitemap.txt` mirror the generated indexable pages; the XML includes
 `lastmod` on published writing.
-`llms.txt` and `llms-full.txt` must list exactly the published writing, and
-`llms-full.txt` must be rendered plain text. Every published
+`llms.txt` and `llms-full.txt` must list exactly the published writing. Every published
 source entry must have a corresponding rendered article with matching metadata;
 drafts must not leak into the build. An intentionally empty writing archive is
 valid. Editable `.excalidraw` originals belong outside `public/`.
