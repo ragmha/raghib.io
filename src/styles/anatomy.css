@@ -39,8 +39,16 @@ html[data-theme='light'] .decision-hero {
 }
 
 .decision-hero-art {
+  position: relative;
   aspect-ratio: 1500 / 740;
   min-width: 0;
+}
+
+.decision-hero-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
 }
 
 .decision-hero-svg {
