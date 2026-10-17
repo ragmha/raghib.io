@@ -34,6 +34,7 @@ assert.match(robots, /^Allow: \/$/m)
 assert.ok(!/^Disallow:\s*\/\s*$/m.test(robots), 'Public pages must be crawlable')
 assert.ok(robots.split(/\r?\n/).includes(`Sitemap: ${new URL('/sitemap-index.xml', site).href}`))
 assert.ok(robots.split(/\r?\n/).includes(`Sitemap: ${new URL('/sitemap.xml', site).href}`))
+assert.ok(robots.split(/\r?\n/).includes(`Sitemap: ${new URL('/sitemap.txt', site).href}`))
 assert.doesNotMatch(
   await readFile(resolve(root, 'llms-full.txt'), 'utf8'),
   /<svg|class="/,
@@ -190,6 +191,11 @@ try {
   }
   assert.deepEqual(sitemapUrls.sort(), publicUrls.sort(), 'Sitemap must contain exactly the canonical, indexable pages')
   assert.deepEqual((await xmlValues('sitemap.xml', 'loc')).sort(), publicUrls.sort(), '/sitemap.xml must contain exactly the canonical, indexable pages')
+  assert.deepEqual(
+    (await readFile(resolve(root, 'sitemap.txt'), 'utf8')).trim().split(/\r?\n/).sort(),
+    publicUrls.sort(),
+    '/sitemap.txt must contain exactly the canonical, indexable pages',
+  )
   assert.deepEqual(
     (await xmlValues('sitemap.xml', 'url:has(lastmod) > loc')).sort(),
     [...writingUrls].sort(),

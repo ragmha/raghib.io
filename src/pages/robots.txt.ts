@@ -24,7 +24,7 @@ export const GET: APIRoute = ({ url, site }) => {
   const home = getCanonicalUrl(new URL('/', url), site)
   const groups = ['*', ...AI_AGENTS].map((agent) => `User-agent: ${agent}\nAllow: /\n`)
   return new Response(
-    `${groups.join('\n')}\n${['/sitemap.xml', '/sitemap-index.xml'].map((path) => `Sitemap: ${new URL(path, home).href}\n`).join('')}`,
+    `${groups.join('\n')}\n${['/sitemap.xml', '/sitemap-index.xml', '/sitemap.txt'].map((path) => `Sitemap: ${new URL(path, home).href}\n`).join('')}`,
     { headers: { 'Content-Type': 'text/plain; charset=utf-8' } },
   )
 }

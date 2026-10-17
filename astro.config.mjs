@@ -1,4 +1,4 @@
-import { copyFile, readFile, readdir } from 'node:fs/promises'
+import { copyFile, readFile, readdir, writeFile } from 'node:fs/promises'
 import { defineConfig } from 'astro/config'
 import mdx from '@astrojs/mdx'
 import rehypeMermaid from 'rehype-mermaid'
@@ -29,8 +29,16 @@ export default defineConfig({
     {
       name: 'sitemap-xml',
       hooks: {
-        // Crawlers probe /sitemap.xml by default. Runs after sitemap(), which writes one urlset below 45,000 URLs.
-        'astro:build:done': ({ dir }) => copyFile(new URL('sitemap-0.xml', dir), new URL('sitemap.xml', dir)),
+        // Reuse the generated urlset instead of maintaining a second route inventory.
+        'astro:build:done': async ({ dir }) => {
+          const files = (await readdir(dir)).filter((file) => /^sitemap-\d+\.xml$/.test(file))
+          const urls = (await Promise.all(files.map((file) => readFile(new URL(file, dir), 'utf8'))))
+            .flatMap((xml) => [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map(([, url]) => url.replaceAll('&amp;', '&')))
+          await Promise.all([
+            copyFile(new URL('sitemap-0.xml', dir), new URL('sitemap.xml', dir)),
+            writeFile(new URL('sitemap.txt', dir), `${urls.join('\n')}\n`),
+          ])
+        },
       },
     },
   ],
