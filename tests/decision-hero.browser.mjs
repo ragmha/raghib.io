@@ -4,6 +4,47 @@ import { chromium, webkit } from 'playwright'
 
 const url = process.env.DECISION_HERO_TEST_URL
 
+test('decision hero reserves its layout before the illustration loads', {
+  skip: !url,
+}, async () => {
+  for (const engine of [chromium, webkit]) {
+    const browser = await engine.launch()
+    try {
+      for (const width of [360, 1024, 1440]) {
+        const context = await browser.newContext({ viewport: { width, height: 640 } })
+        try {
+          const page = await context.newPage()
+          let release
+          const pending = new Promise(resolve => { release = resolve })
+          await page.route('**/decision-hero.svg', async route => {
+            await pending
+            await route.continue()
+          })
+          await page.goto(url, { waitUntil: 'load' })
+          await page.evaluate(() => document.fonts.ready)
+          const art = page.locator('.decision-hero-art')
+          const heading = page.locator('.post-head')
+          const beforeArt = await art.boundingBox()
+          const beforeHeading = await heading.boundingBox()
+
+          release()
+          await art.locator('svg[role="img"]').waitFor()
+          const afterArt = await art.boundingBox()
+          const afterHeading = await heading.boundingBox()
+          const label = `${engine.name()} ${width}px`
+          assert.ok(beforeArt?.height > 0, `Illustration space is reserved at ${label}`)
+          assert.ok(Math.abs(afterArt.height - beforeArt.height) < 1, `Illustration height stays stable at ${label}`)
+          assert.ok(Math.abs(afterHeading.y - beforeHeading.y) < 1, `Article heading stays stable at ${label}`)
+        } finally {
+          await context.close()
+        }
+      }
+    } finally {
+      await browser.close()
+    }
+  }
+})
+
 test('decision hero follows the site theme and fits desktop and mobile', {
   skip: !url,
 }, async () => {
