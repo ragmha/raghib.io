@@ -19,7 +19,7 @@ function buildScene() {
   const slab = (plan, z, height, tone = 'mid', options = {}) =>
     body.push(k.solidSvg(k.slabOf(plan, z, height, P, 6, .8), { tone, ...options }))
   const cylinder = (x, y, radius, z, height, tone = 'mid', options = {}) =>
-    body.push(k.solidSvg(k.cylinder(x, y, radius, z, height, P, 48, .5), { tone, ...options }))
+    body.push(k.solidSvg(k.cylinder(x, y, radius, z, height, P, 12, .5), { tone, ...options }))
   const rule = (from, to, z, tone = 'lo') => line(k.lineOnTop(from, to, z, P), tone)
   const outline = (plan, z, tone = 'lo') => line(k.planOutline(plan, z, P), tone)
   const text = (x, y, z, value, size = 5, tone = 'mid') =>
@@ -35,10 +35,11 @@ function buildScene() {
     outline(k.insetPlan(plan, 2.5), z + height, 'faint')
     screws(plan, z + height)
   }
+  const escapeXmlText = value => value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
   const label = (point, value, { dx = 0, dy = 0, tone = 'mid' } = {}) => {
     const [x, y] = at(point)
     const end = [x + dx, y + dy]
-    annotations.push(`<g class="decision-hero-annotation">${k.lineSvg(k.pathOf([[x, y], [x, end[1]], end]), { tone: 'lo' })}<g class="decision-hero-label" data-tone="${tone}" transform="translate(${end[0]} ${end[1] - 10})"><text text-anchor="middle">${value}</text></g></g>`)
+    annotations.push(`<g class="decision-hero-annotation">${k.lineSvg(k.pathOf([[x, y], [x, end[1]], end]), { tone: 'lo' })}<g class="decision-hero-label" data-tone="${tone}" transform="translate(${end[0]} ${end[1] - 10})"><text text-anchor="middle">${escapeXmlText(value)}</text></g></g>`)
   }
   const rail = (points, tone = 'mid', active = false) => {
     const projected = points.map(at)
