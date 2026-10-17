@@ -1,9 +1,18 @@
+import { copyFile, readFile, readdir, writeFile } from 'node:fs/promises'
 import { defineConfig } from 'astro/config'
 import mdx from '@astrojs/mdx'
 import rehypeMermaid from 'rehype-mermaid'
 import sitemap from '@astrojs/sitemap'
 import rehypeParts from './src/lib/rehype-parts.mjs'
 import rehypeInlineDiagrams from './src/lib/rehype-inline-diagrams.mjs'
+import { readPublication } from './scripts/lib/seo-publications.mjs'
+
+const writingDir = 'src/content/writing'
+const postDates = new Map()
+for (const file of (await readdir(writingDir)).filter((file) => /\.mdx?$/.test(file))) {
+  const post = readPublication(await readFile(`${writingDir}/${file}`, 'utf8'), 'writing', file)
+  if (post) postDates.set(`/writing/${file.replace(/\.mdx?$/, '')}/`, post.datePublished)
+}
 
 export default defineConfig({
   site: 'https://raghib.io',
@@ -15,7 +24,23 @@ export default defineConfig({
     mdx(),
     sitemap({
       filter: (page) => new URL(page).pathname.replace(/\/$/, '') !== '/about',
+      serialize: (item) => ({ ...item, lastmod: postDates.get(new URL(item.url).pathname) ?? item.lastmod }),
     }),
+    {
+      name: 'sitemap-xml',
+      hooks: {
+        // Reuse the generated urlset instead of maintaining a second route inventory.
+        'astro:build:done': async ({ dir }) => {
+          const files = (await readdir(dir)).filter((file) => /^sitemap-\d+\.xml$/.test(file))
+          const urls = (await Promise.all(files.map((file) => readFile(new URL(file, dir), 'utf8'))))
+            .flatMap((xml) => [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map(([, url]) => url.replaceAll('&amp;', '&')))
+          await Promise.all([
+            copyFile(new URL('sitemap-0.xml', dir), new URL('sitemap.xml', dir)),
+            writeFile(new URL('sitemap.txt', dir), `${urls.join('\n')}\n`),
+          ])
+        },
+      },
+    },
   ],
   markdown: {
     // Shiki must skip mermaid blocks, otherwise it highlights them into markup
