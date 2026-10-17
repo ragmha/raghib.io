@@ -15,6 +15,10 @@ The disclaimer, verbatim, as the first paragraph after the frontmatter:
 
 > **Disclaimer:** I work at Microsoft. This is my personal view, based only on public information. It isn’t an official position or a product recommendation.
 
+Keep it as a plain bold-label paragraph in MDX. The shared Markdown renderer
+adds the informational callout automatically; do not add per-post components,
+wrappers, or styles.
+
 Flag a post that is missing the disclaimer when it:
 
 - compares, ranks, or recommends commercial products in a market where

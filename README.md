@@ -179,6 +179,14 @@ complete the methodology before sharing it.
 
 ## Writing and project writeups
 
+Every writing post uses `src/pages/writing/[slug].astro`, `WritingLayout.astro`,
+and `src/styles/writing.css` for the same header, metadata, contents navigation,
+and reading layout. Keep content in MDX rather than duplicating page markup;
+headings supply the contents list without imposing the same outline on every post.
+The standard opening `**Disclaimer:**` paragraph automatically becomes a
+theme-aware informational callout. Keep its wording and position as defined in
+`.github/skills/employer-disclaimer/SKILL.md`; no per-post styling is needed.
+
 Posts live in `src/content/writing/`. A project can optionally have a longer
 writeup at `/project/<project-name>/writings/`, authored as MDX in
 `src/content/project-writeups/`; set `published: true` when it's ready to go
@@ -253,6 +261,14 @@ The hero inherits the site's theme. Because it is about 580 KB, it is served
 as `/decision-hero.svg` and inlined after load, so it doesn't delay the title.
 To verify it in a browser, start the dev server and run
 `DECISION_HERO_TEST_URL=http://localhost:4329/writing/decide-cheaply-generate-carefully/ node --test tests/decision-hero.browser.mjs`.
+
+Every other post opens with the same cover anatomy: an isometric illustration
+above the title, a two-line thesis and a short note. Each post gets its own
+invented machine whose working is the explanation, drawn by a scene function in
+`src/lib/flow-hero.mjs` from a shared workshop kit and fitted to the frame
+automatically. `hero` is required frontmatter. For a new post, write a new
+scene and add a `flowHeroes` entry that paraphrases the post without adding
+claims, then set `hero: "<name>"`.
 
 JetBrains Mono uses `font-display: optional` and width-matched fallback text to
 avoid rewrapping content after the first paint. On slow first visits, the system

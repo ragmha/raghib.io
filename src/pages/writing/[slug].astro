@@ -4,7 +4,7 @@ import { Picture } from 'astro:assets'
 import WritingLayout from '../../layouts/WritingLayout.astro'
 import PartsNav from '../../components/PartsNav.astro'
 import DecisionHero from '../../components/DecisionHero.astro'
-import RfpSandboxHero from '../../components/RfpSandboxHero.astro'
+import FlowHero from '../../components/FlowHero.astro'
 import {
   estimateReadingTime,
   getPostCategory,
@@ -63,7 +63,7 @@ const published = new Intl.DateTimeFormat('en-US', {
   )}
   <div class="shell shell-solo">
     <main id="main" class="post-layout">
-      {post.data.hero === 'decision' && <DecisionHero />}
+      {post.data.hero === 'decision' ? <DecisionHero /> : <FlowHero name={post.data.hero} />}
       <header class="post-head">
         {!post.data.published && (
           <p class="draft-notice">Draft preview — not published. Review the account and conclusions before publishing.</p>
@@ -95,8 +95,6 @@ const published = new Intl.DateTimeFormat('en-US', {
           )}
         </dl>
       </header>
-
-      {post.data.hero === 'rfp-sandbox' && <RfpSandboxHero />}
 
       <div class="post-body">
         <aside class="sidebar">
