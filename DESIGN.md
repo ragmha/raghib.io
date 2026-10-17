@@ -59,7 +59,7 @@ and restrained hierarchy rather than simulated commands or dense chrome.
   with a `4rem` gap
 - Article: optional full-bleed cover image (up to 85% of viewport height),
   breadcrumb, large left-aligned title, description, a labelled
-  category/published/reading-time/tags row, body, return link, and an
+  topics/published/reading-time/tags row, body, return link, and an
   always-visible "On this page" list. The header spans the frame above a rule;
   from `64rem` the list is a sticky `13rem` left column beside the article,
   and it stacks above the article on narrower screens

@@ -4,16 +4,16 @@ import PostList from '../../../components/PostList.astro'
 import {
   estimateReadingTime,
   formatDate,
-  getPostCategory,
   getPostSlug,
   getPostTags,
   getPublishedPosts,
   getTagLabel,
-  getTopics,
+  groupPosts,
 } from '../../../lib/posts'
 
 export async function getStaticPaths() {
-  return getTopics(await getPublishedPosts()).map(({ slug, tag, posts }) => ({
+  const posts = await getPublishedPosts()
+  return groupPosts(posts, (post) => post.data.tags).map(({ name: tag, slug, posts }) => ({
     params: { tag: slug },
     props: { tag, posts },
   }))
@@ -32,10 +32,10 @@ const description = `Articles tagged ${label}, with practical perspectives on so
 >
   <header class="post-head" slot="head">
     <nav class="post-crumbs" aria-label="Breadcrumb">
-      <a href="/writing/">Writing</a> / <a href="/writing/tag/">Topics</a> / <span aria-current="page">{label}</span>
+      <a href="/writing/">Writing</a> / <span aria-current="page">Tagged {label}</span>
     </nav>
     <h1>{label}</h1>
-    <p class="post-lede">{posts.length} article{posts.length === 1 ? '' : 's'} on this topic, newest first.</p>
+    <p class="post-lede">{posts.length} article{posts.length === 1 ? '' : 's'} tagged {label}, newest first.</p>
   </header>
   <PostList
     posts={posts.map((post) => ({
@@ -44,11 +44,11 @@ const description = `Articles tagged ${label}, with practical perspectives on so
       title: post.data.title,
       description: post.data.description,
       readingTime: estimateReadingTime(post.body),
-      category: getPostCategory(post),
+      topics: post.data.topics,
       tags: getPostTags(post),
     }))}
   />
-  <p><a href="/writing/tag/">All topics</a></p>
+  <p><a href="/writing/topic/">All topics</a></p>
 </ArchiveLayout>
 
 <style>

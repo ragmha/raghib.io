@@ -1,4 +1,3 @@
-import type { WritingCategory } from '../lib/posts'
 import githubProjects from './github-projects.json'
 
 export interface Project {
@@ -7,13 +6,11 @@ export interface Project {
   url: string
   homepage?: string
   language?: string
-  category?: WritingCategory
   extraLinks?: { label: string; url: string }[]
 }
 
-const overrides: Record<string, Partial<Pick<Project, 'category' | 'description' | 'homepage' | 'extraLinks'>>> = {
+const overrides: Record<string, Partial<Pick<Project, 'description' | 'homepage' | 'extraLinks'>>> = {
   'ragmha/apple-books-mcp': {
-    category: 'AI',
     description: 'Connect AI assistants to your Apple Books library.',
   },
 }
