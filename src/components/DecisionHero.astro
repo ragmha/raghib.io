@@ -5,14 +5,13 @@ import '../styles/anatomy.css'
 ---
 
 <figure class="decision-hero decision-cover iso">
-  <div class="decision-hero-art" data-src="/decision-hero.svg">
-    <div class="decision-hero-fallback">
-      <div class="decision-cover-routes" aria-label="Illustrative routing thresholds">
-        <span data-tone="green"><code>p ≥ 0.90</code> Generate</span>
-        <span><code>0.60 ≤ p &lt; 0.90</code> Review</span>
-        <span data-tone="red"><code>p &lt; 0.60</code> Stop</span>
-      </div>
+  <div class="decision-hero-frame">
+    <div class="decision-cover-routes" aria-label="Illustrative routing thresholds">
+      <span data-tone="green"><code>p ≥ 0.90</code> Generate</span>
+      <span><code>0.60 ≤ p &lt; 0.90</code> Review</span>
+      <span data-tone="red"><code>p &lt; 0.60</code> Stop</span>
     </div>
+    <div class="decision-hero-art" data-src="/decision-hero.svg" hidden></div>
   </div>
   <figcaption>
     <p class="decision-cover-thesis">
@@ -31,6 +30,7 @@ import '../styles/anatomy.css'
         .then((svg) => {
           art.innerHTML = svg
           art.hidden = false
+          art.closest('.decision-cover')?.classList.add('has-illustration')
         })
         .catch(() => {})
     }

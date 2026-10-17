@@ -27,7 +27,13 @@ test('decision hero follows the site theme and fits desktop and mobile', {
             const hero = page.locator('.decision-hero')
             await hero.locator('svg[role="img"]').waitFor()
             assert.equal(await hero.count(), 1)
-            assert.equal(await hero.locator('.decision-hero-fallback').count(), 0, 'Loaded illustration replaces the static routing key')
+            const routes = hero.locator('.decision-cover-routes')
+            assert.equal(await routes.isVisible(), width <= 768, 'Routing thresholds remain visible on mobile')
+            if (width <= 768) {
+              for (const route of await routes.locator('span').all()) {
+                assert.equal(await route.isVisible(), true, 'Every routing threshold is visible on mobile')
+              }
+            }
             assert.ok((await hero.locator('svg[role="img"]').textContent()).includes('p < 0.60  STOP'), 'Loaded illustration labels the stop route')
             assert.equal(await page.locator('.decision-cover + .post-head + .post-body').count(), 1, 'Cover illustration leads the article, above the title')
             assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'Page has no horizontal overflow')
@@ -77,7 +83,7 @@ test('decision hero follows the site theme and fits desktop and mobile', {
   }
 })
 
-test('decision hero keeps its static fallback and reserves space without an illustration', {
+test('decision hero keeps its static key and collapses unavailable artwork', {
   skip: !url,
 }, async () => {
   const browser = await chromium.launch()
@@ -90,9 +96,11 @@ test('decision hero keeps its static fallback and reserves space without an illu
       const page = await noScript.newPage()
       await page.goto(url, { waitUntil: 'domcontentloaded' })
       const art = page.locator('.decision-hero-art')
-      assert.equal(await art.locator('.decision-cover-routes').isVisible(), true, 'Static routing key replaces empty artwork')
-      assert.equal(await art.isVisible(), true)
-      assert.ok((await art.boundingBox()).height > 0, 'The illustration space is reserved without JavaScript')
+      const frame = page.locator('.decision-hero-frame')
+      assert.equal(await page.locator('.decision-cover-routes').isVisible(), true, 'Static routing key remains without JavaScript')
+      assert.equal(await art.isVisible(), false)
+      assert.equal(await art.boundingBox(), null, 'Illustration collapses without JavaScript')
+      assert.ok((await frame.boundingBox()).height > 0, 'Static key replaces the unavailable illustration')
     } finally {
       await noScript.close()
     }
@@ -107,9 +115,11 @@ test('decision hero keeps its static fallback and reserves space without an illu
       await page.goto(url, { waitUntil: 'domcontentloaded' })
       await requestFailure
       const art = page.locator('.decision-hero-art')
-      assert.equal(await art.locator('.decision-cover-routes').isVisible(), true, 'Static routing key remains after a failed request')
-      assert.equal(await art.isVisible(), true)
-      assert.ok((await art.boundingBox()).height > 0, 'The illustration space remains reserved after a failed request')
+      const frame = page.locator('.decision-hero-frame')
+      assert.equal(await page.locator('.decision-cover-routes').isVisible(), true, 'Static routing key remains after a failed request')
+      assert.equal(await art.isVisible(), false)
+      assert.equal(await art.boundingBox(), null, 'Illustration collapses after a failed request')
+      assert.ok((await frame.boundingBox()).height > 0, 'Static key replaces the failed illustration')
     } finally {
       await failedRequest.close()
     }
