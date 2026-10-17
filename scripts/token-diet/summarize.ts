@@ -1,17 +1,24 @@
 // Turns .work/runs into src/data/token-diet.json for /experiments/token-diet/.
-// Usage: bun scripts/token-diet/summarize.ts (after ./run.sh run)
+// Usage: [ROUND=2] [MODEL=x] bun scripts/token-diet/summarize.ts (after ./run.sh run). Round 2 reads .work/r2;
+// a MODEL other than the default reads runs-<model> and writes token-diet[-2]-<model>.json.
 import { spawnSync } from 'node:child_process'
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { assertCompleteRuns } from './validate-runs'
 
 type Kind = 'fresh' | 'cacheRead' | 'cacheWrite' | 'output'
 type Tool = { name: string; ok: boolean; label: string; outTokens: number }
 type Call = Record<Kind, number> & { ms: number; tools: Tool[] }
 
 const kit = dirname(fileURLToPath(import.meta.url))
-const work = join(kit, '.work')
-const outFile = join(kit, '../../src/data/token-diet.json')
+const round = process.env.ROUND === '2' ? 2 : 1
+const venv = join(kit, '.work/venv')
+const work = round === 2 ? join(kit, '.work/r2') : join(kit, '.work')
+const runModel = process.env.MODEL ?? 'claude-sonnet-5.5'
+const suffix = runModel === 'claude-sonnet-5.5' ? '' : `-${runModel}`
+const runsDir = join(work, `runs${suffix}`)
+const outFile = join(kit, `../../src/data/token-diet${round === 2 ? '-2' : ''}${suffix}.json`)
 const read = (...path: string[]) => readFileSync(join(...path), 'utf8')
 const kinds: Record<string, Kind> = { input: 'fresh', cache_read: 'cacheRead', cache_write: 'cacheWrite', output: 'output' }
 const check = (ok: unknown, message: string) => {
@@ -25,14 +32,15 @@ const same = <T>(previous: T | undefined, next: T, what: string) => {
 const rates: Partial<Record<Kind, number>> = {}
 let prompt: string | undefined
 let model: string | undefined
+let copilot: string | undefined
 let effort: string | undefined
 let toolDefinitionsTokens: number | undefined
 
-const runs = readdirSync(join(work, 'runs'))
-  .filter((id) => /^[a-e][1-5]$/.test(id))
+const runs = readdirSync(runsDir)
+  .filter((id) => /^[a-f][1-5]$/.test(id))
   .sort()
   .map((id) => {
-    const dir = join(work, 'runs', id)
+    const dir = join(runsDir, id)
     const box = read(dir, 'sandbox.txt').trim()
     const redact = (text: string) => {
       const label = text
@@ -61,7 +69,11 @@ const runs = readdirSync(join(work, 'runs'))
     let testRunsUnpiped = 0
 
     for (const { type, timestamp, data } of events) {
-      if (type === 'session.start') start = Date.parse(timestamp)
+      if (type === 'session.start') {
+        start = Date.parse(timestamp)
+        model = same(model, data.selectedModel, 'model')
+        copilot = same(copilot, data.copilotVersion, 'Copilot version')
+      }
       if (type === 'user.message') prompt = same(prompt, data.content, 'prompt')
       if (type === 'system.message') skills = (data.content.match(/<skill>\s*<name>/g) ?? []).length
       if (type === 'hook.end') hookChars += data.output?.additionalContext?.length ?? 0
@@ -79,7 +91,7 @@ const runs = readdirSync(join(work, 'runs'))
         check(nano === usage.copilotUsage.totalNanoAiu, `${id}: call cost does not match its token counts`)
         check(call.fresh + call.cacheRead + call.cacheWrite === usage.inputTokens, `${id}: input tokens do not add up`)
         check(call.output === usage.outputTokens, `${id}: output tokens do not match`)
-        model = same(model, usage.model, 'model')
+        check(usage.fusion || usage.model === model, `${id}: call used ${usage.model}`)
         effort = same(effort, usage.reasoningEffort, 'reasoning effort')
         calls.push(call)
         byApiCall.set(usage.apiCallId, call)
@@ -150,9 +162,10 @@ const runs = readdirSync(join(work, 'runs'))
     }
   })
 
-check(runs.length === 25, `expected 25 runs, found ${runs.length}`)
+const canonicalRoundOne = round === 1 && suffix === ''
+assertCompleteRuns(runs, canonicalRoundOne)
 
-const pytest = spawnSync(join(work, 'venv/bin/python'), ['-m', 'pytest', '-q', '-p', 'no:cacheprovider'], {
+const pytest = spawnSync(join(venv, 'bin/python'), ['-m', 'pytest', '-q', '-p', 'no:cacheprovider'], {
   cwd: join(work, 'fixture-repo'),
   encoding: 'utf8',
   env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' },
@@ -171,6 +184,7 @@ const versions = Object.fromEntries(
       return [name, name === 'caveman' ? value.slice(0, 7) : value]
     }),
 )
+versions.copilot = copilot!
 
 const principles = read(kit, 'principles.md')
   .split('\n')
@@ -202,4 +216,4 @@ for (const leak of ['/Users/', '/tmp/ws', '/private/', 'token-diet', 'gho_', 'gh
 }
 mkdirSync(dirname(outFile), { recursive: true })
 writeFileSync(outFile, json)
-console.log(`wrote ${runs.length} runs to ${outFile}`)
+console.log(`wrote ${runs.length} runs to ${relative(process.cwd(), outFile)}`)
