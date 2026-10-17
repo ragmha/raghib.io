@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import { describe, test } from 'node:test'
 import { correlation, cost, instructions, kinds, median, medianRun, reveal, total } from '../src/lib/token-diet'
 import type { Run, Tokens } from '../src/lib/token-diet'
+import { assertCompleteRuns } from '../scripts/token-diet/validate-runs'
 
 const raw = readFileSync(new URL('../src/data/token-diet.json', import.meta.url), 'utf8')
 const data = JSON.parse(raw) as { principles: string[]; rates: Tokens; runs: Run[] }
@@ -10,6 +11,33 @@ const roundTwoRaw = readFileSync(new URL('../src/data/token-diet-2.json', import
 const roundTwo = JSON.parse(roundTwoRaw) as { rates: Tokens; runs: Run[] }
 const tokens = (cacheRead: number, cacheWrite: number, fresh: number, output: number): Tokens =>
   ({ cacheRead, cacheWrite, fresh, output })
+
+describe('token diet run completeness', () => {
+  const runsFor = (variants: string, count = 5) =>
+    [...variants].flatMap((variant) => Array.from({ length: count }, () => ({ variant })))
+
+  test('accepts complete original and optimizer setup groups', () => {
+    assert.doesNotThrow(() => assertCompleteRuns(runsFor('abcde'), false))
+    assert.doesNotThrow(() => assertCompleteRuns(runsFor('abcdef'), false))
+    assert.doesNotThrow(() => assertCompleteRuns(runsFor('abcdef'), true))
+  })
+
+  test('canonical round one requires the optimizer group', () => {
+    assert.throws(() => assertCompleteRuns(runsFor('abcde'), true), /setup f, found 0/)
+  })
+
+  test('rejects 25 runs without a baseline or with unequal sample sizes', () => {
+    assert.throws(() => assertCompleteRuns(runsFor('bcdef'), false), /setup a, found 0/)
+    const uneven = [...runsFor('abcde', 4), ...runsFor('f')]
+    assert.equal(uneven.length, 25)
+    assert.throws(() => assertCompleteRuns(uneven, false), /setup a, found 4/)
+  })
+
+  test('rejects partial optimizer groups and unexpected setups', () => {
+    assert.throws(() => assertCompleteRuns([...runsFor('abcde'), ...runsFor('f', 4)], false), /setup f, found 4/)
+    assert.throws(() => assertCompleteRuns(runsFor('abcdeg'), false), /unexpected setups/)
+  })
+})
 
 describe('token diet math', () => {
   test('median handles odd, even and empty lists', () => {

@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process'
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { assertCompleteRuns } from './validate-runs'
 
 type Kind = 'fresh' | 'cacheRead' | 'cacheWrite' | 'output'
 type Tool = { name: string; ok: boolean; label: string; outTokens: number }
@@ -162,16 +163,7 @@ const runs = readdirSync(runsDir)
   })
 
 const canonicalRoundOne = round === 1 && suffix === ''
-const runCounts = Object.fromEntries(
-  'abcdef'.split('').map((variant) => [variant, runs.filter((run) => run.variant === variant).length]),
-)
-const requiredVariants = canonicalRoundOne ? 'abcdef' : `abcde${runCounts.f ? 'f' : ''}`
-check(
-  [...requiredVariants].every((variant) => runCounts[variant] === 5),
-  canonicalRoundOne
-    ? `expected five runs for all six setups before writing the canonical Round 1 dataset, found ${runs.length}`
-    : `expected five runs for setups ${requiredVariants}, found ${runs.length}`,
-)
+assertCompleteRuns(runs, canonicalRoundOne)
 
 const pytest = spawnSync(join(venv, 'bin/python'), ['-m', 'pytest', '-q', '-p', 'no:cacheprovider'], {
   cwd: join(work, 'fixture-repo'),

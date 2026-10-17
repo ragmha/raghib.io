@@ -61,9 +61,10 @@ personal research and testing; see the [license](https://github.com/alexgreensh/
 commit subjects. Each `run <round>` launches all six setups concurrently. The
 summarizer requires all 30 runs before writing the canonical Round 1 dataset,
 so a missing Token Optimizer setup cannot replace the published comparison.
-Round 2 and non-default model summaries accept 25 runs across the original
-setups or all 30 with Token Optimizer. Every summary checks token totals, usage
-charges, and redaction before writing the JSON file.
+Round 2 and non-default model summaries require five runs of every original
+setup (a-e), plus all five Token Optimizer runs whenever setup f is present.
+Every summary checks token totals, usage charges, and redaction before writing
+the JSON file.
 
 The public page is `/experiments/token-diet/`. Round 1 and the regression-hunt
 Round 2 have separate views, each with its own call waterfall, measurements,
