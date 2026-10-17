@@ -114,6 +114,7 @@ const TAG_LABELS: Record<string, string> = {
   operations: 'Operations',
   react: 'React',
   rsc: 'React Server Components',
+  til: 'TIL',
   writing: 'Writing',
 }
 
