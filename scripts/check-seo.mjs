@@ -183,6 +183,13 @@ try {
     sitemapUrls.push(...await xmlValues(url.pathname.slice(1), 'loc'))
   }
   assert.deepEqual(sitemapUrls.sort(), publicUrls.sort(), 'Sitemap must contain exactly the canonical, indexable pages')
+  for (const [file, pattern] of [
+    ['llms.txt', /\]\((https:\/\/[^)]+\/writing\/[^/)]+\/)\)/g],
+    ['llms-full.txt', /^URL: (.+)$/gm],
+  ]) {
+    const urls = [...(await readFile(resolve(root, file), 'utf8')).matchAll(pattern)].map((match) => match[1])
+    assert.deepEqual(urls.sort(), [...writingUrls].sort(), `${file} must list exactly the published writing`)
+  }
   for (const [pageUrl, metadata] of documents) {
     for (const href of metadata.links) {
       const target = new URL(href, pageUrl)
