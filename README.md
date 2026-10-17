@@ -249,7 +249,8 @@ The decision-model post uses one isometric hero, built server-side by
 kit and license live in `scripts/vendor/anatomy/` (upstream commit
 `689dcf966e63d92be10a5d593c6e19e10acd4422`). A plain-language key explains
 the input, small decision model and example routes without requiring JavaScript.
-The hero inherits the site's theme.
+The hero inherits the site's theme. Because it is about 580 KB, it is served
+as `/decision-hero.svg` and inlined after load, so it doesn't delay the title.
 To verify it in a browser, start the dev server and run
 `DECISION_HERO_TEST_URL=http://localhost:4329/writing/decide-cheaply-generate-carefully/ node --test tests/decision-hero.browser.mjs`.
 

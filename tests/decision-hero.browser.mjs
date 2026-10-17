@@ -25,7 +25,35 @@ test('decision hero follows the site theme and fits desktop and mobile', {
             await page.goto(url, { waitUntil: 'domcontentloaded' })
 
             const hero = page.locator('.decision-hero')
+            await hero.locator('svg[role="img"]').waitFor()
             assert.equal(await hero.count(), 1)
+            const routes = hero.locator('.decision-cover-routes')
+            assert.equal(await routes.isVisible(), width <= 768, 'Routing thresholds remain visible on mobile')
+            if (width <= 768) {
+              for (const route of await routes.locator('span').all()) {
+                assert.equal(await route.isVisible(), true, 'Every routing threshold is visible on mobile')
+              }
+              const routingLayer = await routes.evaluate(element => {
+                const artwork = document.querySelector('.decision-hero-art')
+                const samples = [...element.querySelectorAll('span')].map(route => {
+                  const bounds = route.getBoundingClientRect()
+                  const hit = document.elementFromPoint(
+                    bounds.left + bounds.width / 2,
+                    bounds.top + bounds.height / 2,
+                  )
+                  return hit !== null && route.contains(hit)
+                })
+                return {
+                  artworkLoaded: artwork !== null && !artwork.hidden,
+                  zIndex: getComputedStyle(element).zIndex,
+                  labelsAreTopmost: samples.every(Boolean),
+                }
+              })
+              assert.equal(routingLayer.artworkLoaded, true, 'Mobile routing labels are checked against loaded artwork')
+              assert.equal(routingLayer.zIndex, '1', 'Mobile routing labels paint above the artwork')
+              assert.equal(routingLayer.labelsAreTopmost, true, 'Loaded artwork does not cover mobile routing labels')
+            }
+            assert.ok((await hero.locator('svg[role="img"]').textContent()).includes('p < 0.60  STOP'), 'Loaded illustration labels the stop route')
             assert.equal(await page.locator('.decision-cover + .post-head + .post-body').count(), 1, 'Cover illustration leads the article, above the title')
             assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'Page has no horizontal overflow')
             assert.equal(await hero.locator('[data-anatomy]').count(), 0)
@@ -54,6 +82,7 @@ test('decision hero follows the site theme and fits desktop and mobile', {
                   .some(signal => getComputedStyle(signal).animationName !== 'none'),
               }
             })
+
             const contextLabel = `${engine.name()} ${theme} ${width}px`
             assert.equal(result.paper, theme === 'dark' ? 'rgb(24, 24, 24)' : 'rgb(243, 243, 243)', contextLabel)
             assert.equal(result.background, result.pageBackground, `Cover blends into the ${contextLabel} page`)
@@ -70,5 +99,50 @@ test('decision hero follows the site theme and fits desktop and mobile', {
     } finally {
       await browser.close()
     }
+  }
+})
+
+test('decision hero keeps its static key and collapses unavailable artwork', {
+  skip: !url,
+}, async () => {
+  const browser = await chromium.launch()
+  try {
+    const noScript = await browser.newContext({
+      viewport: { width: 1024, height: 900 },
+      javaScriptEnabled: false,
+    })
+    try {
+      const page = await noScript.newPage()
+      await page.goto(url, { waitUntil: 'domcontentloaded' })
+      const art = page.locator('.decision-hero-art')
+      const frame = page.locator('.decision-hero-frame')
+      assert.equal(await page.locator('.decision-cover-routes').isVisible(), true, 'Static routing key remains without JavaScript')
+      assert.equal(await art.isVisible(), false)
+      assert.equal(await art.boundingBox(), null, 'Illustration collapses without JavaScript')
+      assert.ok((await frame.boundingBox()).height > 0, 'Static key replaces the unavailable illustration')
+    } finally {
+      await noScript.close()
+    }
+
+    const failedRequest = await browser.newContext({ viewport: { width: 1024, height: 900 } })
+    try {
+      const page = await failedRequest.newPage()
+      await page.route('**/decision-hero.svg', route => route.abort())
+      const requestFailure = page.waitForEvent('requestfailed', {
+        predicate: request => request.url().endsWith('/decision-hero.svg'),
+      })
+      await page.goto(url, { waitUntil: 'domcontentloaded' })
+      await requestFailure
+      const art = page.locator('.decision-hero-art')
+      const frame = page.locator('.decision-hero-frame')
+      assert.equal(await page.locator('.decision-cover-routes').isVisible(), true, 'Static routing key remains after a failed request')
+      assert.equal(await art.isVisible(), false)
+      assert.equal(await art.boundingBox(), null, 'Illustration collapses after a failed request')
+      assert.ok((await frame.boundingBox()).height > 0, 'Static key replaces the failed illustration')
+    } finally {
+      await failedRequest.close()
+    }
+  } finally {
+    await browser.close()
   }
 })

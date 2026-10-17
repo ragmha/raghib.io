@@ -38,7 +38,15 @@ html[data-theme='light'] .decision-hero {
   --anatomy-halo-opacity: .28;
 }
 
+.decision-hero-frame {
+  position: relative;
+  aspect-ratio: 1500 / 740;
+  min-width: 0;
+}
+
 .decision-hero-art {
+  position: absolute;
+  inset: 0;
   min-width: 0;
 }
 
@@ -92,9 +100,12 @@ html[data-theme='light'] .decision-hero {
   --anatomy-weight: .7px;
 }
 
-.decision-cover .decision-hero-art {
+.decision-cover .decision-hero-frame {
   max-width: 76rem;
   margin-inline: auto;
+}
+
+.decision-cover .decision-hero-art {
   padding-inline: clamp(0rem, 2vw, 2rem);
 }
 
@@ -150,11 +161,14 @@ html[data-theme='light'] .decision-hero {
 }
 
 .decision-cover-routes {
-  display: none;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-content: center;
   justify-content: center;
   flex-wrap: wrap;
   gap: .65rem 2rem;
-  margin-block: 1.5rem .8rem;
+  margin: 0;
   color: var(--theme-text);
   font-size: .75rem;
 }
@@ -174,6 +188,10 @@ html[data-theme='light'] .decision-hero {
 .decision-cover-routes [data-tone='green'] { color: var(--theme-green); }
 .decision-cover-routes [data-tone='red'] { color: var(--theme-red); }
 
+.decision-cover.has-illustration .decision-cover-routes {
+  display: none;
+}
+
 .decision-cover-note {
   max-width: 46ch;
   margin: 0 0 0 auto;
@@ -189,6 +207,11 @@ html[data-theme='light'] .decision-hero {
 
   .decision-cover .decision-hero-annotation {
     display: none;
+  }
+
+  .decision-cover.has-illustration .decision-cover-routes {
+    display: flex;
+    z-index: 1;
   }
 
   .decision-cover figcaption {
@@ -208,7 +231,6 @@ html[data-theme='light'] .decision-hero {
   .decision-cover-routes {
     display: flex;
     gap: .6rem 1rem;
-    margin-top: 1rem;
   }
 
   .decision-cover-routes span {
