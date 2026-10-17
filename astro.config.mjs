@@ -5,6 +5,7 @@ import rehypeMermaid from 'rehype-mermaid'
 import sitemap from '@astrojs/sitemap'
 import rehypeParts from './src/lib/rehype-parts.mjs'
 import rehypeInlineDiagrams from './src/lib/rehype-inline-diagrams.mjs'
+import rehypeEmployerDisclaimer from './src/lib/rehype-employer-disclaimer.mjs'
 import { readPublication } from './scripts/lib/seo-publications.mjs'
 
 const writingDir = 'src/content/writing'
@@ -92,6 +93,7 @@ export default defineConfig({
           },
         },
       ],
+      rehypeEmployerDisclaimer,
       rehypeParts,
       rehypeInlineDiagrams,
     ],

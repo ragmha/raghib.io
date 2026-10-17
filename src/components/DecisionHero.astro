@@ -1,7 +1,6 @@
 ---
 import '../../scripts/vendor/anatomy/iso.css'
 import '../styles/anatomy.css'
-// The ~580 KB illustration loads after the title so it doesn't delay LCP; inlining it keeps theme styles.
 ---
 
 <figure class="decision-hero decision-cover iso">
@@ -24,15 +23,6 @@ import '../styles/anatomy.css'
     </p>
   </figcaption>
   <script>
-    for (const art of document.querySelectorAll<HTMLElement>('.decision-hero-art[data-src]')) {
-      fetch(art.dataset.src!)
-        .then((response) => (response.ok ? response.text() : Promise.reject()))
-        .then((svg) => {
-          art.innerHTML = svg
-          art.hidden = false
-          art.closest('.decision-cover')?.classList.add('has-illustration')
-        })
-        .catch(() => {})
-    }
+    import '../scripts/hero-art.ts'
   </script>
 </figure>

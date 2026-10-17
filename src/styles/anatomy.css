@@ -76,6 +76,14 @@ html[data-theme='light'] .decision-hero {
   fill: var(--anatomy-red);
 }
 
+.decision-hero-label[data-tone='blue'] text {
+  fill: var(--anatomy-blue);
+}
+
+.decision-hero-label[data-tone='mid'] text {
+  fill: var(--anatomy-mid);
+}
+
 .decision-hero figcaption {
   max-width: 84rem;
   margin: 1rem auto 0;
@@ -187,6 +195,7 @@ html[data-theme='light'] .decision-hero {
 
 .decision-cover-routes [data-tone='green'] { color: var(--theme-green); }
 .decision-cover-routes [data-tone='red'] { color: var(--theme-red); }
+.decision-cover-routes [data-tone='blue'] { color: var(--theme-blue); }
 
 .decision-cover.has-illustration .decision-cover-routes {
   display: none;
@@ -235,5 +244,7 @@ html[data-theme='light'] .decision-hero {
 
   .decision-cover-routes span {
     gap: .4rem;
+    padding: .15rem .4rem;
+    background: var(--theme-bg);
   }
 }
