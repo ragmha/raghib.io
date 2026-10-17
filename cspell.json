@@ -4,11 +4,13 @@
   "files": ["src/content/**/*.{md,mdx}"],
   "words": [
     "Abramov",
+    "advsec",
     "cutover",
     "cutovers",
     "dmarc",
     "excalidraw",
     "GHCP",
+    "githubabcs",
     "groupby",
     "Namecheap",
     "noall",
