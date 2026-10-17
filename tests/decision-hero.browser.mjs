@@ -33,6 +33,25 @@ test('decision hero follows the site theme and fits desktop and mobile', {
               for (const route of await routes.locator('span').all()) {
                 assert.equal(await route.isVisible(), true, 'Every routing threshold is visible on mobile')
               }
+              const routingLayer = await routes.evaluate(element => {
+                const artwork = document.querySelector('.decision-hero-art')
+                const samples = [...element.querySelectorAll('span')].map(route => {
+                  const bounds = route.getBoundingClientRect()
+                  const hit = document.elementFromPoint(
+                    bounds.left + bounds.width / 2,
+                    bounds.top + bounds.height / 2,
+                  )
+                  return hit !== null && route.contains(hit)
+                })
+                return {
+                  artworkLoaded: artwork !== null && !artwork.hidden,
+                  zIndex: getComputedStyle(element).zIndex,
+                  labelsAreTopmost: samples.every(Boolean),
+                }
+              })
+              assert.equal(routingLayer.artworkLoaded, true, 'Mobile routing labels are checked against loaded artwork')
+              assert.equal(routingLayer.zIndex, '1', 'Mobile routing labels paint above the artwork')
+              assert.equal(routingLayer.labelsAreTopmost, true, 'Loaded artwork does not cover mobile routing labels')
             }
             assert.ok((await hero.locator('svg[role="img"]').textContent()).includes('p < 0.60  STOP'), 'Loaded illustration labels the stop route')
             assert.equal(await page.locator('.decision-cover + .post-head + .post-body').count(), 1, 'Cover illustration leads the article, above the title')

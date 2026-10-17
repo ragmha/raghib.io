@@ -211,6 +211,7 @@ html[data-theme='light'] .decision-hero {
 
   .decision-cover.has-illustration .decision-cover-routes {
     display: flex;
+    z-index: 1;
   }
 
   .decision-cover figcaption {
