@@ -39,6 +39,7 @@ html[data-theme='light'] .decision-hero {
 }
 
 .decision-hero-art {
+  aspect-ratio: 1500 / 740;
   min-width: 0;
 }
 

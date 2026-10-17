@@ -76,7 +76,7 @@ test('decision hero follows the site theme and fits desktop and mobile', {
   }
 })
 
-test('decision hero keeps its static key without an illustration', {
+test('decision hero keeps its static key and reserves space without an illustration', {
   skip: !url,
 }, async () => {
   const browser = await chromium.launch()
@@ -89,7 +89,9 @@ test('decision hero keeps its static key without an illustration', {
       const page = await noScript.newPage()
       await page.goto(url, { waitUntil: 'domcontentloaded' })
       assert.equal(await page.locator('.decision-cover-routes').isVisible(), true)
-      assert.equal(await page.locator('.decision-hero-art').isVisible(), false)
+      const art = page.locator('.decision-hero-art')
+      assert.equal(await art.isVisible(), true)
+      assert.ok((await art.boundingBox()).height > 0, 'The illustration space is reserved without JavaScript')
     } finally {
       await noScript.close()
     }
@@ -104,7 +106,9 @@ test('decision hero keeps its static key without an illustration', {
       await page.goto(url, { waitUntil: 'domcontentloaded' })
       await requestFailure
       assert.equal(await page.locator('.decision-cover-routes').isVisible(), true)
-      assert.equal(await page.locator('.decision-hero-art').isVisible(), false)
+      const art = page.locator('.decision-hero-art')
+      assert.equal(await art.isVisible(), true)
+      assert.ok((await art.boundingBox()).height > 0, 'The illustration space remains reserved after a failed request')
     } finally {
       await failedRequest.close()
     }
