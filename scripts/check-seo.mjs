@@ -33,6 +33,12 @@ assert.match(robots, /^User-agent: \*$/m)
 assert.match(robots, /^Allow: \/$/m)
 assert.ok(!/^Disallow:\s*\/\s*$/m.test(robots), 'Public pages must be crawlable')
 assert.ok(robots.split(/\r?\n/).includes(`Sitemap: ${new URL('/sitemap-index.xml', site).href}`))
+assert.ok(robots.split(/\r?\n/).includes(`Sitemap: ${new URL('/sitemap.xml', site).href}`))
+assert.doesNotMatch(
+  await readFile(resolve(root, 'llms-full.txt'), 'utf8'),
+  /<svg|class="/,
+  'llms-full.txt must be plain text, not markup or MDX source',
+)
 
 const browser = await chromium.launch({ headless: true })
 try {
@@ -183,6 +189,12 @@ try {
     sitemapUrls.push(...await xmlValues(url.pathname.slice(1), 'loc'))
   }
   assert.deepEqual(sitemapUrls.sort(), publicUrls.sort(), 'Sitemap must contain exactly the canonical, indexable pages')
+  assert.deepEqual((await xmlValues('sitemap.xml', 'loc')).sort(), publicUrls.sort(), '/sitemap.xml must contain exactly the canonical, indexable pages')
+  assert.deepEqual(
+    (await xmlValues('sitemap.xml', 'url:has(lastmod) > loc')).sort(),
+    [...writingUrls].sort(),
+    '/sitemap.xml must give every published post a lastmod',
+  )
   for (const [file, pattern] of [
     ['llms.txt', /\]\((https:\/\/[^)]+\/writing\/[^/)]+\/)\)/g],
     ['llms-full.txt', /^URL: (.+)$/gm],

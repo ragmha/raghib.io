@@ -295,8 +295,10 @@ bun run check:vitals
 The audit reads the generated HTML in Chromium with page scripts disabled.
 It requires unique titles/descriptions, one H1, canonical and social metadata,
 a real social-preview image, valid author/article schema, working internal links
-and image assets, and correct sitemap/robots/RSS discovery. `llms.txt` and
-`llms-full.txt` must list exactly the published writing. Every published
+and image assets, and correct sitemap/robots/RSS discovery. `/sitemap.xml`
+mirrors the sitemap index's pages, with `lastmod` on published writing.
+`llms.txt` and `llms-full.txt` must list exactly the published writing, and
+`llms-full.txt` must be rendered plain text. Every published
 source entry must have a corresponding rendered article with matching metadata;
 drafts must not leak into the build. An intentionally empty writing archive is
 valid. Editable `.excalidraw` originals belong outside `public/`.
