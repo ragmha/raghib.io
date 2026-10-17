@@ -8,16 +8,28 @@ published: false
 hero: "rfp-sandbox"
 ---
 
-A vendor questionnaire arrives. Someone copies earlier answers into a spreadsheet. The buyer still has to work out which answers are current and what supports them.
+I've been wondering why vendor questionnaires still travel as spreadsheets.
+Instead of filling in another one, could a vendor offer the buyer something to
+run?
 
-The spreadsheet isn't the real problem. A buyer can't tell whether a cell that says "Yes" is a current fact, a policy intention, or a copy of something that was true two years ago.
+When I looked around, most of the tooling I found helped vendors answer faster:
+libraries of approved answers and, more recently, MCP servers so an assistant
+can draft responses. Trust centers publish policies and reports. I found much
+less that helps a buyer check a single answer.
 
-So I tried a different shape: **what if each answer came with a sandbox that checks it?**
+The spreadsheet isn't the real problem. A buyer can't tell whether a cell that
+says "Yes" is a current fact, a policy intention, or a copy of something that
+was true two years ago.
 
-## The experiment
+So I tried a small version of a different shape: **what if each answer came
+with a sandbox that checks it?**
 
-The sample project is public at [github.com/ragmha/rfp-sandbox](https://github.com/ragmha/rfp-sandbox).
-The run below is [this recorded report](https://github.com/ragmha/rfp-sandbox/blob/fee92e337877d73dc4f5706a2ac9564c9ef3fcb8/report.json),
+## Six answers, one sandbox
+
+I kept the sample to six questions a security review might ask, small enough to
+read in one sitting. It's public at
+[github.com/ragmha/rfp-sandbox](https://github.com/ragmha/rfp-sandbox). The run
+below is [this recorded report](https://github.com/ragmha/rfp-sandbox/blob/fee92e337877d73dc4f5706a2ac9564c9ef3fcb8/report.json),
 pinned to the commit whose source hashes it records.
 
 To reproduce it, install Docker Compose, Terraform, and Python 3.11+, then run:
@@ -30,9 +42,10 @@ terraform -chdir=terraform apply       # the integration the buyer reviews first
 python3 run_checks.py --check-revocation
 ```
 
-The last command explicitly permits disabling and restoring a disposable test user.
-Without that flag, the revocation check stays **unknown**. For a no-infrastructure
-start, `python3 run_checks.py --self-test` exercises the checks offline.
+The last command explicitly permits disabling and restoring a disposable test
+user. Without that flag, the revocation check stays **unknown**. For a
+no-infrastructure start, `python3 run_checks.py --self-test` exercises the
+checks offline.
 
 ## What one run found
 
@@ -49,29 +62,36 @@ hand-authored fixtures, not live production telemetry:
 | Can we export audit logs? | Yes, daily | ⏳ stale | Evidence is 253 days old |
 | Is customer data encrypted at rest? | Yes, AES-256 | ❔ unknown | No evidence provided; this sample cannot verify the claim |
 
-Six "yes" answers became three locally supported results, one contradiction, one
-stale observation, and one unknown. The checks make those decisions without a model.
-The report includes its timestamp and source/configuration hashes; rerunning later
-can change freshness results.
+Six "yes" answers became three locally supported results, one contradiction,
+one stale observation, and one unknown. The checks make those decisions without
+a model. The report includes its timestamp and source/configuration hashes;
+rerunning later can change freshness results.
 
-## Small enough to inspect
+I think the unknown is the most useful row. In a spreadsheet, the encryption
+answer would sit beside the others as another "Yes". Here it stays visibly
+unchecked, so the buyer knows where to ask next.
 
-The README covers setup and teardown. An optional FastMCP server exposes
-`list_claims` and `get_answer` over local stdio. It serves the recorded report,
-including its date and scope; it cannot deploy resources or run checks.
+## What the sample doesn't prove
 
-This is deliberately not a complete vendor application. Token checks use a password
-grant, not browser SSO or PKCE. Permission checks exercise a Python function, not a
-real export endpoint. Revocation is observed after disabling, not measured as an
-instantaneous guarantee. The sample proves those narrow behaviors, not production readiness.
+Because my starting question was about MCP, I added an optional FastMCP server
+that exposes `list_claims` and `get_answer` over local stdio. It serves the
+recorded report, including its date and scope; it can't deploy resources or run
+checks. The README covers setup and teardown.
 
-## The customer-hosted direction
+This is deliberately not a complete vendor application. Token checks use a
+password grant, not browser SSO or PKCE. Permission checks exercise a Python
+function, not a real export endpoint. Revocation is observed after disabling,
+not measured as an instantaneous guarantee. The sample proves those narrow
+behaviors, not production readiness.
 
-The next useful question is whether a buyer can run the evaluation inside their
-own private network, with their own identity provider. That is a direction, not a
-feature of this sample. Only local Keycloak is implemented; another provider needs
-different Terraform resources and identity checks, not just a renamed provider.
-Customer VPC deployment, SCIM, and agent-to-agent exchange remain unbuilt.
+## Running it inside the buyer's network
+
+The next thing I'd want to test is whether a buyer can run the evaluation inside
+their own private network, with their own identity provider. That's a direction,
+not a feature of this sample. Only local Keycloak is implemented; another
+provider needs different Terraform resources and identity checks, not just a
+renamed provider. Customer VPC deployment, SCIM, and agent-to-agent exchange
+remain unbuilt.
 
 I don't think this makes the spreadsheet obsolete. It changes what a "yes" can
 point to: a check with visible evidence, date and scope. The buyer still decides
