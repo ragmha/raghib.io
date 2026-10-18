@@ -4,9 +4,12 @@
   "files": ["src/content/**/*.{md,mdx}"],
   "words": [
     "Abramov",
+    "ANAME",
     "cutover",
     "cutovers",
     "Descr",
+    "DNSKEY",
+    "DNSSEC",
     "dmarc",
     "evals",
     "excalidraw",
