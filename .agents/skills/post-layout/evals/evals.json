@@ -1,0 +1,52 @@
+{
+  "skill_name": "post-layout",
+  "evals": [
+    {
+      "id": 1,
+      "name": "tool-errors-post",
+      "prompt": "hey can you draft a new post for the blog? I want to argue that before you give an agent more tools, you should make each tool's failures obvious: return errors the model can act on, not empty strings or stack traces. keep it short, around 700 words, and leave it as a draft",
+      "expected_output": "A short draft blog post in src/content/writing/ with its own new flow hero, a machine whose parts map to the post's idea, and at least one Mermaid or Excalidraw diagram, chosen with diagram-design, that shows a claim the post makes. The final message names the diagram's claim, type, and medium.",
+      "files": [],
+      "assertions": [
+        "Adds one new post in src/content/writing/ whose hero is a flowHeroes entry that no other post uses",
+        "bun test tests/flow-hero.test.mjs tests/post-layout.test.mjs passes",
+        "The hero scene draws a recognizable machine from workshop-kit parts with one lit part, and its labels map to ideas the post discusses rather than to boxes and arrows",
+        "The post has at least one diagram, every diagram renders within 9 nodes and 12 edges, and every Mermaid block has accTitle and accDescr",
+        "The diagram shows a claim the post's text makes and adds no claim the text doesn't make",
+        "The final message names the diagram's claim, its pattern or type, and its medium"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "classifier-eval-tutorial",
+      "prompt": "Write a tutorial post, as a draft, that builds a small eval harness for an LLM text classifier in TypeScript. It should load a JSONL file of labeled examples, call the model for each one, report precision and recall per label, and exit non-zero in CI when any label's recall drops below a threshold. Readers should be able to run the whole thing end to end.",
+      "expected_output": "A draft tutorial post that keeps to 150 lines of fenced code or fewer, links a companion repository under github.com/ragmha/ near the top with clone and run commands, and shows only the excerpts that carry the idea. The agent asks the author before creating that repository. The post has its own flow hero and at least one diagram.",
+      "files": [],
+      "assertions": [
+        "Adds one new post in src/content/writing/ whose hero is a flowHeroes entry that no other post uses",
+        "bun test tests/flow-hero.test.mjs tests/post-layout.test.mjs passes",
+        "The post has at most 150 lines of fenced code, not counting Mermaid",
+        "The post links a companion repository under github.com/ragmha/ before its second ## heading and gives clone and run commands",
+        "No GitHub repository is created, and the final message asks the author before creating the companion repository",
+        "The post has at least one diagram, every diagram renders within 9 nodes and 12 edges, and every Mermaid block has accTitle and accDescr",
+        "The diagram shows a claim the post's text makes and adds no claim the text doesn't make"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "git-config-til",
+      "prompt": "Quick TIL for the blog: the five git config settings I now set on every new machine: rerere.enabled, push.autoSetupRemote, fetch.prune, rebase.autoStash, and init.defaultBranch. Draft it.",
+      "expected_output": "A short draft TIL post with its own flow hero and a diagram that shows how the settings relate, for example where each one acts in the init, fetch, rebase, and push cycle, rather than the five settings drawn as a one-level tree or list.",
+      "files": [],
+      "assertions": [
+        "Adds one new post in src/content/writing/ whose hero is a flowHeroes entry that no other post uses",
+        "bun test tests/flow-hero.test.mjs tests/post-layout.test.mjs passes",
+        "The hero scene draws a recognizable machine from workshop-kit parts with one lit part, and its labels map to ideas the post discusses rather than to boxes and arrows",
+        "The post has at least one diagram, every diagram renders within 9 nodes and 12 edges, and every Mermaid block has accTitle and accDescr",
+        "The diagram shows how the settings relate, such as when or where each one acts, rather than grouping the five settings under one node",
+        "The diagram shows a claim the post's text makes and adds no claim the text doesn't make",
+        "The final message names the diagram's claim, its pattern or type, and its medium"
+      ]
+    }
+  ]
+}
