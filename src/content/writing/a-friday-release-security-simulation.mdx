@@ -16,7 +16,7 @@ works with the test account, and the release is already on the calendar.
 
 Then a security check raises an alert.
 
-<figure class="excalidraw-figure responsive-diagram">
+<figure class="excalidraw-figure responsive-diagram ink-diagram">
   <picture>
     <source
       media="(max-width: 60rem)"
@@ -78,7 +78,7 @@ parameters][owasp-sqli] addresses the injection path. [Enforcing tenant
 access][owasp-authz] addresses who may read a record. One should not be treated
 as a substitute for the other.
 
-<figure class="excalidraw-figure responsive-diagram">
+<figure class="excalidraw-figure responsive-diagram ink-diagram">
   <picture>
     <source
       media="(max-width: 60rem)"
@@ -122,7 +122,7 @@ The experiment would follow the change through a normal review:
 5. Rerun the checks and make the release decision based on the code, tests, and
    alert results together.
 
-<figure class="excalidraw-figure responsive-diagram">
+<figure class="excalidraw-figure responsive-diagram ink-diagram">
   <picture>
     <source
       media="(max-width: 60rem)"
@@ -136,11 +136,11 @@ The experiment would follow the change through a normal review:
       height="1036"
       loading="lazy"
       decoding="async"
-      alt="Six steps from alert to decision. One: a pull request adds invoice search that builds SQL from user input. Two: build, tests, and security scanning run. Three: triage whether the alert is real, which tenant data is in scope, and what the checks missed. Four, highlighted: hold the release while a credible path to another tenant's data is open. Five: fix both risks with query parameters, a tenant check, and regression tests. Six, highlighted: rerun the same checks, then ship or hold with written reasons."
+      alt="Six steps from alert to decision. One: a pull request adds invoice search that builds SQL from user input. Two: build, tests, and security scanning run. Three: triage whether the alert is real, which tenant data is in scope, and what the checks missed. Four, outlined in bold: hold the release while a credible path to another tenant's data is open. Five: fix both risks with query parameters, a tenant check, and regression tests. Six, outlined in bold: rerun the same checks, then ship or hold with written reasons."
     />
   </picture>
   <figcaption>
-    The highlighted steps are human decisions. The checks feed them; they don't
+    The bold steps are human decisions. The checks feed them; they don't
     replace them. <a href="/diagrams/friday-release-decision-flow.svg" target="_blank" rel="noopener noreferrer">Open full-size diagram.</a>
   </figcaption>
 </figure>

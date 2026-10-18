@@ -576,6 +576,11 @@ main {
   max-width: 100%;
 }
 
+/* Black ink on a transparent SVG; lift it to the dark theme's text color. */
+:root:not([data-theme='light']) .ink-diagram img {
+  filter: invert(0.906);
+}
+
 /* ------------------------------------------------------------ lists */
 
 .prose .post-list {
