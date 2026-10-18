@@ -3,9 +3,11 @@ title: "A Friday Release, a Tenant Boundary, and One Security Alert"
 seoTitle: "A Friday Release Security Simulation"
 description: "A fictional invoice-search feature becomes a practical test of what security checks catch, what they miss, and how a team should respond."
 date: "2026-10-17"
+topics: ["Learning & Growth"]
 tags: ["security", "devsecops", "case-study"]
 socialImage: "/social-card-friday-release.png"
 published: false
+hero: "release-gate"
 ---
 
 **Disclaimer:** I work at Microsoft. This is my personal view, based only on public information. It isn’t an official position or a product recommendation.
@@ -16,7 +18,7 @@ works with the test account, and the release is already on the calendar.
 
 Then a security check raises an alert.
 
-<figure class="excalidraw-figure responsive-diagram ink-diagram">
+<figure class="excalidraw-figure responsive-diagram">
   <picture>
     <source
       media="(max-width: 60rem)"
@@ -78,7 +80,7 @@ parameters][owasp-sqli] addresses the injection path. [Enforcing tenant
 access][owasp-authz] addresses who may read a record. One should not be treated
 as a substitute for the other.
 
-<figure class="excalidraw-figure responsive-diagram ink-diagram">
+<figure class="excalidraw-figure responsive-diagram">
   <picture>
     <source
       media="(max-width: 60rem)"
@@ -122,7 +124,7 @@ The experiment would follow the change through a normal review:
 5. Rerun the checks and make the release decision based on the code, tests, and
    alert results together.
 
-<figure class="excalidraw-figure responsive-diagram ink-diagram">
+<figure class="excalidraw-figure responsive-diagram">
   <picture>
     <source
       media="(max-width: 60rem)"

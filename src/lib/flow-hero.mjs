@@ -607,6 +607,51 @@ function rfpSandbox(t) {
   verdicts.forEach(([tone, name], i) => t.label([243, -72 + i * 48, B + 22], name, { dx: 60, dy: 0, tone }))
 }
 
+function releaseGate(t) {
+  t.base(-300, -150, 600, 300)
+  t.rail([[-200, 0, B + 1], [0, 0, B + 1]])
+  const exits = [[-80, 'red'], [0, 'blue'], [80, 'green']]
+  for (const [y, tone] of exits) t.rail([[80, 0, B + 1], [118, 0, B + 1], [150, y, B + 1], [196, y, B + 1]], tone)
+
+  // Feeder: a stack of pull-request cards for the Friday release.
+  t.plate(-282, -52, 82, 104, B, 6)
+  for (let i = 0; i < 5; i++) t.box(-270 + i, -36, 58, 70, B + 7 + i * 2, 1.2, i === 4 ? 'hi' : 'lo')
+  for (let row = 0; row < 4; row++) t.rule([-262, -24 + row * 12], [-232 - (row % 2) * 10, -24 + row * 12], B + 17.4, 'mid')
+
+  // Checks: three scanner arches over the rail. Two pass; security raises one alert.
+  const checks = [[-150, 'green'], [-105, 'green'], [-60, 'red']]
+  for (const [x, tone] of checks) {
+    t.box(x - 6, -40, 12, 10, B, 46, 'mid')
+    t.box(x - 6, 30, 12, 10, B, 46, 'mid')
+    t.box(x - 6, -40, 12, 80, B + 46, 8, 'lo')
+    t.lamp([x, 0, B + 54], tone, 6)
+  }
+
+  // Release gate: two separate locks. Parameters keep input as data; the tenant check scopes the read.
+  t.plate(0, -60, 80, 120, B, 30, 'lo')
+  for (const y of [-30, 30]) {
+    t.cyl(40, y, 16, B + 30, 22, 'mid')
+    t.cyl(40, y, 9, B + 52, 4, 'hi')
+    t.box(37, y - 2, 6, 4, B + 56, 1, 'lo', { flat: true })
+  }
+
+  // Exits: a hold rack, a rerun bench, and a shipping crate.
+  t.tray(200, -102, 60, 44, B, 26, () => t.box(212, -92, 36, 24, B + 3, 1.2, 'lo'), 'red')
+  t.plate(200, -22, 60, 44, B, 6)
+  t.cyl(230, 0, 15, B + 6, 12, 'blue')
+  t.cyl(230, 0, 7, B + 18, 6, 'mid', { steps: 18 })
+  t.plate(200, 58, 60, 44, B, 6)
+  t.box(206, 64, 48, 32, B + 6, 26, 'green')
+  t.label([-241, 0, B + 17], 'FRIDAY PULL REQUEST', { dy: -110 })
+  t.label([-127, -40, B + 54], 'BUILD + TESTS PASS', { dx: -50, dy: -110, tone: 'green' })
+  t.label([-60, 0, B + 54], 'ONE SECURITY ALERT', { dx: 70, dy: -130, tone: 'red' })
+  t.label([40, -30, B + 56], 'QUERY PARAMETERS', { dy: -96 })
+  t.label([40, 30, B + 56], 'TENANT BOUNDARY', { dx: -40, dy: 120 })
+  t.label([260, -80, B + 26], 'HOLD', { dx: 50, dy: 0, tone: 'red' })
+  t.label([245, 0, B + 24], 'FIX + RERUN', { dx: 70, dy: 0, tone: 'blue' })
+  t.label([254, 80, B + 32], 'SHIP', { dx: 50, dy: 0, tone: 'green' })
+}
+
 export const flowHeroSvg = hero => render(hero.label, hero.art)
 
 // Labels and outcomes paraphrase each article; nothing here adds a claim the post doesn't make.
@@ -701,5 +746,16 @@ export const flowHeroes = {
     ],
     thesis: ['What if each RFP answer', 'came with a sandbox that checks it?'],
     note: 'Illustrative flow. MFA and audit results come from hand-authored fixtures, not live telemetry.',
+  },
+  'release-gate': {
+    art: releaseGate,
+    label: 'An isometric release dock. A Friday pull request rides a rail through three check arches: build and tests light green, while the security scanner lights one red alert. The rail reaches a release gate with two separate locks, query parameters and a tenant boundary, before it splits three ways: hold, fix and rerun, or ship.',
+    outputs: [
+      { label: 'HOLD', tone: 'red' },
+      { label: 'FIX + RERUN', tone: 'blue' },
+      { label: 'SHIP', tone: 'green' },
+    ],
+    thesis: ['An alert starts a decision.', 'It doesn’t make one.'],
+    note: 'Fictional scenario. Query parameters are not access control, so the gate needs both locks.',
   },
 }
