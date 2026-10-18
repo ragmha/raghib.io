@@ -72,6 +72,17 @@ part of the page. Client components cannot import server components. Keep
 database access and other server-only work on the server; put state and event
 handlers in the client component that needs them.
 
+```mermaid
+flowchart LR
+    accTitle: What stays on the server in React Server Components
+    accDescr: A Server Component reads server-side data and returns HTML plus an RSC payload to the browser, while Client Component code is included in a JavaScript bundle for interaction.
+    database["Database"] --> server["Server Component: data and render"]
+    server --> response["HTML + RSC payload"]
+    response --> browser["Browser"]
+    client["Client Component: interaction"] --> bundle["Client JavaScript"]
+    bundle --> browser
+```
+
 ```tsx
 // Server Component — fetches data
 async function PostPage({ id }: { id: string }) {

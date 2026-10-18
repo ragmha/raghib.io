@@ -55,6 +55,18 @@ stale observation, and one unknown. The checks make those decisions without a mo
 The report includes its timestamp and source/configuration hashes; rerunning later
 can change freshness results.
 
+```mermaid
+flowchart TD
+    accTitle: How the sandbox classifies a vendor claim
+    accDescr: The sandbox checks a vendor answer against evidence and reports it as supported, contradicted, stale, or unknown depending on what the check finds.
+    claim["Vendor answer"] --> check["Sandbox checks evidence"]
+    check -->|Current evidence| supports{"Does evidence support the answer?"}
+    supports -->|Yes| supported["Supported"]
+    supports -->|No| contradicted["Contradicted"]
+    check -->|Old evidence| stale["Stale"]
+    check -->|No evidence| unknown["Unknown"]
+```
+
 ## Small enough to inspect
 
 The README covers setup and teardown. An optional FastMCP server exposes

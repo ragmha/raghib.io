@@ -66,6 +66,18 @@ anything between 0.6 and 0.9 to a person, and leave the rest in the queue. You
 can audit which policy rule fired; the threshold does not explain why the model
 assigned its score.
 
+```mermaid
+flowchart TD
+    accTitle: How a decision score becomes an action
+    accDescr: A decision model scores fixed options, then an example application policy routes high scores to automatic action, middle scores to human review, and low scores back to the queue.
+    situation["Situation + fixed options"] --> model["Decision model"]
+    model --> scores["Option scores"]
+    scores --> policy{"Policy?"}
+    policy -->|"> 0.9"| act["Act automatically"]
+    policy -->|0.6 to 0.9| review["Human review"]
+    policy -->|"< 0.6"| queue["Leave in queue"]
+```
+
 Microsoft's Decision-1 is the example I'll use. Microsoft
 [reports](https://commandline.microsoft.com/microsoft-decision-1-model-foundry/)
 the top accuracy across a 36-benchmark comparison, P50 latency about 35× lower

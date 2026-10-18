@@ -32,6 +32,19 @@ The old design optimized for novelty. That produced three practical problems:
 
 None of those issues were implementation failures. They were failures of information architecture.
 
+```mermaid
+flowchart LR
+    accTitle: From a terminal-like portfolio to a writing site
+    accDescr: Before the redesign, visitors had to interpret command-style navigation before finding content. Afterwards, they can choose Writing, Projects, or About directly.
+    visitor(["Visitor"])
+    visitor -->|Before| terminal["Terminal-style homepage"]
+    terminal --> interpret["Interpret commands"]
+    interpret --> find["Find content"]
+    visitor -->|After| direct["Direct navigation"]
+    direct --> paths["Writing / Projects / About"]
+    paths --> read["Read or inspect work"]
+```
+
 ## The New Content Model
 
 The new site has three direct paths:
