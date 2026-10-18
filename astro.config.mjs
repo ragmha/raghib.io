@@ -62,7 +62,10 @@ export default defineConfig({
           strategy: 'inline-svg',
           mermaidConfig: {
             theme: 'base',
-            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            // Same stack as --font-mono in src/styles/fonts.css, so first visits
+            // fall back to the same font as the body text, not Courier.
+            fontFamily:
+              "'JetBrains Mono', ui-monospace, 'SF Mono', SFMono-Regular, 'IBM Plex Mono', Menlo, Consolas, 'Liberation Mono', monospace",
             themeCSS: `
               .node rect, .node circle, .node ellipse, .node polygon, .node path {
                 fill: var(--theme-surface) !important;
