@@ -11,7 +11,7 @@ notice something in practice, ask what it means, explore possible explanations
 or approaches, and state what remains unknown. First person is a choice, not a
 requirement.
 
-`PRODUCT.md` is authoritative: keep the writing independent, cross-industry,
+`AGENTS.md` is authoritative: keep the writing independent, cross-industry,
 and understandable beyond a narrow specialist audience. Use [EXAMPLES.md](EXAMPLES.md)
 as evidence, not as templates.
 
@@ -74,7 +74,7 @@ only works inside one vendor's product reads as marketing.
 
 ## Workflow
 
-1. Read the draft or notes, `PRODUCT.md`, and relevant source material. Record
+1. Read the draft or notes, `AGENTS.md`, and relevant source material. Record
    the intended reader, primary mode, central idea, evidence, and uncertainties.
 2. Preserve the author's actual thinking and phrasing where they carry
    personality. Edit for clarity, order, grammar, and precision without
