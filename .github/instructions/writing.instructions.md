@@ -5,7 +5,7 @@ applyTo: "src/content/writing/**"
 # Posts: employer disclaimer
 
 The author works at Microsoft; the site is independent writing. The full rules
-live in `.github/skills/employer-disclaimer/SKILL.md`. When reviewing or
+live in `.agents/skills/employer-disclaimer/SKILL.md`. When reviewing or
 editing a post, apply them. CI already fails a post that mentions Microsoft,
 Copilot, Azure, OpenAI, LinkedIn or VS Code without the disclaimer, or where
 the disclaimer is reworded or not the first paragraph. Focus on what that

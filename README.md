@@ -185,7 +185,7 @@ and reading layout. Keep content in MDX rather than duplicating page markup;
 headings supply the contents list without imposing the same outline on every post.
 The standard opening `**Disclaimer:**` paragraph automatically becomes a
 theme-aware informational callout. Keep its wording and position as defined in
-`.github/skills/employer-disclaimer/SKILL.md`; no per-post styling is needed.
+`.agents/skills/employer-disclaimer/SKILL.md`; no per-post styling is needed.
 
 Posts live in `src/content/writing/`. A project can optionally have a longer
 writeup at `/project/<project-name>/writings/`, authored as MDX in

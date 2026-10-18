@@ -26,9 +26,17 @@ source code where useful.
 
 ## Writing
 
-- Posts live in `src/content/writing/*.mdx`. Use the `raghib-editorial-voice`
-  skill to draft and revise, and the `employer-disclaimer` skill to decide on
-  the disclaimer.
+- Posts live in `src/content/writing/*.mdx`. Project skills live in
+  `.agents/skills/` in the [Agent Skills](https://agentskills.io) format, so
+  any agent harness can load them:
+  - `raghib-editorial-voice` drafts and revises posts.
+  - `post-layout` covers the hero machine, diagrams, and companion
+    repositories.
+  - `employer-disclaimer` decides whether a post needs the disclaimer.
+- Every post opens with its own isometric hero machine and includes at least
+  one Mermaid or Excalidraw diagram. Tutorials longer than about 150 lines of
+  code put the runnable project in a companion repository. Tests enforce all
+  three.
 - Posts use American English. `seoTitle` must be 44 characters or fewer.
 
 ## Checks
