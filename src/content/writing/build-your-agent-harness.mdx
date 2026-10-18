@@ -1,7 +1,7 @@
 ---
 title: "Build an AI Agent Harness From First Principles with TypeScript and Bun"
 seoTitle: "Build an AI Agent Harness: TypeScript + Bun"
-description: "Build a TypeScript agent harness with tool validation, durable approvals and recovery, then extend it into a workspace-scoped coding agent. No API key required."
+description: "Build a TypeScript agent harness with tool validation, event replay and approval checkpoints, then extend it with example workspace file tools. No API key required."
 date: "2026-10-16"
 topics: ["AI Tools", "Tutorial"]
 tags: ["ai", "agents", "typescript", "bun", "tutorial"]
@@ -25,13 +25,13 @@ API key, network call or randomness. The behavior is repeatable and testable.
 By the end, you will have:
 
 - a provider-neutral model contract and a scripted model;
-- a typed tool registry that validates everything a model sends;
+- a typed tool registry that validates tool names and arguments;
 - a bounded, cancellable agent loop with a trace;
 - skill loading, context projection and an evaluation report;
-- an event-sourced runtime that recovers after a crash;
-- policy gates, idempotent writes and durable human approval.
+- an event-sourced runtime with in-memory replay;
+- policy gates, approval checkpoints and an example idempotency boundary.
 
-The central idea: **agent systems are workflow systems.** The model chooses a semantic next step. The harness owns state, execution, policy, limits, errors and observability.
+The central idea: **agent systems are workflow systems.** The model proposes a semantic next step. The harness owns state, execution, policy, limits and traces; errors propagate to the caller.
 
 ```mermaid
 flowchart LR
@@ -40,7 +40,7 @@ flowchart LR
     model -- "final answer" --> events
     gate -- "allow" --> tools["Typed tools<br/>schema validated"]
     gate -- "deny or await approval" --> events
-    tools --> events["Durable events<br/>state + checkpoints"]
+    tools --> events["Recorded events<br/>state + checkpoints"]
     events -- "resume" --> context
 ```
 
@@ -249,7 +249,7 @@ export const lookupCodeTool: Tool<{ code: string }, { found: boolean; value: str
 };
 ```
 
-The schema does double duty. It is converted to JSON Schema to tell the model what the tool accepts, and it parses the model's reply before anything runs. One source of truth means the advertised shape and the enforced shape cannot drift apart. The `transform` also normalizes input, so `alpha` and `ALPHA` find the same entry.
+The schema does double duty. It is converted to JSON Schema to tell the model what the tool accepts, and it parses tool arguments before a tool runs. One source of truth reduces manual drift for constraints representable in JSON Schema; runtime parsing remains authoritative for transforms and refinements. The `transform` also normalizes input, so `alpha` and `ALPHA` find the same entry.
 
 ### The registry is the allowlist
 
@@ -458,7 +458,7 @@ A few things to notice:
 
 - **The run ends when the model stops asking for tools.** No tool calls means the content is the final answer.
 - **`maxSteps` is checked before each model request**, so a confused model cannot loop forever and quietly spend your budget.
-- **`AbortSignal.any`** merges the caller's signal and the deadline. The model and every tool get the same signal.
+- **`AbortSignal.any`** merges the caller's signal and the deadline. The adapter and tools receive the signal, but cancellation is cooperative: each implementation must honor it, and filesystem calls in the example do not.
 - **Model and tool calls share one `try`**, so every failure emits `run.failed` and is normalized to `ABORTED` when cancellation caused it.
 - **The trace is not the context.** Trace events describe execution for you. They are never sent to the model.
 - **`options.context`** is used in Step 3. Without it, the model sees the full history.
@@ -510,7 +510,7 @@ run.finished
 Alpha is the first synthetic entry.
 ```
 
-That trace is the whole agent loop made visible: two model steps with one tool call between them. Swap `ScriptedModel` for an adapter around any real provider and nothing else changes.
+That trace is the whole agent loop made visible: two model steps with one tool call between them. A provider adapter can connect a real model, but provider-specific behavior may require changes beyond response mapping.
 
 ## Step 3: Skills, context and evaluations
 
@@ -845,13 +845,13 @@ bun run eval
 
 `reports/eval-report.json` now holds per-case results. Exact-match checks are deliberately simple. The point is the plumbing; you can swap in richer graders later without changing it.
 
-## Step 4: Make execution durable and recoverable
+## Step 4: Make execution event-sourced
 
-An in-memory call stack disappears when a process stops. A durable harness records facts before moving to the next side effect, then rebuilds current state by replaying those facts.
+An in-memory call stack disappears when a process stops. An event-sourced runtime records facts and rebuilds current state by replaying them. This tutorial's store is in memory: it demonstrates replay after rebuilding a harness instance in the same process, not recovery after a process crash. Real crash recovery requires a persistent store with suitable transaction and durability guarantees.
 
 ### Events, state and checkpoints
 
-The template defines the durable contracts. Read them before writing the reducer:
+The template defines the event and store contracts. Read them before writing the reducer:
 
 ```ts title="src/durable/contracts.ts"
 import type {
@@ -1027,9 +1027,9 @@ export function initialSnapshot(runId: string): RunSnapshot {
       maxSteps: 0,
       pendingToolCalls: [],
       seenToolCallIds: [],
-      policyDecisions: {},
-      approvalRequests: {},
-      approvalResolutions: {},
+      policyDecisions: Object.create(null),
+      approvalRequests: Object.create(null),
+      approvalResolutions: Object.create(null),
     },
     history: [],
   };
@@ -1059,14 +1059,29 @@ export function applyRunEvent(
       history.push(assistantMessage(event));
       break;
     case "policy.decided":
-      state.policyDecisions[event.toolCallId] = structuredClone(event.decision);
+      Object.defineProperty(state.policyDecisions, event.toolCallId, {
+        value: structuredClone(event.decision),
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
       break;
     case "approval.requested":
-      state.approvalRequests[event.request.approvalId] = structuredClone(event.request);
+      Object.defineProperty(state.approvalRequests, event.request.approvalId, {
+        value: structuredClone(event.request),
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
       state.status = "waiting_for_approval";
       break;
     case "approval.resolved":
-      state.approvalResolutions[event.resolution.approvalId] = structuredClone(event.resolution);
+      Object.defineProperty(state.approvalResolutions, event.resolution.approvalId, {
+        value: structuredClone(event.resolution),
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
       state.status = "running";
       break;
     case "tool.completed":
@@ -1227,11 +1242,11 @@ export function envelope(
 }
 ```
 
-It survives reconstructing the harness inside one process, which is enough to test restart behavior. In production, the same interface would sit on a database.
+It survives reconstructing the harness inside one process because the same `Map` remains alive. It does not survive a process exit. A database adapter would also need atomic commits and durability guarantees; implementing the same interface alone would not provide them.
 
-## Step 5: Add policy gates and idempotent effects
+## Step 5: Add policy gates and an idempotency example
 
-Durability prevents lost progress. It does not decide whether a proposed tool is allowed, or close the gap between performing an effect and recording that it happened.
+Event replay does not decide whether a proposed tool is allowed, or close the gap between performing an effect and recording that it happened.
 
 ### Policy is data
 
@@ -1270,7 +1285,7 @@ The fallback is `deny`: a tool nobody configured does not run. `Object.hasOwn` m
 
 ### Close the effect-before-commit window
 
-A write tool can succeed, then the process can die before `tool.completed` is recorded. On retry, the tool would run again. The fix is an idempotency key derived from the run, tool, call ID and canonicalized arguments, which a destination uses to return the original result instead of repeating the effect. The sample destination honours it atomically:
+A write tool can succeed, then the process can die before `tool.completed` is recorded. On retry, the tool may run again. A key alone does not prevent that: safe retries require the destination to persist and atomically honor the key with the effect. This in-memory example only deduplicates while its `Map` survives; the demo tools do not use it:
 
 ```ts title="src/durable/effect-sink.ts"
 export interface EffectRecord<T> {
@@ -1307,11 +1322,11 @@ bun run grade:step4
 bun run grade:step5
 ```
 
-## Step 6: Pause and resume with durable approval
+## Step 6: Pause at an approval checkpoint
 
-Human approval cannot be a `Promise` waiting in memory. It must be a persisted state that a different process, maybe hours later, can resolve.
+An approval checkpoint should be recorded rather than held in a pending `Promise`. This example records it in the in-memory store, so only another harness instance in the same process can resolve it.
 
-Here is the complete durable harness. It ties the last three steps together: every loop iteration rereads the store, replays the run and takes exactly one next action.
+Here is the end-to-end teaching harness. Each loop iteration rereads the store, replays the run and takes one next action.
 
 ```ts title="src/durable/harness.ts"
 import type { Message, ModelAdapter, ToolCall } from "../core/contracts";
@@ -1384,7 +1399,9 @@ export class DurableHarness {
     const stored = requireStoredRun(runId, await this.store.read(runId));
     const { state } = replayStoredRun(stored);
 
-    const request = state.approvalRequests[command.approvalId];
+    const request = Object.hasOwn(state.approvalRequests, command.approvalId)
+      ? state.approvalRequests[command.approvalId]
+      : undefined;
     if (!request) {
       throw new HarnessError(
         "APPROVAL_NOT_FOUND",
@@ -1392,7 +1409,9 @@ export class DurableHarness {
       );
     }
 
-    const existing = state.approvalResolutions[command.approvalId];
+    const existing = Object.hasOwn(state.approvalResolutions, command.approvalId)
+      ? state.approvalResolutions[command.approvalId]
+      : undefined;
     if (existing) {
       if (
         existing.commandId !== command.commandId ||
@@ -1468,7 +1487,9 @@ export class DurableHarness {
     call: ToolCall,
   ): Promise<void> {
     const { runId } = snapshot.state;
-    const decision = snapshot.state.policyDecisions[call.id];
+    const decision = Object.hasOwn(snapshot.state.policyDecisions, call.id)
+      ? snapshot.state.policyDecisions[call.id]
+      : undefined;
 
     if (!decision) {
       const decided = this.policy.evaluate({
@@ -1496,7 +1517,9 @@ export class DurableHarness {
 
     if (decision.kind === "require_approval") {
       const id = approvalId(runId, call);
-      const resolution = snapshot.state.approvalResolutions[id];
+      const resolution = Object.hasOwn(snapshot.state.approvalResolutions, id)
+        ? snapshot.state.approvalResolutions[id]
+        : undefined;
       if (!resolution) {
         await this.record(runId, stored, {
           type: "approval.requested",
@@ -1547,7 +1570,10 @@ export class DurableHarness {
 
 function waitingResult(snapshot: RunSnapshot, call: ToolCall): DurableRunResult {
   const { runId } = snapshot.state;
-  const approval = snapshot.state.approvalRequests[approvalId(runId, call)];
+  const id = approvalId(runId, call);
+  const approval = Object.hasOwn(snapshot.state.approvalRequests, id)
+    ? snapshot.state.approvalRequests[id]
+    : undefined;
   if (!approval) {
     throw new HarnessError("APPROVAL_NOT_FOUND", `No approval request for "${call.id}"`);
   }
@@ -1630,17 +1656,17 @@ export async function appendEvent(
 }
 ```
 
-Walk through `drive` once and the design becomes clear:
+Walk through `drive` once and the example's control flow becomes clear:
 
-- **One action, then commit.** Each pass records a single event, then the loop rereads the store. If the process dies anywhere, the next harness picks up from the last committed event.
-- **Model responses are committed before tools run.** A crash after the model answers does not pay for the model call twice.
-- **Policy first, then effects.** A pending tool call gets a persisted decision, then is denied, paused for approval, or executed with its idempotency key.
-- **Approval is a command bound to recorded intent.** `resolveApproval` only takes an approval ID, a command ID and a decision. It cannot change the tool call. Sending the same command twice is a safe retry; a conflicting decision fails with `APPROVAL_CONFLICT`.
-- **The `fault` hook** lets tests stop the harness at the three dangerous points and prove recovery works.
+- **One event, then reread.** Each pass records an event, then the loop rereads the in-memory store. The recorded event can be replayed while that store remains available; a process exit loses it.
+- **Model responses are recorded before tools run.** Within this process, a committed response is not requested again during replay. This is not a guarantee across a process crash or a failed store write.
+- **Policy before effects.** A pending tool call gets a recorded decision, then is denied, paused, or executed. Own-property checks and safe record writes prevent inherited object properties from being mistaken for decisions; add regression cases for `constructor`, `toString` and `__proto__` IDs.
+- **Approval is bound to a recorded call, not an authenticated person or an exact diff.** The command cannot change the call, but this sample does not authenticate approvers or bind approval to a resolved path, content hash or preview.
+- **The `fault` hook** injects exceptions at three points. It does not simulate killing the process or prove storage durability.
 
 ### Run it
 
-Create `demo-approval.ts`. It registers a write tool, requires approval for it, starts a run, then resolves the approval from a brand-new harness instance, as if the process had restarted:
+Create `demo-approval.ts`. It registers a write tool, requires approval for it, starts a run, then resolves the approval from a brand-new harness instance while reusing the same in-memory store:
 
 ```ts title="demo-approval.ts"
 import { z } from "zod";
@@ -1671,7 +1697,7 @@ const first = await new DurableHarness(firstModel, tools, store, policy).start("
 console.log(first.status);
 if (first.status !== "waiting_for_approval") throw new Error("expected a pause");
 
-// A brand-new harness, as if the process restarted, resumes from the store.
+// A brand-new harness instance reuses the same in-memory store.
 const model = new ScriptedModel([{ content: "Note sent." }]);
 const done = await new DurableHarness(model, tools, store, policy).resolveApproval("run-1", {
   approvalId: first.approval.approvalId,
@@ -1690,7 +1716,7 @@ waiting_for_approval
 completed Note sent.
 ```
 
-The first harness paused without executing the tool. The second harness read the events, saw the approval, ran the exact recorded call, asked the model for its final answer and completed.
+The first harness paused without executing the tool. The second instance read the same in-memory events, saw the approval and ran the recorded call. This demonstrates instance reconstruction only; it is not a process-restart test or authenticated human approval.
 
 ## Run the full suite
 
@@ -1712,11 +1738,11 @@ If you copied the template to GitHub, push to `main` after each step and the exe
 
 The same loop can power a small coding agent: the model reads a file, lists a directory, proposes a change, then explains what it did. This is the core idea behind [“How to code Claude Code in ~200 lines of code”](https://youtu.be/s7ZzkdvCMDY): the first useful coding agent is a model loop connected to a few tools, not a giant framework.
 
-Keep its reach narrow. Give it one workspace directory, no shell tool, and three file tools. Reading and listing are harmless; editing is a write, so route it through the durable harness's existing approval policy.
+Keep its reach narrow. Give it one workspace directory, no shell tool, and three file tools. Reading and listing are non-mutating but can expose secrets or send sensitive workspace content to a remote model; apply an explicit read policy and size/type limits. Route edits through an approval policy.
 
-### Add workspace-scoped file tools
+### Add example file tools with a workspace path check
 
-These tools use Bun's built-in file APIs and Node's path helpers. Every requested path is resolved and canonicalized before use, so `../` paths and symlinks that point outside the workspace are rejected. `list_files` shows only the immediate directory and skips symlinks; it does not recursively walk the workspace.
+These tools use Bun's built-in file APIs and Node's path helpers. The path check rejects ordinary `../` escapes and existing symlinks that resolve outside the workspace. It is not a security sandbox: validation and file access are separate operations, so concurrent changes can create a time-of-check/time-of-use race; hard links are not detected. Treat the workspace as trusted and not concurrently modified, or use OS-level confinement for untrusted workspaces. `list_files` shows only the immediate directory and skips symlinks; it does not recursively walk the workspace.
 
 ```ts title="src/tools/filesystem.ts"
 import { readdir, readFile, realpath, writeFile } from "node:fs/promises";
@@ -1789,7 +1815,7 @@ export function registerFileTools(tools: ToolRegistry, root: string): void {
 }
 ```
 
-Register the tools and make policy explicit. The durable harness records the decision before it acts; a paused edit can be approved later, while a denied call never reaches `writeFile`.
+Register the tools and make policy explicit. The sample records a policy decision before acting, but the approval is requested for raw model arguments: path resolution, exact-match selection and diff generation happen later. It does not show or bind approval to the exact change. Do not use it to authorize real writes without resolving the target and previewing and binding the exact diff first.
 
 ```ts title="src/coding-agent.ts"
 import { DurableHarness } from "./durable/harness";
@@ -1843,42 +1869,42 @@ if (run.status === "waiting_for_approval") {
 }
 ```
 
-With `workspace/notes.txt` containing `TODO`, the demo reads the file, then pauses before editing:
+With `workspace/notes.txt` containing `TODO`, the demo reads the file, then pauses before editing. It prints the requested arguments, not a resolved target or diff:
 
 ```text
 waiting_for_approval
 {"path":"notes.txt","oldText":"TODO","newText":"Done"}
 ```
 
-Review the arguments, then resume with `harness.resolveApproval(...)` as in the earlier approval demo. The edit operation is intentionally exact-match, not “rewrite this file however you like.” If the model's old text is missing or ambiguous, it fails without writing. A stronger editor can add a diff preview and ask for approval on the diff itself; the essential rule remains the same: validate the target, show the exact change, then authorize that specific write.
+The file-tool example is illustrative and has no tests in the linked template. Before using it, add checks for path traversal, symlink races, stale files, exact diff approval, sensitive reads and file-size limits. Exact-match replacement only fails when the old text is missing or ambiguous; it does not prevent a target from changing after approval.
 
 ### Swap in a real model
 
-`ScriptedModel` already implements `ModelAdapter`. To use a real provider, write an adapter whose `complete(request, signal)` sends `request.messages` and `request.tools` to that provider, then maps its response into `ModelResponse`. Pass the signal to the HTTP client and keep credentials in environment variables. Provider APIs use different tool-call formats, so that mapping is the only provider-specific code; the registry, validation, approval gate, event log and recovery code stay the same.
+`ScriptedModel` implements `ModelAdapter`. A basic non-streaming provider adapter can send `request.messages` and `request.tools` and map a compatible response into `ModelResponse`. TypeScript interfaces do not validate provider payloads at runtime, so validate the full response and tool-call IDs at this boundary. Providers differ in schema support, tool results, parallel calls, retries and cancellation, so the adapter may require orchestration changes too. This tutorial tests only the scripted adapter.
 
-Start with the scripted model and switch only after the file tools and approval flow pass their tests.
+Start with the scripted model. The file tools and approval flow need their own tests before they are used with real files.
 
 This is a small coding agent, not a production clone of Claude Code. It has no shell access, recursive search, patch application, terminal session, or multi-file plan. Add a capability only when a real task needs it; keep each new write behind approval.
 
 ## Summary
 
-You now have a complete agent harness in about a dozen small files with two dependencies. It:
+You now have a small teaching harness in about a dozen files with two dependencies. It:
 
-- talks to any model through one interface;
+- demonstrates an adapter interface with a scripted model;
 - only runs allowlisted tools, with validated arguments;
-- cannot loop forever and can be cancelled at any point;
+- caps model steps and propagates cooperative cancellation when providers and tools honor the signal;
 - traces every step without leaking that trace into the prompt;
-- projects context deliberately and proves behavior with evaluations;
-- recovers after a crash without repeating paid or dangerous work;
-- asks a person before acting, and resumes safely afterwards;
-- can be extended into a coding agent with workspace-scoped file tools.
+- projects context and runs example evaluations;
+- replays events only while its in-memory store remains available;
+- exposes an approval-command API without approver authentication or exact-diff binding;
+- includes file-tool examples with a path check, not OS-level workspace confinement.
 
 None of this depends on a particular model, cloud or industry. Whether your agent triages support tickets, reconciles invoices or files maintenance orders, the questions are the same: which actions exist, who may approve them, what happens on retry, and how you will know it still works tomorrow.
 
 ## Where to go next
 
-- **Use a real model.** Write a `ModelAdapter` around any provider's chat API. Map its tool-call format to `ToolCall`, pass the `AbortSignal` to its HTTP client, and nothing else in the harness changes.
-- **Use a real store.** Implement `RunStore` on a database with a unique `(runId, version)` constraint to get the same optimistic concurrency.
+- **Use a real model.** Write and test a `ModelAdapter` for a specific provider's contracts, including its tool-call format, schema limits, retries and cancellation.
+- **Use a real store.** Implement `RunStore` on a database with atomic commits and a unique `(runId, version)` constraint; test process-kill recovery and define durability guarantees.
 - **Expose tools over MCP.** The [Model Context Protocol tools specification](https://modelcontextprotocol.io/specification/latest/server/tools) standardizes discovery and invocation between processes. The registry here is the in-process version of the same idea.
 
 What this deliberately leaves out is just as instructive: plugin loading, dependency injection, streaming and multi-agent orchestration. Add them when a real requirement asks for them, and you will know exactly which seam they plug into.

@@ -1,7 +1,7 @@
 ---
 title: "Not Every Action Item Is Mine"
 seoTitle: "Work IQ to To-Do List: LLM vs Decision Model"
-description: "Build a to-do list with Work IQ and the GitHub Copilot SDK, then compare LLM prioritization with Microsoft-Decision-1 using the same evidence and rubric."
+description: "Build a reviewed to-do workflow with Work IQ and the GitHub Copilot SDK, then compare LLM prioritization with Microsoft-Decision-1 using the same evidence and rubric."
 date: "2026-10-12"
 topics: ["AI Tools", "Productivity"]
 tags: ["ai", "copilot", "agents", "productivity"]
@@ -47,10 +47,11 @@ provides Microsoft 365 context through a CLI and a Model Context Protocol
 (MCP) server. A **[GitHub Copilot SDK](https://github.com/github/copilot-sdk)**
 session can query it and turn the response into structured action items.
 
-Work IQ's `ask` already does the summarizing, because it is Microsoft 365
-Copilot answering over your meetings, chats and mail. The SDK only turns that
-answer into structured items. A summary says what needs doing. It doesn't say
-whose it is or how urgent.
+Work IQ's `ask` returns a synthesized answer over Microsoft 365 data the user
+can access. During extraction, the configured Copilot model receives that
+answer and structures it; Work IQ's response may already include owners,
+deadlines or blockers. The routing rubric in this sample is application logic,
+not a claim about what Work IQ can or cannot summarize.
 
 That gets the work onto the page. It doesn't settle the priorities.
 
@@ -137,7 +138,9 @@ Missing ownership or timing means `cannot_tell`, not permission to invent a
 deadline.
 
 The baseline uses a **fresh, tool-free Copilot SDK session for each item**. It
-returns a route and an integer urgency level, validated with Zod. It does not
+returns a route and an integer urgency level, validated with Zod. This sample
+uses the pinned SDK version's **preview structured-output API**, whose contract
+may change. It does not
 inherit the Work IQ extraction conversation or retrieve extra context that the
 decision model cannot see.
 
@@ -257,9 +260,18 @@ another run.
 
 ## Replace the fixture with Work IQ
 
-Work IQ's [current prerequisites](https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/work-iq/cli)
+Work IQ's [documented prerequisites](https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/work-iq/cli)
 include a Copilot Studio usage-based billing plan, a user assigned to that plan,
 and administrative consent in the Microsoft Entra tenant.
+
+As of this writing, Work IQ's availability and terms are described
+inconsistently: Microsoft Learn labels version 1.0.1 generally available, while
+the [public repository](https://github.com/microsoft/work-iq) says Public
+Preview and the [package's bundled license](https://www.npmjs.com/package/@microsoft/workiq?activeTab=code)
+describes pre-release evaluation restrictions. Check the terms that apply to
+your installation and organization; treat this as an evaluation workflow
+unless your agreement permits live use.
+
 Read its license and accept it yourself if appropriate:
 
 ```bash
@@ -277,15 +289,18 @@ evidence against the sources, correct ownership and dates, and remove anything
 you are not allowed to send to the selected services. The schema checks shape,
 not whether an LLM quoted a meeting accurately.
 
-Only after that review:
+After reviewing and redacting the snapshot, if your data policy permits:
 
 ```bash
 node triage.mjs --compare items.json
 ```
 
-That explicit second command sends the reviewed snapshot to both the Copilot
-model and the configured Decision-1 endpoint. Extraction does **not**
-automatically forward meeting content to OpenRouter or Foundry.
+During `--extract`, Work IQ's answer is sent to the configured Copilot model for
+structuring **before** you review `items.json`. The `--compare` command is the
+first step that sends the reviewed snapshot to Decision-1. Extraction does not
+send meeting content to OpenRouter or Foundry. If your policy does not permit
+work data to be sent to the Copilot model during extraction, do not run
+`--extract`.
 
 The sample exposes only Work IQ's `ask` MCP tool, not its entity-write tools,
 and rejects other permission requests. Comparison sessions have no tools.
@@ -316,7 +331,9 @@ personal item survive on the later list?
 For a more useful evaluation, label representative tasks **before** looking at
 either answer. Count wrong owners, missed urgent personal tasks, incorrect
 handoffs and items needing review. Repeat requests and reorder the route options
-to look for instability. Keep the evidence, rubric and baseline model fixed.
+to look for instability. Keep the evidence and rubric fixed, record the
+returned Decision-1 model name and version if exposed, and run comparisons
+within a bounded period: the provider may update the model behind a stable ID.
 
 This compares two application approaches, not a controlled claim about model
 architecture alone: the SDK and Decision API still have different runtimes and
@@ -355,3 +372,9 @@ use. An LLM or Decision-1 proposes the routing. The policy stays in code, and
 the final call stays with a person.
 
 The goal isn't an empty list. It's a list I can explain.
+
+The SDK's [structured-output API is marked preview in the pinned 1.0.19
+documentation](https://github.com/github/copilot-sdk/blob/v1.0.19/README.md#structured-output-preview).
+Review Work IQ's [repository status](https://github.com/microsoft/work-iq)
+and [version 1.0.1 license terms](https://www.npmjs.com/package/@microsoft/workiq?activeTab=code)
+before using real workplace data.

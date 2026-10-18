@@ -1,7 +1,7 @@
 ---
-title: "Deployed, Not Live: Why Your Domain Still Points at the Host You Left"
-seoTitle: "DNS Cutovers: Why Domains Hit the Old Host"
-description: "A migration moves your files. It does not automatically change who answers for your domain, and that gap can leave visitors reaching the old host."
+title: "Deployed, Not Live: How a Site Can Reach Its Old Host"
+seoTitle: "DNS Cutovers: Why Sites Reach Old Hosts"
+description: "Moving site files does not by itself update DNS. When active records or cached answers still point to an old host, visitors may reach it after a migration."
 date: "2026-09-18"
 topics: ["Learning & Growth"]
 tags: ["dns", "infrastructure", "migration", "operations"]
@@ -12,15 +12,17 @@ hero: "dns-delegation"
 A deploy pipeline reported success. The build artifacts were correct. The new
 hosting platform had the site ready.
 
-My domain still returned a 404 from a company I had stopped using months earlier.
+My domain still returned a 404 from the hosting platform I had stopped
+deploying to months earlier.
 
-**The site had moved. The route to it had not.**
+**The site had moved. DNS and routing were among the things I needed to investigate.**
 
 Each system reported accurately about the part it owned. The deploy pipeline knew
 the files were there. It did not know whether visitors would ever reach them.
 
-This failure is not specific to one stack or one vendor. To see why, start with
-what happens between typing a domain name and loading a page.
+This kind of failure is not specific to one stack or one vendor. To see how it
+can happen, start with what occurs between typing a domain name and loading a
+page.
 
 ## What DNS Does
 
@@ -82,8 +84,8 @@ registration; it is not a stop on every visitor's DNS lookup:
 
 In this migration, the site was deploying to GitHub Pages, while recorded
 nameserver answers named the old DNS provider and HTTP requests reached the old
-host. The diagram shows a failure path to investigate: delegation selecting a
-zone whose records still send visitors to the previous host.
+host. Those observations show a path to investigate; the recursive nameserver
+answers alone do not prove the parent delegation was responsible.
 
 <figure class="excalidraw-figure">
   <div class="diagram-scroll" role="region" aria-label="Deployment and DNS routes; scroll horizontally to explore" tabindex="0">
@@ -93,7 +95,7 @@ zone whose records still send visitors to the previous host.
       height="640"
       loading="lazy"
       decoding="async"
-      alt="Read left to right: a successful build puts the new site on GitHub Pages. In a separate row, unchanged delegation selects the old DNS zone, whose address sends the browser to the old host and a 404."
+      alt="Read left to right: a successful build puts the new site on GitHub Pages. A separate row illustrates one possible failure path: unchanged delegation selects an old DNS zone whose address sends the browser to the previous host and a 404."
     />
   </div>
   <figcaption>
@@ -174,7 +176,7 @@ Error messages help narrow the investigation:
 |---|---|
 | `DEPLOYMENT_NOT_FOUND` | The vendor received the request but could not find the deployment |
 | "There isn't a GitHub Pages site here" | Pages is reachable but has no site for this hostname |
-| [Cloudflare error 1000](https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/error-1000/) | A DNS record points to a prohibited IP; the request is blocked |
+| [Cloudflare error 1000](https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/error-1000/) | Cloudflare blocked the request; investigate a prohibited target or other documented configuration causes |
 | [Cloudflare error 1016](https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/error-1016/) | Cloudflare cannot resolve the origin hostname |
 | `NoSuchBucket` | The requested bucket does not exist |
 | `NXDOMAIN` | The resolver reports that the queried DNS name does not exist |
@@ -230,7 +232,7 @@ expected behavior for those locations before treating a difference as stale DNS.
 Sorting answers or taking two samples cannot, by itself, establish a caching
 problem.
 
-## The Blast Radius Is the TTL
+## TTL Is One Part of the Blast Radius
 
 Before a cutover, read the [configured TTL](https://www.rfc-editor.org/rfc/rfc1034.html#section-3.6)
 from a known authoritative server. With the same placeholders:
@@ -248,8 +250,10 @@ already cached for a day. Lower it *before* the migration, then wait for the old
 TTL to elapse before changing the address.
 
 That reduces the normal caching window for that record to five minutes. It is not
-a five-minute guarantee for the whole cutover: delegation records have their own
-TTLs, and a lower address-record TTL does not speed up a nameserver change.
+a five-minute guarantee for the whole cutover: parent-zone NS and DS records
+have their own TTLs, and negative answers can be cached for a duration derived
+from the zone's SOA record. A lower address-record TTL does not speed up a
+nameserver change.
 
 This is ordinary risk management expressed in infrastructure: reduce the cost of
 being wrong before you take the action that might be wrong.
@@ -266,11 +270,16 @@ verification. These are possible risks, not losses established by this migration
 
 Before any cutover, account for:
 
-- Apex and `www` address records
+- Apex and `www` A, AAAA and CNAME records, plus provider-specific ALIAS,
+  ANAME or flattening behavior where used
 - `MX`, SPF, DKIM, and `_dmarc`
 - Domain-verification records for every external service
 - Live subdomains such as `api`, `staging`, `docs`, and `status`
-- `CAA`, if the new certificate authority differs
+- Existing `CAA` policy and whether it authorizes the destination's certificate
+  authority
+- DNSSEC signing state, DNSKEY data and parent-zone DS records; an incompatible
+  DS record after a nameserver change can cause validating resolvers to return
+  `SERVFAIL` ([migration guidance](https://docs.cloud.google.com/dns/docs/dnssec-migrate))
 
 Any item you cannot account for is a cutover risk to investigate before proceeding.
 
@@ -301,11 +310,12 @@ naive enumeration mistake wildcard answers for explicitly configured names.
 > Scripts and checklists both encode assumptions. Make the checks repeatable,
 > then test those assumptions against known-good cases and deliberate test failures.
 
-## What Fixed This Migration
+## What Changed During Troubleshooting
 
-In the original troubleshooting exchange, I confirmed switching the nameserver
-setting to Namecheap BasicDNS and fixing the DNS records, including the A-record
-typo: `85.199.108.153` became `185.199.108.153`.
+During troubleshooting, I changed the nameserver setting to Namecheap BasicDNS
+and corrected an A-record typo: `85.199.108.153` became `185.199.108.153`.
+Because both the nameserver setting and records changed before the later
+observation, this does not isolate which change caused the earlier failure.
 
 Separately, the earlier troubleshooting reply recorded:
 
@@ -313,10 +323,11 @@ Separately, the earlier troubleshooting reply recorded:
 - Apex A records: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`,
   and `185.199.111.153`.
 - `www` CNAME: `ragmha.github.io`.
-- HTTP `200`, with TLS provisioning still pending.
+- HTTP `200`; TLS provisioning was still pending, and no successful HTTPS
+  response was recorded.
 
-Those are recorded historical observations, not fresh checks. They do not
-establish a cutover duration or confirm a later successful HTTPS result.
+Those are recorded historical observations, not fresh checks. They establish
+neither which change fixed the HTTP response nor a completed HTTPS cutover.
 
 ## The General Case
 

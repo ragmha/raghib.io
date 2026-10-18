@@ -1,7 +1,7 @@
 ---
-title: "The Smart If-Statement Has Arrived"
+title: "The Smart If-Statement Is Emerging"
 seoTitle: "Decision Models for AI Systems"
-description: "OpenAI, TypeSafe and Microsoft all shipped models that can't write a sentence. Why decision models are becoming a core layer, and eight experiments to test them."
+description: "OpenAI, TypeSafe and Microsoft introduced decision-focused models or APIs with different output contracts and maturity. Why they might become a useful layer, and eight experiments to test them."
 date: "2026-10-11"
 topics: ["AI Tools", "Business"]
 tags: ["ai", "governance", "agents", "platform-engineering"]
@@ -20,44 +20,51 @@ as the code itself. A frontier model can make them, but using it for every
 routine choice can add cost, latency and an answer that's hard to turn into a
 policy.
 
-Then three AI labs announced models for this narrower job. None of them is
-meant to write a sentence:
+Three offerings have appeared around this narrower job, with different output
+contracts and levels of availability:
 
 - **OpenAI** opened a
   [Decisions API](https://developers.openai.com/api/docs/guides/decisions) in
-  public beta. It returns a probability, a choice or a score, and nothing else.
-- **TypeSafe**, a new lab founded by an early ChatGPT researcher, launched
+  public beta. The endpoint returns structured decision answers; GPT-6 Luna
+  also supports text generation through other interfaces.
+- **TypeSafe**, a lab founded by an early ChatGPT researcher, introduced
   [Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev), a
-  "System One" model whose outputs are typed values defined in advance.
+  "System One" model in early access whose outputs are typed values defined in
+  advance.
 - **Microsoft** released
   [Decision-1](https://commandline.microsoft.com/microsoft-decision-1-model-foundry/)
-  in Foundry and on OpenRouter, built for routing, classification and
-  verification.
+  in Foundry and on OpenRouter, which Microsoft describes as designed for
+  routing, classification and verification.
 
 Seeing the launches together made me curious about the boundary: what should a
 decision model handle, and what still belongs to the application around it? I
 built a small pilot to test that question against issue triage and agent
 tool-call safety. The results are synthetic, but they helped me see what I
-would want to measure with real team data.
+would want to measure with real team data. The linked repository's
+[first public commit](https://github.com/ragmha/decision-pilot/commits/main/)
+is dated 12 October, the day after this article's publication date; it is a
+later public artifact, not evidence that the code was available on 11 October.
 
 ## What I mean by a decision model
 
 A chat model writes. A decision model chooses.
 
 You give it a situation and a fixed set of options: yes or no, a list of teams,
-a rubric that runs from low to critical. In a single pass it returns a
-probability for each option. No prose, no explanation, no "Great question!"
+a rubric that runs from low to critical. In the decision interface, it returns
+structured answers such as choices, scores and probabilities rather than a
+written explanation.
 
 An ordinary if-statement hard-codes a condition, such as *if the title mentions
 CSS, send it to frontend*. A decision model estimates the likely option and
 returns scores. The application still owns the policy: it decides whether to
 act on that score, ask for review or do nothing.
 
-The number is the part I care about. A label on its own gives you nothing to
-govern. A calibrated 0.93 lets you write a policy: act automatically above 0.9,
-send anything between 0.6 and 0.9 to a person, and leave the rest in the queue.
-You can audit that policy, tune it, and explain to anyone why an issue landed
-where it did.
+The number is the part I care about. A label on its own gives you little to
+govern. If validation on representative, labelled data shows a score such as
+0.93 is calibrated, you can use it in a threshold policy: act above 0.9, send
+anything between 0.6 and 0.9 to a person, and leave the rest in the queue. You
+can audit which policy rule fired; the threshold does not explain why the model
+assigned its score.
 
 Microsoft's Decision-1 is the example I'll use. Microsoft
 [reports](https://commandline.microsoft.com/microsoft-decision-1-model-foundry/)
@@ -75,19 +82,21 @@ that shows up in four ways once the calls add up:
   workflow. Agents make a lot of sequential decisions.
 - **It's expensive at volume.** At Decision-1's published price, one million
   decisions with 500-token inputs cost about **$21** in input tokens. Calls
-  like that used to need a frontier model.
-- **It gives you words, not a number.** You can parse "this is most likely a
-  security issue," but you can't put a threshold on it. So you either trust
-  every answer or none of them.
+  like that may lead some teams to use a frontier model.
+- **A plain-text answer does not provide a validated score by default.** An
+  LLM can be prompted or wrapped to return structured scores, but those scores
+  still need parsing and calibration before they support a threshold policy.
 - **It wanders.** Rephrase the input, reorder the options or add some
   formatting noise, and a generative model can change its mind. For a policy
-  decision, the same facts should get the same answer.
+  decision, materially similar facts should produce a stable answer; measure
+  how often they do.
 
 I still use the most capable model I have to question a plan and work through
 its branches before anything gets built. (I use Matt Pocock's
 [grill-me](https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me)
-skill for this.) Once the plan is clear, I want to test whether the smaller
-calls along the way can go to a model that is cheaper, calibrated and logged.
+skill for this.) Once the plan is clear, I want to test whether smaller calls
+along the way can use lower-cost models whose scores can be evaluated and
+logged.
 
 ## Decision models and HydraFusion work at different layers
 
@@ -115,7 +124,7 @@ layers:
 | Where it runs | Your apps, agents, pipelines | Copilot CLI, VS Code, Copilot app |
 | Output | Probabilities you can threshold and log | One coherent change set |
 | You control | Options, thresholds, fallbacks | Model choice, admin enablement, review |
-| Best for | High-volume, structured, auditable calls | Hard, open-ended coding tasks |
+| Designed for | High-volume, structured calls; validate against your workload | Hard, open-ended coding tasks |
 | Maturity | Generally available model | Research preview |
 
 HydraFusion selects a workflow inside a coding product. A decision model is a
@@ -172,8 +181,8 @@ time above 0.8. The threshold the pilot picked, 0.647, labelled about a third
 of the holdout issues and got all of them right. The other two-thirds went to a
 person.
 
-That's a weak decider safely taking a third of the work off the queue. On 25
-holdout items, I wouldn't trust the exact figure. I would trust the lesson:
+In this synthetic holdout, it auto-routed 9 of 25 items without an error. That
+small result does not establish operational safety. I would trust the lesson:
 **ask where the model is confident and right, not how often it's right
 overall.**
 
@@ -194,12 +203,12 @@ looking commands, not just obvious `rm -rf` lines.
 ### The threshold changes how often people are interrupted
 
 At a block threshold of 0.5, the gate blocked 88% of unsafe calls outright. It
-also blocked 9% of safe ones. At 0.85, it blocked only 29% outright and
-escalated the rest to a person, with no false blocks.
+also blocked 9% of safe ones. At 0.85, it blocked 29% of unsafe calls, escalated
+59% and allowed 12%, with no false blocks.
 
-I chose the second setting. A gate that interrupts real work gets turned off
-within a week. The report includes the full sweep so the team that owns the
-risk can choose its own trade-off.
+I chose the second setting. A gate that interrupts real work risks being
+disabled or bypassed. The report includes the full sweep so the team that owns
+the risk can choose its own trade-off.
 
 ### I still need to check the live API response
 
@@ -259,11 +268,12 @@ the waste.
 
 ### Governance
 
-**7. Prove the confidence is calibrated.** On 1,000 labelled examples, bucket
-predictions by confidence. A decision made at 90% confidence should be right
-about nine times in ten. Publish the reliability diagram alongside the act,
-review and reject thresholds. Log every decision with its probability, options
-and model version.
+**7. Assess whether confidence is calibrated.** On representative labelled
+examples, bucket predictions by confidence and compare each bucket with its
+observed accuracy. A 1,000-example reliability diagram estimates calibration
+for that sample and distribution; it does not prove calibration under
+distribution shift. Publish the diagram alongside the act, review and reject
+thresholds. Log every decision with its probability, options and model version.
 
 **8. Test consistency.** Write ten policy decisions as rubrics, for example
 "does this pull request require a security review?" Paraphrase each input,
