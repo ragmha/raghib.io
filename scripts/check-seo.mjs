@@ -132,7 +132,7 @@ try {
     const article = metadata.schema.find((entry) => entry['@type'] === 'BlogPosting')
     const isArticle = (
       path.startsWith('/writing/') &&
-      !path.startsWith('/writing/category/') &&
+      !path.startsWith('/writing/topic/') &&
       !path.startsWith('/writing/tag/') &&
       path !== '/writing/'
     ) || path.startsWith('/project/')
@@ -153,7 +153,7 @@ try {
       })
       if (
         path.startsWith('/writing/') &&
-        !path.startsWith('/writing/category/') &&
+        !path.startsWith('/writing/topic/') &&
         !path.startsWith('/writing/tag/') &&
         path !== '/writing/'
       ) writingUrls.push(expected)

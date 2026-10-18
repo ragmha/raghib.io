@@ -4,16 +4,14 @@ import PostList from '../../components/PostList.astro'
 import {
   estimateReadingTime,
   formatDate,
-  getPostCategory,
   getPostSlug,
   getPostTags,
-  getTaxonomySlug,
   getPublishedPosts,
+  groupPosts,
 } from '../../lib/posts'
 
 const posts = await getPublishedPosts()
-const categories = [...new Set(posts.map(getPostCategory))].sort()
-const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort()
+const topics = groupPosts(posts, (post) => post.data.topics)
 ---
 
 <ArchiveLayout
@@ -30,24 +28,16 @@ const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort()
         title: post.data.title,
         description: post.data.description,
         readingTime: estimateReadingTime(post.body),
-        category: getPostCategory(post),
+        topics: post.data.topics,
         tags: getPostTags(post),
       }))}
     />
     <section class="taxonomy-index" aria-label="Browse writing by topic">
-      <h2>Browse by category</h2>
+      <h2>Browse by topic</h2>
       <ul>
-        {categories.map((category) => (
+        {topics.map(({ name, slug }) => (
           <li>
-            <a href={`/writing/category/${getTaxonomySlug(category)}/`}>{category}</a>
-          </li>
-        ))}
-      </ul>
-      <h2>Browse by tag</h2>
-      <ul>
-        {tags.map((tag) => (
-          <li>
-            <a href={`/writing/tag/${getTaxonomySlug(tag)}/`}>{tag}</a>
+            <a href={`/writing/topic/${slug}/`}>{name}</a>
           </li>
         ))}
       </ul>

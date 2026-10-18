@@ -1,6 +1,5 @@
 ---
 import TagList from './TagList.astro'
-import type { WritingCategory } from '../lib/posts'
 
 interface Item {
   href: string
@@ -8,7 +7,7 @@ interface Item {
   title: string
   description?: string
   readingTime?: string
-  category?: WritingCategory
+  topics?: readonly string[]
   tags?: string[]
 }
 
@@ -30,7 +29,7 @@ const { posts } = Astro.props
           <span class="post-title">{post.title}</span>
           {post.description && <span class="post-desc">{post.description}</span>}
         </a>
-        <TagList category={post.category} tags={post.tags} />
+        <TagList topics={post.topics} tags={post.tags} />
       </li>
     ))
   }

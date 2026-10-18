@@ -33,71 +33,8 @@ export function estimateReadingTime(body: string | undefined): string {
   return `${Math.max(1, Math.ceil(words / 220))} MIN READ`
 }
 
-const CATEGORIES = [
-  'AI',
-  'Web',
-  'Infrastructure',
-  'Design',
-  'Systems',
-  'Developer Workflow',
-] as const
-
-export type WritingCategory = (typeof CATEGORIES)[number]
-
 export function getTaxonomySlug(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
-}
-
-const CATEGORY_RULES: Array<{
-  category: WritingCategory
-  keywords: string[]
-}> = [
-  {
-    category: 'AI',
-    keywords: ['ai', 'agent', 'agents', 'copilot', 'llm', 'automation'],
-  },
-  {
-    category: 'Web',
-    keywords: ['web', 'react', 'nextjs', 'rsc', 'astro', 'frontend'],
-  },
-  {
-    category: 'Infrastructure',
-    keywords: ['dns', 'infrastructure', 'migration', 'operations', 'hosting'],
-  },
-  {
-    category: 'Design',
-    keywords: ['design', 'writing', 'layout', 'typography', 'interface'],
-  },
-  {
-    category: 'Systems',
-    keywords: ['systems', 'architecture', 'platform', 'governance', 'trust'],
-  },
-  {
-    category: 'Developer Workflow',
-    keywords: ['dx', 'developer', 'workflow', 'tooling', 'build'],
-  },
-]
-
-export function getPostCategory(post: WritingEntry): WritingCategory {
-  const searchableText = [
-    post.data.title,
-    post.data.description,
-    ...post.data.tags,
-    post.body ?? '',
-  ]
-    .join(' ')
-    .toLowerCase()
-
-  const scores = CATEGORY_RULES.map(({ category, keywords }) => ({
-    category,
-    score: keywords.reduce((total, keyword) => {
-      const pattern = new RegExp(`\\b${keyword}\\b`, 'g')
-      return total + (searchableText.match(pattern)?.length ?? 0)
-    }, 0),
-  }))
-
-  scores.sort((a, b) => b.score - a.score)
-  return scores[0]?.score ? scores[0].category : 'Systems'
 }
 
 // Search-friendly display names for shorthand or ambiguous tags.
@@ -121,15 +58,29 @@ export function getTagLabel(tag: string): string {
   return TAG_LABELS[tag.toLowerCase()] ?? tag
 }
 
-// Together with the category badge this keeps each post at three labels.
-const MAX_TAGS = 2
+// Most posts first; ties fall back to alphabetical.
+export function groupPosts(
+  posts: WritingEntry[],
+  keys: (post: WritingEntry) => readonly string[],
+): Array<{ name: string; slug: string; posts: WritingEntry[] }> {
+  const groups = new Map<string, WritingEntry[]>()
+  for (const post of posts) {
+    for (const key of keys(post)) groups.set(key, [...(groups.get(key) ?? []), post])
+  }
+  return [...groups]
+    .map(([name, posts]) => ({ name, slug: getTaxonomySlug(name), posts }))
+    .sort((a, b) => b.posts.length - a.posts.length || a.name.localeCompare(b.name))
+}
+
+// Topics plus tags stay at three labels per post.
+const MAX_LABELS = 3
 
 function normalizeTagText(text: string): string {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
 }
 
 export function getPostTags(post: WritingEntry): string[] {
-  const category = getPostCategory(post).toLowerCase()
+  const topics = post.data.topics.map((topic) => topic.toLowerCase())
   const relevanceText = normalizeTagText(
     `${post.data.title} ${post.data.description}`
   )
@@ -151,9 +102,9 @@ export function getPostTags(post: WritingEntry): string[] {
             : 0,
       }
     })
-    .filter(({ label }) => label.toLowerCase() !== category)
+    .filter(({ label }) => !topics.includes(label.toLowerCase()))
     .sort((a, b) => b.score - a.score || a.index - b.index)
-    .slice(0, MAX_TAGS)
+    .slice(0, Math.max(0, MAX_LABELS - topics.length))
     .map(({ tag }) => tag)
 }
 
@@ -175,17 +126,4 @@ export function getTagColor(tag: string): TagColor {
     hash = (hash * 31 + tag.charCodeAt(i)) >>> 0
   }
   return TAG_COLORS[hash % TAG_COLORS.length]
-}
-
-const CATEGORY_COLORS: Record<WritingCategory, TagColor> = {
-  AI: 'pink',
-  Web: 'blue',
-  Infrastructure: 'orange',
-  Design: 'yellow',
-  Systems: 'green',
-  'Developer Workflow': 'red',
-}
-
-export function getCategoryColor(category: WritingCategory): TagColor {
-  return CATEGORY_COLORS[category]
 }

@@ -115,7 +115,7 @@ try {
   await preview.goto(`${origin}/writing/advent-of-copilot-cli/`, { waitUntil: 'networkidle' })
   assert.ok(await preview.locator('.draft-notice').isVisible())
   assert.match(await preview.locator('meta[name="robots"]').getAttribute('content'), /noindex/)
-  assert.equal(await preview.locator('.post-head a[href^="/writing/tag/"], .post-head a[href^="/writing/category/"]').count(), 0,
+  assert.equal(await preview.locator('.post-head a[href^="/writing/tag/"], .post-head a[href^="/writing/topic/"]').count(), 0,
     'Draft metadata must not link to archives that may not exist')
 
   await preview.goto(`${origin}/writing/not-every-action-item-is-mine/`, { waitUntil: 'networkidle' })
