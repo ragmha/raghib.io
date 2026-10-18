@@ -37,10 +37,10 @@ think through an idea (blog), or reproduce a result (tutorial).
 
 ## Fundamentals first
 
-Borrow the method of Chip Huyen's *AI Engineering*, not her voice: it
-[focuses on fundamentals "instead of any specific tool or API"](https://github.com/chiphuyen/aie-book)
-because tools date quickly. Readers include people at AI labs; a post that only
-works inside one vendor's product reads as marketing.
+Lead with durable AI engineering fundamentals rather than a specific tool or
+API: tools change quickly, while problems like evaluation, reliability, and
+cost apply across providers. Readers include people at AI labs; a post that
+only works inside one vendor's product reads as marketing.
 
 - **Write about the problem, not the product.** Name the underlying problem
   (evaluation, context construction, cost, latency, reliability, safety,
