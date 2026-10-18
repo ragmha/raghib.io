@@ -14,20 +14,27 @@ The supplied `matchaonmuffins.dev` reference is the layout authority: direct tex
 ## Color
 
 Use the shared tokens in `src/styles/theme.css`; do not introduce a separate
-palette for a new page.
+palette for a new page. The one exception is data inside an experiment chart,
+which may use a ranked hue spectrum when every hue keeps dark labels at 4.5:1
+contrast or better; the surrounding page still uses the shared tokens.
+
+Colors follow the neutral palette of the OpenAI Developers blog; the layout and
+typography remain this site's own.
 
 | Token | Dark | Light |
 | --- | --- | --- |
-| Background | `#161614` | `#f7f5f0` |
-| Raised surface | `#1e1e1b` | `#f2f0e7` |
-| Primary text | `#e7e5dc` | `#111` |
-| Secondary text | `#a5a297` | `#6f6d63` |
-| Tertiary text | `#918e83` | `#777` |
-| Hairline divider | `#2d2d28` | `#dedbcf` |
-| Highlight | `#cede3f` | `#e9f56c` |
+| Background | `#000` | `#fff` |
+| Raised surface | `#181818` | `#f3f3f3` |
+| Primary text | `#fff` | `#0d0d0d` |
+| Secondary text | `#b9b9b9` | `#5d5d5d` |
+| Tertiary text | `#8f8f8f` | `#737373` |
+| Hairline divider | `#292929` | `#e8e8e8` |
+| Highlight | `#dcdcdc` | `#282828` |
 
 Dark is the default; the theme toggle persists the reader's choice. Neutral
 surfaces and restrained highlights communicate interaction, selection, and focus.
+Semantic illustration accents (red, green and blue) and the diagram halo also
+use shared theme tokens; page styles must not introduce their own accent palette.
 
 ## Typography
 
@@ -46,19 +53,24 @@ and restrained hierarchy rather than simulated commands or dense chrome.
 
 - Primary frame: `--layout-width: 960px` with `1.25rem` gutters, shared through
   `src/styles/layout.css`
-- Home opening: name, existing introduction, direct navigation, and links to
-  recent published writing when available
+- Home opening: name, existing introduction, and direct navigation; posts are
+  listed only on the writing archive
 - Archives and projects: editorial content beside a `6.5rem` navigation column,
   with a `4rem` gap
-- Article: heading, author/date/reading metadata, body, return link, and a
-  progressively enhanced contents rail
-- At 60rem and below, articles use the full reading column with an inline,
-  tap-sized Contents disclosure instead of the fixed desktop rail.
+- Article: optional full-bleed cover image (up to 85% of viewport height),
+  breadcrumb, large left-aligned title, description, a labelled
+  topics/published/reading-time/tags row, body, return link, and an
+  always-visible "On this page" list. The header spans the frame above a rule;
+  from `64rem` the list is a sticky `13rem` left column beside the article,
+  and it stacks above the article on narrower screens
 - At 600px and below: a single content column with wrapping navigation and
   reduced spacing; wide code and diagrams scroll internally
 - Concept diagrams with portrait exports switch to stacked compositions below
   60rem. They fit the column without horizontal scrolling or shrinking labels
   into unreadable text; other wide technical diagrams retain their scroll region.
+- Tool experiments may use a full-viewport app frame instead of the reading
+  frame: a compact header with tabs, a fixed control row, and panels that scroll
+  internally while the page itself does not
 
 ## Components
 
@@ -67,13 +79,18 @@ and restrained hierarchy rather than simulated commands or dense chrome.
 - Callouts use a full one-pixel border and a compact semantic label.
 - Code blocks use a solid near-black surface and one-pixel border.
 - Images remain square-edged enough to read as evidence, not decorative media.
-- The Copilot credit-journey illustration uses black ink on white paper:
+- The Copilot credit-journey illustration uses an ink-on-paper treatment:
   original GHCP-user and GH-admin figures, a desk and whiteboard, open
   handwritten dialogue, and no comic-card frames. Automation is the admin's
   tool, not a third persona. The user has headphones and casual clothing;
   the admin has glasses, an ID badge, and a policy clipboard. Both layouts
   retain these cues so the roles are recognizable without reading the labels.
+- Diagram ink, paper, and highlighted surfaces adapt together through
+  `scripts/theme-diagrams.mjs`; dark surfaces must not retain black export text.
 - Focus uses a visible two-pixel theme-highlight outline with offset.
+- Icons are monochrome line drawings on a 16-unit grid, stroked in the current
+  text color; they mark kinds of data in tools, and their meaning is always
+  available as nearby text or a tooltip.
 
 ## Motion
 

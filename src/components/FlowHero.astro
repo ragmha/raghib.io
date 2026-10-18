@@ -1,0 +1,30 @@
+---
+import '../../scripts/vendor/anatomy/iso.css'
+import '../styles/anatomy.css'
+import { flowHeroes } from '../lib/flow-hero.mjs'
+
+interface Props {
+  name: string
+}
+
+const hero = flowHeroes[Astro.props.name as keyof typeof flowHeroes]
+---
+
+<figure class="decision-hero decision-cover iso">
+  <div class="decision-hero-frame">
+    <div class="decision-cover-routes">
+      {hero.outputs.map((output) => <span data-tone={output.tone}>{output.label}</span>)}
+    </div>
+    <div class="decision-hero-art" data-src={`/hero/${Astro.props.name}.svg`} hidden></div>
+  </div>
+  <figcaption>
+    <p class="decision-cover-thesis">
+      {hero.thesis[0]}
+      <span>{hero.thesis[1]}</span>
+    </p>
+    <p class="decision-cover-note">{hero.note}</p>
+  </figcaption>
+  <script>
+    import '../scripts/hero-art.ts'
+  </script>
+</figure>

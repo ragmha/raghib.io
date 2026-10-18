@@ -3,8 +3,10 @@ title: "Deployed, Not Live: Why Your Domain Still Points at the Host You Left"
 seoTitle: "DNS Cutovers: Why Domains Hit the Old Host"
 description: "A migration moves your files. It does not automatically change who answers for your domain, and that gap can leave visitors reaching the old host."
 date: "2026-09-18"
+topics: ["Learning & Growth"]
 tags: ["dns", "infrastructure", "migration", "operations"]
 published: true
+hero: "dns-delegation"
 ---
 
 A deploy pipeline reported success. The build artifacts were correct. The new
@@ -56,7 +58,7 @@ documentation; this is an example, not a live lookup.
 **DNS helps find the address. HTTPS requests the page.** Moving the website's
 files to a new host does not, by itself, change the DNS answer.
 
-## The Mental Model That Causes It
+## Why moving the site does not move DNS authority
 
 The tempting mental model is simple:
 
@@ -120,7 +122,7 @@ editing the wrong zone.
 
 That sentence is the transferable lesson, and it is not really about DNS.
 
-## Ask One Question First
+## Trace the delegation first
 
 Before changing anything, start with your recursive resolver's view. In these
 commands, replace `example.com` with your domain:

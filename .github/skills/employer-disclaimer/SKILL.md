@@ -62,7 +62,9 @@ over it; tell the author:
 
 - Once per post, as the first paragraph after the frontmatter, before any
   other content.
-- Plain bold-label paragraph, no component, no callout box.
+- Keep a plain bold-label paragraph in MDX, not a component or hand-built box.
+  The shared Markdown renderer highlights it as an informational callout,
+  using the site's light and dark themes without client-side JavaScript.
 - Do not repeat it in `description`, `seoTitle`, social images, or RSS-only
   fields.
 - If an older `**Disclosure:**` paragraph exists, replace it with the text

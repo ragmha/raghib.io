@@ -7,6 +7,7 @@
     "dev": "astro dev",
     "build": "astro check && astro build",
     "check": "astro check",
+    "theme:diagrams": "node scripts/theme-diagrams.mjs",
     "check:seo": "bun scripts/check-seo.mjs",
     "check:vitals": "bun scripts/check-web-vitals.mjs",
     "generate:social-card": "bun scripts/generate-social-card.mjs",
@@ -21,6 +22,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
+    "gpt-tokenizer": "^4.0.3",
     "playwright": "^1.63.0",
     "rehype-mermaid": "^3.0.0",
     "typescript": "^5.9.2",

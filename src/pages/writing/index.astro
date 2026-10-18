@@ -2,12 +2,16 @@
 import ArchiveLayout from '../../layouts/ArchiveLayout.astro'
 import PostList from '../../components/PostList.astro'
 import {
+  estimateReadingTime,
   formatDate,
   getPostSlug,
+  getPostTags,
   getPublishedPosts,
+  groupPosts,
 } from '../../lib/posts'
 
 const posts = await getPublishedPosts()
+const topics = groupPosts(posts, (post) => post.data.topics)
 ---
 
 <ArchiveLayout
@@ -23,8 +27,21 @@ const posts = await getPublishedPosts()
         date: formatDate(post.data.date),
         title: post.data.title,
         description: post.data.description,
+        readingTime: estimateReadingTime(post.body),
+        topics: post.data.topics,
+        tags: getPostTags(post),
       }))}
     />
+    <section class="taxonomy-index" aria-label="Browse writing by topic">
+      <h2>Browse by topic</h2>
+      <ul>
+        {topics.map(({ name, slug }) => (
+          <li>
+            <a href={`/writing/topic/${slug}/`}>{name}</a>
+          </li>
+        ))}
+      </ul>
+    </section>
   ) : (
     <p class="empty-writing">No posts published yet.</p>
   )}
@@ -34,5 +51,18 @@ const posts = await getPublishedPosts()
   .prose .empty-writing {
     color: var(--ink-muted);
     text-align: center;
+  }
+
+  .taxonomy-index ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 1rem;
+    list-style: none;
+    margin: 0 0 1.5rem;
+    padding: 0;
+  }
+
+  .taxonomy-index li {
+    margin: 0;
   }
 </style>

@@ -1,14 +1,20 @@
 ---
 title: "React Server Components Explained"
-description: "A practical guide to understanding RSC — what they are, why they matter, and how to use them"
+description: "A practical guide to where React Server Components run, how they compose with client components, and what that means for browser JavaScript"
 date: "2026-03-28"
+topics: ["Tutorial"]
 tags: ["react", "nextjs", "rsc"]
 published: false
+hero: "server-components"
 ---
 
-## What Are Server Components?
+## Start with where the component runs
 
-React Server Components (RSC) let you write components that run exclusively on the server. They never ship JavaScript to the browser. This is a fundamental shift in how React applications are built.
+React Server Components (RSC) render on the server. Their component
+implementation is not sent to the browser as client JavaScript; React sends
+the rendered result in its server-component payload instead. That can reduce
+the JavaScript a page needs, but it does not mean the whole page has no
+JavaScript.
 
 ```tsx
 // This component runs on the server only
@@ -26,21 +32,22 @@ async function RecentPosts() {
 }
 ```
 
-## Server vs Client Components
+## Server and client components have different jobs
 
-The mental model is straightforward:
+In a framework that supports RSC, the distinction is about where component
+code can run and what it can do:
 
 ### Server Components (default)
 - Run on the server during rendering
-- Can directly access databases, filesystems, and APIs
+- Can access server-side data sources such as databases and files
 - Cannot use hooks (`useState`, `useEffect`)
 - Cannot add event handlers (`onClick`, `onChange`)
-- Zero bundle size impact
+- Their implementation is not included in the client JavaScript bundle
 
 ### Client Components (`'use client'`)
-- Run in the browser (and on the server for SSR)
+- Can be server-rendered, then hydrated in the browser
 - Can use hooks and interactivity
-- Add to the JavaScript bundle
+- Their client-side code is included in the JavaScript bundle
 - Declared with the `'use client'` directive at the top of the file
 
 ```tsx
@@ -58,9 +65,12 @@ export function LikeButton() {
 }
 ```
 
-## The Composition Pattern
+## Compose the two
 
-The real power of RSC comes from composing server and client components together. Server components can import and render client components, but not the other way around.
+Server components can render client components, passing data to the interactive
+part of the page. Client components cannot import server components. Keep
+database access and other server-only work on the server; put state and event
+handlers in the client component that needs them.
 
 ```tsx
 // Server Component — fetches data
@@ -79,13 +89,10 @@ async function PostPage({ id }: { id: string }) {
 }
 ```
 
-> Think of Server Components as the "static" shell and Client Components as
-> the "interactive" islands. This is similar to the Islands Architecture
-> pattern, but built into React itself.
+## Choose the boundary
 
-## When to Use What
-
-Here's my decision framework:
+Start with server components for data and rendering. Add a client component
+where the interface needs browser interaction:
 
 - **Need database access?** → Server Component
 - **Need user interactivity?** → Client Component
@@ -93,18 +100,19 @@ Here's my decision framework:
 - **Managing form state?** → Client Component
 - **Displaying static content?** → Server Component
 
-> Don't make everything a Client Component "just in case." Start with Server
-> Components and add the `'use client'` directive only when you need
-> interactivity.
+Do not add `'use client'` just in case. It moves that component and its
+dependencies into the client bundle, so use it where interaction requires it.
 
-## Performance Wins
+## What changes for performance
 
-The performance benefits are real:
+RSC can reduce client JavaScript when server-only components and dependencies
+stay on the server. The result depends on the component boundary and the
+framework; RSC does not automatically make every page faster.
 
-1. **Smaller bundles** — server-only code never reaches the browser
-2. **Faster initial load** — less JavaScript to parse and execute
-3. **Direct data access** — no API layer needed for server-side data
-4. **Streaming** — components can stream in as they resolve
+It can also let a server component read data without adding a separate browser
+request to an API route, and supported frameworks can stream rendered output
+as it becomes ready. Those are options to measure in an application, not
+guaranteed performance wins.
 
 This site now uses Astro, but the same architectural question still matters in
 React applications: ship client JavaScript only where interaction requires it.

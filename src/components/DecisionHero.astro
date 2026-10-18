@@ -1,0 +1,28 @@
+---
+import '../../scripts/vendor/anatomy/iso.css'
+import '../styles/anatomy.css'
+---
+
+<figure class="decision-hero decision-cover iso">
+  <div class="decision-hero-frame">
+    <div class="decision-cover-routes" aria-label="Illustrative routing thresholds">
+      <span data-tone="green"><code>p ≥ 0.90</code> Generate</span>
+      <span><code>0.60 ≤ p &lt; 0.90</code> Review</span>
+      <span data-tone="red"><code>p &lt; 0.60</code> Stop</span>
+    </div>
+    <div class="decision-hero-art" data-src="/decision-hero.svg" hidden></div>
+  </div>
+  <figcaption>
+    <p class="decision-cover-thesis">
+      A small model decides the path.
+      <span>A capable model does the work.</span>
+    </p>
+    <p class="decision-cover-note">
+      Illustrative thresholds, not live predictions. Set cutoffs from calibration
+      and the cost of mistakes.
+    </p>
+  </figcaption>
+  <script>
+    import '../scripts/hero-art.ts'
+  </script>
+</figure>

@@ -33,6 +33,8 @@ assert.match(robots, /^User-agent: \*$/m)
 assert.match(robots, /^Allow: \/$/m)
 assert.ok(!/^Disallow:\s*\/\s*$/m.test(robots), 'Public pages must be crawlable')
 assert.ok(robots.split(/\r?\n/).includes(`Sitemap: ${new URL('/sitemap-index.xml', site).href}`))
+assert.ok(robots.split(/\r?\n/).includes(`Sitemap: ${new URL('/sitemap.xml', site).href}`))
+assert.ok(robots.split(/\r?\n/).includes(`Sitemap: ${new URL('/sitemap.txt', site).href}`))
 
 const browser = await chromium.launch({ headless: true })
 try {
@@ -65,7 +67,7 @@ try {
       const meta = (selector) => document.querySelector(selector)?.getAttribute('content')
       return {
         title: document.title,
-        titleCount: document.querySelectorAll('title').length,
+        titleCount: document.head.querySelectorAll('title').length,
         description: meta('meta[name="description"]'),
         descriptionCount: document.querySelectorAll('meta[name="description"]').length,
         canonical: document.querySelector('link[rel="canonical"]')?.getAttribute('href'),
@@ -128,7 +130,12 @@ try {
     assert.ok(metadata.schema.some((entry) => entry['@type'] === 'Person'), `Author identity for ${file}`)
     assert.ok(metadata.schema.some((entry) => entry['@type'] === 'WebSite'), `Site identity for ${file}`)
     const article = metadata.schema.find((entry) => entry['@type'] === 'BlogPosting')
-    const isArticle = (path.startsWith('/writing/') && path !== '/writing/') || path.startsWith('/project/')
+    const isArticle = (
+      path.startsWith('/writing/') &&
+      !path.startsWith('/writing/topic/') &&
+      !path.startsWith('/writing/tag/') &&
+      path !== '/writing/'
+    ) || path.startsWith('/project/')
     assert.equal(Boolean(article), isArticle, `Article schema only on article routes: ${file}`)
     if (article) {
       assert.equal(metadata.ogType, 'article', `Article social type for ${file}`)
@@ -144,7 +151,12 @@ try {
         description: metadata.description,
         datePublished: article.datePublished,
       })
-      if (path.startsWith('/writing/')) writingUrls.push(expected)
+      if (
+        path.startsWith('/writing/') &&
+        !path.startsWith('/writing/topic/') &&
+        !path.startsWith('/writing/tag/') &&
+        path !== '/writing/'
+      ) writingUrls.push(expected)
     }
     for (const href of metadata.links) {
       const url = new URL(href, expected)
@@ -173,6 +185,24 @@ try {
     sitemapUrls.push(...await xmlValues(url.pathname.slice(1), 'loc'))
   }
   assert.deepEqual(sitemapUrls.sort(), publicUrls.sort(), 'Sitemap must contain exactly the canonical, indexable pages')
+  assert.deepEqual((await xmlValues('sitemap.xml', 'loc')).sort(), publicUrls.sort(), '/sitemap.xml must contain exactly the canonical, indexable pages')
+  assert.deepEqual(
+    (await readFile(resolve(root, 'sitemap.txt'), 'utf8')).trim().split(/\r?\n/).sort(),
+    publicUrls.sort(),
+    '/sitemap.txt must contain exactly the canonical, indexable pages',
+  )
+  assert.deepEqual(
+    (await xmlValues('sitemap.xml', 'url:has(lastmod) > loc')).sort(),
+    [...writingUrls].sort(),
+    '/sitemap.xml must give every published post a lastmod',
+  )
+  for (const [file, pattern] of [
+    ['llms.txt', /\]\((https:\/\/[^)]+\/writing\/[^/)]+\/)\)/g],
+    ['llms-full.txt', /^URL: (.+)$/gm],
+  ]) {
+    const urls = [...(await readFile(resolve(root, file), 'utf8')).matchAll(pattern)].map((match) => match[1])
+    assert.deepEqual(urls.sort(), [...writingUrls].sort(), `${file} must list exactly the published writing`)
+  }
   for (const [pageUrl, metadata] of documents) {
     for (const href of metadata.links) {
       const target = new URL(href, pageUrl)
@@ -194,8 +224,8 @@ try {
   assert.match(home.title, /software.*AI.*systems/i, 'The homepage search title must describe the publication')
   if (writingUrls.length > 0) {
     assert.ok(
-      home.mainLinks.some((href) => writingUrls.includes(new URL(href, site).href)),
-      'The homepage must link directly to published writing',
+      home.mainLinks.some((href) => new URL(href, site).href === new URL('/writing/', site).href),
+      'The homepage must link to the writing archive',
     )
   }
   console.log(`SEO metadata and discovery checks passed for ${publicUrls.length} public pages.`)

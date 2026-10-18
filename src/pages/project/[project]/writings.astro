@@ -30,35 +30,37 @@ const readingTime = estimateReadingTime(writeup.body)
   noindex={!writeup.data.published}
   article={{ headline: writeup.data.title, date: writeup.data.date }}
 >
-  <div class="shell">
-    <aside class="sidebar">
-      <PartsNav headings={headings} title={writeup.data.title} readingTime={readingTime} />
-    </aside>
-    <main id="main">
-      <article class="prose">
-        <header class="doc-head">
-          {!writeup.data.published && (
-            <p class="draft-notice">Draft preview — not published. Review the account and conclusions before publishing.</p>
-          )}
-          <h1 id="post-title">{writeup.data.title}</h1>
-          <p class="doc-meta">
-            <a href="/#about" rel="author">{SITE_NAME}</a> ·
-            <time datetime={writeup.data.date.toISOString()}>{formatDate(writeup.data.date)}</time> · {readingTime}
-          </p>
-          <p class="project-context">
-            <a href="/projects/">Projects</a> / {project.name}
-          </p>
-          <p class="project-resources">
-            <a href={project.url}>Repository &amp; README ↗</a>
-            {project.homepage && <a href={project.homepage}>Live ↗</a>}
-          </p>
-        </header>
+  <div class="shell shell-solo">
+    <main id="main" class="post-layout">
+      <div class="post-body">
+        <aside class="sidebar">
+          <PartsNav headings={headings} />
+        </aside>
+        <article class="prose">
+          <header class="doc-head">
+            {!writeup.data.published && (
+              <p class="draft-notice">Draft preview — not published. Review the account and conclusions before publishing.</p>
+            )}
+            <h1 id="post-title">{writeup.data.title}</h1>
+            <p class="doc-meta">
+              <a href="/#about" rel="author">{SITE_NAME}</a> ·
+              <time datetime={writeup.data.date.toISOString()}>{formatDate(writeup.data.date)}</time> · {readingTime}
+            </p>
+            <p class="project-context">
+              <a href="/projects/">Projects</a> / {project.name}
+            </p>
+            <p class="project-resources">
+              <a href={project.url}>Repository &amp; README ↗</a>
+              {project.homepage && <a href={project.homepage}>Live ↗</a>}
+            </p>
+          </header>
 
-        <Content />
+          <Content />
 
-        <hr class="rule-dotted" />
-        <p class="doc-end"><a href="/projects/">← All projects</a></p>
-      </article>
+          <hr class="rule-dotted" />
+          <p class="doc-end"><a href="/projects/">← All projects</a></p>
+        </article>
+      </div>
     </main>
   </div>
 </WritingLayout>

@@ -1,9 +1,11 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro'
 import PostList from '../components/PostList.astro'
-import { formatDate, getPostSlug, getPublishedPosts } from '../lib/posts'
+import { formatDate, getPostSlug, getPublishedPosts, groupPosts } from '../lib/posts'
 
-const latestPosts = (await getPublishedPosts()).slice(0, 3)
+const posts = await getPublishedPosts()
+const latestPosts = posts.slice(0, 3)
+const topics = groupPosts(posts, (post) => post.data.topics)
 ---
 
 <SiteLayout
@@ -24,6 +26,16 @@ const latestPosts = (await getPublishedPosts()).slice(0, 3)
     </p>
   </div>
 
+  {topics.length > 0 && (
+    <nav class="topic-strip" aria-label="Topics">
+      <span>Gone deep on:</span>
+      {topics.map(({ name, slug }) => (
+        <a href={`/writing/topic/${slug}/`}>{name}</a>
+      ))}
+      <a href="/writing/topic/">All topics →</a>
+    </nav>
+  )}
+
   {latestPosts.length > 0 && (
     <section class="home-writing" aria-labelledby="latest-writing">
       <div class="section-head">
@@ -38,3 +50,19 @@ const latestPosts = (await getPublishedPosts()).slice(0, 3)
     </section>
   )}
 </SiteLayout>
+
+<style>
+  .topic-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    margin: 0 0 2.5rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .topic-strip span {
+    color: var(--ink-faint);
+  }
+</style>

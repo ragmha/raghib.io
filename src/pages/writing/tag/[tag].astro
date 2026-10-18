@@ -1,0 +1,60 @@
+---
+import ArchiveLayout from '../../../layouts/ArchiveLayout.astro'
+import PostList from '../../../components/PostList.astro'
+import {
+  estimateReadingTime,
+  formatDate,
+  getPostSlug,
+  getPostTags,
+  getPublishedPosts,
+  getTagLabel,
+  groupPosts,
+} from '../../../lib/posts'
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts()
+  return groupPosts(posts, (post) => post.data.tags).map(({ name: tag, slug, posts }) => ({
+    params: { tag: slug },
+    props: { tag, posts },
+  }))
+}
+
+const { tag, posts } = Astro.props
+const label = getTagLabel(tag)
+const description = `Articles tagged ${label}, with practical perspectives on software, technology, and engineering.`
+---
+
+<ArchiveLayout
+  title={`Writing tagged ${label}`}
+  count={posts.length}
+  itemLabel="article"
+  description={description}
+>
+  <header class="post-head" slot="head">
+    <nav class="post-crumbs" aria-label="Breadcrumb">
+      <a href="/writing/">Writing</a> / <span aria-current="page">Tagged {label}</span>
+    </nav>
+    <h1>{label}</h1>
+    <p class="post-lede">{posts.length} article{posts.length === 1 ? '' : 's'} tagged {label}, newest first.</p>
+  </header>
+  <PostList
+    posts={posts.map((post) => ({
+      href: `/writing/${getPostSlug(post)}/`,
+      date: formatDate(post.data.date),
+      title: post.data.title,
+      description: post.data.description,
+      readingTime: estimateReadingTime(post.body),
+      topics: post.data.topics,
+      tags: getPostTags(post),
+    }))}
+  />
+  <p><a href="/writing/topic/">All topics</a></p>
+</ArchiveLayout>
+
+<style>
+  /* PostList draws its own top rule. */
+  .post-head {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+</style>

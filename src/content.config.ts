@@ -1,17 +1,23 @@
 import { defineCollection, z } from 'astro:content'
 import { glob } from 'astro/loaders'
 import { projectSnapshot } from './content/project-snapshot'
+import { flowHeroes } from './lib/flow-hero.mjs'
+import { TOPICS } from './lib/topics'
 
 const writing = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/writing' }),
-  schema: z.object({
+  schema: ({ image }) => z.object({
     title: z.string(),
     seoTitle: z.string().trim().min(1).optional(),
     description: z.string(),
     socialImage: z.string().regex(/^\/(?!\/)/).optional(),
     date: z.coerce.date(),
+    topics: z.array(z.enum(TOPICS)).min(1),
     tags: z.array(z.string()).default([]),
     published: z.boolean().default(true),
+    cover: z.object({ src: image(), alt: z.string().trim().min(1) }).optional(),
+    // Every post opens with an Anatomy illustration: the decision cover or a flow hero.
+    hero: z.enum(['decision', ...Object.keys(flowHeroes)] as [string, ...string[]]),
   }),
 })
 
