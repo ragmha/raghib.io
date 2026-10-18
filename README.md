@@ -201,6 +201,10 @@ cover:
   alt: "What the image shows"
 ```
 
+Every post needs at least one Mermaid or Excalidraw diagram. Choose its type
+with [diagram-design](https://github.com/cathrynlavery/diagram-design), as
+described in `.agents/skills/post-layout/SKILL.md`.
+
 Rendered diagrams live in `public/diagrams/`; editable `.excalidraw` sources live
 in `src/assets/diagrams/`. Edit a source in Excalidraw, then export the matching
 SVG. Keep SVG diagrams as native `<img>` elements with explicit `width`, `height`,

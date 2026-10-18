@@ -1,6 +1,6 @@
 ---
 name: post-layout
-description: Lay out a raghib.io post. Invent its isometric hero machine, add Mermaid or Excalidraw diagrams, and move large tutorial code into a companion repository. Use when creating, drafting, restructuring, or publishing any post in src/content/writing/, or when a post needs a hero banner, a diagram, or a companion repo.
+description: Lay out a raghib.io post. Invent its isometric hero machine, choose its diagram with diagram-design and draw it in Mermaid or Excalidraw, and move large tutorial code into a companion repository. Use when creating, drafting, restructuring, or publishing any post in src/content/writing/, or when a post needs a hero banner, a diagram, or a companion repo.
 ---
 
 # Post layout
@@ -71,9 +71,46 @@ Every post needs at least one Mermaid or Excalidraw diagram, and
 `tests/post-layout.test.mjs` enforces this. The hero is a metaphor; diagrams
 show the post's own system directly.
 
-- **Mermaid** is the default. Write a fenced `mermaid` block with `accTitle`
-  and `accDescr`, and keep it to about 12 nodes. It renders to SVG at build
-  time.
+### Choose the diagram with diagram-design
+
+Use the `diagram-design` skill
+([cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design),
+MIT) to decide which diagram the post needs. If your harness doesn't have the
+skill, install it with `npx skills add cathrynlavery/diagram-design`, or read
+its [SKILL.md](https://github.com/cathrynlavery/diagram-design/blob/550fd66edff058bc73056c3416b76d69cfe865ba/skills/diagram-design/SKILL.md)
+and the `references/` file for the type you choose. Use it only to choose and
+edit the diagram. Skip its style guide, onboarding gate, fonts, and HTML
+output, because this site's theme owns the look.
+
+1. Find the claim in the post that a reader would understand faster from a
+   picture than from a paragraph. If a sentence or a table would explain it
+   just as well, pick a different claim.
+2. If behavior, state, enforcement, or risk carries the meaning, choose a
+   semantic pattern from `references/semantic-patterns.md` first. Then pick
+   the visual type from its guide, and read that type's reference.
+3. Keep to its budget: at most 9 nodes, at most 12 arrows, one or two focal
+   elements, and nothing a reader wouldn't miss if you removed it. If the
+   diagram goes over, split it into an overview and a detail.
+4. Before drawing, tell the author the claim, the pattern and type, the
+   medium, and anything the budget forced out.
+5. Draw it in the medium that suits the type:
+   - **Mermaid `flowchart`:** flowchart, process, data flow, architecture,
+     tree, or dependency graph. This is the only Mermaid type the theme CSS in
+     `astro.config.mjs` covers for light and dark.
+   - **Another Mermaid type** (`sequenceDiagram`, `stateDiagram-v2`,
+     `erDiagram`, `timeline`, `quadrantChart`, `xychart-beta`, `gantt`) for
+     sequence, state machine, ER, timeline, quadrant, bar or line chart, or
+     Gantt. These render, but check them in light and dark, and extend
+     `themeCSS` if their colors don't follow the theme.
+   - **Excalidraw:** spatial or editorial types such as loop, nested, layer
+     stack, Venn, pyramid, swimlane, fishbone, service blueprint, and exploded
+     or axonometric views.
+
+### Draw it
+
+- **Mermaid:** write a fenced `mermaid` block. Put the diagram's title in
+  `accTitle` and a one-sentence description of its content in `accDescr`.
+  Keep labels short. It renders to SVG at build time.
 - **Excalidraw** is for concept art and scenes. Save the source as
   `src/assets/diagrams/<name>.excalidraw` and export the SVG to
   `public/diagrams/<name>.svg`. Then run `bun run theme:diagrams` and embed the
