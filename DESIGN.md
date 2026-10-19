@@ -1,7 +1,5 @@
 # Design System
 
-<!-- impeccable:design-schema 1 -->
-
 ## Direction
 
 raghib.io is a restrained independent publishing home. Its author introduction,

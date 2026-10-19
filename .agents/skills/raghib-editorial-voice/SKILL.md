@@ -11,7 +11,7 @@ notice something in practice, ask what it means, explore possible explanations
 or approaches, and state what remains unknown. First person is a choice, not a
 requirement.
 
-`PRODUCT.md` is authoritative: keep the writing independent, cross-industry,
+`AGENTS.md` is authoritative: keep the writing independent, cross-industry,
 and understandable beyond a narrow specialist audience. Use [EXAMPLES.md](EXAMPLES.md)
 as evidence, not as templates.
 
@@ -35,6 +35,28 @@ elements from another mode, but do not make every post follow the same rhythm.
 If a piece is hybrid, prioritize the reader's main job: learn one fact (TIL),
 think through an idea (blog), or reproduce a result (tutorial).
 
+## Fundamentals first
+
+Lead with durable AI engineering fundamentals rather than a specific tool or
+API: tools change quickly, while problems like evaluation, reliability, and
+cost apply across providers. Readers include people at AI labs; a post that
+only works inside one vendor's product reads as marketing.
+
+- **Write about the problem, not the product.** Name the underlying problem
+  (evaluation, context construction, cost, latency, reliability, safety,
+  feedback loops). The tool you used belongs in the method, not the title.
+- **Lay out the options before you pick one.** Lay out the realistic
+  approaches, what each costs, and when each one wins. Leave the reader with
+  the questions that decide it in their context, not a verdict for everyone.
+- **Ground claims in sources.** Cite primary sources (papers, model cards,
+  official docs, benchmarks) for factual claims, and say what a benchmark
+  does and does not measure.
+- **Evaluation is part of the work.** For any AI system, state how you know it
+  works: the rubric or metric, the data, the baseline, and the failure cases.
+- **Make the result reusable.** Make the takeaway transfer across providers:
+  use a swappable interface in code, or an open standard (MCP, OpenTelemetry,
+  Agent Skills) instead of one vendor's feature.
+
 ## Writing principles
 
 - Lead with the question, discovery, or outcome that gives this piece a reason
@@ -52,7 +74,7 @@ think through an idea (blog), or reproduce a result (tutorial).
 
 ## Workflow
 
-1. Read the draft or notes, `PRODUCT.md`, and relevant source material. Record
+1. Read the draft or notes, `AGENTS.md`, and relevant source material. Record
    the intended reader, primary mode, central idea, evidence, and uncertainties.
 2. Preserve the author's actual thinking and phrasing where they carry
    personality. Edit for clarity, order, grammar, and precision without

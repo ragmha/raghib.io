@@ -64,3 +64,18 @@ architecture, review and the assumptions behind a change.
 I am also exploring where these tools help people understand an unfamiliar
 codebase. Onboarding is one place where saving keystrokes is less important
 than helping someone build a useful mental model.
+
+```mermaid
+flowchart TD
+    accTitle: Where AI-generated code needs engineering judgment
+    accDescr: An AI proposal is checked against intended behavior and system context; gaps return for revision, and an acceptable change still needs tests and review before integration.
+    task(["Task and context"]) --> proposal["AI proposes code"]
+    proposal --> check["Engineer checks behavior and system context"]
+    check --> changes{"Changes needed?"}
+    changes -->|Yes| revise["Revise with context"]
+    revise --> proposal
+    changes -->|No| tests["Run tests and review"]
+    tests --> ready{"Ready to integrate?"}
+    ready -->|Yes| integrate(["Integrate change"])
+    ready -->|No| revise
+```

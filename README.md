@@ -185,7 +185,7 @@ and reading layout. Keep content in MDX rather than duplicating page markup;
 headings supply the contents list without imposing the same outline on every post.
 The standard opening `**Disclaimer:**` paragraph automatically becomes a
 theme-aware informational callout. Keep its wording and position as defined in
-`.github/skills/employer-disclaimer/SKILL.md`; no per-post styling is needed.
+`.agents/skills/employer-disclaimer/SKILL.md`; no per-post styling is needed.
 
 Posts live in `src/content/writing/`. A project can optionally have a longer
 writeup at `/project/<project-name>/writings/`, authored as MDX in
@@ -201,9 +201,26 @@ cover:
   alt: "What the image shows"
 ```
 
+Every post needs at least one Mermaid or Excalidraw diagram. Choose its type
+with [diagram-design](https://github.com/cathrynlavery/diagram-design), as
+described in `.agents/skills/post-layout/SKILL.md`.
+
 Rendered diagrams live in `public/diagrams/`; editable `.excalidraw` sources live
-in `src/assets/diagrams/`. Edit a source in Excalidraw, then export the matching
-SVG. Keep SVG diagrams as native `<img>` elements with explicit `width`, `height`,
+in `src/assets/diagrams/`. Edit a source in Excalidraw, or write element
+skeletons by hand, then export the matching SVG:
+
+```bash
+bun run export:excalidraw <name> --title "…" --description "…"
+```
+
+The export runs Excalidraw's own renderer in headless Chromium, so text is
+measured with the real fonts. It embeds the fonts, applies the shared light and
+dark palettes, adds the title and description, and writes a PNG preview. It
+rejects labels that overflow their shapes and colors that wouldn't follow dark
+mode, and writes nothing when a check fails. A skeleton source is saved back as
+a full, editable scene.
+
+Keep SVG diagrams as native `<img>` elements with explicit `width`, `height`,
 and descriptive `alt` attributes; shared writing styles scale them to their
 container. Put raster content images in `src/assets/` and render them with
 Astro's `<Image />` or `<Picture />` components so responsive `srcset` values and
@@ -243,8 +260,9 @@ This exercises portrait image selection, diagram legibility, contents navigation
 the always-visible contents list, the no-JavaScript fallback, and an existing
 published article.
 
-After exporting an SVG, run `bun run theme:diagrams` to apply the shared light
-and dark palettes. At build time, `src/lib/rehype-inline-diagrams.mjs` inlines
+`bun run export:excalidraw` applies the shared light and dark palettes itself.
+After changing an SVG any other way, run `bun run theme:diagrams`. At build
+time, `src/lib/rehype-inline-diagrams.mjs` inlines
 `<img src="/diagrams/*.svg">` in posts so diagrams follow the site's
 `data-theme` toggle; Safari only shows the OS theme to SVGs loaded as images.
 Images inside `<picture>` remain native images so responsive sources still work.

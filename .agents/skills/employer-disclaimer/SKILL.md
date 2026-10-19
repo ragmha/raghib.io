@@ -6,7 +6,7 @@ description: Decide whether a raghib.io post needs the Microsoft employer discla
 # Employer disclaimer
 
 The author works at Microsoft. The site is independent writing (see
-`PRODUCT.md`), so the disclaimer is added only when an employer connection
+`AGENTS.md`), so the disclaimer is added only when an employer connection
 could reasonably colour how a reader trusts the post.
 
 ## The text

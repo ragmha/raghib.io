@@ -6,7 +6,7 @@ import rehypeEmployerDisclaimer from '../src/lib/rehype-employer-disclaimer.mjs'
 const DISCLAIMER =
   '**Disclaimer:** I work at Microsoft. This is my personal view, based only on public information. It isn’t an official position or a product recommendation.'
 // ponytail: keyword tripwire only; GitHub is excluded because it appears incidentally in most posts.
-// The judgment calls (competitors, incidental mentions) live in .github/skills/employer-disclaimer.
+// The judgment calls (competitors, incidental mentions) live in .agents/skills/employer-disclaimer.
 const TRIGGER = /\b(microsoft|copilot|azure|openai|linkedin|vs ?code)\b/i
 
 const dir = new URL('../src/content/writing/', import.meta.url)

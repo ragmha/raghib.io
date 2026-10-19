@@ -245,6 +245,26 @@ Deny rules always win, even over `--allow-all-tools`. Inside a session, `/permis
 
 `/sandbox` configures OS-level limits on what shell commands can read, write, and reach over the network. `/sandbox policy` shows the effective rules. Permission prompts ask; a sandbox enforces. Using both means a bad command fails safely instead of depending on a tired approval.
 
+```mermaid
+flowchart TD
+    accTitle: Where a shell command can be stopped
+    accDescr: When the agent wants to run a shell command, a matching deny rule blocks it even when all tools are allowed. Otherwise it needs an allow rule or your approval. With the sandbox enabled, an approved command that steps outside the sandbox policy fails safely, so a tired approval is not the last boundary.
+    command(["Agent's shell command"])
+    deny["Deny rules"]
+    approve["Allow rules and your approval"]
+    sandbox["Sandbox policy"]
+    blocked(["Blocked before it runs"])
+    fails(["Fails safely"])
+    runs(["Runs"])
+    command --> deny
+    deny -->|Match: deny always wins| blocked
+    deny -->|No match| approve
+    approve -->|Declined| blocked
+    approve -->|Approved, even by a tired click| sandbox
+    sandbox -->|Steps outside| fails
+    sandbox -->|Stays inside| runs
+```
+
 ### 31. `--yolo` — the escape hatch, labeled honestly
 
 ```bash
