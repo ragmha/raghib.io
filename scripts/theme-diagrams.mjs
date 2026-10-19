@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 
 const palettes = [
   ['paper', ['#f7f5f0', '#262a33'], '#ffffff', '#000000'],
-  ['ink', ['#1c1b18', '#dedfe3', '#000000', '#111111'], '#0d0d0d', '#ffffff'],
+  ['ink', ['#1c1b18', '#dedfe3', '#000000', '#111111', '#1e1e1e'], '#0d0d0d', '#ffffff'],
   ['surface', ['#f2f0e7', '#ffffff'], '#f3f3f3', '#181818'],
   ['muted', ['#6f6d63', '#b8bac0'], '#5d5d5d', '#b9b9b9'],
   ['rule', ['#c9c5b6', '#3b414a'], '#d8d8d8', '#424242'],
