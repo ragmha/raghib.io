@@ -704,7 +704,7 @@ export const flowHeroes = {
   },
   'action-triage': {
     art: actionTriage,
-    label: 'An isometric sorting desk. Meetings and chats arrive as one evidence tray. Two identical stamp presses, a generative model and Decision-1, work from the same evidence and the same rubric card, and their proposals drop into four bins: my next actions, my later list, needs review, and handoffs and records.',
+    label: 'An isometric sorting desk. Meetings and chats arrive as one evidence tray. Two identical stamp presses, a generative model and Decision-1, work from the same evidence and the same rubric card, and their proposals drop into four bins: my next actions, my later list, needs review, and one bin shared by handoffs and recorded decisions, which the report lists separately.',
     outputs: [
       { label: 'MY NEXT ACTIONS', tone: 'green' },
       { label: 'MY LATER LIST', tone: 'blue' },
