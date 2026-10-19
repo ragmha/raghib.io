@@ -14,7 +14,7 @@ hero: "action-triage"
 import { Code } from 'astro:components';
 import triageSource from '../../../public/examples/workiq-triage.mjs?raw';
 
-Every meeting ends with work.
+Most meetings end with work.
 
 Some of it never reaches a list. The rest lands on one big list, all mixed
 together: things only I can do, things a teammate already owns, things an agent
@@ -27,8 +27,8 @@ A to-do list that holds everything isn't a plan. It's a backlog with my name on 
 
 ## The problem: capture isn't triage
 
-A meeting summary can tell me what was said. It cannot, by itself, tell me what
-I should do next.
+A meeting summary can tell me what was said. It often can't, by itself, tell me
+what I should do next.
 
 That needs context: who owns the work, what is blocked, whether a deadline is
 real, and whether the decision was already made somewhere else. The answer
@@ -75,7 +75,7 @@ uncertainty.
 ```mermaid
 flowchart TD
     accTitle: Work IQ to a reviewed to-do list
-    accDescr: Work IQ and the Copilot SDK produce a reviewed evidence snapshot. The same snapshot, or synthetic tasks, goes to an LLM and Decision-1. Their proposals are compared before separating personal work, later work, uncertain items, handoffs and recorded decisions.
+    accDescr: Work IQ and the Copilot SDK produce an evidence snapshot for a person to review. The same snapshot, or synthetic tasks, goes to an LLM and Decision-1. Their proposals are compared before separating personal work, later work, uncertain items, handoffs and recorded decisions.
     sources(["Meetings and Teams chats"]) --> workiq["Work IQ summary + SDK"]
     workiq --> review["Review a local evidence snapshot"]
     sample["Or start with synthetic tasks"] --> compare
@@ -135,7 +135,8 @@ Both get the same five routes: `me`, `team`, `agent`, `decision` and
 | 3 | Overdue, due today, or explicitly blocking work |
 
 Missing ownership or timing means `cannot_tell`, not permission to invent a
-deadline.
+deadline. The exceptions are unassigned drafting work (`agent`) and items with
+nothing left to do (`decision`).
 
 The baseline uses a **fresh, tool-free Copilot SDK session for each item**. It
 returns a route and an integer urgency level, validated with Zod. This sample
@@ -287,7 +288,8 @@ rather than producing a success-shaped empty to-do list.
 Edit `ABOUT_ME` before extraction. Then inspect `items.json`: check the quoted
 evidence against the sources, correct ownership and dates, and remove anything
 you are not allowed to send to the selected services. The schema checks shape,
-not whether an LLM quoted a meeting accurately.
+not whether an LLM quoted a meeting accurately. The script can't tell whether
+you reviewed the file.
 
 After reviewing and redacting the snapshot, if your data policy permits:
 
