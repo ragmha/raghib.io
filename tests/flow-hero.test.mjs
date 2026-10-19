@@ -28,5 +28,12 @@ for (const [name, hero] of Object.entries(flowHeroes)) {
     assert.equal(hero.thesis.length, 2, 'Caption has a two-line thesis')
     assert.ok(hero.note, 'Caption has a note')
     assert.ok(!/NaN|undefined|Infinity|<script/.test(svg), 'SVG has no invalid output')
+    const [, , width, height] = svg.match(/viewBox="([^"]+)"/)[1].split(' ').map(Number)
+    for (const [, x, y, anchor, text] of svg.matchAll(/class="decision-hero-label"[^>]*translate\((-?[\d.]+) (-?[\d.]+)\)"><text text-anchor="(\w+)">([^<]*)</g)) {
+      // 14px JetBrains Mono with .05em tracking is about 9.1px a character.
+      const length = text.replaceAll(/&\w+;/g, '_').length * 9.1
+      const left = +x - length * { start: 0, middle: 0.5, end: 1 }[anchor]
+      assert.ok(left >= 0 && +y >= 11 && left + length <= width && +y + 4 <= height, `"${text}" stays inside the frame`)
+    }
   })
 }

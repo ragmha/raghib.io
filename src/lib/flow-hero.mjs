@@ -78,14 +78,19 @@ function workshop(P) {
     const [x, y] = projected.at(-1)
     body.push(`<circle class="decision-port" data-tone="${tone}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3"/>`)
   }
+  const labels = []
   const label = (point, value, { dx = 0, dy = -60, tone = 'mid' } = {}) => {
     const [x, y] = at(point)
     const end = [x + dx, y + dy]
     const side = dy === 0 || Math.abs(dx) > Math.abs(dy)
     const anchor = side ? (dx < 0 ? 'end' : 'start') : 'middle'
-    const place = side ? `${(end[0] + (dx < 0 ? -8 : 8)).toFixed(1)} ${(end[1] + 5).toFixed(1)}` : `${end[0].toFixed(1)} ${(end[1] + (dy > 0 ? 18 : -8)).toFixed(1)}`
+    const [tx, ty] = side ? [end[0] + (dx < 0 ? -8 : 8), end[1] + 5] : [end[0], end[1] + (dy > 0 ? 18 : -8)]
     const path = side ? k.pathOf([[x, y], [x, end[1]], end]) : k.pathOf([[x, y], end])
-    notes.push(`<g class="decision-hero-annotation">${k.lineSvg(path, { tone: 'lo' })}<g class="decision-hero-label" data-tone="${tone}" transform="translate(${place})"><text text-anchor="${anchor}">${escapeXml(value)}</text></g></g>`)
+    // Labels keep their pixel size at any scale; 14px JetBrains Mono with .05em tracking is about 9.1px a character.
+    const width = value.length * 9.1
+    const left = tx - width * { start: 0, middle: 0.5, end: 1 }[anchor]
+    labels.push({ point: [x, y], box: [Math.min(left, end[0], x) - x, Math.min(ty - 11, end[1], y) - y, Math.max(left + width, end[0], x) - x, Math.max(ty + 4, end[1], y) - y] })
+    notes.push(`<g class="decision-hero-annotation">${k.lineSvg(path, { tone: 'lo' })}<g class="decision-hero-label" data-tone="${tone}" transform="translate(${tx.toFixed(1)} ${ty.toFixed(1)})"><text text-anchor="${anchor}">${escapeXml(value)}</text></g></g>`)
   }
   const svg = aria => k.figureSvg({ width: WIDTH, height: HEIGHT, label: aria, className: 'decision-hero-svg flow-hero-svg', body: [...body, ...notes] })
   const extent = () => {
@@ -97,18 +102,27 @@ function workshop(P) {
     }
     return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]
   }
-  return { P, at, extent, line, box, cyl, bar, rule, seg, ring, outline, text, plate, base, tray, dial, lamp, rail, label, svg }
+  return { P, at, extent, labels, line, box, cyl, bar, rule, seg, ring, outline, text, plate, base, tray, dial, lamp, rail, label, svg }
 }
 
 function render(aria, draw, { pad = 28, headroom = 96 } = {}) {
   const probe = workshop({ origin: [0, 0], scale: 1, ...CAMERA })
   draw(probe)
   const [left, top, right, bottom] = probe.extent()
-  const scale = Math.min((WIDTH - pad * 2) / (right - left), (HEIGHT - pad - headroom) / (bottom - top))
-  const origin = [WIDTH / 2 - ((left + right) / 2) * scale, headroom + (HEIGHT - pad - headroom) / 2 - ((top + bottom) / 2) * scale]
-  const t = workshop({ origin, scale, ...CAMERA })
-  draw(t)
-  return t.svg(aria)
+  const bounds = scale => probe.labels.reduce(([l, t, r, b], { point: [x, y], box }) =>
+    [Math.min(l, x * scale + box[0]), Math.min(t, y * scale + box[1]), Math.max(r, x * scale + box[2]), Math.max(b, y * scale + box[3])],
+  [left * scale, top * scale, right * scale, bottom * scale])
+  let scale = Math.min((WIDTH - pad * 2) / (right - left), (HEIGHT - pad - headroom) / (bottom - top))
+  let origin = [WIDTH / 2 - ((left + right) / 2) * scale, headroom + (HEIGHT - pad - headroom) / 2 - ((top + bottom) / 2) * scale]
+  let [l, t, r, b] = bounds(scale)
+  // When a label nears the edge, shrink the machine until the labels fit too, then center the whole drawing.
+  if (l + origin[0] < 12 || t + origin[1] < 12 || r + origin[0] > WIDTH - 12 || b + origin[1] > HEIGHT - 12) {
+    while ((r - l > WIDTH - pad * 2 || b - t > HEIGHT - pad * 2) && scale > 0.05) [l, t, r, b] = bounds(scale *= 0.98)
+    origin = [(WIDTH - l - r) / 2, (HEIGHT - t - b) / 2]
+  }
+  const machine = workshop({ origin, scale, ...CAMERA })
+  draw(machine)
+  return machine.svg(aria)
 }
 
 function agentHarness(t) {
