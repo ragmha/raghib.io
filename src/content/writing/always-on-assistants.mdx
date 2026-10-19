@@ -1,0 +1,57 @@
+---
+title: "How assistants like Grok Bot, Muse, and Dots could work"
+seoTitle: "How Always-On AI Assistants Could Work"
+description: "A reference architecture for an always-on AI assistant: conversations, durable memory, scheduled jobs, permission-checked tools, and visible progress."
+date: "2026-10-19"
+topics: ["AI Tools", "Productivity"]
+tags: ["ai", "agents", "architecture"]
+published: true
+hero: "always-on-assistant"
+---
+
+Think of assistants like **Grok Bot**, **Muse**, and **Dots**: this is a
+conceptual design for how an always-on assistant could work, not their verified
+internals or a claim about their features.
+
+## One system, not just a model
+
+<figure class="diagram">
+<div class="diagram-scroll" role="region" aria-label="Assistant architecture diagram, scroll horizontally" tabIndex={0}>
+<div style={{ minWidth: '64rem' }}>
+
+```mermaid
+flowchart TB
+    accTitle: An always-on assistant reference architecture
+    accDescr: Messages and scheduled jobs enter a durable queue. A backend runtime loads identity, instructions, history and memory, exchanges context and tool results for model requests, and checks permissions and human approvals before using an isolated computer or connected services. It saves progress and replies before delivering them to the user.
+    chat["You / chat client"] <-->|Messages / updates| api["Authenticated API"]
+    api --> queue["Durable job queue<br/>Chat + scheduled jobs"]
+    queue --> runtime["Backend agent runtime<br/>Outside the sandbox"]
+    runtime -->|"Saved progress<br/>+ replies"| api
+    runtime <-->|Read / save| store[("Durable storage<br/>Identity + instructions<br/>History + memory")]
+    runtime -->|"Context + tool definitions<br/>+ results"| model["Language model"]
+    model -->|"Tool requests<br/>or final answer"| runtime
+    runtime <-->|Calls / results| gate["Permission-checked tools<br/>Human approval if needed"]
+    gate <-->|Execute / results| computer["Isolated computer<br/>Browser, shell, files"]
+    gate <-->|Requests / results| apps["Connected services"]
+```
+
+</div>
+</div>
+<figcaption>Scroll horizontally to follow the diagram.</figcaption>
+</figure>
+
+The model requests actions; software authorizes and executes them; storage
+remembers. "Always-on" means durable state and scheduled work, not a model
+thinking forever.
+
+## Capabilities of this design
+
+| Capability | What makes it possible |
+| --- | --- |
+| Identity and ongoing conversations | Load the assistant's identity, instructions, saved history, and relevant memory into each run. |
+| Multi-step tool use | Return tool results to the model so it can request another step or produce a final answer. |
+| An isolated workspace | Use a browser, files, and shell inside a sandbox; keep the controlling runtime outside it. |
+| Connected apps | Reach external services through tools with explicitly granted, scoped permissions. |
+| Scheduled and background work | Submit scheduled jobs to the same durable queue; the chat window need not stay open. |
+| Visible progress and history | Save progress, tool results, and replies so the user can inspect work and return to it later. |
+| Human approval | Pause actions that require consent and deny unauthorized requests before execution. |
