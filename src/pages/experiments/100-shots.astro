@@ -1,0 +1,1076 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro'
+import { ACHIEVEMENTS, FILTERS, LEVELS, MILESTONES, ROUTES, STATUSES, STEPS, XP, chance } from '../../lib/hundred-shots'
+
+const article = 'https://x.com/Jayyanginspires/status/2110733530321879482'
+const description =
+  'A browser-only tracker for Jay Yang’s 100-shot dream-life framework: pick people, audit their work, match an offer, reach out, and earn XP, levels and achievements.'
+// Initial render matches an empty save, so first-time visitors see no layout shift.
+const next = 20
+const rate = 5
+---
+
+<SiteLayout title="100 Shots: A Gamified Outreach Tracker" description={description}>
+  <Fragment slot="heading">Can 100 Shots Build Your Dream Life?</Fragment>
+  <div class="shots">
+    <div class="hud" id="hud">
+      <p class="lv"><b id="lv-n">Lv 1</b> <span id="lv-title">{LEVELS[0][1]}</span></p>
+      <div class="xp">
+        <progress id="xp-bar" max={LEVELS[1][0]} value="0" aria-labelledby="xp-text"></progress>
+        <span id="xp-text" class="muted">0 XP · {LEVELS[1][0]} to {LEVELS[1][1]}</span>
+        <span id="xp-pop" class="pop" aria-hidden="true"></span>
+      </div>
+      <p class="tally"><span><b id="streak">0</b> day streak</span> <span><b id="shots">0</b>/100 shots</span></p>
+    </div>
+
+    <p class="intro">
+      Help the people who already have the life you want. <strong>Pick → audit → match → reach out.</strong> You can’t
+      control one yes. You control how many good shots you take, and every one earns XP. The loop comes from Jay Yang’s
+      <a href={article} rel="noreferrer">“How to Build Your Dream Life”</a>.
+    </p>
+
+    <div class="pair">
+      <section aria-labelledby="chart-h">
+        <h2 id="chart-h">Shot chart</h2>
+        <p id="chart-sum" class="muted small">0/100 · 0 replies · 0 yes · 0 lessons</p>
+        <ol id="chart" class="chart" aria-label="0 of 100 shots: 0 waiting, 0 replied, 0 yes, 0 no">
+          {Array.from({ length: 100 }, (_, i) => <li class={i < next ? 'next' : undefined} aria-hidden="true"></li>)}
+        </ol>
+        <ul class="legend muted small">
+          <li><span data-kind="pitched"></span>pitched</li>
+          <li><span data-kind="replied">↩</span>replied</li>
+          <li><span data-kind="won">★</span>yes</li>
+          <li><span data-kind="no">×</span>no</li>
+          <li><span class="next"></span>next shots</li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="odds-h" class="odds">
+        <h2 id="odds-h">Odds</h2>
+        <p class="muted small">More good shots beat one perfect pitch.</p>
+        <label for="next">Take the next <b id="next-out">{next}</b> shots</label>
+        <input id="next" type="range" min="1" max="100" value={next} />
+        <p class="rate">
+          <label for="rate">Yes rate per shot</label>
+          <input id="rate" type="number" min="0" max="100" step="1" value={rate} /> %
+        </p>
+        <p aria-live="polite" class="muted small">
+          <b id="odds" class="big">{chance(next, rate / 100)}%</b> chance of at least one yes · ~<span id="expect">{(next * rate) / 100}</span> yes expected
+        </p>
+        <div id="mile" class="mile">
+          <p class="small"><span>Next milestone: shot <span id="mile-n">1</span></span> <span id="mile-of" class="muted">0/1</span></p>
+          <progress id="mile-bar" max="1" value="0" aria-labelledby="mile-of"></progress>
+          <p id="mile-say" class="muted small">{MILESTONES[1]}</p>
+        </div>
+      </section>
+    </div>
+
+    <section aria-labelledby="badges-h">
+      <h2 id="badges-h">Achievements</h2>
+      <p id="badge-sum" class="muted small">0 of {ACHIEVEMENTS.length} unlocked</p>
+      <ul id="badges" class="badges">
+        {ACHIEVEMENTS.map((a) => (
+          <li data-id={a.id}>
+            <span class="name">{a.title}<span class="visually-hidden state"> (locked)</span></span>
+            <span class="muted small">{a.hint}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section aria-labelledby="targets-h">
+      <div class="bar">
+        <h2 id="targets-h">Targets <span id="t-count" class="muted">0</span></h2>
+        <label for="filter" class="visually-hidden">Filter by status</label>
+        <select id="filter">
+          <option value="all">All statuses</option>
+          {STATUSES.map((st) => <option value={st}>{st} (0)</option>)}
+        </select>
+        <button type="button" id="export" disabled>Export</button>
+        <button type="button" id="import">Import</button>
+        <input id="file" type="file" accept="application/json,.json" hidden />
+      </div>
+
+      <form id="add" class="add">
+        <label for="new" class="visually-hidden">New target</label>
+        <input id="new" required autocomplete="off" placeholder="Who already has the life you want?" />
+        <button class="primary">Add target</button>
+      </form>
+
+      <div id="targets" class="targets" hidden></div>
+      <div id="empty" class="empty">
+        <p id="empty-title"><strong>Your first shot starts with a name</strong></p>
+        <p id="empty-body" class="muted small">
+          Add someone whose work, life and ideas you’d follow for free. Passing all three filters is worth your first {XP.pick} XP.
+        </p>
+      </div>
+
+      <template id="target-tpl">
+        <details class="target">
+          <summary>
+            <span class="t-name"></span>
+            <span class="t-meta small">
+              {STEPS.map(() => <span class="step"></span>)}
+              <span class="t-status"></span>
+              <span class="t-xp muted"></span>
+            </span>
+          </summary>
+          <div class="t-body">
+            <div class="two">
+              <label>Name <input data-k="name" autocomplete="off" /></label>
+              <label>Link <input data-k="link" autocomplete="off" placeholder="Profile, site or channel" /></label>
+            </div>
+            <fieldset>
+              <legend>1 · Pick: all three filters, or pick someone else <span class="plus">+{XP.pick} XP</span></legend>
+              {FILTERS.map(([k, label]) => <label class="check"><input type="checkbox" data-k={k} /> {label}</label>)}
+            </fieldset>
+            <label>
+              <span>2 · Audit: read everything. What’s working, what’s missing? <span class="plus">+{XP.audit} XP</span></span>
+              <textarea data-k="audit" rows="3"></textarea>
+            </label>
+            <label>
+              <span>3 · Match: the gap you can fill for them <span class="plus">+{XP.match} XP</span></span>
+              <textarea data-k="offer" rows="3"></textarea>
+            </label>
+            <fieldset>
+              <legend>4 · Reach out: Contact Quadrant, use more than one <span class="plus">+{XP.route} XP per route</span></legend>
+              <div class="routes">
+                {ROUTES.map(([k, label]) => <label class="check"><input type="checkbox" data-k={k} /> {label}</label>)}
+              </div>
+            </fieldset>
+            <label class="status">
+              Status
+              <select data-k="status">{STATUSES.map((st) => <option value={st}>{st}</option>)}</select>
+              <span class="muted small">Pitched +{XP.shot} · reply +{XP.reply} · yes +{XP.yes} XP</span>
+            </label>
+            <label>
+              <span>Lesson: why it worked or failed <span class="plus">+{XP.lesson} XP</span></span>
+              <textarea data-k="lesson" rows="3" placeholder="What will you change for the next shot?"></textarea>
+            </label>
+            <p class="nudge small" hidden>A no still pays: log the lesson for +{XP.lesson} XP.</p>
+            <button type="button" class="danger" data-act="delete">Delete target</button>
+          </div>
+        </details>
+      </template>
+    </section>
+
+    <p class="muted small foot">
+      Data stays in this browser’s local storage; export to back it up. Framework from Jay Yang,
+      <a href={article} rel="noreferrer">“How to Build Your Dream Life”</a>.
+    </p>
+
+    <p id="notice" class="notice" role="status"></p>
+
+    <dialog id="confirm" aria-labelledby="confirm-title" aria-describedby="confirm-body">
+      <form method="dialog">
+        <h2 id="confirm-title"></h2>
+        <p id="confirm-body" class="muted small"></p>
+        <p class="actions">
+          <button value="cancel" id="confirm-cancel">Cancel</button>
+          <button value="ok" id="confirm-ok" class="primary"></button>
+        </p>
+      </form>
+    </dialog>
+  </div>
+
+  <script>
+    import { ACHIEVEMENTS, MILESTONES, NOS, SAY, SHOTS, STEPS, chance, diff, load, steps, tally, xpOf } from '../../lib/hundred-shots'
+    import type { Status, Target } from '../../lib/hundred-shots'
+
+    // Same key and JSON shape as the standalone app, so its exports import as-is.
+    const KEY = 'dream-life-100-shots'
+    const KIND: Partial<Record<Status, string>> = { pitched: 'pitched', replied: 'replied', won: 'won', declined: 'no', 'no reply': 'no' }
+    const GLYPH: Record<string, string> = { replied: '↩', won: '★', no: '×' }
+    const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T
+    const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches
+    const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? '' : 's'}`
+    const stamp = () => new Date().toISOString()
+
+    function read(): Target[] {
+      try { return load(JSON.parse(localStorage.getItem(KEY) ?? '[]')) } catch { return [] }
+    }
+
+    let list = read()
+    let s = tally(list)
+    let filter = 'all'
+    let landed = ''
+    let noticeTimer = 0
+    const open = new Set<string>()
+
+    const hud = $('hud'), chart = $('chart'), targets = $('targets'), notice = $('notice'), dialog = $<HTMLDialogElement>('confirm')
+    const nextIn = $<HTMLInputElement>('next'), rateIn = $<HTMLInputElement>('rate'), filterIn = $<HTMLSelectElement>('filter')
+    const fileIn = $<HTMLInputElement>('file'), tpl = $<HTMLTemplateElement>('target-tpl')
+
+    function save(next: Target[]) {
+      list = next
+      s = tally(list)
+      try { localStorage.setItem(KEY, JSON.stringify(list)) } catch { /* storage full or blocked: keep playing in memory */ }
+      renderStats()
+    }
+
+    function commit(next: Target[], lines: string[] = [], rebuild = true) {
+      const before = s
+      save(next)
+      if (rebuild) renderList()
+      const d = diff(before, s), { level } = s
+      if (d.gain > 0) pop(d.gain)
+      if (d.levelUp) lines.push(`Level ${level.n}: ${level.title}. ${level.next ? `Next: ${level.nextTitle} at ${level.next} XP.` : 'Max level. Freedom.'}`)
+      for (const a of d.unlocked) lines.push(`Achievement unlocked: ${a.title}. ${a.hint}.`)
+      if (lines.length) say(lines.join(' '))
+      if (d.levelUp || d.unlocked.length) burst(hud)
+    }
+
+    function say(text: string) {
+      notice.textContent = text
+      clearTimeout(noticeTimer)
+      noticeTimer = window.setTimeout(() => { notice.textContent = '' }, 8000)
+    }
+
+    function renderStats() {
+      const { level, shots } = s, k = shots.length
+      $('lv-n').textContent = `Lv ${level.n}`
+      $('lv-title').textContent = level.title
+      const bar = $<HTMLProgressElement>('xp-bar')
+      bar.max = level.next ? level.next - level.floor : 1
+      bar.value = level.next ? s.xp - level.floor : 1
+      $('xp-text').textContent = `${s.xp} XP${level.next ? ` · ${level.next - s.xp} to ${level.nextTitle}` : ' · max level'}`
+      $('streak').textContent = String(s.streak)
+      $('shots').textContent = String(k)
+      $('chart-sum').textContent = `${k}/100 · ${s.replies} repl${s.replies === 1 ? 'y' : 'ies'}${k ? ` (${Math.round((s.replies / k) * 100)}%)` : ''} · ${s.wins} yes · ${plural(s.lessons, 'lesson')}`
+      renderChart()
+      renderOdds()
+      for (const li of document.querySelectorAll<HTMLElement>('#badges li')) {
+        const got = s.unlocked.has(li.dataset.id ?? '')
+        li.toggleAttribute('data-unlocked', got)
+        li.querySelector('.state')!.textContent = got ? ' (unlocked)' : ' (locked)'
+      }
+      $('badge-sum').textContent = `${s.unlocked.size} of ${ACHIEVEMENTS.length} unlocked`
+      $('t-count').textContent = String(list.length)
+      for (const o of filterIn.options) if (o.value !== 'all') o.textContent = `${o.value} (${list.filter((t) => t.status === o.value).length})`
+      $<HTMLButtonElement>('export').disabled = !list.length
+    }
+
+    function renderChart() {
+      const { shots } = s, k = shots.length, n = Number(nextIn.value)
+      const count = (kind: string) => shots.filter((t) => KIND[t.status] === kind).length
+      chart.setAttribute('aria-label', `${k} of 100 shots: ${count('pitched')} waiting, ${count('replied')} replied, ${count('won')} yes, ${count('no')} no`)
+      chart.replaceChildren(...Array.from({ length: 100 }, (_, i) => {
+        const li = document.createElement('li'), t = shots[i]
+        if (!t) {
+          li.setAttribute('aria-hidden', 'true')
+          if (i < k + n) li.className = 'next'
+          return li
+        }
+        const kind = KIND[t.status] ?? 'pitched', b = document.createElement('button')
+        b.type = 'button'
+        b.id = `dot-${t.id}`
+        b.dataset.id = t.id
+        b.dataset.kind = kind
+        b.textContent = GLYPH[kind] ?? ''
+        b.title = `${t.name} · ${t.status}`
+        b.setAttribute('aria-label', `Shot ${i + 1}: ${t.name}, ${t.status}`)
+        if (t.id === landed) li.className = 'land'
+        li.append(b)
+        return li
+      }))
+      landed = ''
+    }
+
+    function renderOdds() {
+      const n = Number(nextIn.value), rate = Math.min(Math.max(Number(rateIn.value) || 0, 0), 100) / 100, k = s.shots.length
+      $('next-out').textContent = String(n)
+      $('odds').textContent = `${chance(n, rate)}%`
+      $('expect').textContent = String(+(n * rate).toFixed(1))
+      const mile = Object.keys(MILESTONES).map(Number).find((m) => m > k)
+      $('mile').hidden = !mile
+      if (!mile) return
+      const bar = $<HTMLProgressElement>('mile-bar')
+      bar.max = mile
+      bar.value = k
+      $('mile-n').textContent = String(mile)
+      $('mile-of').textContent = `${k}/${mile}`
+      $('mile-say').textContent = MILESTONES[mile]
+    }
+
+    function renderList() {
+      const shown = filter === 'all' ? list : list.filter((t) => t.status === filter)
+      targets.replaceChildren(...shown.map(item))
+      targets.hidden = !shown.length
+      $('empty').hidden = !!shown.length
+      $('empty-title').firstElementChild!.textContent = list.length ? `No ${filter} targets` : 'Your first shot starts with a name'
+      $('empty-body').textContent = list.length
+        ? 'Pick another status, or take a shot to fill this one.'
+        : 'Add someone whose work, life and ideas you’d follow for free. Passing all three filters is worth your first 10 XP.'
+    }
+
+    function item(t: Target) {
+      const el = tpl.content.firstElementChild!.cloneNode(true) as HTMLDetailsElement
+      el.id = `t-${t.id}`
+      el.dataset.id = t.id
+      el.open = open.has(t.id)
+      for (const f of el.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('[data-k]')) {
+        const v = t[f.dataset.k as keyof Target]
+        if (f instanceof HTMLInputElement && f.type === 'checkbox') f.checked = !!v
+        else f.value = typeof v === 'string' ? v : ''
+      }
+      paint(el, t)
+      return el
+    }
+
+    function paint(el: HTMLElement, t: Target) {
+      const done = steps(t)
+      el.querySelector('.t-name')!.textContent = t.name || 'Untitled'
+      el.querySelectorAll('.step').forEach((x, i) => {
+        x.textContent = `${done[i] ? '✓' : '○'} ${STEPS[i]}`
+        x.toggleAttribute('data-done', done[i])
+      })
+      const st = el.querySelector<HTMLElement>('.t-status')!
+      st.textContent = t.status
+      st.dataset.status = t.status
+      el.querySelector('.t-xp')!.textContent = `${xpOf(t)} XP`
+      el.querySelector<HTMLElement>('.nudge')!.hidden = !(NOS.has(t.status) && !t.lesson?.trim())
+    }
+
+    function edit(t: Target, patch: Partial<Target>, lines?: string[], rebuild = false) {
+      const next = { ...t, ...patch, updated: stamp() }
+      commit(list.map((x) => (x.id === t.id ? next : x)), lines, rebuild)
+      const el = document.getElementById(`t-${t.id}`)
+      if (el && !rebuild) paint(el, next)
+    }
+
+    function setStatus(t: Target, status: Status) {
+      const shot = SHOTS.has(status), fresh = shot && !SHOTS.has(t.status), at = s.shots.length + 1
+      const lines = [fresh && `Shot ${at}/100.`, fresh && MILESTONES[at], SAY[status]?.(t.name || 'They')].filter((l): l is string => !!l)
+      if (fresh) landed = t.id
+      edit(t, { status, shotAt: shot ? (t.shotAt ?? stamp()) : undefined }, lines, filter !== 'all' && filter !== status)
+      if (status === 'won') requestAnimationFrame(() => burst(document.getElementById(`dot-${t.id}`)))
+    }
+
+    function reveal(id: string) {
+      filter = filterIn.value = 'all'
+      open.add(id)
+      renderList()
+      const el = document.getElementById(`t-${id}`)
+      el?.querySelector('summary')?.focus({ preventScroll: true })
+      el?.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' })
+    }
+
+    function ask(title: string, body: string, ok: string, cancel: string) {
+      $('confirm-title').textContent = title
+      $('confirm-body').textContent = body
+      $('confirm-ok').textContent = ok
+      $('confirm-cancel').textContent = cancel
+      dialog.returnValue = ''
+      dialog.showModal()
+      return new Promise<boolean>((done) => dialog.addEventListener('close', () => done(dialog.returnValue === 'ok'), { once: true }))
+    }
+
+    function pop(gain: number) {
+      const el = $('xp-pop')
+      el.textContent = `+${gain} XP`
+      el.classList.remove('go')
+      void el.offsetWidth
+      el.classList.add('go')
+    }
+
+    function burst(el: Element | null) {
+      if (!el || reduced()) return
+      const r = el.getBoundingClientRect()
+      for (let i = 0; i < 14; i++) {
+        const spark = document.createElement('span')
+        spark.textContent = '★'
+        spark.setAttribute('aria-hidden', 'true')
+        Object.assign(spark.style, {
+          position: 'fixed', left: `${r.left + r.width / 2}px`, top: `${r.top + r.height / 2}px`,
+          pointerEvents: 'none', zIndex: '50', color: 'var(--theme-text)',
+        })
+        document.body.append(spark)
+        const a = (i / 14) * Math.PI * 2, d = 36 + Math.random() * 40
+        spark.animate(
+          [{ transform: 'translate(-50%,-50%) scale(1.2)', opacity: 1 },
+            { transform: `translate(calc(-50% + ${Math.cos(a) * d}px), calc(-50% + ${Math.sin(a) * d}px)) scale(.3)`, opacity: 0 }],
+          { duration: 750, easing: 'cubic-bezier(.16,1,.3,1)' },
+        ).onfinish = () => spark.remove()
+      }
+    }
+
+    const find = (el: Element) => {
+      const id = el.closest<HTMLElement>('details')?.dataset.id
+      return list.find((t) => t.id === id)
+    }
+
+    targets.addEventListener('input', (e) => {
+      const f = e.target as HTMLInputElement, t = find(f), k = f.dataset.k
+      if (t && k && f.type !== 'checkbox' && f.tagName !== 'SELECT') edit(t, { [k]: f.value } as Partial<Target>)
+    })
+    targets.addEventListener('change', (e) => {
+      const f = e.target as HTMLInputElement, t = find(f), k = f.dataset.k
+      if (!t || !k) return
+      if (f.type === 'checkbox') edit(t, { [k]: f.checked } as Partial<Target>)
+      else if (k === 'status') setStatus(t, f.value as Status)
+    })
+    targets.addEventListener('toggle', (e) => {
+      const d = e.target as HTMLDetailsElement, id = d.dataset.id ?? ''
+      if (d.open) open.add(id)
+      else open.delete(id)
+    }, true)
+    targets.addEventListener('click', async (e) => {
+      const b = (e.target as Element).closest('[data-act="delete"]'), t = b && find(b)
+      if (!t || !(await ask(`Delete ${t.name || 'this target'}?`, 'Their notes and XP go with them. This can’t be undone.', 'Delete', 'Keep'))) return
+      open.delete(t.id)
+      commit(list.filter((x) => x.id !== t.id))
+      $('new').focus()
+    })
+
+    chart.addEventListener('click', (e) => {
+      const id = (e.target as Element).closest('button')?.dataset.id
+      if (id) reveal(id)
+    })
+    nextIn.addEventListener('input', () => { renderChart(); renderOdds() })
+    rateIn.addEventListener('input', renderOdds)
+    filterIn.addEventListener('change', () => { filter = filterIn.value; renderList() })
+
+    $('add').addEventListener('submit', (e) => {
+      e.preventDefault()
+      const input = $<HTMLInputElement>('new'), name = input.value.trim()
+      if (!name) return
+      const t: Target = { id: crypto.randomUUID(), name, status: 'idea', created: stamp() }
+      commit([t, ...list])
+      input.value = ''
+      reveal(t.id)
+    })
+
+    $('export').addEventListener('click', () => {
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(list, null, 2)], { type: 'application/json' }))
+      a.download = `100-shots-${new Date().toLocaleDateString('sv')}.json`
+      a.click()
+      URL.revokeObjectURL(a.href)
+    })
+    $('import').addEventListener('click', () => fileIn.click())
+    fileIn.addEventListener('change', async () => {
+      const f = fileIn.files?.[0]
+      if (!f) return
+      let incoming: Target[]
+      try {
+        incoming = load(JSON.parse(await f.text()))
+      } catch (err) {
+        say(`Couldn’t import that file: ${(err as Error).message}`)
+        return
+      } finally {
+        fileIn.value = ''
+      }
+      const replace = !list.length || await ask(
+        `Replace your ${plural(list.length, 'target')}?`,
+        `The file has ${plural(incoming.length, 'target')}. Export first if you want to keep what’s here.`,
+        'Replace', 'Cancel',
+      )
+      if (!replace) return
+      open.clear()
+      filter = filterIn.value = 'all'
+      save(incoming)
+      renderList()
+      say(`Imported ${plural(incoming.length, 'target')}.`)
+    })
+
+    if (list.length) {
+      renderStats()
+      renderList()
+    }
+  </script>
+</SiteLayout>
+
+<style is:global>
+  html:has(.shots) {
+    scroll-padding-top: 6rem;
+  }
+
+  .shots {
+    --dot: 1.25rem;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .shots .muted {
+    color: var(--theme-muted);
+  }
+
+  .shots .small {
+    font-size: 0.8rem;
+  }
+
+  .shots .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .shots h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .shots section {
+    margin-top: 2.5rem;
+  }
+
+  .shots p {
+    margin: 0;
+  }
+
+  .shots .intro {
+    margin-top: 1.25rem;
+  }
+
+  .shots a {
+    color: inherit;
+    text-underline-offset: 3px;
+  }
+
+  /* HUD */
+  .shots .hud {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--theme-rule);
+    background: var(--theme-bg);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .shots .xp {
+    position: relative;
+    display: grid;
+    flex: 1 1 12rem;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+  }
+
+  .shots .tally {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+  }
+
+  .shots .pop {
+    position: absolute;
+    top: -0.35rem;
+    right: 0;
+    font-weight: 700;
+    opacity: 0;
+  }
+
+  .shots .pop.go {
+    animation: shots-pop 1.1s ease-out;
+  }
+
+  @keyframes shots-pop {
+    0% { opacity: 0; transform: translateY(0.4rem); }
+    20% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-0.6rem); }
+  }
+
+  .shots progress {
+    width: 100%;
+    height: 0.5rem;
+    border: 1px solid var(--theme-faint);
+    border-radius: 0;
+    background: var(--theme-surface);
+    appearance: none;
+  }
+
+  .shots progress::-webkit-progress-bar {
+    background: var(--theme-surface);
+  }
+
+  .shots progress::-webkit-progress-value {
+    background: var(--theme-text);
+  }
+
+  .shots progress::-moz-progress-bar {
+    background: var(--theme-text);
+  }
+
+  /* Chart and odds */
+  .shots .pair {
+    display: grid;
+    gap: 0 3rem;
+  }
+
+  @media (min-width: 52rem) {
+    .shots .pair {
+      grid-template-columns: max-content minmax(0, 1fr);
+    }
+  }
+
+  .shots .chart {
+    display: grid;
+    grid-template-columns: repeat(10, var(--dot));
+    gap: 0.375rem;
+    width: max-content;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .shots .chart li,
+  .shots .legend span {
+    display: grid;
+    place-items: center;
+    width: var(--dot);
+    height: var(--dot);
+    border: 1px solid var(--theme-rule-strong);
+    border-radius: 50%;
+  }
+
+  .shots .chart li.next,
+  .shots .legend .next {
+    border: 1px dashed var(--theme-faint);
+  }
+
+  .shots .chart li:has(button) {
+    border: 0;
+  }
+
+  .shots .chart button,
+  .shots .legend [data-kind] {
+    width: var(--dot);
+    height: var(--dot);
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--theme-text);
+    color: var(--theme-bg);
+    font: inherit;
+    font-size: 0.7rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .shots :is(.chart, .legend) [data-kind='replied'] {
+    background: var(--theme-blue);
+  }
+
+  .shots :is(.chart, .legend) [data-kind='won'] {
+    background: var(--theme-green);
+  }
+
+  .shots :is(.chart, .legend) [data-kind='no'] {
+    background: var(--theme-faint);
+  }
+
+  .shots .chart button:hover {
+    transform: scale(1.2);
+  }
+
+  .shots .chart .land button {
+    animation: shots-land 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes shots-land {
+    from { transform: scale(0.2); }
+    60% { transform: scale(1.35); }
+  }
+
+  .shots .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.85rem;
+    max-width: 17rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .shots .legend li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .shots .legend span {
+    --dot: 0.85rem;
+    font-size: 0.55rem;
+  }
+
+  .shots .odds {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .shots .odds h2 + p {
+    margin-top: -0.5rem;
+  }
+
+  .shots .odds input[type='range'] {
+    width: 100%;
+    margin: 0;
+    accent-color: var(--theme-text);
+  }
+
+  .shots .rate {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .shots .rate input {
+    width: 5rem;
+  }
+
+  .shots .big {
+    color: var(--theme-text);
+    font-size: 2rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .shots .mile {
+    display: grid;
+    gap: 0.4rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--theme-rule);
+  }
+
+  .shots .mile > p:first-child {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  /* Achievements */
+  .shots .badges {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+    gap: 0.5rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .shots .badges li {
+    display: grid;
+    gap: 0.15rem;
+    align-content: start;
+    padding: 0.6rem 0.75rem;
+    border: 1px dashed var(--theme-rule-strong);
+  }
+
+  .shots .badges .name {
+    color: var(--theme-muted);
+  }
+
+  .shots .badges .name::before {
+    content: '○ ';
+  }
+
+  .shots .badges li[data-unlocked] {
+    border: 1px solid var(--theme-text);
+    background: var(--theme-surface);
+  }
+
+  .shots .badges li[data-unlocked] .name {
+    color: var(--theme-text);
+    font-weight: 600;
+  }
+
+  .shots .badges li[data-unlocked] .name::before {
+    content: '✓ ';
+  }
+
+  /* Controls */
+  .shots input:not([type='checkbox'], [type='range']),
+  .shots textarea,
+  .shots select,
+  .shots button {
+    min-height: 2.25rem;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid var(--theme-faint);
+    border-radius: 0;
+    background: var(--theme-bg);
+    color: var(--theme-text);
+    font: inherit;
+    font-size: 0.85rem;
+  }
+
+  .shots textarea {
+    width: 100%;
+    resize: vertical;
+  }
+
+  .shots ::placeholder {
+    color: var(--theme-faint);
+    opacity: 1;
+  }
+
+  .shots button {
+    cursor: pointer;
+  }
+
+  .shots button:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  .shots button.primary {
+    border-color: var(--theme-text);
+    background: var(--theme-text);
+    color: var(--theme-bg);
+  }
+
+  .shots button.danger {
+    justify-self: start;
+    border-color: var(--theme-red);
+    color: var(--theme-red);
+  }
+
+  .shots input[type='checkbox'] {
+    width: 1rem;
+    height: 1rem;
+    margin: 0.2rem 0 0;
+    flex: none;
+    accent-color: var(--theme-text);
+  }
+
+  /* Targets */
+  .shots .bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .shots .bar h2 {
+    margin-right: auto;
+  }
+
+  .shots .add {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .shots .add input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .shots .targets {
+    margin-top: 1rem;
+    border-top: 1px solid var(--theme-rule);
+  }
+
+  .shots .target {
+    border-bottom: 1px solid var(--theme-rule);
+  }
+
+  .shots summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem 1rem;
+    padding: 0.85rem 0;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .shots summary::before {
+    content: '▸';
+    color: var(--theme-muted);
+  }
+
+  .shots details[open] > summary::before {
+    content: '▾';
+  }
+
+  .shots summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .shots .t-name {
+    flex: 1 1 10rem;
+    min-width: 0;
+    overflow: hidden;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .shots .t-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.6rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .shots .step {
+    color: var(--theme-muted);
+  }
+
+  .shots .step[data-done] {
+    color: var(--theme-text);
+  }
+
+  .shots .t-status {
+    padding: 0 0.35rem;
+    border: 1px solid var(--theme-faint);
+  }
+
+  .shots .t-status[data-status='won'] {
+    border-color: var(--theme-green);
+    background: var(--theme-green);
+    color: var(--theme-bg);
+  }
+
+  .shots .t-body {
+    display: grid;
+    gap: 1.25rem;
+    padding: 0.25rem 0 1.5rem;
+  }
+
+  .shots .t-body > label,
+  .shots .two label {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .shots .two {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 40rem) {
+    .shots .two,
+    .shots .routes {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .shots fieldset {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .shots legend {
+    margin-bottom: 0.6rem;
+    padding: 0;
+  }
+
+  .shots .routes {
+    display: grid;
+    gap: 0.6rem 1rem;
+  }
+
+  .shots .check {
+    display: flex;
+    gap: 0.5rem;
+    color: var(--theme-muted);
+    cursor: pointer;
+  }
+
+  .shots .plus {
+    margin-left: 0.25rem;
+    padding: 0 0.3rem;
+    border: 1px solid var(--theme-rule-strong);
+    color: var(--theme-muted);
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+
+  .shots .status select {
+    max-width: 16rem;
+  }
+
+  .shots .nudge {
+    margin-top: -0.75rem;
+    color: var(--theme-text);
+    font-weight: 600;
+  }
+
+  .shots [hidden] {
+    display: none !important;
+  }
+
+  .shots .empty {
+    display: grid;
+    gap: 0.35rem;
+    margin-top: 1rem;
+    padding: 1.5rem 1rem;
+    border: 1px dashed var(--theme-rule-strong);
+    text-align: center;
+  }
+
+  .shots .foot {
+    margin-top: 2.5rem;
+  }
+
+  /* Notices and dialog */
+  .shots .notice {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 10;
+    max-width: min(24rem, calc(100vw - 2rem));
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--theme-text);
+    background: var(--theme-surface);
+    font-size: 0.85rem;
+    pointer-events: none;
+  }
+
+  .shots .notice:empty {
+    opacity: 0;
+  }
+
+  .shots dialog {
+    max-width: min(26rem, calc(100vw - 2rem));
+    padding: 1.25rem;
+    border: 1px solid var(--theme-rule-strong);
+    background: var(--theme-bg);
+    color: var(--theme-text);
+  }
+
+  .shots dialog::backdrop {
+    background: rgb(0 0 0 / 0.6);
+  }
+
+  .shots dialog p + p,
+  .shots dialog h2 + p {
+    margin-top: 0.75rem;
+  }
+
+  .shots .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .shots .pop.go {
+      animation-name: shots-fade;
+    }
+
+    .shots .chart .land button {
+      animation: none;
+    }
+
+    .shots .chart button:hover {
+      transform: none;
+    }
+  }
+
+  @keyframes shots-fade {
+    20% { opacity: 1; }
+  }
+</style>

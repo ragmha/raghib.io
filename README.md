@@ -177,6 +177,18 @@ complete the methodology before sharing it.
   idle gaps, keyboard and tab controls, restart/reload, and that the app fits
   the viewport without page scrolling at desktop and phone sizes.
 
+## Can 100 Shots Build Your Dream Life?
+
+`/experiments/100-shots/` turns Jay Yang’s
+[“How to Build Your Dream Life”](https://x.com/Jayyanginspires/status/2110733530321879482)
+into a game: pick people who already have the life you want, audit their work,
+match an offer, and reach out, 100 times. Each step earns XP toward 10 levels
+and 12 achievements, with day streaks, a 10×10 shot chart, an odds calculator,
+and JSON export/import. Data stays in `localStorage` (`dream-life-100-shots`).
+
+- Logic: `src/lib/hundred-shots.ts`; the page script is vanilla DOM.
+- Tests: `bun test --bail 1 tests/hundred-shots.test.ts`.
+
 ## Writing and project writeups
 
 Every writing post uses `src/pages/writing/[slug].astro`, `WritingLayout.astro`,
