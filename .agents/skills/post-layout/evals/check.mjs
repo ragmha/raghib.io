@@ -17,18 +17,60 @@ const dir = join(repo, 'src/content/writing')
 const files = readdirSync(dir).filter(name => /\.mdx?$/.test(name))
 const read = name => readFileSync(join(dir, name), 'utf8')
 const heroOf = source => source.match(/^hero:\s*"?([\w-]+)"?\s*$/m)?.[1]
-const { flowHeroes } = await import(pathToFileURL(join(repo, 'src/lib/flow-hero.mjs')).href)
+const { flowHeroes, flowHeroSvg } = await import(pathToFileURL(join(repo, 'src/lib/flow-hero.mjs')).href)
 
-// Same counting rule as tests/post-layout.test.mjs.
-const codeLines = source => {
-  let fence = null
-  let count = 0
+// Same frame check as tests/flow-hero.test.mjs.
+const labelsOutsideFrame = svg => {
+  const [, , width, height] = svg.match(/viewBox="([^"]+)"/)[1].split(' ').map(Number)
+  return [...svg.matchAll(/class="decision-hero-label"[^>]*translate\((-?[\d.]+) (-?[\d.]+)\)"><text text-anchor="(\w+)">([^<]*)</g)]
+    .filter(([, x, y, anchor, text]) => {
+      const length = text.replaceAll(/&\w+;/g, '_').length * 9.1
+      const left = +x - length * { start: 0, middle: 0.5, end: 1 }[anchor]
+      return !(left >= 0 && +y >= 11 && left + length <= width && +y + 4 <= height)
+    })
+    .map(([, , , , text]) => text)
+}
+
+// Same counting rule as tests/post-layout.test.mjs, kept per block so the grader can see files.
+const codeBlocks = source => {
+  const blocks = []
+  let open = null
   for (const line of source.split('\n')) {
-    const open = line.match(/^\s*```(\w*)/)
-    if (open) fence = fence === null ? open[1] : null
-    else if (fence !== null && fence !== 'mermaid') count++
+    const fence = line.match(/^\s*```(\w*)(.*)$/)
+    if (fence && !open) open = { lang: fence[1], title: fence[2].match(/title="([^"]+)"/)?.[1], lines: [] }
+    else if (fence) blocks.push(open), (open = null)
+    else open?.lines.push(line)
   }
-  return count
+  if (open) blocks.push(open)
+  return blocks.filter(block => block.lang !== 'mermaid').map(({ lang, title, lines }) => ({
+    lang,
+    lines: lines.length,
+    file: title ?? lines[0]?.match(/^\s*(?:\/\/|#|--)\s*((?:[\w.-]+\/)*[\w.-]+\.\w+)\s*$/)?.[1] ?? null,
+  }))
+}
+
+// portraits: names a <source media="(max-width: 60rem)"> serves.
+const excalidraw = (name, portraits) => {
+  const svgPath = join(repo, 'public/diagrams', `${name}.svg`)
+  if (!existsSync(svgPath)) return { name, exists: false }
+  const svg = readFileSync(svgPath, 'utf8')
+  const sourcePath = join(repo, 'src/assets/diagrams', `${name}.excalidraw`)
+  const elements = existsSync(sourcePath)
+    ? JSON.parse(readFileSync(sourcePath, 'utf8')).elements.filter(element => !element.isDeleted)
+    : null
+  return {
+    name,
+    exists: true,
+    themed: svg.includes('id="diagram-theme"'),
+    titled: /<title[\s>]/.test(svg) && /<desc[\s>]/.test(svg),
+    rawColors: [...new Set(svg.replace(/<mask[\s\S]*?<\/mask>/g, '').match(/(?:fill|stroke)="#[\da-f]{3,8}"/gi) ?? [])],
+    width: Number(svg.match(/\bviewBox="([^"]+)"/)?.[1].split(/\s+/)[2]),
+    minFontSize: Math.min(...[...svg.matchAll(/font-size="([\d.]+)px"/g)].map(match => Number(match[1]))),
+    source: Boolean(elements),
+    shapes: elements?.filter(element => ['rectangle', 'diamond', 'ellipse'].includes(element.type)).length,
+    arrows: elements?.filter(element => element.type === 'arrow').length,
+    ...(name.endsWith('-portrait') ? {} : { portrait: portraits.has(`${name}-portrait`) }),
+  }
 }
 
 const render = createMermaidRenderer()
@@ -41,6 +83,10 @@ for (const file of files.filter(name => !before.has(`src/content/writing/${name}
   const mermaid = [...source.matchAll(/^\s*```mermaid\n([\s\S]*?)^\s*```/gm)].map(match => match[1])
   const rendered = await render(mermaid, {})
   const secondHeading = [...source.matchAll(/^## /gm)][1]?.index ?? source.length
+  const code = codeBlocks(source)
+  const portraits = new Set([...source.matchAll(/<source\b[^>]*>/g)]
+    .filter(([tag]) => tag.includes('media="(max-width: 60rem)"'))
+    .flatMap(([tag]) => [...tag.matchAll(/\/diagrams\/([\w-]+)\.svg/g)].map(([, name]) => name)))
 
   posts.push({
     file,
@@ -49,12 +95,13 @@ for (const file of files.filter(name => !before.has(`src/content/writing/${name}
       name: hero,
       registered: Boolean(hero && flowHeroes[hero]),
       usedByOtherPosts: files.filter(other => other !== file && heroOf(read(other)) === hero),
+      labelsOutsideFrame: hero && flowHeroes[hero] ? labelsOutsideFrame(flowHeroSvg(flowHeroes[hero])) : null,
     },
     mermaid: mermaid.map((block, i) => {
       const result = rendered[i]
       const svg = result.status === 'fulfilled' ? result.value.svg : ''
       return {
-        type: block.trim().split(/\s/)[0],
+        type: block.replace(/^\s*---[\s\S]*?---\s*/, '').replace(/^\s*%%.*$/gm, '').trim().split(/\s/)[0],
         accTitle: /^\s*accTitle:/m.test(block),
         accDescr: /^\s*accDescr:/m.test(block),
         renders: result.status === 'fulfilled',
@@ -64,11 +111,9 @@ for (const file of files.filter(name => !before.has(`src/content/writing/${name}
         edges: count(svg, /class="[^"]*\b(?:flowchart-link|transition)\b/g) + count(svg, /class="messageLine[01]"/g),
       }
     }),
-    excalidraw: [...source.matchAll(/\/diagrams\/([\w-]+\.svg)/g)].map(([, svg]) => {
-      const path = join(repo, 'public/diagrams', svg)
-      return { svg, exists: existsSync(path), themed: existsSync(path) && readFileSync(path, 'utf8').includes('id="diagram-theme"') }
-    }),
-    codeLines: codeLines(source),
+    excalidraw: [...new Set([...source.matchAll(/\/diagrams\/([\w-]+)\.svg/g)].map(([, name]) => name))].map(name => excalidraw(name, portraits)),
+    codeLines: code.reduce((total, block) => total + block.lines, 0),
+    codeBlocks: code,
     companionRepos: [...new Set([...source.matchAll(/github\.com\/ragmha\/([\w.-]+)/g)].map(([, name]) => name))]
       .filter(name => name !== 'raghib.io')
       .map(name => ({ name, nearTop: source.indexOf(`github.com/ragmha/${name}`) < secondHeading })),

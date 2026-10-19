@@ -48,8 +48,8 @@ its own scene.
      with `{ lit: true }`.
    - Use the `green`, `blue`, `red`, and `mid` tones for outcomes, and `lo`,
      `mid`, and `hi` for structure.
-   - Put words only in short, all-caps `t.label` callouts. `render` fits the
-     frame automatically.
+   - Put words only in short, all-caps `t.label` callouts. `render` scales the
+     machine so that it and its labels fit the frame.
 3. Add a `flowHeroes` entry with these fields:
    - `art`: the scene function.
    - `label`: alt text that names the machine and what each part stands for.
@@ -58,9 +58,10 @@ its own scene.
    - `note`: an honest caveat, such as illustrative, simplified, or fictional
      data.
 4. Set `hero: "<name>"` in the frontmatter.
-5. Run `bun test tests/flow-hero.test.mjs`. Then start `bun run dev` and open
+5. Run `bun test tests/flow-hero.test.mjs`, which checks that every label
+   stays inside the frame. Then start `bun run dev` and open
    `/hero/<name>.svg` and the post in light and dark themes, at 360 px and at
-   desktop width. Labels must not overlap or clip.
+   desktop width. Labels must not overlap each other or the parts they name.
 
 The `decision` hero is a one-off for the reference post. New posts use flow
 heroes.
@@ -73,58 +74,98 @@ show the post's own system directly.
 
 ### Choose the diagram with diagram-design
 
-Use the `diagram-design` skill
+Choose with the `diagram-design` skill
 ([cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design),
-MIT) to decide which diagram the post needs. If your harness doesn't have the
-skill, install it with `npx skills add cathrynlavery/diagram-design`, or read
-its [SKILL.md](https://github.com/cathrynlavery/diagram-design/blob/550fd66edff058bc73056c3416b76d69cfe865ba/skills/diagram-design/SKILL.md)
-and the `references/` file for the type you choose. Use it only to choose and
-edit the diagram. Skip its style guide, onboarding gate, fonts, and HTML
-output, because this site's theme owns the look.
+MIT). Reading it is required, not optional: open its `SKILL.md`, then
+`references/semantic-patterns.md` when step 2 applies, then the
+`references/type-<type>.md` file for the type you pick. If your harness
+doesn't have the skill, install it with
+`npx skills add cathrynlavery/diagram-design`, or read the same files from its
+[SKILL.md](https://github.com/cathrynlavery/diagram-design/blob/550fd66edff058bc73056c3416b76d69cfe865ba/skills/diagram-design/SKILL.md)
+on GitHub. Use it only to choose and edit the diagram. Skip its style guide,
+onboarding gate, fonts, and HTML output, because this site's theme owns the
+look.
 
 1. Find the claim in the post that a reader would understand faster from a
    picture than from a paragraph. If a sentence or a table would explain it
    just as well, pick a different claim.
 2. If behavior, state, enforcement, or risk carries the meaning, choose a
    semantic pattern from `references/semantic-patterns.md` first. Then pick
-   the visual type from its guide, and read that type's reference.
+   the nearest visual type from its selection table.
 3. Keep to its budget: at most 9 nodes, at most 12 arrows, one or two focal
    elements, and nothing a reader wouldn't miss if you removed it. If the
    diagram goes over, split it into an overview and a detail.
-4. Before drawing, tell the author the claim, the pattern and type, the
-   medium, and anything the budget forced out.
-5. Draw it in the medium that suits the type:
-   - **Mermaid `flowchart`:** flowchart, process, data flow, architecture,
-     tree, or dependency graph. This is the only Mermaid type the theme CSS in
-     `astro.config.mjs` covers for light and dark.
-   - **Another Mermaid type** (`sequenceDiagram`, `stateDiagram-v2`,
-     `erDiagram`, `timeline`, `quadrantChart`, `xychart-beta`, `gantt`) for
-     sequence, state machine, ER, timeline, quadrant, bar or line chart, or
-     Gantt. These render, but check them in light and dark, and extend
-     `themeCSS` if their colors don't follow the theme.
-   - **Excalidraw:** spatial or editorial types such as loop, nested, layer
-     stack, Venn, pyramid, swimlane, fishbone, service blueprint, and exploded
-     or axonometric views.
+4. Every node, arrow, and label must match something the post says. If the
+   text doesn't support it, cut it from the diagram.
+5. Before you draw, tell the author the claim, the pattern and type, the
+   reference files you read, the medium, and anything the budget forced out.
+   Repeat it in your final message.
+6. Draw it in the medium that suits the type:
+   - **Mermaid `flowchart`** for a flowchart, process, data flow,
+     architecture, tree, or dependency graph. It's the only Mermaid type the
+     site's theme covers: `themeCSS` in `astro.config.mjs` styles flowchart
+     classes, and other types keep dark colors in the light theme.
+   - **Excalidraw** for every other type, including sequence, state machine,
+     timeline, quadrant, layer stack, loop, nested, Venn, pyramid, swimlane,
+     fishbone, and exploded or axonometric views.
 
 ### Draw it
 
 - **Mermaid:** write a fenced `mermaid` block. Put the diagram's title in
   `accTitle` and a one-sentence description of its content in `accDescr`.
   Keep labels short. It renders to SVG at build time.
-- **Excalidraw** is for concept art and scenes. Save the source as
-  `src/assets/diagrams/<name>.excalidraw` and export the SVG to
-  `public/diagrams/<name>.svg`. Then run `bun run theme:diagrams` and embed the
-  SVG as `<figure class="excalidraw-figure">` with an `<img>` that has
-  `width`, `height`, and descriptive `alt`. Wide diagrams need a `-portrait`
-  variant inside `<picture>`; see the README.
+- **Excalidraw:** save the source as `src/assets/diagrams/<name>.excalidraw`.
+  Draw it in Excalidraw, or write element skeletons by hand. The export lays
+  skeletons out with real font metrics and saves them back as an editable
+  scene:
+
+  ```json
+  {
+    "type": "excalidraw",
+    "version": 2,
+    "elements": [
+      { "type": "rectangle", "id": "score", "x": 0, "y": 0, "width": 300, "height": 100, "label": { "text": "Score the request", "fontSize": 28 } },
+      { "type": "rectangle", "id": "act", "x": 520, "y": 0, "width": 300, "height": 100, "strokeColor": "#47603e", "backgroundColor": "#e2ecd9", "fillStyle": "solid", "label": { "text": "Act on it", "fontSize": 28 } },
+      { "type": "arrow", "id": "go", "x": 300, "y": 50, "points": [[0, 0], [220, 0]], "start": { "id": "score" }, "end": { "id": "act" }, "label": { "text": "above 0.9", "fontSize": 24 } },
+      { "type": "text", "id": "rest", "x": 0, "y": 150, "text": "Everything else waits for a person.", "fontSize": 24, "strokeColor": "#6f6d63" }
+    ]
+  }
+  ```
+
+  Use only the colors in `scripts/theme-diagrams.mjs` and Excalidraw's
+  default ink. Other colors wouldn't follow dark mode, so the export rejects
+  them. Then run:
+
+  ```sh
+  bun run export:excalidraw <name> --title "…" --description "…"
+  ```
+
+  It writes `public/diagrams/<name>.svg` with embedded fonts, both palettes,
+  and the title and description, then prints the SVG's size and the path of
+  a PNG preview. Look at the preview and fix crowded or overlapping parts in
+  the source.
+- **Excalidraw layouts:** draw each Excalidraw diagram twice with the same
+  facts: a landscape layout that exports about 956 px wide, and a
+  `<name>-portrait` layout that exports at most 456 px wide, for screens up to
+  60rem. The export adds 28 px of padding on each side, so draw about 900 px
+  and 400 px of content. Set every `fontSize` between 24 and 30. Excalidraw's
+  default of 20 is too small to read once a phone scales the diagram down.
+  Embed the pair as
+  `src/content/writing/a-friday-release-security-simulation.mdx` does: a
+  `<figure class="excalidraw-figure responsive-diagram">` whose `<picture>`
+  has a `<source media="(max-width: 60rem)">` for the portrait and an `<img>`
+  for the landscape. Give both the printed `width` and `height`, and give the
+  `<img>` descriptive `alt`.
 
 ## Code and companion repositories
 
-A post explains the idea, and a repository runs it. When a tutorial needs more
-than about 150 lines of code, or more than a couple of files, put the runnable
-project in its own public repository with tests and a README, as with
-[ragmha/build-your-harness](https://github.com/ragmha/build-your-harness). Ask
-the author before you create a repository.
+A post explains the idea, and a repository runs it. When a tutorial's code
+spans more than one file, or more than 150 lines, put the runnable project in
+its own public repository with tests and a README, as with
+[ragmha/build-your-harness](https://github.com/ragmha/build-your-harness).
+Don't trim the code to get under this rule. Ask the author before you create a
+repository, and until they answer, link the one you propose under
+`github.com/ragmha/`.
 
 In the post:
 

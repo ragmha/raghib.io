@@ -34,9 +34,9 @@ source code where useful.
     repositories.
   - `employer-disclaimer` decides whether a post needs the disclaimer.
 - Every post opens with its own isometric hero machine and includes at least
-  one Mermaid or Excalidraw diagram. Tutorials longer than about 150 lines of
-  code put the runnable project in a companion repository. Tests enforce all
-  three.
+  one Mermaid or Excalidraw diagram. A tutorial whose code spans more than one
+  file, or more than 150 lines, puts the runnable project in a companion
+  repository. Tests enforce the hero, the diagram, and the 150-line limit.
 - Posts use American English. `seoTitle` must be 44 characters or fewer.
 
 ## Checks

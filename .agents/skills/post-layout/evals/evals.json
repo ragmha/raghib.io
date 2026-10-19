@@ -13,7 +13,12 @@
         "The hero scene draws a recognizable machine from workshop-kit parts with one lit part, and its labels map to ideas the post discusses rather than to boxes and arrows",
         "The post has at least one diagram, every diagram renders within 9 nodes and 12 edges, and every Mermaid block has accTitle and accDescr",
         "The diagram shows a claim the post's text makes and adds no claim the text doesn't make",
-        "The final message names the diagram's claim, its pattern or type, and its medium"
+        "The final message names the diagram's claim, its pattern or type, and its medium",
+        "The new hero's labels all sit inside its frame",
+        "The run read diagram-design's SKILL.md and at least one of its type references",
+        "Every Mermaid block is a flowchart",
+        "Every Excalidraw diagram has a title and description, text of at least 24 px, and a portrait version at most 456 px wide that a (max-width: 60rem) source serves",
+        "The final message names the diagram-design reference files the run read"
       ]
     },
     {
@@ -29,7 +34,13 @@
         "The post links a companion repository under github.com/ragmha/ before its second ## heading and gives clone and run commands",
         "No GitHub repository is created, and the final message asks the author before creating the companion repository",
         "The post has at least one diagram, every diagram renders within 9 nodes and 12 edges, and every Mermaid block has accTitle and accDescr",
-        "The diagram shows a claim the post's text makes and adds no claim the text doesn't make"
+        "The diagram shows a claim the post's text makes and adds no claim the text doesn't make",
+        "The final message names the diagram's claim, its pattern or type, and its medium",
+        "The new hero's labels all sit inside its frame",
+        "The run read diagram-design's SKILL.md and at least one of its type references",
+        "Every Mermaid block is a flowchart",
+        "Every Excalidraw diagram has a title and description, text of at least 24 px, and a portrait version at most 456 px wide that a (max-width: 60rem) source serves",
+        "The final message names the diagram-design reference files the run read"
       ]
     },
     {
@@ -45,7 +56,12 @@
         "The post has at least one diagram, every diagram renders within 9 nodes and 12 edges, and every Mermaid block has accTitle and accDescr",
         "The diagram shows how the settings relate, such as when or where each one acts, rather than grouping the five settings under one node",
         "The diagram shows a claim the post's text makes and adds no claim the text doesn't make",
-        "The final message names the diagram's claim, its pattern or type, and its medium"
+        "The final message names the diagram's claim, its pattern or type, and its medium",
+        "The new hero's labels all sit inside its frame",
+        "The run read diagram-design's SKILL.md and at least one of its type references",
+        "Every Mermaid block is a flowchart",
+        "Every Excalidraw diagram has a title and description, text of at least 24 px, and a portrait version at most 456 px wide that a (max-width: 60rem) source serves",
+        "The final message names the diagram-design reference files the run read"
       ]
     }
   ]
