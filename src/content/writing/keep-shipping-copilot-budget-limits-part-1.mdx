@@ -1,338 +1,220 @@
 ---
 title: "Keep Shipping: When an AI Budget Runs Out"
-seoTitle: "AI Budget Limits: A Fallback Prototype"
-description: "Could an explicitly approved budget cap support a lower-cost model fallback after a Copilot limit trips? A prototype design explores the trade-offs; it has not been piloted."
+seoTitle: "What to Do When Your AI Budget Runs Out"
+description: "A spending limit that pauses an AI assistant mid-task protects the budget but strands the work. My design for an approved, expiring grace allowance on a cheaper model, and the two assumptions that broke along the way."
 socialImage: "/social-card-keep-shipping.png"
 date: "2026-10-13"
 topics: ["AI Tools", "Business"]
-tags: ["ai", "copilot", "governance", "prototype"]
+tags: ["ai", "governance", "prototype", "cost"]
 published: true
 hero: "budget-fallback"
 ---
 
-**Disclaimer:** I work at Microsoft. This is my personal view, based only on public information. It isn’t an official position or a product recommendation.
-
-I kept returning to the moment a developer reaches a spending limit mid-task.
-The budget owner needs to keep spending controlled; the developer wants to keep
-working. A hard stop protects the budget, but it does not answer what should
-happen next.
-
-GitHub Copilot gives me a concrete case to examine. When a user reaches an
-applicable hard-stop budget, the AI-credit-consuming features covered by that
-budget pause. On paid plans, code completions and next edit suggestions may
-remain available. Budget ownership and precedence depend on the configured
-enterprise, organization and user controls.
-
-Could an organization approve a higher spending cap while restricting which
-models remain available? That is the design experiment behind this article.
-Whether the combination preserves the intended policy has not been verified in
-a pilot. It is my take on the problem, inspired by OpenAI's spend controls, not
-a recommendation that every organization adopt the same policy.
-
-## Copilot users and the budget owner
-
-**Copilot users** are the people working with GitHub Copilot. They want to finish
-the task, understand why credit-consuming features have paused, and know how to
-request more usage. In the example, one user represents that perspective.
-
-**The budget owner** controls spending rules and model access. Here, that means
-someone authorized to manage those enterprise settings, not simply a repository
-administrator. They decide how much additional consumption to allow and when a
-temporary exception should expire.
-
-I built a private prototype to automate some of that admin's work: checking reported
-usage, changing the managed model-team memberships, and applying approved
-budget changes. The admin still verifies Luna-only access and approves the
-additional usage in this design; the automation does not
-approve its own spending.
-
-## What I took from OpenAI
-
-OpenAI's [usage-limit controls for eligible ChatGPT Enterprise and Edu
-workspaces][openai-limits] separate a person's allowance from the workspace's
-overall spending control. They support defaults, individual exceptions, and
-approved temporary increases.
-
-The part that interested me was the operating model: give people a normal
-allowance, make additional usage an explicit decision, and let a temporary
-exception expire rather than become a permanent entitlement.
-
-That does not mean copying OpenAI's billing units or assuming every product
-works the same way. ChatGPT workspace controls and OpenAI API-platform controls
-are different surfaces. Neither should be treated as interchangeable with
-GitHub's billing model.
-
-GitHub also has [native requests for additional Copilot budget][github-requests]
-and [expiring individual user-level budgets][github-budgets]. The request flow
-is not available for enterprises with managed users, so check its availability
-for your account.
-
-My extension was to connect an exception with a narrower choice of models:
-instead of immediately restoring the original set of approved models, could a
-small allowance on a lower-priced GPT-6 option be enough for some of the
-remaining work?
-
-**OpenAI inspired the allowance-and-exception pattern. The lower-priced model
-transition is my experiment, not a claim about an OpenAI feature.**
-
-## A budget and a model policy answer different questions
-
-Before building anything, I had to separate two controls that are easy to blur
-together.
-
-<figure class="excalidraw-figure responsive-diagram">
-  <picture>
-    <source
-      media="(max-width: 60rem)"
-      srcSet="/diagrams/copilot-budget-and-model-access-portrait.svg"
-      width="456"
-      height="1016"
-    />
-    <img
-      src="/diagrams/copilot-budget-and-model-access.svg"
-      width="956"
-      height="756"
-      loading="eager"
-      fetchpriority="high"
-      decoding="async"
-      alt="Two separate controls meet: the user budget determines how much someone may consume, while model policy determines which models they may use. Both must permit the request, and other applicable billing controls still apply."
-    />
-  </picture>
-  <figcaption>
-    A budget answers "how much?" Model policy answers "which models?"
-    Changing one does not supply the other. <a href="/diagrams/copilot-budget-and-model-access.svg" target="_blank" rel="noopener noreferrer">Open full-size diagram.</a>
-  </figcaption>
-</figure>
-
-An available model is not necessarily an affordable model. Giving someone permission
-to use a cheaper model does not make it free, and it does not override an
-exhausted user budget.
-
-Under GitHub's [AI-credit billing model][github-billing], included credits are
-pooled at the billing-entity level. A Copilot Business seat contributes 1,900
-credits to that pool; it does not create a private 1,900-credit wallet for its
-holder.
-
-A user-level budget is an additional control over how much a person can
-consume, including both pooled and metered usage. If that budget is exhausted,
-credit-consuming features are blocked even when the pool still has capacity.
-Code completions and next edit suggestions remain available on paid plans.
-
-This meant my proposed fallback needed two things, in the right order:
-establish and verify the intended model restriction, then apply an explicitly
-approved budget cap.
-
-It could not be a way around the budget.
-
-## One user, one small allowance
-
-I chose a fictional user's monthly journey to make the idea concrete. The
-numbers below are example policy choices, not a claim that everyone should have
-the same limit.
-
-The example starts with a **$19 user-level cap**, equivalent to **1,900 AI
-credits** at the published rate; it is not a reserved credit allocation. The
-fallback model is **GPT-6 Luna**, which is lower-priced than the other GPT-6
-options in [GitHub's published model prices][github-pricing]. The proposed cap
-increase is **100 credits** (**$1** of AI-credit consumption), limited by this
-prototype's policy to once per user per monthly cycle.
-
-<figure class="excalidraw-figure responsive-diagram">
-  <picture>
-    <source
-      media="(max-width: 60rem)"
-      srcSet="/diagrams/copilot-credit-journey-portrait.svg"
-      width="456"
-      height="2166"
-    />
-    <img
-      src="/diagrams/copilot-credit-journey.svg"
-      width="1001"
-      height="1126"
-      loading="lazy"
-      decoding="async"
-      alt="Two distinct black-ink personas: a GHCP user wearing headphones sits at a paused laptop; the GH admin wears glasses and an ID badge, holds a policy clipboard, and points to the budget board. The admin's automation checks usage and changes model teams. The example proposes a $1 increase from a $19 cap to $20 after verifying model access; a separate approved $20 increase raises the total cap to $40."
-    />
-  </picture>
-  <figcaption>
-    The Copilot user wants to continue working. The budget owner controls the budget
-    and uses automation to apply the policy. The board shows total limits, not
-    fresh credit purchases. The admin must verify Luna-only access before
-    releasing grace. If grace runs out, usage pauses again; a $20 increase
-    requires approval.
-    <a href="/diagrams/copilot-credit-journey.svg" target="_blank" rel="noopener noreferrer">Open full-size diagram.</a>
-  </figcaption>
-</figure>
-
-Here, "all models" always means the models the enterprise has approved.
-It does not include models prohibited by its security or compliance policies.
-
-The example's $40 cap includes the proposed $1 increase (raising the cap from
-$19 to $20) and a separate approved $20 increase. If an increase arrives
-earlier, the calculation starts from the current cap instead. In this
-prototype's intended state machine, switching teams does not reset tracked
-consumption or authorize another grant; this is not a GitHub billing guarantee.
-
-There is an important administrative distinction, too. My prototype accepts an
-increment: "add $20." GitHub's native approval interface sets a new total budget.
-To add $20 to a current $20 cap there, the new total is **$40**, not $20.
-
-Raising that cap does not purchase or reserve credits. It permits more
-consumption, which can create additional charges when included capacity runs
-out. GitHub's other spending controls, including applicable enterprise,
-organization, or cost-center limits and paid-usage policy, still have to allow it.
-
-## The first surprise: a restricted team cannot subtract access
-
-My initial idea sounded simple: put an exhausted user on a temporary team that
-only has access to Luna.
-
-But GitHub's [enterprise-team model grants are additive][github-models]. If
-another team grants a model, or the enterprise enables it for everyone, adding
-a more restricted team does not take that access away.
-
-<figure class="excalidraw-figure responsive-diagram">
-  <picture>
-    <source
-      media="(max-width: 60rem)"
-      srcSet="/diagrams/copilot-additive-model-access-portrait.svg"
-      width="456"
-      height="2096"
-    />
-    <img
-      src="/diagrams/copilot-additive-model-access.svg"
-      width="956"
-      height="936"
-      loading="lazy"
-      decoding="async"
-      alt="A full-model team plus a Luna-only team still gives the user all approved models. Establishing Luna-only access requires removing the full-model grant, reviewing enterprise-wide and other team grants, and verifying the result in the client."
-    />
-  </picture>
-  <figcaption>
-    The Luna-only team is another grant, not a deny rule. Removing one full-model
-    membership is insufficient if another source still grants those models.
-    <a href="/diagrams/copilot-additive-model-access.svg" target="_blank" rel="noopener noreferrer">Open full-size diagram.</a>
-  </figcaption>
-</figure>
-
-The design uses dedicated model-access teams and removes the managed full-model
-grant during the fallback transition. Those teams must not
-also control repository permissions or Copilot license assignments.
-
-Other grants still matter. The design cannot claim Luna-only access just
-because one membership changed successfully.
-
-There is also a broader prerequisite: enterprise teams mode changes where
-granular model policy is managed and deactivates organization-level model
-settings. The model-policy targeting through enterprise teams described by the
-linked documentation is an **opt-in public preview**. That is not a small
-switch to enable casually for a single-user experiment. An existing enterprise
-would need to assess the effect on everyone else before adopting it.
-
-## The second surprise: changing membership is not proof of continuity
-
-The prototype design uses GitHub Actions and public APIs to coordinate the
-transition. Native GitHub budgets remain responsible for spending enforcement.
-
-The unpublished prototype is designed to detect exhaustion, keep the existing
-cap in place, remove its full-model grant, and establish the fallback
-membership. An administrator would then need to verify the intended model
-restriction in the relevant clients before approving a $1 cap increase. The
-implementation and its idempotency behavior cannot be independently inspected
-or tested.
-
-That verification step is deliberate. I have not established a supported API
-signal that proves all relevant clients and existing sessions have applied the
-restriction. A successful membership response is not enough evidence, and a
-fixed delay would not make it enough.
-
-**So this is not seamless fallback. There is still a pause.**
-
-Scheduled reconciliation is not instantaneous. Public documentation does not
-establish whether a membership change automatically remaps the model in every
-existing conversation. I assume a user may need to refresh their client or
-choose Luna themselves; that needs per-client testing.
-
-That is the gap between the ambition and the implementation. "Keep shipping"
-is the question I am exploring, not a result I can claim simply because the
-automation runs.
-
-## What would make the experiment worthwhile?
-
-A cheaper model is only useful here if it can do the work.
-
-The remaining task might need capabilities, context, or tools that make a
-particular model unsuitable. More retries can erase an apparent saving.
-Waiting for an administrator can erase the continuity benefit.
-
-I would want to evaluate:
-
-- Whether the developer completes the task at an acceptable level of quality.
-- The total AI cost of getting to that result, not just the model's token price.
-- Time spent blocked, switching models, or waiting for approval.
-- The administrative effort required to operate and recover the workflow.
-
-The comparison is not only "expensive model versus cheap model." It is also
-"this custom transition versus a normal, approved budget increase."
-
-Compared with stopping usage, the grace allowance authorizes more consumption.
-Compared with unrestricted access to the original model set, it might reduce
-the cost of the remaining work. Whether that trade is worthwhile needs evidence.
-
-## What exists today
-
-The private prototype is designed around native user budgets, dedicated
-enterprise model teams and GitHub Actions. It is intended to record operations
-so a retry does not request the same increase twice and to tie temporary
-increases to a monthly cycle; these guarantees cannot be independently verified
-without public code and tests.
-
-The prototype is not published as a public repository, so this article describes
-the approach and trade-offs rather than offering a runnable implementation.
-
-I have not completed a live enterprise pilot. I do not yet have measured savings,
-delivery improvements, or evidence that this approach suits every AI-assisted
-workflow. A native budget increase may be the simpler answer in many cases.
-
-That does not settle the experiment either way. It tells me what to investigate
-next.
-
-## Follow the series
-
-This is Part 1 of the Keep Shipping prototype series. Part 2 will turn the sketch into
-explicit policy: which budget applies, what each transition can change, and
-what must remain untouched. [Subscribe to the writing RSS feed](/writing/feed.xml)
-to get future installments.
-
-The idea I want to carry through the series is simple:
-
-**A spending limit can be correct while the experience around it still deserves
-better design.**
-
-That is what "keep shipping" means in this prototype series: exploring a more useful
-path through a legitimate constraint, not pretending the constraint has
-disappeared.
-
-## References
-
-Product behavior and availability are time-sensitive. These are the primary
-references behind the design; check the documentation and the controls available
-in your own environment before treating the example as an implementation plan.
-The GitHub references were reviewed on 13 October 2026. The OpenAI usage-limit
-guidance was reviewed on 7 October 2026. Availability and prices can change.
-
-- [OpenAI: manage usage limits, temporary increases, and workspace spending controls][openai-limits]
-- [GitHub: AI-credit billing for organizations and enterprises][github-billing]
-- [GitHub: user budgets, precedence, and expiration][github-budgets]
-- [GitHub: requests for additional Copilot budget][github-requests]
-- [GitHub: enterprise model availability and additive team grants][github-models]
-- [GitHub: enterprise-team model policy targeting public preview](https://github.blog/changelog/2026-07-31-enterprise-teams-model-policy-targeting-in-public-preview/)
-- [GitHub: GPT-6 Luna availability](https://github.blog/changelog/2026-09-22-openais-gpt-6-sol-and-gpt-6-luna-now-available/)
-- [GitHub: Copilot models and pricing](https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing)
-
-[openai-limits]: https://help.openai.com/en/articles/20001001
-[github-billing]: https://docs.github.com/en/copilot/concepts/billing-and-usage/organizations-and-enterprises/billing
-[github-budgets]: https://docs.github.com/en/copilot/concepts/billing-and-usage/organizations-and-enterprises/budgets
-[github-requests]: https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-budget-requests
-[github-models]: https://docs.github.com/en/enterprise-cloud@latest/copilot/how-tos/administer-copilot/manage-for-enterprise/manage-availability-of-default-models
-[github-pricing]: https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing
+A per-person spending limit on an AI assistant does exactly one thing well: it
+stops spending. It says nothing about the half-finished task the person was in
+the middle of when it fired.
+
+I kept coming back to that moment. The budget is correct, the stop is correct,
+and the work is still stranded. The only ways forward are to wait for the next
+cycle or to ask someone for a bigger budget, which restores everything,
+including the most expensive models.
+
+So I designed a third path: a small grace allowance that someone explicitly
+approves, that expires, and that only buys access to a cheaper model. This post
+is about that design, what it has to guarantee, and the two assumptions that
+didn't survive contact with how access control actually works. It's a private
+prototype. I haven't piloted it, and I have no savings to report.
+
+## Two people, one limit
+
+Two people meet at the limit, and they want different things.
+
+**The person working** wants to finish the task. They need to know why the
+assistant stopped and how to ask for more.
+
+**The budget owner** sets the spending rules and the model policy. They decide
+how much extra consumption to allow, and for how long.
+
+A hard stop serves the budget owner completely and the person working not at
+all. A blanket budget increase does the opposite. The grace path is an attempt
+to give the person working a way to continue that the budget owner can still
+reason about: bounded in amount, bounded in time, and bounded in what it can
+buy.
+
+The prototype automates the budget owner's routine work: reading reported
+usage, changing model-access group memberships, and applying approved budget
+changes. It never approves its own spending. A person approves every increase.
+
+## How much, and which models
+
+Before building anything, I had to separate two controls that are easy to
+blur:
+
+- A **budget** answers "how much may this person consume?"
+- A **model policy** answers "which models may this person use?"
+
+A request goes through only if both say yes. Changing one doesn't supply the
+other. Permission to use a cheaper model doesn't make it free, and it doesn't
+override an exhausted budget.
+
+There's a second distinction inside the budget. Capacity is often pooled
+across a whole organization, while a per-person cap is an additional limit on
+top of that pool. A person can be blocked by their own cap while the pool
+still has room. Raising their cap doesn't buy or reserve anything; it permits
+more consumption, which may cost money once the pool runs dry. Any limit set
+higher up, for a team or the whole organization, still applies.
+
+That gave the grace path a strict order: **restrict which models first, then
+raise how much**. Reverse the order and the grace allowance funds the
+expensive models it was meant to avoid.
+
+## The grace path
+
+The operating model borrows from how some workspace products already handle
+usage: give everyone a normal allowance, make extra usage an explicit
+decision, and let a temporary exception expire instead of becoming a
+permanent entitlement. My addition was to tie the exception to a narrower set
+of models.
+
+```mermaid
+flowchart TD
+    accTitle: The grace path after a budget runs out
+    accDescr: When a person's budget is exhausted, work pauses. If the budget owner approves grace, broad model grants are removed and the restriction is verified where requests run. Only then is the cap raised by a small, expiring allowance. When the grace is spent or expires, work pauses again.
+    start(["Budget exhausted mid-task"]) --> stop["Hard stop: work pauses"]
+    stop --> ask{"Owner approves grace?"}
+    ask -- No --> wait(["Wait for next cycle or a full increase"])
+    ask -- Yes --> remove["Remove broad model grants"]
+    remove --> verify{"Restriction visible where requests run?"}
+    verify -- No --> hold["Keep the cap and investigate"]
+    verify -- Yes --> grace["Raise cap by a small, expiring grace"]
+    grace --> done(["Grace spent or expired: pause again"])
+```
+
+A few rules keep the grace path from turning into a loophole:
+
+- **Once per person per cycle.** In my policy, grace is available once a
+  month. Switching groups doesn't reset tracked consumption or authorize
+  another grant.
+- **Grace is small.** It's meant to finish the current task, not replace a
+  budget conversation.
+- **Expiry is the default.** At the end of the cycle the exception goes away
+  without anyone having to remember to remove it.
+- **Retries are safe.** Each operation is recorded, so a retried job doesn't
+  request the same increase twice.
+
+One administrative trap showed up immediately: increments versus totals. My
+prototype accepts "add 20 units." An approval screen that sets a new total
+reads the same request differently. If the cap is already 20 and the approver
+means "add 20," the new total is 40, not 20. Any system that passes budget
+changes between tools needs to say which one it means.
+
+## First attempt: a narrower group
+
+My first design was simple. When someone ran out, add them to a temporary
+group that only grants the cheaper model.
+
+It doesn't work, and the reason applies well beyond this one system. Model
+access was built from a **union of grants**: a person can use any model that
+any of their groups grants, plus anything enabled for everyone. Adding a
+narrower group adds nothing to remove.
+
+```mermaid
+flowchart LR
+    accTitle: Access is the union of every grant
+    accDescr: A default group granting all approved models, a fallback group granting only the cheaper model, and an organization-wide default all feed into effective access, which is their union. The person can still use every approved model.
+    full["Default group: all approved models"] --> union["Effective access: the union"]
+    cheap["Fallback group: cheaper model only"] --> union
+    org["Organization-wide defaults"] --> union
+    union --> result(["Still every approved model"])
+```
+
+In a union of grants, a narrower grant can't restrict anything. Restriction
+has to come from removing grants.
+
+The redesign follows from that:
+
+- Use **dedicated model-access groups** that do nothing else. If the same
+  group also controls repository permissions or licenses, removing someone
+  from it breaks unrelated things.
+- During the transition, **remove the broad grant** instead of adding a
+  narrow one.
+- **Review every other source of the grant**, including organization-wide
+  defaults and other groups. One successful removal doesn't prove the person
+  has lost access.
+
+I also had to account for a deployment-wide risk: if enabling group-based model
+policy changes how model access is managed across an organization, a one-person
+test could affect more than its participant. That's not a switch to flip
+casually.
+
+## Second break: accepted isn't applied
+
+The prototype runs as scheduled jobs against the platform's admin APIs. The
+platform's own budgets still do the enforcing; my jobs only change
+memberships and caps.
+
+The obvious next step was to remove the broad grant, see a successful
+response, and raise the cap. That's the second assumption that broke. A
+**control plane accepting a change isn't evidence that every enforcement
+point has applied it**. Clients cache what they're allowed to do. An open
+session may keep the model it started with. I found no supported signal that
+says every client and session now sees the restriction, and a fixed delay
+doesn't turn a guess into proof.
+
+So the design puts a person at that point. The budget owner checks the
+restriction in the clients the person actually uses, and only then approves
+the grace allowance. Verify where the change is used, not where it was made.
+
+That means the grace path isn't seamless. There's still a pause: reconciliation
+runs on a schedule, a person has to verify, and the person working may need to
+refresh their client or pick the cheaper model themselves. "Keep shipping" is
+the question I'm exploring, not a result I can claim because the automation
+runs.
+
+## Trade-offs and failure modes
+
+| Path | Protects the budget | Keeps work moving | Main risk |
+| --- | --- | --- | --- |
+| Hard stop | Fully | No | Stranded work, workarounds outside policy |
+| Full increase | Only as far as the approver checks | Yes | Pays top-model prices for the tail of the task |
+| Cheaper-model grace | Bounded amount, time, and models | Partly, after a pause | The cheaper model can't finish the task |
+
+The last risk is the one that decides whether this is worth doing. A cheaper
+model is only useful if it can do the remaining work. The task might need
+context, tools, or reasoning that the cheaper model lacks. More retries can
+erase the saving, and waiting for approval can erase the continuity.
+
+Compared with a hard stop, grace authorizes more consumption. Compared with a
+full increase, it might reduce the cost of finishing. Whether that trade is
+worth it needs evidence I don't have yet.
+
+## What's next
+
+I haven't run a live pilot, so there are no measured savings or delivery
+improvements here. A plain approved increase may be the simpler answer in
+many cases. If I pilot this, I'd measure:
+
+- whether the person finishes the task at acceptable quality;
+- the total cost of getting there, including retries, not just the per-token
+  price;
+- the time spent blocked, switching models, or waiting for approval;
+- the effort it takes the budget owner to run and recover the workflow.
+
+The comparison isn't only an expensive model against a cheap one. It's this
+custom transition against an ordinary approved increase.
+
+Open questions I'm still working through:
+
+- Can the restriction be verified automatically at the enforcement point, or
+  does that check always need a person?
+- Should grace be sized in money, in tokens, or in tasks?
+- What should happen to a session that started on an expensive model when the
+  grace path begins?
+
+This is Part 1 of the Keep Shipping series. Part 2 turns the sketch into
+explicit policy: which budget applies, what each transition is allowed to
+change, and what must stay untouched.
+[Subscribe to the writing RSS feed](/writing/feed.xml) to follow along.
+
+A spending limit can be correct while the experience around it still deserves
+better design.

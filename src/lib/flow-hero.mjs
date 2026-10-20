@@ -201,7 +201,7 @@ function budgetFallback(t) {
   t.base(-300, -150, 600, 300)
   t.rail([[200, 90, B + 1], [80, 130, B + 1], [-200, 130, B + 1], [-200, 64, B + 1]], 'green', false)
 
-  // Reserve: a small tank piped only to the Luna nozzle.
+  // Reserve: a small tank piped only to the cheap-model nozzle.
   t.box(146, -100, 8, 54, B, 6, 'lo')
   t.box(60, -54, 94, 8, B, 6, 'lo')
   t.cyl(150, -112, 26, B, 52, 'mid')
@@ -250,7 +250,7 @@ function budgetFallback(t) {
   t.label([-200, -40, B + 112], 'BUDGET = HOW MUCH', { dy: -70 })
   t.label([-23, -100, B + 26], 'MODEL POLICY = WHICH MODELS', { dy: -150 })
   t.label([-105, 0, B + 45], 'HARD STOP', { dy: -150, tone: 'red' })
-  t.label([150, -112, B + 55], 'ONE-TIME GRACE, LUNA ONLY', { dy: -90, tone: 'blue' })
+  t.label([150, -112, B + 55], 'ONE-TIME GRACE, CHEAP MODEL ONLY', { dy: -90, tone: 'blue' })
   t.label([240, 90, B + 70], 'APPROVED INCREASE', { dx: 40, dy: 0, tone: 'green' })
 }
 
@@ -357,7 +357,7 @@ function actionTriage(t) {
     t.cyl(-60, y + 20, 4, B + 82, 7, 'hi', { steps: 14 })
   }
   press(-60, 'LLM')
-  press(60, 'DECISION-1')
+  press(60, 'DECISION MODEL')
 
   // Sorting bins: one per route, each with its signal lamp.
   bins.forEach(([tone], i) => {
@@ -371,202 +371,8 @@ function actionTriage(t) {
   t.label([-238, 0, B + 17], 'MEETINGS + CHATS', { dy: -150 })
   t.label([-95, -132, B + 62], 'SAME RUBRIC', { dx: 110, dy: -30 })
   t.label([-70, -60, B + 84], 'GENERATIVE MODEL', { dy: -70 })
-  t.label([-60, 80, B + 89], 'DECISION-1', { dx: -150, dy: 110 })
+  t.label([-60, 80, B + 89], 'DECISION MODEL', { dx: -150, dy: 110 })
   bins.forEach(([tone, name], i) => t.label([270, -96 + i * 64, B + 30], name, { dx: 46, dy: 0, tone }))
-}
-
-function copilotTips(t) {
-  t.base(-300, -140, 600, 280)
-  t.rail([[-40, 0, B + 1], [10, 0, B + 1]], 'green')
-
-  // Tool chest: each drawer is a stage of the tips, pulled out further the earlier it is.
-  t.plate(-250, -80, 140, 160, B, 150, 'lo')
-  t.box(-256, -86, 152, 172, B + 150, 6, 'mid')
-  t.bar([-200, -50], [-200, 50], 5, B + 156, 6, 'mid')
-  t.text(-160, 0, B + 156, '50 TIPS', 9, 'mid')
-  const drawers = [90, 62, 34]
-  drawers.forEach((pull, i) => {
-    const z = B + 8 + i * 46
-    const x = -130
-    t.tray(x, -70, pull + 20, 140, z, 34, () => {
-      if (i === 0) {
-        t.box(x + 20, -30, pull - 20, 60, z + 3, 2, 'hi', { flat: true })
-        for (let r = 0; r < 3; r++) t.rule([x + 28, -18 + r * 16], [x + pull - 14 - r * 8, -18 + r * 16], z + 5, 'mid')
-      }
-      if (i === 1) {
-        for (let s = 0; s < 3; s++) {
-          t.bar([x + 14, -40 + s * 40], [x + pull - 6, -40 + s * 40], 4, z + 3, 3, 'mid')
-          t.cyl(x + 14, -40 + s * 40, 8, z + 3, 4, 'hi')
-        }
-      }
-      if (i === 2) {
-        for (let s = 0; s < 4; s++) {
-          t.cyl(x + 20, -45 + s * 30, 6, z + 3, 10, 'mid', { steps: 16 })
-          t.ring(x + 20, -45 + s * 30, 3, z + 13, 'hi')
-        }
-      }
-    }, 'mid')
-    t.box(x + pull + 17, -20, 6, 40, z + 12, 6, 'hi')
-  })
-
-  // The fleet: identical agents on a charging dock, with one coordinator lit.
-  t.plate(10, -120, 260, 240, B, 8)
-  const bots = []
-  for (let row = 0; row < 4; row++) for (let col = 0; col < 4; col++) bots.push([50 + col * 60, -90 + row * 60])
-  bots.sort((a, b) => depth(a) - depth(b))
-  for (const [x, y] of bots) {
-    const lead = x === 110 && y === 30
-    t.ring(x, y, 16, B + 8, 'faint')
-    t.cyl(x, y, 11, B + 8, 22, 'mid', { lit: lead })
-    t.cyl(x, y, 8, B + 30, 10, lead ? 'green' : 'lo')
-    t.seg([x, y, B + 40], [x, y, B + 52], 'mid')
-    t.cyl(x, y, 1.8, B + 52, 2, 'hi', { steps: 10 })
-  }
-  t.lamp([270, 120, B + 8], 'green')
-
-  t.label([-40, 0, B + 13], 'FIRST PROMPT', { dx: -60, dy: 70 })
-  t.label([-68, 0, B + 59], 'SESSIONS + PERMISSIONS', { dx: 150, dy: -10 })
-  t.label([-96, -50, B + 105], 'HOOKS + SUBAGENTS', { dx: 110, dy: -50 })
-  t.label([230, -90, B + 54], 'AGENT FLEETS', { dx: 50, dy: 0, tone: 'green' })
-}
-
-function aiWorkflow(t) {
-  t.base(-320, -140, 640, 280)
-  t.rail([[-70, 0, B + 1], [20, 0, B + 1]])
-  t.rail([[190, 70, B + 1], [226, 70, B + 1]], 'green')
-
-  // Pen plotter: it drafts the routine part on its own.
-  t.plate(-300, -108, 230, 216, B, 6)
-  t.box(-296, -112, 222, 10, B + 6, 8, 'lo')
-  t.box(-276, -84, 170, 168, B + 6, 1, 'hi', { flat: true })
-  for (let r = 0; r < 6; r++) t.rule([-266, -70 + r * 14], [-196 - (r * 17) % 50, -70 + r * 14], B + 7, 'mid')
-  t.outline(-262, 20, 60, 44, B + 7, 'mid')
-  t.outline(-186, 20, 64, 44, B + 7, 'lo')
-  t.rule([-202, 42], [-186, 42], B + 7, 'mid')
-  t.box(-178, -112, 16, 16, B + 14, 48, 'mid')
-  t.box(-178, 96, 16, 16, B + 14, 48, 'mid')
-  t.cyl(-170, 30, 2, B + 7, 44, 'hi', { steps: 10 })
-  t.box(-180, -112, 20, 224, B + 62, 12, 'lo')
-  t.box(-188, 14, 36, 34, B + 50, 34, 'mid')
-  t.box(-296, 102, 222, 10, B + 6, 8, 'lo')
-
-  // Review: a light table and an inspection loupe over the draft.
-  t.plate(20, -90, 170, 180, B, 22, 'lo')
-  t.box(28, -82, 154, 164, B + 22, 2, 'hi', { flat: true })
-  t.box(46, -60, 110, 120, B + 24, 1, 'lo', { flat: true })
-  for (let r = 0; r < 7; r++) t.rule([56, -48 + r * 14], [124 - (r * 13) % 40, -48 + r * 14], B + 25, 'faint')
-  const checks = [[70, -30], [130, 40]]
-  for (const [x, y] of checks) t.ring(x, y, 9, B + 25.5, 'mid')
-  t.cyl(170, -76, 11, B + 24, 12, 'mid')
-  t.cyl(170, -76, 3, B + 36, 82, 'mid', { steps: 12 })
-  t.bar([170, -76], [112, -6], 5, B + 112, 5, 'mid')
-  t.cyl(112, -6, 2.4, B + 80, 32, 'mid', { steps: 10 })
-  t.cyl(108, 0, 30, B + 70, 6, 'hi', { lit: true })
-  t.ring(108, 0, 24, B + 76, 'mid')
-
-  // Out tray: only the reviewed change leaves, stamped.
-  t.tray(226, 30, 76, 82, B, 18, () => {
-    for (let s = 0; s < 4; s++) t.box(236, 40 + s, 56, 60, B + 3 + s * 2, 1.2, s === 3 ? 'hi' : 'lo')
-    t.ring(264, 72, 10, B + 11.4, 'green')
-  }, 'green')
-  t.lamp([302, 112, B + 18], 'green')
-
-  t.label([-170, 30, B + 84], 'AI DRAFTS ROUTINE WORK', { dy: -110 })
-  t.label([108, -20, B + 76], 'SYSTEM CONTEXT REVIEW', { dy: -90 })
-  t.label([70, -30, B + 26], 'CACHING', { dx: -150, dy: -10 })
-  t.label([130, 40, B + 26], 'CREDENTIALS + RETRIES', { dx: -40, dy: 120 })
-  t.label([300, 70, B + 18], 'REVIEWED CHANGE', { dx: 40, dy: 0, tone: 'green' })
-}
-
-function writingSite(t) {
-  t.base(-300, -140, 600, 280)
-  t.rail([[-120, 0, B + 1], [-10, 0, B + 1]])
-
-  // The old interactive terminal: a CRT and keyboard.
-  t.box(-282, -42, 56, 84, B + 12, 70, 'lo')
-  t.plate(-232, -60, 80, 120, B, 100, 'lo')
-  const face = -152
-  t.line(k.pathOf([[face, -46, B + 18], [face, 44, B + 18], [face, 44, B + 86], [face, -46, B + 86]].map(t.at), true), 'mid')
-  for (let r = 0; r < 6; r++) t.seg([face, -40, B + 78 - r * 9], [face, -4 - (r * 13) % 30, B + 78 - r * 9], 'faint')
-  t.box(face, -40, 0.6, 8, B + 25, 3, 'hi')
-  t.plate(-140, -64, 44, 128, B, 8)
-  for (let r = 0; r < 3; r++) for (let c = 0; c < 9; c++) t.box(-134 + r * 13, -56 + c * 13, 9, 9, B + 8, 3, 'lo', { r: 1 })
-
-  // The writing site: a reading desk with an open book and a lamp.
-  for (const [x, y] of [[0, -100], [226, -100], [0, 88], [226, 88]]) t.box(x, y, 12, 12, B, 46, 'lo')
-  t.plate(-10, -110, 256, 220, B + 46, 8)
-  const top = B + 54
-  for (let s = 0; s < 3; s++) t.box(10 + s * 3, -96 + s * 2, 56 - s * 6, 40, top + s * 10, 10, s === 2 ? 'hi' : 'mid')
-  t.box(60, -64, 130, 60, top, 9, 'mid')
-  t.box(60, 4, 130, 60, top, 9, 'mid')
-  t.cyl(125, 0, 4, top, 7, 'lo', { steps: 12 })
-  for (const y of [-56, 12]) for (let r = 0; r < 7; r++) t.rule([72 + r * 16, y], [72 + r * 16, y + 44 - (r % 3) * 8], top + 9, 'faint')
-  const ribbons = [['green', -30], ['blue', 0], ['mid', 30]]
-  for (const [tone, y] of ribbons) t.rail([[190, y, top + 6], [236, y, top + 1]], tone)
-  t.cyl(200, -80, 14, top, 5, 'mid')
-  t.cyl(200, -80, 2.4, top + 5, 66, 'mid', { steps: 12 })
-  t.bar([200, -80], [150, -40], 4, top + 70, 4, 'mid')
-  t.cyl(150, -40, 18, top + 56, 14, 'hi', { lit: true })
-  t.ring(150, -40, 12, top + 70, 'mid')
-
-  t.label([-152, 0, B + 100], 'INTERACTIVE TERMINAL', { dy: -90 })
-  t.label([125, -30, top + 9], 'WRITING SITE', { dx: -40, dy: -150 })
-  ribbons.forEach(([tone, y], i) => t.label([236, y, top + 1], ['WRITING', 'PROJECTS', 'ABOUT'][i], { dx: 44, dy: 0, tone }))
-}
-
-function serverComponents(t) {
-  t.base(-320, -150, 640, 300)
-  t.rail([[-150, -60, B + 1], [-150, -20, B + 1]])
-  t.rail([[80, 30, B + 1], [80, 76, B + 1]], 'green')
-  t.rail([[-290, -60, B + 1], [-290, 110, B + 1], [100, 110, B + 1]], 'blue')
-
-  // The kitchen: the server cooks, and the recipe binder stays on its shelf.
-  t.plate(-290, -140, 240, 80, B, 56, 'lo')
-  const range = B + 56
-  t.box(-282, -142, 46, 14, range, 34, 'mid')
-  t.text(-259, -135, range + 34, 'CODE', 6, 'mid')
-  for (let s = 0; s < 4; s++) t.box(-275 + s * 9, -132, 7, 20, range + 34, 5, 'lo')
-  const burners = [[-210, -110], [-130, -110], [-210, -82], [-130, -82]]
-  for (const [x, y] of burners) {
-    t.ring(x, y, 14, range, 'faint')
-    t.ring(x, y, 8, range, 'lo')
-  }
-  for (const [x, y] of [[-210, -100], [-130, -100]]) {
-    t.cyl(x, y, 22, range, 26, 'mid')
-    t.cyl(x, y, 23, range + 26, 3, 'lo')
-    t.cyl(x, y, 4, range + 29, 5, 'hi', { steps: 14 })
-  }
-  for (let s = 0; s < 5; s++) t.box(-270 + s * 44, -62, 8, 4, B + 30, 8, 'hi')
-
-  // The pass: plates of rendered results, not the recipe.
-  for (const [x, y] of [[-270, -20], [90, -20], [-270, 20], [90, 20]]) t.box(x, y, 8, 8, B, 50, 'lo')
-  t.plate(-280, -28, 384, 64, B + 50, 6)
-  const pass = B + 56
-  for (const x of [-220, -140, -60, 20]) {
-    t.cyl(x, 4, 20, pass, 2, 'hi')
-    t.ring(x, 4, 14, pass + 2, 'faint')
-    t.cyl(x, 4, 9, pass + 2, 6, 'mid')
-  }
-  t.box(-280, -30, 384, 3, pass + 40, 3, 'lo')
-  for (const x of [-276, 100]) t.cyl(x, -28, 1.6, pass, 40, 'mid', { steps: 10 })
-  for (const x of [-220, -140, -60]) t.box(x - 7, -29, 14, 1, pass + 22, 18, 'hi')
-
-  // The dining table: delivered plates, and one table-side burner that ships with the meal.
-  for (const [x, y] of [[60, 80], [276, 80], [60, 132], [276, 132]]) t.box(x, y, 8, 8, B, 36, 'lo')
-  t.plate(50, 70, 240, 74, B + 36, 6)
-  const table = B + 42
-  for (const x of [100, 170]) {
-    t.cyl(x, 108, 20, table, 2, 'hi')
-    t.cyl(x, 108, 9, table + 2, 6, 'mid')
-  }
-  t.cyl(240, 106, 13, table, 12, 'blue')
-  t.cyl(240, 106, 18, table + 12, 5, 'hi', { lit: true })
-  t.lamp([262, 132, table], 'blue')
-
-  t.label([-259, -135, range + 39], 'COMPONENT CODE STAYS', { dy: -60 })
-  t.label([-170, -100, range + 34], 'SERVER RENDERS', { dx: 120, dy: -40 })
-  t.label([20, 4, pass + 8], 'RSC PAYLOAD: RENDERED RESULT', { dx: 150, dy: -50, tone: 'green' })
-  t.label([240, 106, table + 17], "'use client' JS", { dx: 50, dy: 0, tone: 'blue' })
 }
 
 function rfpSandbox(t) {
@@ -666,6 +472,54 @@ function releaseGate(t) {
   t.label([254, 80, B + 32], 'SHIP', { dx: 50, dy: 0, tone: 'green' })
 }
 
+function budgetInterlock(t) {
+  t.base(-260, -140, 550, 270)
+  t.rail([[118, -64, B + 1], [150, -64, B + 1], [150, 82, B + 1], [190, 82, B + 1]], 'blue')
+
+  // Cycle reset: a dial on a post at the back of the box.
+  t.cyl(220, -90, 7, B, 46, 'mid', { steps: 16 })
+  t.dial(220, -90, 26, B + 46, -2.4)
+
+  // Lever frame: two padlocked levers for the higher limits, then three levers pulled in order.
+  t.plate(-230, -90, 345, 48, B, 18, 'lo')
+  const levers = [[-195, false], [-155, false], [-80, true], [-20, true], [40, true]]
+  for (const [x, pulled] of levers) {
+    t.box(x - 4, -82, 8, 30, B + 18, 1, 'lo', { flat: true })
+    const y = pulled ? -60 : -78
+    t.box(x - 3, y, 6, 6, B + 18, 84, x === 40 ? 'blue' : pulled ? 'hi' : 'lo')
+    t.box(x - 5, y - 1, 10, 8, B + 102, 6, 'mid')
+    if (!pulled) t.box(x - 7, y + 8, 14, 8, B + 18, 14, 'red')
+  }
+  t.lamp([40, -57, B + 108], 'blue', 6)
+  // The owner's release key sits in a lock on the frame beside lever 2.
+  t.cyl(10, -66, 8, B + 18, 12, 'green', { steps: 18 })
+  t.box(8, -74, 4, 8, B + 30, 3, 'hi')
+
+  // Interlocking bed: tappets on the locking bars stop a lever until its prerequisite is pulled.
+  t.tray(-230, -24, 345, 60, B, 16, () => {
+    for (const y of [-8, 18]) t.bar([-222, y], [106, y], 3, B + 3, 3, 'mid')
+    for (const [x] of levers) t.box(x - 3, -16, 6, 42, B + 6, 4, 'hi')
+  })
+
+  // Outcome panel: the person is stopped, on grace, or back to normal.
+  t.plate(190, 30, 80, 100, B, 12)
+  const lamps = [[50, 'red'], [80, 'blue'], [110, 'green']]
+  for (const [y, tone] of lamps) {
+    t.cyl(230, y, 11, B + 12, 6, 'lo', { steps: 18 })
+    t.lamp([230, y, B + 18], tone, 6)
+  }
+
+  t.label([-175, -78, B + 108], 'HIGHER LIMITS: PADLOCKED', { dx: -110, dy: -50, tone: 'red' })
+  t.label([-80, -60, B + 108], '1 REMOVE BROAD GRANT', { dy: -150 })
+  t.label([10, -66, B + 30], '2 OWNER VERIFIES', { dx: -90, dy: 190, tone: 'green' })
+  t.label([40, -57, B + 108], '3 RAISE CAP ONCE', { dx: 70, dy: -110, tone: 'blue' })
+  t.label([-150, 36, B + 16], 'INTERLOCKING', { dy: 110 })
+  t.label([220, -90, B + 49], 'CYCLE RESET', { dy: -90 })
+  for (const [y, tone] of lamps) {
+    t.label([230, y, B + 18], { red: 'STOPPED', blue: 'GRACE', green: 'NORMAL' }[tone], { dx: 70, dy: 0, tone })
+  }
+}
+
 export const flowHeroSvg = hero => render(hero.label, hero.art)
 
 // Labels and outcomes paraphrase each article; nothing here adds a claim the post doesn't make.
@@ -683,14 +537,25 @@ export const flowHeroes = {
   },
   'budget-fallback': {
     art: budgetFallback,
-    label: 'An isometric fuel rig. A main tank with its gauge on empty is the budget, closed by a red hard-stop valve. A manifold with five nozzles is the model policy, and only the Luna nozzle is open, fed by a small one-time reserve tank. A separate refill tank stands for an approved budget increase.',
+    label: 'An isometric fuel rig. A main tank with its gauge on empty is the budget, closed by a red hard-stop valve. A manifold with five nozzles is the model policy, and only the cheaper-model nozzle is open, fed by a small one-time reserve tank. A separate refill tank stands for an approved budget increase.',
     outputs: [
       { label: 'HARD STOP', tone: 'red' },
-      { label: 'LUNA-ONLY GRACE', tone: 'blue' },
+      { label: 'CHEAP-MODEL GRACE', tone: 'blue' },
       { label: 'APPROVED INCREASE', tone: 'green' },
     ],
     thesis: ['A budget answers how much.', 'Model policy answers which models.'],
-    note: 'Example policy from the post: a one-time 100-credit grace on GPT-6 Luna, or an approved budget increase.',
+    note: 'The pattern from the post: an approved, expiring grace on a cheaper model, or an approved budget increase.',
+  },
+  'budget-interlock': {
+    art: budgetInterlock,
+    label: 'An isometric signal-box lever frame. Two levers for the team and organization limits are padlocked. Three levers are pulled in order: remove the broad grant, the owner verifies with a release key, and raise the cap once. An interlocking bed in front stops any lever until its prerequisite is pulled. A cycle-reset dial stands behind, and a lamp panel shows stopped, grace, or normal.',
+    outputs: [
+      { label: 'STOPPED', tone: 'red' },
+      { label: 'GRACE', tone: 'blue' },
+      { label: 'NORMAL', tone: 'green' },
+    ],
+    thesis: ['Restrict first, then raise.', 'Lower first, then widen.'],
+    note: 'An illustrative policy for a private prototype. It hasn’t run in a pilot.',
   },
   'dns-delegation': {
     art: dnsDelegation,
@@ -704,7 +569,7 @@ export const flowHeroes = {
   },
   'action-triage': {
     art: actionTriage,
-    label: 'An isometric sorting desk. Meetings and chats arrive as one evidence tray. Two identical stamp presses, a generative model and Decision-1, work from the same evidence and the same rubric card, and their proposals drop into four bins: my next actions, my later list, needs review, and handoffs and records.',
+    label: 'An isometric sorting desk. Meetings and chats arrive as one evidence tray. Two identical stamp presses, a generative model and a decision model, work from the same evidence and the same rubric card, and their proposals drop into four bins: my next actions, my later list, needs review, and handoffs and records.',
     outputs: [
       { label: 'MY NEXT ACTIONS', tone: 'green' },
       { label: 'MY LATER LIST', tone: 'blue' },
@@ -713,41 +578,6 @@ export const flowHeroes = {
     ],
     thesis: ['Capture isn’t triage.', 'Same evidence, same rubric, two models.'],
     note: 'A route is a recommendation, not proof that anyone did the work. The sample tasks are fictional.',
-  },
-  'copilot-cli-tips': {
-    art: copilotTips,
-    label: 'An isometric tool chest of fifty tips. Its drawers step from a first prompt, to sessions and permissions, to hooks and subagents, and beside it a dock of identical agents stands for agent fleets.',
-    outputs: [{ label: 'AGENT FLEETS', tone: 'green' }],
-    thesis: ['Start with one prompt.', 'Grow into hooks, subagents and fleets.'],
-    note: 'Fifty tips, grouped from the first day to multi-model orchestration.',
-  },
-  'ai-workflow': {
-    art: aiWorkflow,
-    label: 'An isometric drafting shop. A pen plotter drafts the routine work, then the sheet moves to a light table where an inspection loupe checks it for system context such as caching, credentials and retries. Only the reviewed change reaches the out tray.',
-    outputs: [{ label: 'REVIEWED CHANGE', tone: 'green' }],
-    thesis: ['AI drafts the routine parts.', 'Engineering judgment still matters.'],
-    note: 'Caching, credentials and retries need system context that a generated proposal does not have.',
-  },
-  'writing-site': {
-    art: writingSite,
-    label: 'An isometric pair of workstations. An old terminal with a keyboard gives way to a reading desk with an open book, a desk lamp, and three ribbon bookmarks: writing, projects and about.',
-    outputs: [
-      { label: 'WRITING', tone: 'green' },
-      { label: 'PROJECTS', tone: 'blue' },
-      { label: 'ABOUT', tone: 'mid' },
-    ],
-    thesis: ['From an interactive terminal', 'to a clear home for ideas.'],
-    note: 'Three direct paths replace the terminal: writing, projects and about.',
-  },
-  'server-components': {
-    art: serverComponents,
-    label: 'An isometric kitchen. The stove is the server, and the recipe binder, the component code, stays on its shelf. Finished plates go out over the pass as the rendered result in the server-component payload. Only a small table-side burner, a use client component, ships to the table as JavaScript.',
-    outputs: [
-      { label: 'RENDERED RESULT', tone: 'green' },
-      { label: "'use client' JS", tone: 'blue' },
-    ],
-    thesis: ['Server components send results, not code.', 'Client components still ship JavaScript.'],
-    note: 'Simplified: a page with server components can still load client JavaScript.',
   },
   'rfp-sandbox': {
     art: rfpSandbox,

@@ -1,18 +1,13 @@
 ---
-title: "Not Every Action Item Is Mine"
-seoTitle: "Work IQ to To-Do List: LLM vs Decision Model"
-description: "Build a reviewed to-do workflow with Work IQ and the GitHub Copilot SDK, then compare LLM prioritization with Microsoft-Decision-1 using the same evidence and rubric."
+title: "Urgent, Important, and Not Mine"
+seoTitle: "Eisenhower Matrix for Meeting Action Items"
+description: "Why a meeting list needs the Eisenhower matrix with mine in place of important, how a reviewed workflow keeps finding work apart from judging it, and where uncertain work should go."
 date: "2026-10-12"
 topics: ["AI Tools", "Productivity"]
-tags: ["ai", "copilot", "agents", "productivity"]
+tags: ["ai", "agents", "productivity"]
 published: true
 hero: "action-triage"
 ---
-
-**Disclaimer:** I work at Microsoft. This is my personal view, based only on public information. It isn’t an official position or a product recommendation.
-
-import { Code } from 'astro:components';
-import triageSource from '../../../public/examples/workiq-triage.mjs?raw';
 
 Every meeting ends with work.
 
@@ -20,114 +15,167 @@ Some of it never reaches a list. The rest lands on one big list, all mixed
 together: things only I can do, things a teammate already owns, things an agent
 could draft, and decisions dressed up as tasks.
 
-**The question isn't just "What are the action items?" It's "Which of these
-deserve my attention next?"**
+I picture my work on the Eisenhower matrix: urgent against important, four
+boxes. Do what is both. Schedule what matters but can wait. Delegate what is
+urgent but doesn't matter. Delete the rest.
 
-A to-do list that holds everything isn't a plan. It's a backlog with my name on it.
+That works when everything on the list is already mine. A meeting list isn't.
 
-## The problem: capture isn't triage
+**The question isn't just "Is it important?" It's "Is it mine?"**
 
-A meeting summary can tell me what was said. It cannot, by itself, tell me what
-I should do next.
+A to-do list that holds everything isn't a plan. It's a backlog with my name on
+it. This post is about the small system I designed to make that list shorter
+without making it lossy, and why it is split the way it is.
 
-That needs context: who owns the work, what is blocked, whether a deadline is
-real, and whether the decision was already made somewhere else. The answer
-might be in a meeting note, a Teams thread or an email.
+## Where the matrix breaks
+
+The matrix borrows a line Dwight Eisenhower
+[quoted in a 1954 speech](https://www.presidency.ucsb.edu/documents/address-the-second-assembly-the-world-council-churches-evanston-illinois),
+from a former college president: "I have two kinds of problems, the urgent and
+the important. The urgent are not important, and the important are never
+urgent." The four boxes came later. They assume what a meeting list doesn't
+give me: that every item is mine to sort.
+
+**Ownership comes before importance.** An item can be urgent and important and
+still belong to a named teammate. The matrix puts it in Do, but it isn't mine
+to do. Its Delegate box also assumes I hand work off only when it doesn't
+matter. On a team, who owns a task is a separate question from how much it
+matters.
+
+**Delete loses work.** An item that isn't mine and isn't urgent still belongs
+to someone. Dropping it from my list is fine. Dropping it from the record is
+how work gets lost.
+
+**Two states have no box.** Some "action items" are decisions already made and
+recorded somewhere else. Others have no owner and no deadline yet. Neither can
+be placed: a settled decision isn't work, and an unclear item can't be judged
+until someone answers.
+
+So I keep urgency, swap important for mine, and give the other two states their
+own place.
+
+<figure class="excalidraw-figure responsive-diagram">
+  <picture>
+    <source
+      media="(max-width: 60rem)"
+      srcSet="/diagrams/urgent-mine-grid-portrait.svg"
+      width="456"
+      height="836"
+    />
+    <img
+      src="/diagrams/urgent-mine-grid.svg"
+      width="946"
+      height="666"
+      loading="lazy"
+      decoding="async"
+      alt="The Eisenhower matrix with important swapped for mine. Mine and urgent goes to my next actions, where the matrix says Do. Mine and not urgent goes to my later list, where it says Schedule. Work that isn't mine becomes a proposed handoff whether it is urgent or not, including where the matrix says Delete. Outside the grid, already settled items become recorded decisions, and items that aren't clear yet go to needs review, the highlighted box."
+    />
+  </picture>
+</figure>
+
+A meeting summary can tell me what was said. It cannot, by itself, tell me
+which box an item belongs in. For each item I need four answers:
+
+- **Is it mine?** Or does a named teammate own it?
+- **Is it urgent?** Due today, blocking someone, or explicitly later?
+- **Is it already settled?** Some "action items" are decisions that were made
+  and recorded somewhere else.
+- **Is it clear yet?** No owner and no deadline is a real state, not a gap to
+  fill with a guess.
+
+The answers live in different places: a meeting note, a chat thread, an email.
+And they are independent. An urgent item can belong to someone else. An item
+that is mine can be explicitly no rush. A single ranked list tends to blur
+those two axes, which is exactly where work gets lost or wrongly claimed.
 
 I want a smaller list, but not one that becomes smaller by quietly losing work.
 Anything uncertain should stay visible. Anything assigned to someone else
-should stay theirs. A request for a draft should not become permission to send it.
+should stay theirs. A request for a draft should not become permission to send
+it.
 
-That is the workflow this tutorial builds.
+## The obvious design, and why it breaks
 
-## The workflow: separate finding work from judging it
+The obvious first version is one step: point a model at my recent meetings and
+chats and ask for a prioritized to-do list.
 
-**[Work IQ](https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/work-iq/cli)**
-provides Microsoft 365 context through a CLI and a Model Context Protocol
-(MCP) server. A **[GitHub Copilot SDK](https://github.com/github/copilot-sdk)**
-session can query it and turn the response into structured action items.
+It looks efficient, but it fuses two jobs that fail differently:
 
-Work IQ's `ask` returns a synthesized answer over Microsoft 365 data the user
-can access. During extraction, the configured Copilot model receives that
-answer and structures it; Work IQ's response may already include owners,
-deadlines or blockers. The routing rubric in this sample is application logic,
-not a claim about what Work IQ can or cannot summarize.
+- **Finding** the work is a retrieval and summarization problem. It fails by
+  missing items, misquoting them, or attributing them to the wrong person.
+- **Judging** the work is a routing problem. It fails by putting a correct
+  item in the wrong place: claiming a teammate's task, inventing a deadline,
+  or dropping something vague.
 
-That gets the work onto the page. It doesn't settle the priorities.
+When both happen in one opaque step, a wrong answer has no address. I can't
+tell whether the model never saw the evidence or saw it and misjudged it. I
+also can't change the rubric, or the model doing the judging, without
+re-running and re-trusting the retrieval.
 
-For that, there are two paths worth comparing. Ask the generative LLM to choose
-an owner and an urgency level. Or send the same evidence to
-**[Microsoft-Decision-1](https://commandline.microsoft.com/microsoft-decision-1-model-foundry/)**,
-which answers bounded questions with typed decisions and probabilities rather
-than prose.
+## The redesign: a context stage and a judgment stage
 
-The useful distinction isn't "LLMs can't prioritize." They can. It is whether
-a specialized decision interface gives me a more useful way to handle
-uncertainty.
-
-> **This is a runnable tutorial, not a benchmark report.** The six tasks below
-> are synthetic. Their expected routes are a human-written rubric, not model
-> output. The sample calls both services when you run it; no live
-> LLM-versus-Decision-1 accuracy, cost or speed result is claimed here.
-
-## The output: a list with a place for uncertainty
+So the system has two stages with different jobs, joined by a snapshot I can
+read.
 
 ```mermaid
 flowchart TD
-    accTitle: Work IQ to a reviewed to-do list
-    accDescr: Work IQ and the Copilot SDK produce a reviewed evidence snapshot. The same snapshot, or synthetic tasks, goes to an LLM and Decision-1. Their proposals are compared before separating personal work, later work, uncertain items, handoffs and recorded decisions.
-    sources(["Meetings and Teams chats"]) --> workiq["Work IQ summary + SDK"]
-    workiq --> review["Review a local evidence snapshot"]
-    sample["Or start with synthetic tasks"] --> compare
-    review --> compare["Same state and rubric"]
-    compare --> llm["Generative LLM"]
-    compare --> d1["Microsoft-Decision-1"]
-    llm --> report["Compare routes and urgency"]
-    d1 --> report
-    report --> mine(["My next actions"])
-    report --> later(["My later list"])
-    report --> check(["Needs review"])
-    report --> elsewhere(["Handoffs + records"])
+    accTitle: Finding work separately from judging it
+    accDescr: Meetings, chats and email feed a context stage that writes a reviewed evidence snapshot. A judgment stage routes each item against a fixed rubric, and a small policy in code sorts proposals into my next actions, my later list, needs review, and handoffs and records.
+    sources(["Meetings, chats, email"]) --> context["Context stage: gather evidence"]
+    context --> snapshot["Reviewed evidence snapshot"]
+    snapshot --> judge["Judgment stage: route against rubric"]
+    judge --> policy{"Policy in code"}
+    policy --> mine(["My next actions"])
+    policy --> later(["My later list"])
+    policy --> check(["Needs review"])
+    policy --> elsewhere(["Handoffs + records"])
     classDef default fill:transparent,stroke:#8d9287
 ```
 
-It is one script, not another task-management app. Its output is a local
-`todo.md` with both models' proposed lists.
+**The context stage** gathers candidate items from whatever sources I can
+access and turns them into records. Each record carries the evidence, not just
+a title:
 
-There is deliberately no "done" arrow from an agent to a completed task. A
-route is a recommendation, not proof that anyone did the work. Team handoffs
-still need acknowledgment. Agent drafts still need review.
+```js
+{
+  task: "Approve the pilot budget",
+  evidence: "Lead approval due today; purchasing is blocked",
+  owner: "me",          // or a name, or null
+  due: "2026-10-12",    // or null
+  source: "meeting note, 11 Oct"
+}
+```
 
-### First, make the priorities explicit
+It asks for a bounded number of items over a bounded window. That is a
+snapshot, not a claim to have found every obligation. An empty or malformed
+extraction stops the run instead of producing a success-shaped empty list.
+
+**The snapshot is the seam.** It is a local file I review before anything else
+happens: I check the quoted evidence against the sources, correct owners and
+dates, and remove anything that shouldn't go to the next model. A schema can
+check the shape of a record. It can't check that a meeting was quoted
+accurately.
+
+**The judgment stage** sees one frozen item at a time, plus my role, a
+reference timestamp and the rubric. It has no tools and cannot retrieve more
+context. That constraint is deliberate: if a judge can fetch its own evidence,
+I'm back to not knowing what it decided from.
+
+Keeping the stages apart buys three things. Each can be checked on its own.
+Either model can be swapped without touching the other. And the snapshot gives
+me a natural place to apply data rules before evidence moves on.
+
+## Making the rubric explicit
+
+The rubric is the part that most needs to be written down, because it is where
+my preferences live.
 
 The example role is a project lead who approves budget and scope. Teammates
 own their named deliverables. Unassigned, reversible drafting work may go to
-an agent for a first pass.
+an agent for a first pass. Every item gets one of five routes: `me`, `team`,
+`agent`, `decision` (already settled) and `cannot_tell`. And one urgency
+level:
 
-At **09:00 UTC on 12 October 2026**, this is what the synthetic evidence says:
-
-| Task | Evidence that matters | Expected treatment under this rubric |
-|---|---|---|
-| Approve the pilot budget | Lead approval due today; purchasing is blocked | My next actions |
-| Publish the migration checklist | Sam owns it, due today; no lead approval needed | Team handoff, not my task |
-| Draft an agenda | Three supplied topics; unassigned; due 15 October; human review required | Agent draft proposal |
-| Record the rollout decision | Already approved and recorded; no follow-up remains | Decision record, not a new action |
-| Follow up with the partner | No owner or deadline | Review; don't guess |
-| Explore next quarter's tooling | Mine, explicitly no rush; revisit 2 November | My later list |
-
-The checklist is urgent. **It still isn't mine.** The tooling research is mine.
-**It still isn't urgent.** Those are different questions, and a single ranked
-list tends to blur them.
-
-### Then, give both models the same evidence
-
-Each request gets the same `state`: an `as_of` timestamp, a description of my
-role, and one task with its evidence and source.
-
-Both get the same five routes: `me`, `team`, `agent`, `decision` and
-`cannot_tell`. Both use the same ordered urgency scale:
-
-| Index | Meaning |
+| Level | Meaning |
 |---|---|
 | 0 | No outstanding work |
 | 1 | Explicitly later than seven days, or explicitly no rush |
@@ -137,244 +185,136 @@ Both get the same five routes: `me`, `team`, `agent`, `decision` and
 Missing ownership or timing means `cannot_tell`, not permission to invent a
 deadline.
 
-The baseline uses a **fresh, tool-free Copilot SDK session for each item**. It
-returns a route and an integer urgency level, validated with Zod. This sample
-uses the pinned SDK version's **preview structured-output API**, whose contract
-may change. It does not
-inherit the Work IQ extraction conversation or retrieve extra context that the
-decision model cannot see.
+Six synthetic items show why both axes matter:
 
-Decision-1 receives that same item and rubric through a plain HTTP request:
+| Task | Evidence that matters | Expected treatment |
+|---|---|---|
+| Approve the pilot budget | Lead approval due today; purchasing is blocked | My next actions |
+| Publish the migration checklist | Sam owns it, due today; no lead approval needed | Team handoff |
+| Draft an agenda | Three supplied topics; unassigned; due in three days | Agent draft, reviewed |
+| Record the rollout decision | Already approved and recorded | Decision record |
+| Follow up with the partner | No owner or deadline | Review; don't guess |
+| Explore next quarter's tooling | Mine, explicitly no rush | My later list |
 
-```js
-{
-  model: deploymentName,
-  state: { as_of, about_me, item },
-  questions: {
-    route: {
-      type: "choice",
-      instructions: "Who should handle this?",
-      criteria: ROUTES
-    },
-    urgency: {
-      type: "score",
-      instructions: "How soon, relative to as_of?",
-      criteria: URGENCY
-    }
-  }
-}
-```
+The checklist is urgent. **It still isn't mine.** The tooling research is mine.
+**It still isn't urgent.** The expected treatments are a human-written rubric,
+not model output, and they are the first thing any judge has to get right.
 
-That is the request shape; the complete script below includes the fuller
-instructions shared with the LLM.
+## Two kinds of judge
 
-Microsoft's [API guide](https://learn.microsoft.com/en-us/azure/foundry/foundry-models/how-to/use-foundry-models-microsoft-decision)
-defines a `choice` response as a selected option plus probabilities. A `score`
-is a probability-weighted average of the level indexes. A four-level rubric
-therefore produces a score between 0 and 3, including fractional values.
+With the stages split, the judge becomes a replaceable part, and there are two
+quite different things to put there.
 
-**A score of 2.6 is not a deadline, and a route probability of 0.8 is not proof
-of 80% accuracy on your tasks.** These are signals to evaluate, not facts to
-promote into certainty.
+A **generative model** can be asked for a structured answer: one route and one
+integer urgency level, validated against a schema. It is flexible, it can
+explain itself if asked, and it is the obvious default.
 
-### Finally, apply a small, visible policy
+A **decision model** works differently. Instead of writing an answer, it is
+given a fixed set of options and returns a probability for each. For a
+`choice` question that means a selected route plus a distribution over all
+five. For an ordered scale, it can return a probability-weighted average of
+the levels, so a four-level rubric produces a score anywhere between 0 and 3.
 
-Both lists separate ownership from urgency. Personal items scoring at least
-2 go into **My next actions**; lower-scoring personal items remain in
-**My later list**. Team and agent routes become **Proposed handoffs**.
-Already-settled items become **Recorded decisions**.
-
-`cannot_tell` always goes into **Review before routing**. On the Decision-1
-side, a selected-route probability below **0.7** also goes there. The code uses
-`probabilities[choice]`, not an interchangeable-looking `confidence` field.
-Every item retains its evidence and source in the report.
-
-Those cutoffs are illustrative policy choices. In particular, the LLM's whole
-level and Decision-1's weighted score are not identical measurements: 2 and
-1.9 can land in different sections without showing that one model is wrong.
-Nothing is deleted because it scored low.
-
-## Try it with six fictional tasks
-
-**[Download the complete sample](/examples/workiq-triage.mjs)** and save it as
-`triage.mjs` in a new directory. It uses Node.js 24, the Copilot SDK and Zod;
-it does not need Work IQ access for the synthetic comparison.
-
-```bash
-mkdir workiq-triage
-cd workiq-triage
-npm init -y
-npm install @github/copilot-sdk@1.0.19 zod@4.6.6
-```
-
-Use an authenticated Copilot CLI and a model available on your Copilot account.
-Set `COPILOT_MODEL` to that model's exact ID so the baseline is explicit, rather
-than an account default that may change.
-
-Configure **one** Decision-1 provider:
-
-```bash
-export COPILOT_MODEL="<model-id-available-to-your-account>"
-
-# Option A: OpenRouter
-export OPENROUTER_API_KEY="<your-key>"
-
-# Option B: Microsoft Foundry, instead of Option A
-# Use the resource origin, not a project or chat-completions URL.
-export AZURE_ENDPOINT="https://<your-resource>.services.ai.azure.com"
-export AZURE_API_KEY="<your-key>"
-export DEPLOYMENT_NAME="<your-decision-1-deployment>"
-```
-
-If `AZURE_ENDPOINT` is set, the script uses Foundry and requires its other
-settings. Otherwise it uses OpenRouter. There is no silent provider fallback.
-Keep keys out of source files and version control.
-
-Foundry uses
-`/providers/microsoft/v1/systemone` and your **deployment name**.
-OpenRouter uses its
-[alpha Decisions endpoint](https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-request)
-and model ID `microsoft/microsoft-decision-1`. The alpha API can change.
-
-```bash
-# Offline assertions: no login, API key or model call needed.
-node triage.mjs --self-test
-
-# Live calls on synthetic evidence; consumes API/Copilot usage.
-node triage.mjs --sample
-```
-
-The self-test checks the routing boundaries, malformed responses and both
-provider request paths using fake responses. It is **not** a model evaluation.
-
-The live run prints each task's LLM route and urgency next to Decision-1's route,
-selected-route probability and urgency. It writes both proposed lists to
-`todo.md`, recording the baseline model, returned decision-model name and
-reference timestamp. Existing output is not overwritten: rename it before
-another run.
-
-<details>
-<summary>Full runnable sample: triage.mjs</summary>
-<Code code={triageSource} lang="js" />
-</details>
-
-## Replace the fixture with Work IQ
-
-Work IQ's [documented prerequisites](https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/work-iq/cli)
-include a Copilot Studio usage-based billing plan, a user assigned to that plan,
-and administrative consent in the Microsoft Entra tenant.
-
-As of this writing, Work IQ's availability and terms are described
-inconsistently: Microsoft Learn labels version 1.0.1 generally available, while
-the [public repository](https://github.com/microsoft/work-iq) says Public
-Preview and the [package's bundled license](https://www.npmjs.com/package/@microsoft/workiq?activeTab=code)
-describes pre-release evaluation restrictions. Check the terms that apply to
-your installation and organization; treat this as an evaluation workflow
-unless your agreement permits live use.
-
-Read its license and accept it yourself if appropriate:
-
-```bash
-npx -y @microsoft/workiq@1.0.1 accept-eula
-node triage.mjs --extract
-```
-
-This command connects Work IQ to the SDK, asks for **up to 12 items** from the
-previous seven days and writes `items.json`. It is a bounded snapshot, not a
-claim to have found every obligation. An empty or invalid extraction stops
-rather than producing a success-shaped empty to-do list.
-
-Edit `ABOUT_ME` before extraction. Then inspect `items.json`: check the quoted
-evidence against the sources, correct ownership and dates, and remove anything
-you are not allowed to send to the selected services. The schema checks shape,
-not whether an LLM quoted a meeting accurately.
-
-After reviewing and redacting the snapshot, if your data policy permits:
-
-```bash
-node triage.mjs --compare items.json
-```
-
-During `--extract`, Work IQ's answer is sent to the configured Copilot model for
-structuring **before** you review `items.json`. The `--compare` command is the
-first step that sends the reviewed snapshot to Decision-1. Extraction does not
-send meeting content to OpenRouter or Foundry. If your policy does not permit
-work data to be sent to the Copilot model during extraction, do not run
-`--extract`.
-
-The sample exposes only Work IQ's `ask` MCP tool, not its entity-write tools,
-and rejects other permission requests. Comparison sessions have no tools.
-These restrictions reduce what the local agent can invoke; they are not a
-sandbox for the remote Work IQ service or a guarantee against prompt injection.
-Source content remains untrusted, and the workflow stops at a proposal.
-
-## Just the LLM vs Microsoft-Decision-1
-
-| Question | LLM-only path | Decision-1 path |
+| Question | Generative judge | Decision-model judge |
 |---|---|---|
 | What does it see? | One frozen item, role, date and rubric | The same |
-| Can it retrieve more context here? | No | No |
-| What comes back? | Structured route and integer level | Route probabilities and weighted score |
-| Can it explain an answer? | A generative model can; this baseline doesn't request a rationale | No generated rationale |
-| How does it abstain? | `cannot_tell` | `cannot_tell`, plus a probability cutoff in our code |
-| What is proven by a disagreement? | Neither model is proven right | Neither model is proven right |
+| Can it retrieve more context? | No | No |
+| What comes back? | A route and a whole urgency level | Route probabilities and a weighted score |
+| Can it explain an answer? | It can, if asked | No generated rationale |
+| How does it abstain? | `cannot_tell` | `cannot_tell`, plus a probability cutoff in my code |
 
-An LLM could also be prompted to output a confidence number. I haven't treated
-that self-reported number as equivalent to Decision-1's probability output.
-Neither should be trusted without checking it against labelled examples.
+The useful distinction isn't "generative models can't prioritize." They can.
+It is whether an interface that exposes a distribution gives me a better way to
+handle uncertainty than one that returns a single confident-looking answer.
 
-Start by checking the live output against the six expected treatments above.
-Did today's budget approval rise to the top? Did Sam keep the checklist?
-Did the vague partner follow-up stay visible for review? Did the low-urgency
-personal item survive on the later list?
+Two cautions travel with that. **A score of 2.6 is not a deadline, and a route
+probability of 0.8 is not proof of 80% accuracy on my tasks.** And a generative
+model can be prompted to print a confidence number too, but a self-reported
+number is not the same kind of signal as a distribution over fixed options.
+Neither should be trusted without checking it against labeled examples.
 
-For a more useful evaluation, label representative tasks **before** looking at
-either answer. Count wrong owners, missed urgent personal tasks, incorrect
-handoffs and items needing review. Repeat requests and reorder the route options
-to look for instability. Keep the evidence and rubric fixed, record the
-returned Decision-1 model name and version if exposed, and run comparisons
-within a bounded period: the provider may update the model behind a stable ID.
+I have not run a controlled comparison of the two, and this post doesn't claim
+one. A disagreement between them proves neither is right.
 
-This compares two application approaches, not a controlled claim about model
-architecture alone: the SDK and Decision API still have different runtimes and
-output contracts. If you measure elapsed time, report that distinction too.
+## Policy in code, the final call with a person
 
-If the ordinary LLM meets your needs, stop there. Decision-1 earns its extra
-network call only if its probabilities and routing behavior help on your work.
-Microsoft's [launch benchmarks](https://commandline.microsoft.com/microsoft-decision-1-model-foundry/)
-are a reason to investigate, not results from this to-do list.
+The judge proposes. A small, visible policy decides where the proposal lands:
 
-## Where I'd keep a human in the loop
+- Personal items at urgency 2 or above go to **My next actions**; lower ones
+  stay on **My later list**.
+- `team` and `agent` routes become **Proposed handoffs**. Already-settled items
+  become **Recorded decisions**.
+- `cannot_tell` always goes to **Needs review**. For the decision-model judge,
+  a selected-route probability below a cutoff goes there too.
+- Every item keeps its evidence and source. Nothing is deleted because it
+  scored low.
 
-**Data boundaries come first.** Work IQ's access controls do not automatically
-extend to a separate inference provider. Confirm organizational policy before
-sending work data to either comparison service. OpenRouter introduces a
-third-party routing service; Foundry still needs an approved deployment and
-data-handling configuration. Local snapshots, reports and SDK session history
-can also contain sensitive evidence.
+The cutoffs are illustrative policy choices, and they belong in code rather
+than in a prompt because code is where I can read, test and change them. They
+also expose a real mismatch: a whole level and a weighted score are not the
+same measurement, so 2 and 1.9 can land in different sections without either
+judge being wrong.
 
-**Costs belong to more than one service.** Work IQ uses Copilot Credits,
-the SDK uses the configured Copilot/model access, and Decision-1 is separately
-metered. Check current pricing rather than assuming one subscription covers
-the whole workflow.
+There is deliberately no path from an agent to a completed task. A route is a
+recommendation, not proof that anyone did the work. Handoffs still need the
+other person to acknowledge them. Agent drafts still need review. The list is
+a proposal I accept or correct.
+
+## Source content is untrusted
+
+Meeting notes, chat threads and emails are written by many people, and some of
+that text may be written to steer whatever reads it. The design treats it as
+data, never as instructions:
+
+- The context stage is limited to read-only retrieval. It cannot write to the
+  sources, and other permission requests are rejected.
+- The judgment stage has no tools at all.
+- Neither stage automatically executes its output, but poisoned content can
+  still lead to omissions, misquotes, or wrong routes.
+
+These restrictions narrow what a local agent can do. They are not a sandbox
+for the services that hold the data, and they don't make prompt injection
+impossible. The human review step is part of the defense, not a formality.
+
+## Failure modes and trade-offs
+
+**Extraction is the weakest link.** If the context stage misses an item, no
+judge can route it. Reviewing the snapshot helps with misquotes and wrong
+owners; it does not reveal what was never extracted.
+
+**Data crosses boundaries.** Access controls on the source don't extend to a
+separate inference provider. Each stage that sees work data is a decision
+about where that data may go, and the snapshot review is only useful if it
+happens before the evidence moves on.
+
+**More stages, more cost.** Two models, a review step and a policy are slower
+and more expensive than one prompt. If an ordinary generative judge meets the
+need, that is where to stop. A decision model earns its extra call only if its
+probabilities actually help on real work.
+
+**Models drift behind stable names.** A comparison is only meaningful over a
+bounded period with the evidence and rubric held fixed.
 
 **Routing is not a people score.** This is about who owns a task, not who is
-valuable or productive. Microsoft's guidance warns against using model scores
-as the sole basis for consequential decisions about individuals.
+valuable or productive. Model scores shouldn't be the sole basis for
+consequential decisions about individuals.
 
-## What this comparison can tell you
+## What's next
+
+The six synthetic items are a smoke test, not an evaluation. The questions I
+still want to answer:
+
+- With representative items labeled **before** looking at either judge's
+  answer, how often does each claim a teammate's work, miss an urgent personal
+  item, or hide something that should have gone to review?
+- Are the decision model's probabilities calibrated on this kind of work, or
+  only plausible-looking?
+- How stable are routes when the same item is sent twice, or the route options
+  are reordered?
+- Can review of the snapshot be made cheap enough that I actually do it every
+  time?
 
 I don't need a model to make every task sound important. I need a workflow that
-can distinguish **urgent**, **mine**, **already settled** and **not clear yet**.
-
-Work IQ supplies context. The Copilot SDK turns it into something a program can
-use. An LLM or Decision-1 proposes the routing. The policy stays in code, and
-the final call stays with a person.
+can tell **urgent**, **mine**, **already settled** and **not clear yet** apart.
 
 The goal isn't an empty list. It's a list I can explain.
-
-The SDK's [structured-output API is marked preview in the pinned 1.0.19
-documentation](https://github.com/github/copilot-sdk/blob/v1.0.19/README.md#structured-output-preview).
-Review Work IQ's [repository status](https://github.com/microsoft/work-iq)
-and [version 1.0.1 license terms](https://www.npmjs.com/package/@microsoft/workiq?activeTab=code)
-before using real workplace data.

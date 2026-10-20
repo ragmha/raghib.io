@@ -1,43 +1,39 @@
 ---
-applyTo: "src/content/writing/**"
+applyTo: "src/content/writing/**,src/pages/experiments/**"
 ---
 
-# Posts: employer disclaimer
+# Posts: no employer content
 
-The author works at Microsoft; the site is independent writing. The full rules
-live in `.agents/skills/employer-disclaimer/SKILL.md`. When reviewing or
-editing a post, apply them. CI already fails a post that mentions Microsoft,
-Copilot, Azure, OpenAI, LinkedIn or VS Code without the disclaimer, or where
-the disclaimer is reworded or not the first paragraph. Focus on what that
-keyword check cannot see.
+The site is independent writing. Posts never name the author's employer or its
+products, and carry no employer disclaimer. `tests/no-employer.test.mjs` fails
+CI on Microsoft, GitHub, Copilot, Azure, LinkedIn, VS Code, OpenAI, Bing and
+similar names outside code blocks and URLs.
 
-The disclaimer, verbatim, as the first paragraph after the frontmatter:
+When reviewing a post, also flag what the keyword test can't catch:
 
-> **Disclaimer:** I work at Microsoft. This is my personal view, based only on public information. It isn’t an official position or a product recommendation.
+- A post whose subject is an employer product described generically, such as
+  its pricing, plans or internal workflow.
+- Measurements, screenshots or examples that come from an employer product.
+- Internal, pre-release, or customer material.
 
-Keep it as a plain bold-label paragraph in MDX. The shared Markdown renderer
-adds the informational callout automatically; do not add per-post components,
-wrappers, or styles.
+Suggest reframing around the tool-agnostic pattern: the constraint, the design
+that resolves it, and its trade-offs.
 
-Flag a post that is missing the disclaimer when it:
+## Neutrality check
 
-- compares, ranks, or recommends commercial products in a market where
-  Microsoft competes (cloud, AI models and assistants, developer tools,
-  productivity, security, collaboration), even if no Microsoft product is
-  named;
-- evaluates a Microsoft-family product (GitHub, LinkedIn, Azure, Copilot,
-  VS Code, npm, etc.) or a close partner such as OpenAI as a vendor;
-- discusses big-tech employment, hiring, layoffs, or regulation that directly
-  affects Microsoft.
+The goal is no bias: no vendor, the employer included, is favored or
+disfavored. Hiding a name doesn't remove a conflict of interest. For posts and
+experiments, flag work that fails any of these, and leave the decision to the
+author:
 
-Flag a post that has the disclaimer but breaks its promises:
-
-- it relies on internal, pre-release, customer, or other non-public material;
-- its conclusion tells readers to buy or adopt a specific product.
-
-Flag a disclaimer on a post where vendors appear only incidentally (a docs
-link, the editor or host used, "the repo is on GitHub") and no product is
-evaluated, compared, recommended, or criticised.
-
-Quote the rule that applies. Do not comment on style or grammar for this
-check.
+1. **Does it take a side?** Ranking products by cost, quality, or speed,
+   telling readers which to buy, or measuring on one vendor's product only
+   reads as an endorsement. Describe the pattern and the criteria a reader
+   would apply instead.
+2. **Is every claim public?** No internal pricing mechanics, roadmap,
+   telemetry, or customer material, even reworded.
+3. **Would the vendor publish it?** Using fewer tokens, caching, or routing to
+   smaller models is fine. A technique that works only because of a gap in
+   metering, quotas, pricing, or terms is not; report it privately instead.
+4. **Is it a substitute?** Building or promoting a replacement for an employer
+   product is an outside-activity question for the author, not a style fix.

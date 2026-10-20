@@ -14,7 +14,7 @@ covers structure and visuals.
 ## Order
 
 1. Frontmatter, including `hero`, which the schema requires.
-2. The disclaimer, when the `employer-disclaimer` skill requires it.
+2. No disclaimer: posts never name the employer or its products.
 3. An opening of a few short paragraphs that states the question or
    observation, before the first `##`.
 4. `##` and `###` sections. Put a diagram wherever the reader would otherwise

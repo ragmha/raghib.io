@@ -6,14 +6,11 @@ These examples show different modes, not one structure to copy.
 
 - **TIL:** No post is currently a standalone TIL. Keep this as an available
   format for one bounded discovery; do not shorten an essay just to fill it.
-- **Blog posts:** `ai-powered-developer-workflows.mdx`,
-  `building-my-personal-site.mdx`, `decide-cheaply-generate-carefully.mdx`,
-  `keep-shipping-copilot-budget-limits-part-1.mdx`, and
-  `rfp-without-spreadsheets.mdx`.
-- **Tutorials and references:** `advent-of-copilot-cli.mdx`,
-  `build-your-agent-harness.mdx`, `leaving-vercel-dns-lessons.mdx`,
-  `not-every-action-item-is-mine.mdx`, and
-  `react-server-components-explained.mdx`.
+- **Blog posts:** `decide-cheaply-generate-carefully.mdx`,
+  `keep-shipping-copilot-budget-limits-part-1.mdx`,
+  `not-every-action-item-is-mine.mdx`, and `rfp-without-spreadsheets.mdx`.
+- **Tutorials and references:** `build-your-agent-harness.mdx` and
+  `leaving-vercel-dns-lessons.mdx`.
 
 ## TIL: one useful distinction
 
