@@ -36,26 +36,45 @@ test('all published SVG diagrams include both palettes and retain accessible met
   }
 })
 
-test('inline diagrams retain alt text and do not replace responsive picture fallbacks', () => {
-  const image = () => ({
+test('inline diagrams retain alt text', () => {
+  const tree = { type: 'root', children: [{
     type: 'element', tagName: 'img',
     properties: { src: '/diagrams/dns-lookup-basics.svg', alt: 'DNS lookup', width: 1420, height: 560 },
     children: [],
-  })
-  const standalone = image()
-  const nativeFallback = image()
-  const mdxFallback = {
-    type: 'mdxJsxFlowElement', name: 'img',
-    attributes: Object.entries(image().properties).map(([name, value]) => ({ name, value: String(value) })),
-    children: [],
-  }
-  const picture = { type: 'element', tagName: 'picture', properties: {}, children: [nativeFallback] }
-  const mdxPicture = { type: 'mdxJsxFlowElement', name: 'picture', attributes: [], children: [mdxFallback] }
-  const tree = { type: 'root', children: [standalone, picture, mdxPicture] }
+  }] }
   rehypeInlineDiagrams()(tree)
   assert.equal(tree.children[0].tagName, 'svg')
   assert.equal(tree.children[0].properties.ariaLabel, 'DNS lookup')
   assert.equal(tree.children[0].properties.role, 'img')
-  assert.equal(picture.children[0], nativeFallback)
-  assert.equal(mdxPicture.children[0], mdxFallback)
+})
+
+// Safari draws an <img> SVG in the OS palette, so a pair must be inlined to follow the site toggle.
+test('responsive picture pairs become inline portrait and landscape SVGs', () => {
+  const mdx = (name, attributes) => ({
+    type: 'mdxJsxFlowElement', name, children: [],
+    attributes: Object.entries(attributes).map(([name, value]) => ({ name, value })),
+  })
+  const picture = {
+    type: 'mdxJsxFlowElement', name: 'picture', attributes: [],
+    children: [
+      mdx('source', { media: '(max-width: 60rem)', srcSet: '/diagrams/friday-release-alert-portrait.svg', width: '456', height: '806' }),
+      mdx('img', { src: '/diagrams/friday-release-alert.svg', alt: 'Release alert', width: '956', height: '540' }),
+    ],
+  }
+  const tree = { type: 'root', children: [picture] }
+  rehypeInlineDiagrams()(tree)
+  const [wrapper] = tree.children
+  assert.deepEqual(wrapper.properties.className, ['diagram-variants'])
+  const [portrait, landscape] = wrapper.children
+  assert.deepEqual(portrait.properties.className, ['diagram-portrait'])
+  assert.equal(portrait.properties.dataSource, '/diagrams/friday-release-alert-portrait.svg')
+  assert.deepEqual(landscape.properties.className, ['diagram-landscape'])
+  for (const svg of [portrait, landscape]) {
+    assert.equal(svg.tagName, 'svg')
+    assert.equal(svg.properties.ariaLabel, 'Release alert')
+  }
+
+  const wrongMedia = structuredClone(picture)
+  wrongMedia.children[0].attributes[0].value = '(max-width: 40rem)'
+  assert.throws(() => rehypeInlineDiagrams()({ type: 'root', children: [wrongMedia] }), /media/)
 })

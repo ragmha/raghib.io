@@ -577,15 +577,18 @@ main {
   overflow: visible;
 }
 
-.responsive-diagram picture {
-  display: block;
+.diagram-variants {
   max-width: 100%;
   margin-inline: auto;
 }
 
-.prose > .responsive-diagram img {
-  min-width: 0;
-  max-width: 100%;
+.diagram-variants svg {
+  display: block;
+  height: auto;
+}
+
+.diagram-variants .diagram-portrait {
+  display: none;
 }
 
 /* ------------------------------------------------------------ lists */
@@ -772,8 +775,16 @@ main {
     padding-block: 0.65rem;
   }
 
-  .responsive-diagram picture {
+  .diagram-variants {
     width: min(100%, 30rem);
+  }
+
+  .diagram-variants .diagram-landscape {
+    display: none;
+  }
+
+  .diagram-variants .diagram-portrait {
+    display: block;
   }
 
   @media (max-width: 600px) {

@@ -58,13 +58,11 @@ try {
     for (let index = 0; index < 3; index++) {
       const figure = figures.nth(index)
       await figure.scrollIntoViewIfNeeded()
-      const image = figure.locator('img')
-      await image.evaluate(element => element.decode())
       const geometry = await figure.evaluate(element => {
-        const image = element.querySelector('img')
-        const picture = element.querySelector('picture')
+        const picture = element.querySelector('.diagram-variants')
+        const image = [...picture.querySelectorAll('svg[data-source]')].find(svg => svg.getClientRects().length)
         return {
-          source: new URL(image.currentSrc).pathname,
+          source: image.dataset.source,
           imageWidth: image.getBoundingClientRect().width,
           imageHeight: image.getBoundingClientRect().height,
           figureWidth: element.clientWidth,

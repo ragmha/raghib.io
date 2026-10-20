@@ -145,7 +145,9 @@ After changing an SVG any other way, run `bun run theme:diagrams`. At build
 time, `src/lib/rehype-inline-diagrams.mjs` inlines
 `<img src="/diagrams/*.svg">` in posts so diagrams follow the site's
 `data-theme` toggle; Safari only shows the OS theme to SVGs loaded as images.
-Images inside `<picture>` remain native images so responsive sources still work.
+A `<picture>` pair (portrait `<source media="(max-width: 60rem)">` plus a
+landscape `<img>`) becomes both inline SVGs, and `writing.css` shows one per
+viewport at the same breakpoint.
 Opened directly, the files still follow the OS theme. Palette roles live in
 `scripts/theme-diagrams.mjs`; preserve pure black/white SVG mask colors.
 
