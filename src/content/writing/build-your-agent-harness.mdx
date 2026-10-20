@@ -49,15 +49,15 @@ This walkthrough follows the [build-your-harness](https://github.com/ragmha/buil
 Before you begin, ensure you have the following installed:
 
 - [Bun](https://bun.sh/docs/installation) 1.3.14 or later. It runs TypeScript directly, installs packages and runs tests, so you do not need Node.js.
-- Git, or a browser to copy the template.
+- Git, plus a browser and account on the host where you will create your template copy.
 - Basic TypeScript.
 
 ## Project setup
 
-Create your own copy of the exercise template and install its dependencies:
+Use the template page's **Use this template** action to create a copy in your account, then clone it and install its dependencies:
 
 ```bash
-gh repo create build-your-harness --template ragmha/build-your-harness --public --clone
+git clone https://github.com/<your-account>/build-your-harness.git
 cd build-your-harness
 bun install --frozen-lockfile
 bun run typecheck

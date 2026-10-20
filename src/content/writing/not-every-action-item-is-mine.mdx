@@ -269,8 +269,8 @@ data, never as instructions:
 - The context stage is limited to read-only retrieval. It cannot write to the
   sources, and other permission requests are rejected.
 - The judgment stage has no tools at all.
-- Nothing either stage produces is executed. The worst a poisoned item can do
-  is propose a wrong route, which then lands in front of me.
+- Neither stage automatically executes its output, but poisoned content can
+  still lead to omissions, misquotes, or wrong routes.
 
 These restrictions narrow what a local agent can do. They are not a sandbox
 for the services that hold the data, and they don't make prompt injection
