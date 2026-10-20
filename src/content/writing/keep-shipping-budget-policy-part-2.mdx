@@ -1,0 +1,159 @@
+---
+title: "Keep Shipping: The Grace Path as Policy"
+seoTitle: "AI Budget Grace Path: States and Invariants"
+description: "Part 2 of Keep Shipping. A grace path for an exhausted AI budget is only safe once it's written down: which limit applies, what each transition may change, and the one combination that must never happen."
+date: "2026-10-20"
+topics: ["AI Tools", "Business"]
+tags: ["ai", "governance", "policy", "cost"]
+published: false
+hero: "budget-interlock"
+---
+
+[Part 1](/writing/keep-shipping-copilot-budget-limits-part-1/) ended with a
+sketch. When someone's AI budget runs out mid-task, their budget owner can
+approve a small grace allowance that expires and only buys a cheaper model.
+The sketch reads well, and that's its weakness. It never has to say which
+limit stopped the person, what the automation may touch at each step, or what
+happens when a step only half works.
+
+This part writes those decisions down as policy. It's still a design for a
+private prototype. Nothing here has run in a pilot, and I have no savings to
+report. What I can show is where writing it down changed the design.
+
+## Which budget applies
+
+A blocked request doesn't say which limit blocked it. Limits nest: a person's
+cap sits inside a team limit, which sits inside an organization limit, and a
+request goes through only if every one of them still has room.
+
+The grace path raises exactly one of those, the person's own cap. That makes
+the first rule about eligibility, not money:
+
+> Grace applies only when the person's own cap is the limit that stopped them,
+> and they haven't had grace this cycle.
+
+If a team or organization limit is the one that's exhausted, raising the
+person's cap changes nothing. The request is still blocked one level up, and
+the decision belongs to whoever owns that limit. That's a budget conversation,
+not a way to finish one task.
+
+Part 1 left open whether grace should be sized in money, tokens, or tasks.
+Writing the rule settled it for me: in the cap's own unit. The cap is what the
+platform enforces, so it's the only unit where "approve 20 more" means the same
+thing to the approver, the automation, and the enforcement point. A token count
+costs different amounts on different models, and nothing meters "one task".
+
+## Three states and a forbidden corner
+
+As steps, the grace path is a line: stop, approve, remove, verify, raise. As
+states, it's a small machine, and each state is defined by two facts: which
+models the person can reach, and what their cap is.
+
+- **Normal, then stopped.** Every approved model, normal cap. When the cap
+  runs out, the platform blocks requests. The automation does nothing here.
+- **Restricted.** The owner approved grace, so the broad grant is gone. The cap
+  hasn't moved, so the person is still stopped. They stay here until the owner
+  sees the restriction in the clients the person actually uses.
+- **Grace.** Cheaper model only, cap raised once by the approved amount. When
+  that's spent, the person is stopped again until the cycle resets.
+
+The fourth combination is the one that must never happen: a raised cap while
+the broad grant is still in place. That's grace paying for every model, the
+outcome the whole design exists to prevent.
+
+<figure class="excalidraw-figure responsive-diagram">
+  <picture>
+    <source
+      media="(max-width: 60rem)"
+      srcSet="/diagrams/grace-path-states-portrait.svg"
+      width="456"
+      height="866"
+    />
+    <img
+      src="/diagrams/grace-path-states.svg"
+      width="1051"
+      height="686"
+      loading="lazy"
+      decoding="async"
+      alt="Four states laid out by model access and cap. Normal, then stopped at the cap, has every approved model and the normal cap. Step 1 removes the broad grant and moves to Restricted, still stopped until the owner verifies. Step 2 raises the cap once and moves to Grace, cheaper model only. Raising the cap first would reach the fourth corner, which must never happen: grace paying for every model. At the cycle reset, step 3 lowers the cap first and step 4 returns the grant."
+    />
+  </picture>
+</figure>
+
+Laying the states out by those two facts showed me something the step list
+hid. Part 1's rule, restrict which models first and then raise how much, has a
+mirror image on the way back. At the end of the cycle, the reset has to lower
+the cap first and only then return the broad grant. In the other order, the
+person passes through the forbidden corner. Usually that lasts a moment and
+nobody notices. If the reset job fails between its two steps, it lasts until
+someone does.
+
+Railway signal boxes solved the same problem with interlocking: a lever can't
+move until the levers it depends on are in place, so a dangerous combination
+can't be set, however the signaller hurries. The grace path needs that
+property more than it needs speed. Every step moves toward the safe side, so a
+job that dies halfway leaves the person stopped or restricted, never in the
+forbidden corner.
+
+## What each transition may change
+
+This table is the policy. Each transition has one trigger, one actor, and one
+thing it may change. Anything outside the last column is out of bounds for that
+step, even if the automation has permission to change it.
+
+| Transition | Trigger | Who acts | Changes only |
+| --- | --- | --- | --- |
+| Normal → stopped | The person's cap runs out | The platform | Nothing; it blocks requests |
+| Stopped → normal | The owner approves a full increase | Owner approves, job applies | The cap |
+| Stopped → restricted | The owner approves grace | Owner approves, job applies | The person's model-access groups |
+| Restricted → grace | The owner sees the restriction where the person works | Owner approves, job applies | The cap, once, by the approved amount |
+| Grace → stopped | The grace is spent | The platform | Nothing; it blocks requests |
+| Any state → normal | The cycle resets | The job, on a schedule | The cap, then the model-access groups |
+
+The "who acts" column keeps the automation from approving its own spending.
+Every change to money or access starts with a person, and the platform enforces
+the stops. The automation only carries out what someone already approved.
+
+Writing the last column exposed the increments-versus-totals trap from
+Part 1 again. "Raise the cap by 20" applied twice is a different policy from
+"raise the cap by 20" applied once. So a transition here records totals, not
+increments: the cap it expects to find and the cap it sets. A retry that finds
+the cap already at the target does nothing. One that finds any other value
+stops and asks, because someone else changed the cap in between.
+
+## What must stay untouched
+
+Some things sit outside every transition. Writing them as a list made them
+testable: each one is a check that should fail loudly, not a convention
+someone has to remember.
+
+- **Higher limits.** No transition changes a team or organization limit. If one
+  of those is exhausted, grace doesn't apply.
+- **Other permissions.** Model access lives in dedicated groups. No transition
+  touches a group that also controls repositories, licenses, or anything else.
+- **Tracked consumption.** Moving someone between groups doesn't reset what
+  they've used, or make them eligible for grace again.
+- **The approval.** The automation never approves its own increase, and one
+  approval covers one transition, for one person, in one cycle.
+- **Open sessions.** The policy can't change what a client has cached, so it
+  doesn't pretend to. That's why verification is a person looking, not a
+  timer.
+
+## What writing it down didn't settle
+
+- **Verification is still manual.** Without a supported signal that every
+  client has applied the restriction, the restricted state ends when a person
+  says so. I'd rather have a slow, honest gate than a fast guess, but it's the
+  step most likely to make the pause too long to be useful.
+- **"Once per cycle" is a choice, not a law.** Someone who hits the cap early
+  in the cycle and again near the end may need a second grace more than
+  someone who hits it on the last day. I haven't found a rule for that which
+  stays simple to audit.
+- **The cheaper model might still not finish the task.** The policy makes the
+  grace path safe to run. It says nothing about whether it's worth running.
+  That needs the pilot Part 1 described: task completion, total cost including
+  retries, time spent blocked, and the owner's effort.
+
+Writing a grace path as states and invariants doesn't make it cheaper or
+faster. It makes it checkable, and that's what a budget owner needs before
+approving anything.

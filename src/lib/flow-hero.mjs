@@ -472,6 +472,54 @@ function releaseGate(t) {
   t.label([254, 80, B + 32], 'SHIP', { dx: 50, dy: 0, tone: 'green' })
 }
 
+function budgetInterlock(t) {
+  t.base(-260, -140, 550, 270)
+  t.rail([[118, -64, B + 1], [150, -64, B + 1], [150, 82, B + 1], [190, 82, B + 1]], 'blue')
+
+  // Cycle reset: a dial on a post at the back of the box.
+  t.cyl(220, -90, 7, B, 46, 'mid', { steps: 16 })
+  t.dial(220, -90, 26, B + 46, -2.4)
+
+  // Lever frame: two padlocked levers for the higher limits, then three levers pulled in order.
+  t.plate(-230, -90, 345, 48, B, 18, 'lo')
+  const levers = [[-195, false], [-155, false], [-80, true], [-20, true], [40, true]]
+  for (const [x, pulled] of levers) {
+    t.box(x - 4, -82, 8, 30, B + 18, 1, 'lo', { flat: true })
+    const y = pulled ? -60 : -78
+    t.box(x - 3, y, 6, 6, B + 18, 84, x === 40 ? 'blue' : pulled ? 'hi' : 'lo')
+    t.box(x - 5, y - 1, 10, 8, B + 102, 6, 'mid')
+    if (!pulled) t.box(x - 7, y + 8, 14, 8, B + 18, 14, 'red')
+  }
+  t.lamp([40, -57, B + 108], 'blue', 6)
+  // The owner's release key sits in a lock on the frame beside lever 2.
+  t.cyl(10, -66, 8, B + 18, 12, 'green', { steps: 18 })
+  t.box(8, -74, 4, 8, B + 30, 3, 'hi')
+
+  // Interlocking bed: tappets on the locking bars stop a lever until its prerequisite is pulled.
+  t.tray(-230, -24, 345, 60, B, 16, () => {
+    for (const y of [-8, 18]) t.bar([-222, y], [106, y], 3, B + 3, 3, 'mid')
+    for (const [x] of levers) t.box(x - 3, -16, 6, 42, B + 6, 4, 'hi')
+  })
+
+  // Outcome panel: the person is stopped, on grace, or back to normal.
+  t.plate(190, 30, 80, 100, B, 12)
+  const lamps = [[50, 'red'], [80, 'blue'], [110, 'green']]
+  for (const [y, tone] of lamps) {
+    t.cyl(230, y, 11, B + 12, 6, 'lo', { steps: 18 })
+    t.lamp([230, y, B + 18], tone, 6)
+  }
+
+  t.label([-175, -78, B + 108], 'HIGHER LIMITS: PADLOCKED', { dx: -110, dy: -50, tone: 'red' })
+  t.label([-80, -60, B + 108], '1 REMOVE BROAD GRANT', { dy: -150 })
+  t.label([10, -66, B + 30], '2 OWNER VERIFIES', { dx: -90, dy: 190, tone: 'green' })
+  t.label([40, -57, B + 108], '3 RAISE CAP ONCE', { dx: 70, dy: -110, tone: 'blue' })
+  t.label([-150, 36, B + 16], 'INTERLOCKING', { dy: 110 })
+  t.label([220, -90, B + 49], 'CYCLE RESET', { dy: -90 })
+  for (const [y, tone] of lamps) {
+    t.label([230, y, B + 18], { red: 'STOPPED', blue: 'GRACE', green: 'NORMAL' }[tone], { dx: 70, dy: 0, tone })
+  }
+}
+
 export const flowHeroSvg = hero => render(hero.label, hero.art)
 
 // Labels and outcomes paraphrase each article; nothing here adds a claim the post doesn't make.
@@ -497,6 +545,17 @@ export const flowHeroes = {
     ],
     thesis: ['A budget answers how much.', 'Model policy answers which models.'],
     note: 'The pattern from the post: an approved, expiring grace on a cheaper model, or an approved budget increase.',
+  },
+  'budget-interlock': {
+    art: budgetInterlock,
+    label: 'An isometric signal-box lever frame. Two levers for the team and organization limits are padlocked. Three levers are pulled in order: remove the broad grant, the owner verifies with a release key, and raise the cap once. An interlocking bed in front stops any lever until its prerequisite is pulled. A cycle-reset dial stands behind, and a lamp panel shows stopped, grace, or normal.',
+    outputs: [
+      { label: 'STOPPED', tone: 'red' },
+      { label: 'GRACE', tone: 'blue' },
+      { label: 'NORMAL', tone: 'green' },
+    ],
+    thesis: ['Restrict first, then raise.', 'Lower first, then widen.'],
+    note: 'An illustrative policy for a private prototype. It hasn’t run in a pilot.',
   },
   'dns-delegation': {
     art: dnsDelegation,
