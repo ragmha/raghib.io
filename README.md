@@ -44,6 +44,39 @@ Run `bun run sync:projects` with an authenticated `gh` CLI to refresh
 overrides (description, demo/extra links) live in
 `src/content/project-snapshot.ts` and survive future syncs.
 
+## Local chess
+
+`/experiments/chess/` plays against Stockfish.js 19.0.1, lite single-threaded
+WebAssembly. The pixel-art, Game Boy palette board has a growing, connected move history: each player
+move adds a box, followed by a pending engine box that updates to its reply.
+Earlier moves remain visible in the internally scrolling panel. The panel has
+three views. **Moves** is that history. **Steps** is the five-step inspector:
+player move, chess.js validation, local search telemetry, reply validation, and
+engine move. Its turn selector revisits recorded turns without changing the
+board. The candidate line is a search forecast, not a rationale or a sequence of
+played moves. **Context** is an illustration: the context a harness would send a
+language model playing Black, built from the real game and Stockfish output. It
+shows pinned, replaced, windowed, and summarized blocks against a 512-token
+budget (estimated at four characters per token), next to a naive transcript that
+resends everything. Stockfish itself has no context window. Switching views
+keeps the game and history; New game clears both.
+
+The engine loads on the first move in a Web Worker. It needs no API, GPU, or
+cross-origin isolation headers. The static host must serve the adjacent
+`public/experiments/chess/stockfish-19-lite-single.js` and `.wasm` files as
+JavaScript and `application/wasm`. chess.js is bundled locally. Ship the engine's
+`COPYING.txt` and `SOURCE.txt` alongside the files. The source notice identifies
+the matching upstream release and build instructions.
+
+Games stay in memory and reset on reload. White promotions automatically choose
+a queen. Engine failures are visible and retryable; New game cancels any pending
+search. No engine runs after a terminal move.
+
+Checks: `bun test --bail tests/chess.test.ts`. Against a running dev or preview
+server, run `CHESS_TEST_URL=http://localhost:4321/experiments/chess/ node --test
+--test-force-exit tests/chess.browser.mjs`. Set `CHESS_SCREENSHOTS` to a directory
+to save desktop and mobile renders during that check.
+
 ## What’s Under the Prompt?
 
 `/experiments/context-autopsy/` (“What’s Under the Prompt?”) reads coding-agent session logs in a Web Worker
