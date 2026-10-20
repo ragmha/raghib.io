@@ -193,9 +193,12 @@ request into `main`, on merge-queue builds, and on pushes to `main`, where it
 also uploads the site for the `deploy` job. Its job name is the required-check
 identifier: keep it stable when editing the workflow. A required status-check
 rule on `main` enforces the gate; merely adding a workflow does not prevent
-merging. The gate also runs `cspell` (American English) over posts; add real
-terms to `cspell.json`. A weekly `Link check` workflow opens or updates a
-`Broken links` issue when external links fail.
+merging. A pull request that only changes files outside the release lane
+(`lab/`, `.agents/`, contributor docs; see the `lanes` job) skips the checks,
+and the skipped job still reports success. The gate also runs `cspell`
+(American English) over posts; add real terms to `cspell.json`. A weekly
+`Link check` workflow opens or updates a `Broken links` issue when external
+links fail.
 
 Run the gate locally with:
 
