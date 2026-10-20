@@ -9,8 +9,6 @@ published: true
 hero: "agent-harness"
 ---
 
-**Disclaimer:** I work at Microsoft. This is my personal view, based only on public information. It isn’t an official position or a product recommendation.
-
 An agent needs more than a model call. The model proposes a next step; the
 runtime validates it, checks policy, executes it, records what happened and
 decides when to stop. That runtime is the **harness**.
@@ -51,7 +49,7 @@ This walkthrough follows the [build-your-harness](https://github.com/ragmha/buil
 Before you begin, ensure you have the following installed:
 
 - [Bun](https://bun.sh/docs/installation) 1.3.14 or later. It runs TypeScript directly, installs packages and runs tests, so you do not need Node.js.
-- The [GitHub CLI](https://cli.github.com/), or a browser to copy the template.
+- Git, or a browser to copy the template.
 - Basic TypeScript.
 
 ## Project setup
@@ -1732,7 +1730,7 @@ bun test
 Ran 38 tests across 6 files.
 ```
 
-If you copied the template to GitHub, push to `main` after each step and the exercise grades your work in Actions.
+If you copied the template to your own repository, push to `main` after each step and its CI grades your work.
 
 ## Turn the harness into a coding agent
 
@@ -1915,5 +1913,5 @@ What this deliberately leaves out is just as instructive: plugin loading, depend
 - [Bun documentation](https://bun.sh/docs)
 - [Zod](https://zod.dev/)
 - [AbortSignal.any](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal/any_static)
-- [Event sourcing pattern](https://learn.microsoft.com/azure/architecture/patterns/event-sourcing)
+- [Event sourcing, Martin Fowler](https://martinfowler.com/eaaDev/EventSourcing.html)
 - [Idempotent Consumer pattern](https://microservices.io/patterns/communication-style/idempotent-consumer.html)

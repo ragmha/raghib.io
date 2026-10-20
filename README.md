@@ -76,9 +76,8 @@ Every writing post uses `src/pages/writing/[slug].astro`, `WritingLayout.astro`,
 and `src/styles/writing.css` for the same header, metadata, contents navigation,
 and reading layout. Keep content in MDX rather than duplicating page markup;
 headings supply the contents list without imposing the same outline on every post.
-The standard opening `**Disclaimer:**` paragraph automatically becomes a
-theme-aware informational callout. Keep its wording and position as defined in
-`.agents/skills/employer-disclaimer/SKILL.md`; no per-post styling is needed.
+Posts name no employer or employer product and carry no disclaimer;
+`tests/no-employer.test.mjs` enforces it.
 
 Posts live in `src/content/writing/`. A project can optionally have a longer
 writeup at `/project/<project-name>/writings/`, authored as MDX in
@@ -120,24 +119,12 @@ Astro's `<Image />` or `<Picture />` components so responsive `srcset` values an
 optimized formats are generated automatically. Icon credits and reuse terms are
 in `public/diagrams/ICONS-LICENSE.txt`.
 
-The Keep Shipping article includes three `copilot-*.excalidraw` concept diagrams:
-budget versus model access, the example credit journey, and additive model
-grants. Their SVGs are static exports with embedded Excalifont, accessible text,
+The Friday release simulation includes three Excalidraw concept diagrams. Their SVGs are static exports with embedded Excalifont, accessible text,
 and no client-side drawing library. Match the exported dimensions in the MDX
 when updating a diagram.
 Each has a `-portrait` source/export for viewports up to 60rem. The article uses
 `picture` to switch compositions instead of shrinking labels or requiring
 sideways scrolling. Keep equivalent facts in both versions.
-The credit journey is an original black-ink office illustration with two
-personas: a GHCP user and a GH admin responsible for budgets and model policy.
-The user wears headphones and casual clothing; the admin has glasses, an ID
-badge, and a policy clipboard. These cues stay consistent in both layouts.
-The admin's automation is a labelled tool, not an additional persona. It uses
-open dialogue rather than card panels, with a stacked composition for small
-screens. Elements retain their actor, automation-owner, and prop roles in
-`customData`. The reusable personal `stick-figure-explainer` skill can render
-these scene files without adding drawing dependencies to the site.
-The illustrations use original line art, not third-party figure libraries.
 
 With the local dev server running on port 4321, check phone, narrow-panel, and
 desktop reading layouts with:

@@ -103,5 +103,5 @@ unpublish, rename slugs, or rewrite without the author's go-ahead.
   the author's diligence instead of informing the reader.
 - **Product tours.** A post that mainly lists one product's features should be
   reframed around a pattern or retired. Ask the author which.
-- Removing vendor names does not remove the disclaimer; re-apply
-  `employer-disclaimer` after any edit.
+- **No employer.** Never name the author's employer or its products; describe
+  the pattern instead. `tests/no-employer.test.mjs` enforces this.

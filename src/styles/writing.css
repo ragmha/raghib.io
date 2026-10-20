@@ -362,28 +362,6 @@ main {
   margin-block: var(--prose-space);
 }
 
-.prose > .employer-disclaimer {
-  position: relative;
-  margin-block: 0 var(--prose-block-space);
-  padding: 1rem 1.25rem 1rem 3rem;
-  border: 1px solid var(--rule-strong);
-  border-radius: 0.75rem;
-  background: var(--paper-sunk);
-  font-size: 0.875rem;
-  line-height: 1.7;
-}
-
-.prose > .employer-disclaimer::before {
-  content: '';
-  position: absolute;
-  top: 1.25rem;
-  left: 1rem;
-  width: 1rem;
-  height: 1rem;
-  background: currentColor;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='6.25' fill='none' stroke='black' stroke-width='1.5'/%3E%3Cpath d='M8 7v4m0-6h.01' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
-}
-
 .prose :where(blockquote, li, figcaption) > p + p {
   margin-top: var(--prose-space);
 }

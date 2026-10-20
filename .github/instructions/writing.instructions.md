@@ -2,42 +2,19 @@
 applyTo: "src/content/writing/**"
 ---
 
-# Posts: employer disclaimer
+# Posts: no employer content
 
-The author works at Microsoft; the site is independent writing. The full rules
-live in `.agents/skills/employer-disclaimer/SKILL.md`. When reviewing or
-editing a post, apply them. CI already fails a post that mentions Microsoft,
-Copilot, Azure, OpenAI, LinkedIn or VS Code without the disclaimer, or where
-the disclaimer is reworded or not the first paragraph. Focus on what that
-keyword check cannot see.
+The site is independent writing. Posts never name the author's employer or its
+products, and carry no employer disclaimer. `tests/no-employer.test.mjs` fails
+CI on Microsoft, GitHub, Copilot, Azure, LinkedIn, VS Code, OpenAI, Bing and
+similar names outside code blocks and URLs.
 
-The disclaimer, verbatim, as the first paragraph after the frontmatter:
+When reviewing a post, also flag what the keyword test can't catch:
 
-> **Disclaimer:** I work at Microsoft. This is my personal view, based only on public information. It isn’t an official position or a product recommendation.
+- A post whose subject is an employer product described generically, such as
+  its pricing, plans or internal workflow.
+- Measurements, screenshots or examples that come from an employer product.
+- Internal, pre-release, or customer material.
 
-Keep it as a plain bold-label paragraph in MDX. The shared Markdown renderer
-adds the informational callout automatically; do not add per-post components,
-wrappers, or styles.
-
-Flag a post that is missing the disclaimer when it:
-
-- compares, ranks, or recommends commercial products in a market where
-  Microsoft competes (cloud, AI models and assistants, developer tools,
-  productivity, security, collaboration), even if no Microsoft product is
-  named;
-- evaluates a Microsoft-family product (GitHub, LinkedIn, Azure, Copilot,
-  VS Code, npm, etc.) or a close partner such as OpenAI as a vendor;
-- discusses big-tech employment, hiring, layoffs, or regulation that directly
-  affects Microsoft.
-
-Flag a post that has the disclaimer but breaks its promises:
-
-- it relies on internal, pre-release, customer, or other non-public material;
-- its conclusion tells readers to buy or adopt a specific product.
-
-Flag a disclaimer on a post where vendors appear only incidentally (a docs
-link, the editor or host used, "the repo is on GitHub") and no product is
-evaluated, compared, recommended, or criticised.
-
-Quote the rule that applies. Do not comment on style or grammar for this
-check.
+Suggest reframing around the tool-agnostic pattern: the constraint, the design
+that resolves it, and its trade-offs.

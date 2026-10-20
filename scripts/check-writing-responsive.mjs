@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { chromium } from 'playwright'
 
 const origin = process.env.WRITING_TEST_URL ?? 'http://127.0.0.1:4321'
-const route = '/writing/keep-shipping-copilot-budget-limits-part-1/'
+const route = '/writing/a-friday-release-security-simulation/'
 const screenshotDirectory = process.env.RESPONSIVE_SCREENSHOTS
 if (screenshotDirectory) await mkdir(screenshotDirectory, { recursive: true })
 const browser = await chromium.launch({ headless: true, timeout: 30000 })
@@ -112,7 +112,7 @@ try {
   await published.close()
 
   const preview = await browser.newPage()
-  await preview.goto(`${origin}/writing/advent-of-copilot-cli/`, { waitUntil: 'networkidle' })
+  await preview.goto(`${origin}/writing/rfp-without-spreadsheets/`, { waitUntil: 'networkidle' })
   assert.ok(await preview.locator('.draft-notice').isVisible())
   assert.match(await preview.locator('meta[name="robots"]').getAttribute('content'), /noindex/)
   assert.equal(await preview.locator('.post-head a[href^="/writing/tag/"], .post-head a[href^="/writing/topic/"]').count(), 0,
@@ -145,17 +145,9 @@ try {
         highlights: [...document.querySelectorAll('[fill*="--diagram-ochre-surface"]')]
           .map(shape => getComputedStyle(shape).fill),
       }))
-      const requiresHighlights = /\/copilot-(?:budget-and-model-access|additive-model-access)(?:-portrait)?\.svg$/.test(source)
-      const hasNoHighlights = /\/copilot-credit-journey(?:-portrait)?\.svg$/.test(source)
       assert.ok(colors.text.length > 0, `Diagram has readable labels: ${source}`)
       assert.ok(colors.text.every(color => color === (theme === 'dark' ? 'rgb(255, 255, 255)' : 'rgb(13, 13, 13)')),
         `Diagram ink must adapt to ${theme}: ${source}`)
-      if (requiresHighlights) {
-        assert.ok(colors.highlights.length > 0, `Budget/access diagram must retain highlight fills: ${source}`)
-      }
-      if (hasNoHighlights) {
-        assert.equal(colors.highlights.length, 0, `Credit-journey diagram intentionally has no highlights: ${source}`)
-      }
       assert.ok(colors.highlights.every(color => color === (theme === 'dark' ? 'rgb(48, 39, 25)' : 'rgb(244, 233, 199)')),
         `Diagram highlights must adapt with their ink in ${theme}: ${source}`)
     }

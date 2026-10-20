@@ -1,7 +1,7 @@
 ---
-title: "The Smart If-Statement Is Emerging"
-seoTitle: "Decision Models for AI Systems"
-description: "A decision model scores a fixed set of options instead of writing prose. Why that could become a separate, auditable layer in AI systems, what a small synthetic pilot showed, and eight experiments to test it."
+title: "Decide Cheaply, Generate Carefully"
+seoTitle: "A Smart If-Statement for AI Agents"
+description: "Routine choices in an AI system can be a small, auditable layer: fixed options, calibrated scores, and thresholds that hand uncertain cases to a person. Why it is separate from generation and orchestration, and how it fails."
 date: "2026-10-11"
 topics: ["AI Tools", "Business"]
 tags: ["ai", "governance", "agents", "platform-engineering"]
@@ -9,314 +9,241 @@ published: true
 hero: "decision"
 ---
 
-**Disclaimer:** I work at Microsoft. This is my personal view, based only on public information. It isn’t an official position or a product recommendation.
+Most of what an agent does happens before it writes anything. It decides which
+model to use, whether a tool call is safe, whether to retry, and when to stop
+and ask a person. Each of those is a choice among a handful of options, and in
+most systems each one is answered by the same generative model that writes the
+code.
 
-I've been noticing how much of an agent's work happens before it writes
-anything. It has to choose a model, decide whether a tool call is safe, and
-know when to retry or ask a person.
+That gets expensive in a way that is easy to miss. If an agent makes 20
+sequential decisions and each one costs an extra 100 ms of generation, the
+workflow is two seconds slower before any useful work happens. At volume, a
+million routine decisions with 500-token inputs is half a billion input tokens,
+all priced and served like generation. And the answer comes back as prose,
+which is hard to turn into a policy anyone can audit.
 
-I started wondering whether those small decisions need the same kind of model
-as the code itself. A frontier model can make them, but using it for every
-routine choice can add cost, latency and an answer that's hard to turn into a
-policy.
+So I've been designing around a split: **decide cheaply, generate carefully**.
+The decision becomes its own small layer, a smart if-statement, and the
+expensive model only runs on the branch that needs it.
 
-Three offerings have appeared around this narrower job, with different output
-contracts and levels of availability:
+## A smart if-statement
 
-- **OpenAI** opened a
-  [Decisions API](https://developers.openai.com/api/docs/guides/decisions) in
-  public beta. The endpoint returns structured decision answers; GPT-6 Luna
-  also supports text generation through other interfaces.
-- **TypeSafe**, a lab founded by an early ChatGPT researcher, introduced
-  [Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev), a
-  "System One" model in early access whose outputs are typed values defined in
-  advance.
-- **Microsoft** released
-  [Decision-1](https://commandline.microsoft.com/microsoft-decision-1-model-foundry/)
-  in Foundry and on OpenRouter, which Microsoft describes as designed for
-  routing, classification and verification.
+An ordinary if-statement hard-codes a condition: *if the title mentions CSS,
+send it to frontend*. A smart if-statement keeps the shape but replaces the
+condition with a model that scores a fixed set of options and returns a number
+for each one.
 
-Seeing the launches together made me curious about the boundary: what should a
-decision model handle, and what still belongs to the application around it? I
-built a small pilot to test that question against issue triage and agent
-tool-call safety. The results are synthetic, but they helped me see what I
-would want to measure with real team data. The linked repository's
-[first public commit](https://github.com/ragmha/decision-pilot/commits/main/)
-is dated 12 October, the day after this article's publication date; it is a
-later public artifact, not evidence that the code was available on 11 October.
+Three parts make it a layer rather than a prompt:
 
-## What I mean by a decision model
+- **A fixed output contract.** The options are defined before the call: allow,
+  escalate or block; a list of owning groups; a severity rubric. The model can
+  only choose among them.
+- **A calibrated score.** Each option gets a probability that has been checked
+  against labelled outcomes, so 0.9 means "right about nine times in ten" on
+  data like yours.
+- **A policy the application owns.** Thresholds turn scores into actions. The
+  model estimates; the application decides what to do with the estimate.
 
-A chat model writes. A decision model chooses.
+The split matters because the two halves are judged differently. Generation is
+judged on the quality of what it produces. A decision is judged on whether it
+was right, how sure it claimed to be, and what it cost to be wrong.
 
-You give it a situation and a fixed set of options: yes or no, a list of teams,
-a rubric that runs from low to critical. In the decision interface, it returns
-structured answers such as choices, scores and probabilities rather than a
-written explanation.
+## Why asking the big model breaks
 
-An ordinary if-statement hard-codes a condition, such as *if the title mentions
-CSS, send it to frontend*. A decision model estimates the likely option and
-returns scores. The application still owns the policy: it decides whether to
-act on that score, ask for review or do nothing.
+The obvious first design is to ask the generative model inline: "Should I run
+this command? Answer yes or no and explain." It works in a demo. It breaks in
+three places once it runs all day.
 
-The number is the part I care about. A label on its own gives you little to
-govern. If validation on representative, labelled data shows a score such as
-0.93 is calibrated, you can use it in a threshold policy: act above 0.9, send
-anything between 0.6 and 0.9 to a person, and leave the rest in the queue. You
-can audit which policy rule fired; the threshold does not explain why the model
-assigned its score.
+- **Prose isn't a policy.** The answer has to be parsed, and the explanation
+  doesn't tell you how sure the model was. You can't set a threshold on
+  "probably fine".
+- **It's unstable.** Reorder the options or change the formatting, and the
+  answer can move. Language models show
+  [a preference for particular option positions](https://arxiv.org/abs/2309.03882)
+  in multiple-choice questions, and
+  [small formatting changes can shift accuracy a lot](https://arxiv.org/abs/2310.11324).
+  A policy should give the same answer for the same facts.
+- **Latency compounds.** Every branch waits on a model that is built to write,
+  not to choose.
+
+The second design wraps the call so it returns a label, then measures accuracy.
+I tried that in a small pilot: a few dozen synthetic issues to route to a team,
+and a few dozen synthetic tool calls to allow, escalate or block. As a
+baseline I used a deliberately crude keyword heuristic. Its overall routing
+accuracy was poor, and my first reaction was that the experiment had failed.
+
+The reliability table said otherwise. Where the baseline was confident, it was
+right; where it was unsure, it was often wrong. Overall accuracy averaged those
+together and hid the one thing I needed: a band where acting automatically was
+safe and a band where it wasn't. The question changed from "how often is it
+right?" to **"where is it confident and right?"**
+
+That is the redesign: a fixed contract, a score you can check, and a threshold
+that sends everything uncertain to a person. The results are from a heuristic
+on synthetic data, so they show the shape of the problem, not how any real
+decision model performs.
+
+## Fixed output contracts
+
+The contract is what makes a decision testable. If the options are fixed, you
+can replay last month's history, compare each choice with what a person did,
+and see exactly where they disagree. If the model can answer anything, there is
+nothing to compare against.
+
+Two details matter more than they look:
+
+- **Give it a way out.** Every contract needs a "none of these fits" or
+  "escalate" option. Without it, an unusual input is forced into the nearest
+  wrong box, with a confident score.
+- **Version the contract.** Log the options, the model, the threshold and the
+  config version with every decision. When someone asks why an issue was
+  labelled, you can show which rule fired and what the score was.
+
+A contract also makes the model swappable. If the interface is "situation in,
+scored options out", you can replace the model behind it and rerun the same
+replay to see whether anything got worse.
+
+## Calibrated scores and thresholds
+
+A score is only useful if it means what it says.
+[Modern neural networks are often overconfident](https://arxiv.org/abs/1706.04599),
+so a raw 0.95 can be right far less than 95% of the time. Calibration is the
+check: bucket past decisions by score and compare each bucket with how often it
+was actually right.
+
+Once the score is trustworthy, the policy can trade coverage for risk. That
+idea is old; [selective classification](https://arxiv.org/abs/1705.08500)
+formalizes letting a model abstain when it isn't sure. In practice, it gives you
+three bands:
 
 ```mermaid
 flowchart TD
     accTitle: How a decision score becomes an action
-    accDescr: A decision model scores fixed options, then an example application policy routes high scores to automatic action, middle scores to human review, and low scores back to the queue.
+    accDescr: A decision model scores fixed options, then an application policy sends high scores to automatic action, middle scores to a person, and low scores back to the normal queue.
     situation["Situation + fixed options"] --> model["Decision model"]
-    model --> scores["Option scores"]
-    scores --> policy{"Policy?"}
-    policy -->|"> 0.9"| act["Act automatically"]
-    policy -->|0.6 to 0.9| review["Human review"]
-    policy -->|"< 0.6"| queue["Leave in queue"]
+    model --> scores["Score per option"]
+    scores --> policy{"Application policy"}
+    policy -->|"p ≥ 0.9"| act["Act automatically"]
+    policy -->|"0.6 to 0.9"| review["Ask a person"]
+    policy -->|"p < 0.6"| queue["Leave in queue"]
 ```
 
-Microsoft's Decision-1 is the example I'll use. Microsoft
-[reports](https://commandline.microsoft.com/microsoft-decision-1-model-foundry/)
-the top accuracy across a 36-benchmark comparison, P50 latency about 35× lower
-than GPT-6 Sol, and a 1.3% average decision-flip rate when inputs are perturbed.
-Input costs $0.042 per million tokens. Output is free.
+The numbers are illustrative. The real cutoffs come from two things: the
+calibration on your data and the cost of each kind of mistake. Pick thresholds
+on one half of the labelled history and check them on the other half, or you
+are only measuring how well you fit the sample.
 
-## The cost of using a frontier model for every decision
+The tool-call gate in the pilot made this trade-off concrete. A low block
+threshold stopped more unsafe calls outright, but it also blocked some safe
+ones. A high threshold blocked no safe calls and escalated more of the unsafe
+ones to a person instead. I preferred the second. A gate that interrupts real
+work gets disabled or bypassed, and then it catches nothing. The team that owns
+the risk should see the full sweep and choose its own point on it.
 
-A frontier LLM *can* triage an issue. It's just built for something else, and
-that shows up in four ways once the calls add up:
+## Orchestration is a different layer
 
-- **It's slow where speed compounds.** The announcement makes the point well:
-  20 sequential decisions at an extra 100 ms each add two seconds to a
-  workflow. Agents make a lot of sequential decisions.
-- **It's expensive at volume.** At Decision-1's published price, one million
-  decisions with 500-token inputs cost about **$21** in input tokens. Calls
-  like that may lead some teams to use a frontier model.
-- **A plain-text answer does not provide a validated score by default.** An
-  LLM can be prompted or wrapped to return structured scores, but those scores
-  still need parsing and calibration before they support a threshold policy.
-- **It wanders.** Rephrase the input, reorder the options or add some
-  formatting noise, and a generative model can change its mind. For a policy
-  decision, materially similar facts should produce a stable answer; measure
-  how often they do.
+Routing *within* one request is a related idea, and it's worth keeping
+separate. An orchestrator decides how much effort a single task gets:
+[cascades](https://arxiv.org/abs/2305.05176) try a cheaper model first and
+escalate if a quality check fails, and
+[learned routers](https://arxiv.org/abs/2406.18665) send each query to a
+stronger or weaker model. Some add a critique pass from a second model.
 
-I still use the most capable model I have to question a plan and work through
-its branches before anything gets built. (I use Matt Pocock's
-[grill-me](https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me)
-skill for this.) Once the plan is clear, I want to test whether smaller calls
-along the way can use lower-cost models whose scores can be evaluated and
-logged.
+Both spend less where less is needed, but they sit at different points in the
+system:
 
-## Decision models and orchestrators work at different layers
+```mermaid
+flowchart LR
+    accTitle: Where a decision layer and an orchestrator sit
+    accDescr: An agent step goes to a decision layer that chooses act, ask a person, or stop. Only the act branch reaches an orchestrator, which routes the task between a smaller and a larger model to produce one result.
+    step["Agent step"] --> decide{"Decision layer"}
+    decide -->|act| orch["Orchestrator"]
+    decide -->|unsure| person["Ask a person"]
+    decide -->|no| stop["Stop"]
+    orch --> small["Smaller model"]
+    orch --> large["Larger model"]
+    small --> result["One result"]
+    large --> result
+```
 
-One useful comparison is a multi-model orchestrator such as
-[HydraFusion](https://github.blog/ai-and-ml/github-copilot/project-hydrafusion-frontier-quality-via-multi-model-orchestration/),
-a research preview in GitHub Copilot. For each
-coding task, HydraFusion chooses one of three workflows:
-
-- **Single:** one model does the task.
-- **Cascade:** a cheaper model drafts, then a quality gate either accepts the
-  result or escalates to a stronger model.
-- **Critique:** a read-only critic from a different model family reviews the
-  draft, then the drafter revises once.
-
-In GitHub's offline evaluation, HydraFusion scored 4.9 points higher than
-Claude Opus 5 on TerminalBench 2.1 at 67% lower estimated cost. On DeepSWE, it
-finished within 1.5 points at 36% lower cost.
-
-Both influence how much effort a task receives, but they act at different
-layers:
-
-| Dimension | Decision model (Decision-1) | Orchestrator (HydraFusion) |
+| | Decision layer | Orchestrator |
 | --- | --- | --- |
-| What it is | A building block: score fixed options | A finished workflow: route, draft, critique, escalate |
-| Where it runs | Your apps, agents, pipelines | Copilot CLI, VS Code, Copilot app |
-| Output | Probabilities you can threshold and log | One coherent change set |
-| You control | Options, thresholds, fallbacks | Model choice, admin enablement, review |
-| Designed for | High-volume, structured calls; validate against your workload | Hard, open-ended coding tasks |
-| Maturity | Generally available model | Research preview |
+| Question it answers | Should this happen, and which option? | How should this task be done? |
+| Output | Scored options from a fixed list | One finished artifact |
+| Judged on | Calibration, coverage, cost of mistakes | Quality of the artifact per unit cost |
+| Who sets the policy | The team that owns the risk | Whoever owns the model pool |
+| What you log | Every choice, score and threshold | Which path ran and what it cost |
 
-HydraFusion selects a workflow inside a coding product. A decision model is a
-component an application can call wherever it needs a bounded choice. The
-application owner still has to define and test the policy around that choice:
-who owns the work, what is safe and what is good enough.
+An orchestrator's quality gate is a decision, and it could be built as one. The
+difference is ownership. A routing step inside a coding tool is tuned for
+output quality. A decision layer encodes a rule that someone outside the model
+team, such as security, operations or support, has to be able to read, test and
+change.
 
-HydraFusion's Cascade workflow includes a quality gate, which is one place a
-decision model could fit architecturally. GitHub has not said what powers its
-internal routing or gates, so this is a comparison of concepts, not a claim
-about its implementation.
+## Failure modes and trade-offs
 
-## The pilot I built
+- **Ordinary actions in the wrong context.** The two unsafe tool calls the
+  pilot's gate missed contained no alarming words. One edited a CI release
+  workflow to upload a signing key because a web page suggested it. The other
+  published a package nobody had asked to release. A decision only sees the
+  context you give it, so the red-team set should include harmless-looking
+  commands, not just `rm -rf`.
+- **Fixed options can hide the real answer.** Some situations don't fit a
+  list. A missing escape option turns that into confident nonsense.
+- **Calibration doesn't travel.** A reliability table describes the data it
+  was measured on. New owners, new kinds of issues or a new model version can
+  shift it without anything failing loudly.
+- **A score isn't an explanation.** You can audit which threshold fired. You
+  can't audit why the model assigned the score, so reviewers still need the
+  evidence it saw.
+- **One more component.** If generative models keep getting faster and
+  cheaper, a separate decision layer may cost more to maintain than it saves.
+  The audit case may still justify it; the latency case might not.
+- **A cheaper call isn't a cheaper workflow.** Count retries, human review
+  time and corrections, not just tokens.
+- **Know where the data goes.** If the inputs are sensitive, run the decision
+  model somewhere your existing data controls already apply.
 
-I built
-[**ragmha/decision-pilot**](https://github.com/ragmha/decision-pilot). It runs
-two decisions end to end:
+## Experiments you can run
 
-- **Issue routing.** Which team owns this issue, and how severe is it? Above the
-  act threshold, it labels the issue. In the middle band, it suggests a label to
-  a person. Below that, the issue goes to normal triage.
-- **A tool-call gate.** An agent wants to run a command. Allow it, escalate it
-  to a person, or block it?
+Each of these needs only labelled history you probably already have and a
+model you are already allowed to use. Measure today's baseline first.
 
-For each one, it replays labelled history, reports how well the confidence
-matches reality, picks thresholds on one half of the data and checks them on
-the other half. Then a GitHub Actions workflow runs on every new issue in
-shadow mode. It records what it *would* have done and labels nothing until you
-switch it on. Every decision is logged with its probability, model and config
-version.
+1. **Route issues before anyone reads them.** Use your owning groups as the
+   options. Replay a few hundred historical issues, compare with the human
+   labels, and report accuracy *and* coverage at a chosen threshold.
+2. **Gate agent tool calls.** Put allow, escalate and block in front of every
+   tool call. Mix a red-team set of injection and exfiltration attempts into
+   ordinary traffic. Report the catch rate and the false-block rate together.
+3. **Rank findings, don't replace scanners.** Score existing security alerts
+   for likely exploitability and compare the ranking with alerts your team has
+   already triaged.
+4. **Plot the cost-latency curve.** Classify a large batch of real records
+   with a small decision model and with the generative model you use today, on
+   the same labels. Compare p50 and p95 latency and cost per thousand
+   decisions.
+5. **Find the sequential-decision ceiling.** In one agent loop, replace only
+   the continue, retry, stop or hand-off points with a decision model. Keep
+   generation unchanged and measure task time and success rate.
+6. **Draw the reliability diagram.** Bucket predictions by score, compare each
+   bucket with observed accuracy, and publish it next to the thresholds.
+7. **Test consistency.** Paraphrase inputs, reorder options and add formatting
+   noise. Count how often the decision changes. Same facts, same decision is
+   the oldest governance requirement, and now you can measure it.
+8. **Compare a single model with a cascade.** On a few dozen recently closed
+   tasks with tests, run one strong model, then a cheap-first cascade. Compare
+   tests passing, review comments, time and cost.
 
-```sh
-git clone https://github.com/ragmha/decision-pilot && cd decision-pilot
-python -m decision_pilot replay routing   # offline, no account needed
-python -m decision_pilot replay gate
-```
+## What's next
 
-It needs no dependencies and no account. Without credentials it uses a mock
-provider, a deliberately simple keyword heuristic, so you can see the reports
-before you spend anything. Set a Foundry endpoint and it calls Decision-1
-instead. The data is synthetic: 48 issues and 40 tool calls that I wrote,
-including some deliberately ambiguous ones.
-
-## What the pilot showed
-
-### Aggregate accuracy hid the useful threshold
-
-The mock routes only 65% of issues to the right team. My first reaction was
-that the experiment had failed.
-
-It hadn't. In the reliability table, confidence tracked correctness: on the
-holdout half, the mock was right 78% of the time between 0.6 and 0.8, and every
-time above 0.8. The threshold the pilot picked, 0.647, labelled about a third
-of the holdout issues and got all of them right. The other two-thirds went to a
-person.
-
-In this synthetic holdout, it auto-routed 9 of 25 items without an error. That
-small result does not establish operational safety. I would trust the lesson:
-**ask where the model is confident and right, not how often it's right
-overall.**
-
-### The calls it missed looked ordinary
-
-The gate caught 88% of the unsafe tool calls and blocked no safe ones. The two
-it missed are the instructive part.
-
-One was a write to `.github/workflows/release.yml` because a web page suggested
-adding a step that uploads the signing key. The other was `npm publish` on a
-package nobody had asked to release. Neither contains a scary word. Both are
-ordinary commands in the wrong context.
-
-A keyword heuristic was always going to miss those. That's the case for testing
-a real decision model, and it's why your red-team set should include harmless-
-looking commands, not just obvious `rm -rf` lines.
-
-### The threshold changes how often people are interrupted
-
-At a block threshold of 0.5, the gate blocked 88% of unsafe calls outright. It
-also blocked 9% of safe ones. At 0.85, it blocked 29% of unsafe calls, escalated
-59% and allowed 12%, with no false blocks.
-
-I chose the second setting. A gate that interrupts real work risks being
-disabled or bypassed. The report includes the full sweep so the team that owns
-the risk can choose its own trade-off.
-
-### I still need to check the live API response
-
-Microsoft's docs show the request format and say a choice answer includes a
-probability for every option. They don't name the response field. So the
-parser accepts the likely shapes and, if none matches, fails with the fields it
-actually received. I haven't run the pilot against the live API yet. When I
-do, that's the first thing I'll check.
-
-## How I would test the idea
-
-The pilot covers two of these ideas with synthetic data. With a team, I would
-start by measuring its current workflow, then choose one experiment that can
-use existing data and produce a result the team can inspect. The models can be
-the ones already approved for use.
-
-### Delivery
-
-**1. Build your own benchmark for an orchestrator.** Take 30 to 50 recently closed,
-well-scoped issues that have tests. Replay each one from its parent commit with
-a fixed frontier model, then with the orchestrator, such as HydraFusion.
-Compare tests passing, review comments, wall-clock time and model usage cost. GitHub built CheckpointBench
-from real sessions. This is the same idea with your codebase.
-
-**2. Route issues before anyone reads them.** *(In the pilot repo.)* In a
-GitHub Actions workflow on `issues: opened`, ask a decision model to choose
-type, severity and owning team. Use your CODEOWNERS teams as the options.
-Compare its labels with 500 historical human labels, then apply labels only
-above a confidence threshold. Report accuracy, coverage at that threshold and
-median time to first response.
-
-### Security
-
-**3. Gate agent tool calls.** *(In the pilot repo.)* Put a decision step in
-front of every agent tool call, including MCP calls. The options are allow,
-escalate and block. Run a red-team set of prompt-injection and
-data-exfiltration attempts alongside ordinary traffic. Report the catch rate
-*and* the false-block rate.
-
-**4. Triage findings, don't replace scanners.** Score existing code scanning
-and dependency alerts for likely exploitability using repository context. Check
-the ranking against alerts your security team has already triaged. The scanner
-still finds the issues. The decision model decides what people look at first.
-
-### Scalability
-
-**5. Measure the cost-latency curve.** Classify 100,000 real records, such as
-support tickets, incident log lines or survey responses. Use a decision model
-and the LLM you use today on the same labels. Plot p50 and p95 latency,
-throughput and cost per thousand decisions.
-
-**6. Find the sequential-decision ceiling.** Take an agent loop with many
-decision points: continue, retry, stop or hand off? Replace only those decision
-points with a decision model and keep generation unchanged. Measure end-to-end
-task time and success rate. If success holds while time drops, you've found
-the waste.
-
-### Governance
-
-**7. Assess whether confidence is calibrated.** On representative labelled
-examples, bucket predictions by confidence and compare each bucket with its
-observed accuracy. A 1,000-example reliability diagram estimates calibration
-for that sample and distribution; it does not prove calibration under
-distribution shift. Publish the diagram alongside the act, review and reject
-thresholds. Log every decision with its probability, options and model version.
-
-**8. Test consistency.** Write ten policy decisions as rubrics, for example
-"does this pull request require a security review?" Paraphrase each input,
-reorder the options and add formatting noise. Count how often the decision
-changes. Same facts, same decision is the oldest governance requirement, and
-now you can measure it. Then make the decision a required status check through
-a branch ruleset so the policy runs on every pull request.
-
-Whichever you pick, measure today's baseline first: accuracy, time to
-resolution and cost per outcome, including retries and human corrections. A
-cheaper model call isn't necessarily a cheaper workflow.
-
-## What I still don't know
-
-- **Small models may not stay cheaper.** If frontier models keep getting
-  faster and cheaper, a separate decision layer may become one more thing to
-  maintain. The auditability case may still matter, but it needs to justify
-  that added complexity.
-- **Fixed options can hide the real answer.** Some decisions don't fit a
-  list, and forcing them into one can create false confidence.
-- **Reported isn't proven.** Both sets of numbers come from the vendors, on
-  their benchmarks. HydraFusion's results are offline and specific to the
-  evaluated benchmark revisions, model pool and pricing assumptions. My own
-  numbers come from a mock on synthetic data.
-- **A preview isn't a production commitment.** HydraFusion's names,
-  workflows and availability may change.
-- **Know where your data goes.** If inputs are sensitive, run the model
-  somewhere your existing data controls already apply.
+The pilot answered a design question, not a performance one: overall accuracy
+is the wrong number, and the confident band is the right one. What it can't
+tell me is whether a real decision model earns its place. Next, I want to put a
+real model behind the same contract, replay real labelled history from a team
+that owns a queue, and publish the reliability diagram and the threshold sweep
+alongside the result.
 
 I don't want a small model making every decision, or a large one narrating
-every routine choice. I want to know whether a bounded decision, with a
-visible policy and a path to human review, improves the whole workflow. My
-pilot is too small and synthetic to answer that. A team's own data is the
-next test.
+every routine choice. I want each bounded decision to have a visible policy, a
+logged score and a path to a person, and to know whether that makes the whole
+workflow better.

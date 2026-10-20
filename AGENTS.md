@@ -32,11 +32,14 @@ source code where useful.
   - `raghib-editorial-voice` drafts and revises posts.
   - `post-layout` covers the hero machine, diagrams, and companion
     repositories.
-  - `employer-disclaimer` decides whether a post needs the disclaimer.
 - Every post opens with its own isometric hero machine and includes at least
   one Mermaid or Excalidraw diagram. A tutorial whose code spans more than one
   file, or more than 150 lines, puts the runnable project in a companion
   repository. Tests enforce the hero, the diagram, and the 150-line limit.
+- Posts never name the author's employer or its products (Microsoft, GitHub,
+  Copilot, Azure, LinkedIn, VS Code, OpenAI and similar), and carry no
+  disclaimer. `tests/no-employer.test.mjs` fails CI on any such name outside
+  code blocks and URLs.
 - Posts use American English. `seoTitle` must be 44 characters or fewer.
 
 ## Checks
