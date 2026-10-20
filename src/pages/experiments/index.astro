@@ -4,7 +4,7 @@ import ArchiveLayout from '../../layouts/ArchiveLayout.astro'
 
 <ArchiveLayout
   title="Experiments"
-  count={2}
+  count={4}
   itemLabel="experiment"
   description="Interactive experiments and technical demonstrations by Raghib Hasan."
 >
@@ -20,6 +20,10 @@ import ArchiveLayout from '../../layouts/ArchiveLayout.astro'
     <li>
       <h2><a href="/experiments/token-diet/">Does Your Coding Agent Need a Token Diet?</a></h2>
       <p>Compare a coding agent’s token use before and after simple principles, caveman, and rtk across 25 runs.</p>
+    </li>
+    <li>
+      <h2><a href="/experiments/chess/">Can a Browser Tab Beat You at Chess?</a></h2>
+      <p>Play Stockfish compiled to WebAssembly. The engine runs on your device; no moves leave the page.</p>
     </li>
   </ul>
 </ArchiveLayout>
