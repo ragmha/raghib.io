@@ -1,7 +1,7 @@
 ---
 title: "Not Every Action Item Is Mine"
-seoTitle: "Work IQ to To-Do List: LLM vs Decision Model"
-description: "Build a reviewed to-do workflow with Work IQ and the GitHub Copilot SDK, then compare LLM prioritization with Microsoft-Decision-1 using the same evidence and rubric."
+seoTitle: "Triage Action Items: LLM vs Decision Model"
+description: "Separate finding work from judging it: build a reviewed to-do workflow that routes the same evidence through a generative LLM and a decision model, with uncertainty kept visible."
 date: "2026-10-12"
 topics: ["AI Tools", "Productivity"]
 tags: ["ai", "copilot", "agents", "productivity"]
@@ -32,7 +32,7 @@ I should do next.
 
 That needs context: who owns the work, what is blocked, whether a deadline is
 real, and whether the decision was already made somewhere else. The answer
-might be in a meeting note, a Teams thread or an email.
+might be in a meeting note, a chat thread or an email.
 
 I want a smaller list, but not one that becomes smaller by quietly losing work.
 Anything uncertain should stay visible. Anything assigned to someone else
@@ -42,6 +42,12 @@ That is the workflow this tutorial builds.
 
 ## The workflow: separate finding work from judging it
 
+The pattern has two stages with different jobs. A context stage gathers the
+evidence for each item. A judgment stage routes each item against an explicit
+rubric. Keeping them apart lets you check each stage, and swap the model in
+either, without touching the other.
+
+In this tutorial,
 **[Work IQ](https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/work-iq/cli)**
 provides Microsoft 365 context through a CLI and a Model Context Protocol
 (MCP) server. A **[GitHub Copilot SDK](https://github.com/github/copilot-sdk)**
@@ -74,7 +80,7 @@ uncertainty.
 
 ```mermaid
 flowchart TD
-    accTitle: Work IQ to a reviewed to-do list
+    accTitle: Meeting context to a reviewed to-do list
     accDescr: Work IQ and the Copilot SDK produce a reviewed evidence snapshot. The same snapshot, or synthetic tasks, goes to an LLM and Decision-1. Their proposals are compared before separating personal work, later work, uncertain items, handoffs and recorded decisions.
     sources(["Meetings and Teams chats"]) --> workiq["Work IQ summary + SDK"]
     workiq --> review["Review a local evidence snapshot"]
@@ -258,7 +264,7 @@ another run.
 <Code code={triageSource} lang="js" />
 </details>
 
-## Replace the fixture with Work IQ
+## Replace the fixture with real meeting context
 
 Work IQ's [documented prerequisites](https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/work-iq/cli)
 include a Copilot Studio usage-based billing plan, a user assigned to that plan,
@@ -308,7 +314,7 @@ These restrictions reduce what the local agent can invoke; they are not a
 sandbox for the remote Work IQ service or a guarantee against prompt injection.
 Source content remains untrusted, and the workflow stops at a proposal.
 
-## Just the LLM vs Microsoft-Decision-1
+## Generative routing vs a decision model
 
 | Question | LLM-only path | Decision-1 path |
 |---|---|---|
@@ -367,9 +373,10 @@ as the sole basis for consequential decisions about individuals.
 I don't need a model to make every task sound important. I need a workflow that
 can distinguish **urgent**, **mine**, **already settled** and **not clear yet**.
 
-Work IQ supplies context. The Copilot SDK turns it into something a program can
-use. An LLM or Decision-1 proposes the routing. The policy stays in code, and
-the final call stays with a person.
+A context layer supplies the evidence. A structuring step turns it into records
+a program can check. A generative model or a decision model proposes the route.
+The policy stays in code, and the final call stays with a person. Each part is
+replaceable; that shape is what carries over to other tools.
 
 The goal isn't an empty list. It's a list I can explain.
 

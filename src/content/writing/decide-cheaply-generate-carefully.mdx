@@ -1,7 +1,7 @@
 ---
 title: "The Smart If-Statement Is Emerging"
 seoTitle: "Decision Models for AI Systems"
-description: "OpenAI, TypeSafe and Microsoft introduced decision-focused models or APIs with different output contracts and maturity. Why they might become a useful layer, and eight experiments to test them."
+description: "A decision model scores a fixed set of options instead of writing prose. Why that could become a separate, auditable layer in AI systems, what a small synthetic pilot showed, and eight experiments to test it."
 date: "2026-10-11"
 topics: ["AI Tools", "Business"]
 tags: ["ai", "governance", "agents", "platform-engineering"]
@@ -110,11 +110,11 @@ skill for this.) Once the plan is clear, I want to test whether smaller calls
 along the way can use lower-cost models whose scores can be evaluated and
 logged.
 
-## Decision models and HydraFusion work at different layers
+## Decision models and orchestrators work at different layers
 
-One useful comparison is
+One useful comparison is a multi-model orchestrator such as
 [HydraFusion](https://github.blog/ai-and-ml/github-copilot/project-hydrafusion-frontier-quality-via-multi-model-orchestration/),
-the multi-model orchestration research preview in GitHub Copilot. For each
+a research preview in GitHub Copilot. For each
 coding task, HydraFusion chooses one of three workflows:
 
 - **Single:** one model does the task.
@@ -239,10 +239,10 @@ the ones already approved for use.
 
 ### Delivery
 
-**1. Build your own benchmark for HydraFusion.** Take 30 to 50 recently closed,
+**1. Build your own benchmark for an orchestrator.** Take 30 to 50 recently closed,
 well-scoped issues that have tests. Replay each one from its parent commit with
-a fixed frontier model, then with HydraFusion. Compare tests passing, review
-comments, wall-clock time and premium-request usage. GitHub built CheckpointBench
+a fixed frontier model, then with the orchestrator, such as HydraFusion.
+Compare tests passing, review comments, wall-clock time and model usage cost. GitHub built CheckpointBench
 from real sessions. This is the same idea with your codebase.
 
 **2. Route issues before anyone reads them.** *(In the pilot repo.)* In a

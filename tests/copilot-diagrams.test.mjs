@@ -159,7 +159,7 @@ test('the credit illustration uses an original open office scene with no card pa
 })
 
 test('the narrative separates the two personas, admin-owned automation, and approval authority', () => {
-  assert.match(draft, /## Copilot users and the budget owner/)
+  assert.match(draft, /## The person working and the budget owner/)
   assert.match(draft, /not simply a repository\s+administrator/)
   assert.match(draft, /The admin still verifies Luna-only access and approves the\s+additional usage/)
   assert.match(draft, /does not\s+approve its own spending/)

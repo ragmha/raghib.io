@@ -1,7 +1,7 @@
 ---
 title: "Keep Shipping: When an AI Budget Runs Out"
 seoTitle: "AI Budget Limits: A Fallback Prototype"
-description: "Could an explicitly approved budget cap support a lower-cost model fallback after a Copilot limit trips? A prototype design explores the trade-offs; it has not been piloted."
+description: "When a spending limit pauses an AI assistant mid-task, can an explicitly approved grace cap on a cheaper model keep work moving without bypassing the budget? A prototype design and its trade-offs; not yet piloted."
 socialImage: "/social-card-keep-shipping.png"
 date: "2026-10-13"
 topics: ["AI Tools", "Business"]
@@ -29,7 +29,7 @@ Whether the combination preserves the intended policy has not been verified in
 a pilot. It is my take on the problem, inspired by OpenAI's spend controls, not
 a recommendation that every organization adopt the same policy.
 
-## Copilot users and the budget owner
+## The person working and the budget owner
 
 **Copilot users** are the people working with GitHub Copilot. They want to finish
 the task, understand why credit-consuming features have paused, and know how to
@@ -46,7 +46,7 @@ budget changes. The admin still verifies Luna-only access and approves the
 additional usage in this design; the automation does not
 approve its own spending.
 
-## What I took from OpenAI
+## Allowances, exceptions and expiry
 
 OpenAI's [usage-limit controls for eligible ChatGPT Enterprise and Edu
 workspaces][openai-limits] separate a person's allowance from the workspace's
@@ -191,6 +191,9 @@ But GitHub's [enterprise-team model grants are additive][github-models]. If
 another team grants a model, or the enterprise enables it for everyone, adding
 a more restricted team does not take that access away.
 
+That is true of any access model built from a union of grants: a narrower grant
+cannot restrict anything. Restriction has to come from removing grants.
+
 <figure class="excalidraw-figure responsive-diagram">
   <picture>
     <source
@@ -245,6 +248,9 @@ That verification step is deliberate. I have not established a supported API
 signal that proves all relevant clients and existing sessions have applied the
 restriction. A successful membership response is not enough evidence, and a
 fixed delay would not make it enough.
+
+The general lesson: a control plane accepting a change is not evidence that
+every enforcement point has applied it. Verify where the change is used.
 
 **So this is not seamless fallback. There is still a pause.**
 
