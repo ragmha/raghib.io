@@ -666,10 +666,45 @@ function releaseGate(t) {
   t.label([254, 80, B + 32], 'SHIP', { dx: 50, dy: 0, tone: 'green' })
 }
 
+function alwaysOnAssistant(t) {
+  t.base(-250, -120, 500, 240)
+  t.rail([[-185, 0, B + 1], [-70, 0, B + 1], [60, 0, B + 1]])
+  t.rail([[0, -80, B + 1], [0, 0, B + 1]], 'blue')
+  t.rail([[80, 0, B + 1], [170, 0, B + 1]], 'green')
+  t.dial(-185, 0, 38, B, -0.6)
+  t.tray(-90, -36, 60, 72, B, 18, () => {
+    for (let i = 0; i < 4; i++) t.box(-82 + i * 2, -28, 40, 56, B + 3 + i * 2, 1.2, 'hi')
+  })
+  t.cyl(0, -80, 24, B, 36, 'blue')
+  t.plate(-18, -24, 36, 48, B, 28)
+  t.cyl(0, 0, 9, B + 28, 12, 'hi')
+  t.plate(60, -28, 20, 56, B, 36)
+  t.tray(140, -42, 82, 84, B, 30, () => {
+    t.box(156, -26, 50, 52, B + 3, 14, 'green')
+  })
+  t.label([-185, 0, B + 3], 'SCHEDULED JOBS', { dy: -70 })
+  t.label([-60, 0, B + 18], 'QUEUE', { dy: -95 })
+  t.label([0, -80, B + 36], 'MEMORY', { dy: -65, tone: 'blue' })
+  t.label([0, 0, B + 40], 'RUNTIME', { dy: -60 })
+  t.label([70, 0, B + 36], 'PERMISSION CHECK', { dy: -120 })
+  t.label([181, 0, B + 30], 'ISOLATED TOOLS', { dx: 55, dy: 0, tone: 'green' })
+}
+
 export const flowHeroSvg = hero => render(hero.label, hero.art)
 
 // Labels and outcomes paraphrase each article; nothing here adds a claim the post doesn't make.
 export const flowHeroes = {
+  'always-on-assistant': {
+    art: alwaysOnAssistant,
+    label: 'An isometric assistant workbench. A clock feeds a job queue beside a memory spool. A controller stands outside a separate tool tray, with a permission gate between them.',
+    outputs: [
+      { label: 'SCHEDULED JOBS', tone: 'mid' },
+      { label: 'SAVED MEMORY', tone: 'blue' },
+      { label: 'CHECKED ACTIONS', tone: 'green' },
+    ],
+    thesis: ['The model requests an action.', 'Software checks it. Storage remembers.'],
+    note: 'A conceptual assistant design, not the verified internals or features of any product.',
+  },
   'agent-harness': {
     art: agentHarness,
     label: 'An isometric ticket gate for an agent harness. A tool-call card from the model passes a key board where only registered tools have a peg, then a turnstile that is the policy gate. Its three exits run the tool, hold it for approval, or drop it in a reject bin, while a paper tape journals every event.',
