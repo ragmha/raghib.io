@@ -1,7 +1,7 @@
 ---
-title: "Not Every Action Item Is Mine"
-seoTitle: "Triage Action Items: Find, Then Judge"
-description: "Why a reviewed to-do workflow keeps gathering evidence apart from routing it, how a generative judge differs from a decision model, and where uncertain work should go."
+title: "Urgent, Important, and Not Mine"
+seoTitle: "Eisenhower Matrix for Meeting Action Items"
+description: "Why a meeting list needs the Eisenhower matrix with mine in place of important, how a reviewed workflow keeps finding work apart from judging it, and where uncertain work should go."
 date: "2026-10-12"
 topics: ["AI Tools", "Productivity"]
 tags: ["ai", "agents", "productivity"]
@@ -15,19 +15,66 @@ Some of it never reaches a list. The rest lands on one big list, all mixed
 together: things only I can do, things a teammate already owns, things an agent
 could draft, and decisions dressed up as tasks.
 
-**The question isn't just "What are the action items?" It's "Which of these
-deserve my attention next?"**
+I picture my work on the Eisenhower matrix: urgent against important, four
+boxes. Do what is both. Schedule what matters but can wait. Delegate what is
+urgent but doesn't matter. Delete the rest.
+
+That works when everything on the list is already mine. A meeting list isn't.
+
+**The question isn't just "Is it important?" It's "Is it mine?"**
 
 A to-do list that holds everything isn't a plan. It's a backlog with my name on
 it. This post is about the small system I designed to make that list shorter
 without making it lossy, and why it is split the way it is.
 
-## The real constraint: four questions, not one
+## Where the matrix breaks
 
-A meeting summary can tell me what was said. It cannot, by itself, tell me what
-I should do next.
+The matrix borrows a line Dwight Eisenhower
+[quoted in a 1954 speech](https://www.presidency.ucsb.edu/documents/address-the-second-assembly-the-world-council-churches-evanston-illinois),
+from a former college president: "I have two kinds of problems, the urgent and
+the important. The urgent are not important, and the important are never
+urgent." The four boxes came later. They assume what a meeting list doesn't
+give me: that every item is mine to sort.
 
-For each item I actually need four answers:
+**Ownership comes before importance.** An item can be urgent and important and
+still belong to a named teammate. The matrix puts it in Do, but it isn't mine
+to do. Its Delegate box also assumes I hand work off only when it doesn't
+matter. On a team, who owns a task is a separate question from how much it
+matters.
+
+**Delete loses work.** An item that isn't mine and isn't urgent still belongs
+to someone. Dropping it from my list is fine. Dropping it from the record is
+how work gets lost.
+
+**Two states have no box.** Some "action items" are decisions already made and
+recorded somewhere else. Others have no owner and no deadline yet. Neither can
+be placed: a settled decision isn't work, and an unclear item can't be judged
+until someone answers.
+
+So I keep urgency, swap important for mine, and give the other two states their
+own place.
+
+<figure class="excalidraw-figure responsive-diagram">
+  <picture>
+    <source
+      media="(max-width: 60rem)"
+      srcSet="/diagrams/urgent-mine-grid-portrait.svg"
+      width="456"
+      height="836"
+    />
+    <img
+      src="/diagrams/urgent-mine-grid.svg"
+      width="946"
+      height="666"
+      loading="lazy"
+      decoding="async"
+      alt="The Eisenhower matrix with important swapped for mine. Mine and urgent goes to my next actions, where the matrix says Do. Mine and not urgent goes to my later list, where it says Schedule. Work that isn't mine becomes a proposed handoff whether it is urgent or not, including where the matrix says Delete. Outside the grid, already settled items become recorded decisions, and items that aren't clear yet go to needs review, the highlighted box."
+    />
+  </picture>
+</figure>
+
+A meeting summary can tell me what was said. It cannot, by itself, tell me
+which box an item belongs in. For each item I need four answers:
 
 - **Is it mine?** Or does a named teammate own it?
 - **Is it urgent?** Due today, blocking someone, or explicitly later?
