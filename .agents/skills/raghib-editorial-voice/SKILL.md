@@ -105,3 +105,7 @@ unpublish, rename slugs, or rewrite without the author's go-ahead.
   reframed around a pattern or retired. Ask the author which.
 - **No employer.** Never name the author's employer or its products; describe
   the pattern instead. `tests/no-employer.test.mjs` enforces this.
+- **Conflict check.** Hiding a name doesn't remove a conflict of interest. Run
+  the four questions in `.github/instructions/writing.instructions.md`: would
+  the vendor publish it, is every claim public, is it a substitute, does it rank
+  vendors. Flag failures to the author.
