@@ -32,6 +32,7 @@ source code where useful.
   - `raghib-editorial-voice` drafts and revises posts.
   - `post-layout` covers the hero machine, diagrams, and companion
     repositories.
+  - `publication-preflight` checks a draft or post before review or release.
 - Every post opens with its own isometric hero machine and includes at least
   one Mermaid or Excalidraw diagram. A tutorial whose code spans more than one
   file, or more than 150 lines, puts the runnable project in a companion
