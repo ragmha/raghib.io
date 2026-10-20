@@ -1,5 +1,5 @@
 ---
-applyTo: "src/content/writing/**,src/pages/experiments/**"
+applyTo: "src/content/writing/**"
 ---
 
 # Posts: no employer content

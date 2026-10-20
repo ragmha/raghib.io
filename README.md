@@ -56,9 +56,9 @@ and deployment instructions:
 - [Where Did the Time Go?](https://lab.raghib.io/session-flame/)
 - [Token Diet](https://lab.raghib.io/token-diet/)
 
-The blog's `/experiments/` remains a directory linking directly to those apps.
-Native Astro redirects in `astro.config.mjs` preserve each old
-`/experiments/<name>/` page URL. On this static site Astro emits HTML redirects;
+The site navigation links to the lab. Native Astro redirects in
+`astro.config.mjs` send `/experiments/` and each old `/experiments/<name>/`
+page URL there. On this static site Astro emits HTML redirects;
 no redirect JavaScript is required. Redirect pages are excluded from the
 sitemap and skipped by the SEO and vitals checks. App code, data, and downloads
 live only in the lab repository.
