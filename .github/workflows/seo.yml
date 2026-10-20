@@ -16,8 +16,8 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # Release checks gate what ships with the blog. A PR that only touches other
-  # lanes (lab, agent skills, contributor docs) skips them.
+  # Release checks gate what ships with the blog. A PR that only touches agent
+  # skills or contributor docs skips them.
   lanes:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -35,7 +35,7 @@ jobs:
           if [ -n "$PR" ]; then
             files=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --paginate --jq '.[].filename')
             # ponytail: prefix list; move to a paths-filter action if lanes multiply
-            grep -qvE '^(lab/|\.agents/|\.impeccable/|\.github/instructions/|(AGENTS|DESIGN|README)\.md$|LICENSE$)' <<< "$files" || release=false
+            grep -qvE '^(\.agents/|\.impeccable/|\.github/instructions/|(AGENTS|DESIGN|README)\.md$|LICENSE$)' <<< "$files" || release=false
           fi
           echo "release=$release" >> "$GITHUB_OUTPUT"
 

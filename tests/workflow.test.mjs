@@ -43,8 +43,8 @@ test('release checks skip only PRs that stay outside the release lane', () => {
   }
   try {
     assert.equal(lane('', []), 'release=true')
-    assert.equal(lane('7', ['lab/chess/index.astro', '.agents/skills/x/SKILL.md', 'AGENTS.md', 'README.md']), 'release=false')
-    assert.equal(lane('7', ['lab/chess/index.astro', 'src/pages/index.astro']), 'release=true')
+    assert.equal(lane('7', ['.agents/skills/x/SKILL.md', 'AGENTS.md', 'README.md']), 'release=false')
+    assert.equal(lane('7', ['AGENTS.md', 'src/pages/index.astro']), 'release=true')
     assert.equal(lane('7', ['.github/workflows/seo.yml']), 'release=true')
     assert.equal(lane('7', ['docs/README.md']), 'release=true')
   } finally {

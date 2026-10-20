@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import config from '../astro.config.mjs'
 
@@ -14,17 +14,5 @@ test('the experiment directory links to the lab and old app routes use native re
     assert.equal(existsSync(new URL(`../src/pages/experiments/${slug}.astro`, import.meta.url)), false)
   }
   assert.equal((directory.match(/href="https:\/\/lab\.raghib\.io\//g) ?? []).length, 4)
-})
-
-test('old experiment tabs and download links retain their static compatibility assets', () => {
-  for (const path of [
-    'copilot-export.sh', 'copilot-export.ps1',
-    'experiments/chess/stockfish-19-lite-single.js',
-    'experiments/chess/stockfish-19-lite-single.wasm',
-    'experiments/chess/COPYING.txt', 'experiments/chess/SOURCE.txt',
-  ]) {
-    assert.ok(existsSync(new URL(`../public/${path}`, import.meta.url)), path)
-  }
-  assert.equal(readdirSync(new URL('../public/experiments/session-flame/runs/', import.meta.url))
-    .filter((file) => file.endsWith('.jsonl')).length, 9)
+  assert.equal(existsSync(new URL('../public/experiments/', import.meta.url)), false, 'experiment assets belong in the lab')
 })

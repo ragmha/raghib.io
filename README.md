@@ -60,14 +60,8 @@ The blog's `/experiments/` remains a directory linking directly to those apps.
 Native Astro redirects in `astro.config.mjs` preserve each old
 `/experiments/<name>/` page URL. On this static site Astro emits HTML redirects;
 no redirect JavaScript is required. Redirect pages are excluded from the
-sitemap and skipped by the SEO and vitals checks.
-
-Compatibility downloads stay at `/copilot-export.sh` and `/copilot-export.ps1`,
-with their tests in `tests/copilot-export.test.ts`. The old
-`public/experiments/chess/` engine files and GPL/source notices, and the nine
-published logs in `public/experiments/session-flame/runs/`, remain unchanged
-so already-open or cached app tabs can fetch them. These are compatibility
-copies, not a second app implementation; maintain the apps in the lab repository.
+sitemap and skipped by the SEO and vitals checks. App code, data, and downloads
+live only in the lab repository.
 The blog's shared theme, layouts, fonts, and writing documentation remain here.
 
 ## Writing and project writeups
@@ -193,8 +187,8 @@ request into `main`, on merge-queue builds, and on pushes to `main`, where it
 also uploads the site for the `deploy` job. Its job name is the required-check
 identifier: keep it stable when editing the workflow. A required status-check
 rule on `main` enforces the gate; merely adding a workflow does not prevent
-merging. A pull request that only changes files outside the release lane
-(`lab/`, `.agents/`, contributor docs; see the `lanes` job) skips the checks,
+merging. A pull request that only changes agent skills or contributor docs
+(see the `lanes` job) skips the checks,
 and the skipped job still reports success. The gate also runs `cspell`
 (American English) over posts; add real terms to `cspell.json`. A weekly
 `Link check` workflow opens or updates a `Broken links` issue when external
