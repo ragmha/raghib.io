@@ -17,6 +17,12 @@ for (const file of (await readdir(writingDir)).filter((file) => /\.mdx?$/.test(f
 
 export default defineConfig({
   site: 'https://raghib.io',
+  redirects: {
+    '/experiments/chess/': 'https://lab.raghib.io/chess/',
+    '/experiments/context-autopsy/': 'https://lab.raghib.io/context-autopsy/',
+    '/experiments/session-flame/': 'https://lab.raghib.io/session-flame/',
+    '/experiments/token-diet/': 'https://lab.raghib.io/token-diet/',
+  },
   image: {
     layout: 'constrained',
     responsiveStyles: true,

@@ -19,13 +19,11 @@
     "@astrojs/mdx": "^4.3.6",
     "@astrojs/rss": "^4.0.12",
     "@astrojs/sitemap": "^3.7.4",
-    "astro": "^5.13.7",
-    "chess.js": "1.4.0"
+    "astro": "^5.13.7"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
     "@excalidraw/excalidraw": "^0.18.1",
-    "gpt-tokenizer": "^4.0.3",
     "playwright": "^1.63.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
