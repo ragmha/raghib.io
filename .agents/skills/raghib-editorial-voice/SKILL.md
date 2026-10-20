@@ -85,3 +85,23 @@ only works inside one vendor's product reads as marketing.
    them. `seoTitle` must remain at most 44 characters.
 5. Check the piece against its chosen mode in [EXAMPLES.md](EXAMPLES.md), then
    run `bun run build` and `bun run check:seo` for content changes.
+
+## Audit for vendor drift
+
+When asked to audit existing posts, report findings per post; do not
+unpublish, rename slugs, or rewrite without the author's go-ahead.
+
+- **So what?** State in one sentence why the post matters to a builder outside
+  the author's company. If you can't, flag it.
+- **Problem, not product.** `title`, `seoTitle`, `description`, and headings
+  name the problem or pattern. A vendor name belongs only where it is a cited
+  source, a step the reader runs, or the incident being explained.
+- **Why and what before how.** In a blog post, most of the text covers the
+  constraint, the pattern, its trade-offs, and the evidence; tool setup
+  supports them. Tutorials are exempt: the steps are the point.
+- **Plain findings.** Keep genuine uncertainty; cut justification that defends
+  the author's diligence instead of informing the reader.
+- **Product tours.** A post that mainly lists one product's features should be
+  reframed around a pattern or retired. Ask the author which.
+- Removing vendor names does not remove the disclaimer; re-apply
+  `employer-disclaimer` after any edit.
