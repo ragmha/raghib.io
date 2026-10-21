@@ -50,5 +50,7 @@ const analyticsToken = import.meta.env.PROD ? import.meta.env.PUBLIC_CF_BEACON_T
     data-cf-beacon={JSON.stringify({ token: analyticsToken })}
   />
 )}
-<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+{/* Google Search can't use SVG favicons; keep the PNG first. */}
+<link rel="icon" href="/favicon-192.png" type="image/png" sizes="192x192" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
 <meta name="generator" content={Astro.generator} />
