@@ -27,6 +27,31 @@ test('site audits pass before the main-branch artifact can deploy', () => {
   assert.equal(workflow.jobs.deploy.if, "github.ref == 'refs/heads/main'")
 })
 
+test('release checks skip only PRs that stay outside the release lane', () => {
+  assert.equal(workflow.jobs.seo.needs, 'lanes')
+  assert.equal(workflow.jobs.seo.if, "${{ !cancelled() && needs.lanes.outputs.release != 'false' }}")
+  const script = workflow.jobs.lanes.steps[0].run
+  const output = join(process.cwd(), `.test-lanes-${process.pid}`)
+  const lane = (pr, files) => {
+    writeFileSync(output, '')
+    const result = spawnSync('bash', ['--noprofile', '--norc', '-e', '-c', `gh() { printf '%s\\n' "$MOCK_FILES"; }\n${script}`], {
+      encoding: 'utf8',
+      env: { ...process.env, PR: pr, MOCK_FILES: files.join('\n'), GITHUB_OUTPUT: output, GITHUB_REPOSITORY: 'o/r' },
+    })
+    assert.equal(result.status, 0, result.stderr)
+    return readFileSync(output, 'utf8').trim()
+  }
+  try {
+    assert.equal(lane('', []), 'release=true')
+    assert.equal(lane('7', ['.agents/skills/x/SKILL.md', 'AGENTS.md', 'README.md']), 'release=false')
+    assert.equal(lane('7', ['AGENTS.md', 'src/pages/index.astro']), 'release=true')
+    assert.equal(lane('7', ['.github/workflows/seo.yml']), 'release=true')
+    assert.equal(lane('7', ['docs/README.md']), 'release=true')
+  } finally {
+    rmSync(output, { force: true })
+  }
+})
+
 test('link check creates an issue once and edits it only when findings change', () => {
   const linkWorkflow = parse(readFileSync(new URL('../.github/workflows/link-check.yml', import.meta.url), 'utf8'))
   const script = linkWorkflow.jobs.links.steps.find(step => step.run).run
