@@ -3,6 +3,12 @@ import { glob } from 'astro/loaders'
 import { projectSnapshot } from './content/project-snapshot'
 import { flowHeroes } from './lib/flow-hero.mjs'
 import { TOPICS } from './lib/topics'
+import { rstackVersionPattern, rstackPathPattern } from './lib/rstack.mjs'
+
+const rstack = z.object({
+  version: z.string().regex(rstackVersionPattern),
+  uses: z.array(z.string().regex(rstackPathPattern)),
+}).optional()
 
 const writing = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/writing' }),
@@ -15,6 +21,7 @@ const writing = defineCollection({
     topics: z.array(z.enum(TOPICS)).min(1),
     tags: z.array(z.string()).default([]),
     published: z.boolean().default(true),
+    rstack,
     cover: z.object({ src: image(), alt: z.string().trim().min(1) }).optional(),
     // Every post opens with an Anatomy illustration: the decision cover or a flow hero.
     hero: z.enum(['decision', ...Object.keys(flowHeroes)] as [string, ...string[]]),
@@ -33,6 +40,7 @@ const projectWriteups = defineCollection({
     description: z.string().min(1),
     date: z.coerce.date(),
     published: z.boolean().default(false),
+    rstack,
   }),
 })
 

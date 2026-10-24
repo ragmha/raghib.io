@@ -15,13 +15,19 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.5
+      - run: bun install --frozen-lockfile
       - shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           : > broken.txt
-          grep -rhoE 'https?://[^][[:space:]<>"'"'"'`()]+' src/content/writing src/content/project-writeups README.md \
-            | sed -E 's/[.,;:]+$//' | grep -vE '^https?://(localhost|127\.0\.0\.1)' | sort -u \
+          bun scripts/rstack-urls.mjs > rstack-urls.txt
+          { grep -rhoE 'https?://[^][[:space:]<>"'"'"'`()]+' src/content/writing src/content/project-writeups README.md
+            cat rstack-urls.txt
+          } | sed -E 's/[.,;:]+$//' | grep -vE '^https?://(localhost|127\.0\.0\.1)' | sort -u \
             | while read -r url; do
                 code=$(curl -sL -o /dev/null -w '%{http_code}' --max-time 15 -A 'Mozilla/5.0 raghib.io link check' "$url" || true)
                 # 401/403/429/999 are usually bot blocking, not dead pages.

@@ -5,6 +5,7 @@ import WritingLayout from '../../layouts/WritingLayout.astro'
 import PartsNav from '../../components/PartsNav.astro'
 import DecisionHero from '../../components/DecisionHero.astro'
 import FlowHero from '../../components/FlowHero.astro'
+import RstackBox from '../../components/RstackBox.astro'
 import {
   estimateReadingTime,
   getPostSlug,
@@ -102,6 +103,7 @@ const published = new Intl.DateTimeFormat('en-US', {
         </aside>
         <article class="prose">
           <Content />
+          {post.data.rstack && <RstackBox rstack={post.data.rstack} />}
 
           <hr class="rule-dotted" />
           <p class="doc-end"><a href="/writing/">← All writing</a></p>
