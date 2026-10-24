@@ -78,6 +78,26 @@ writeup at `/project/<project-name>/writings/`, authored as MDX in
 `src/content/project-writeups/`; set `published: true` when it's ready to go
 live. Writeups are separate from the Writing archive/RSS feed.
 
+Writing posts and project writeups can credit the skills, agents, and workflows
+they actually used with release-pinned frontmatter:
+
+```yaml
+rstack:
+  version: v0.2.0
+  uses: [skills/diagnose, skills/tdd, workflows/issue-triage.md]
+```
+
+This renders a **Built with rstack** box after the article. Inline Markdown such
+as `[diagnose](rstack:skills/diagnose)` links to the same release in
+`ragmha/rstack`. Every shorthand reference must appear in `rstack.uses`;
+missing versions and unlisted references fail the build. Versions must be
+`v<major>.<minor>.<patch>`. Skills use `skills/<name>` directories; agents use
+`agents/<name>.md` or `agents/<name>.agent.md`; workflows use
+`workflows/<name>.md`, `.yml`, or `.yaml`. Names contain only lowercase letters,
+digits, and hyphens. Links use `tree` for skill directories and `blob` for files.
+`bun scripts/rstack-urls.mjs` expands the frontmatter links for the weekly link
+check. Only declare resources present in the selected release.
+
 A post can open with a full-bleed cover image. Put the image in
 `src/assets/covers/` and add it to the frontmatter:
 
