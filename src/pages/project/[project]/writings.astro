@@ -2,6 +2,7 @@
 import { render, type CollectionEntry } from 'astro:content'
 import WritingLayout from '../../../layouts/WritingLayout.astro'
 import PartsNav from '../../../components/PartsNav.astro'
+import RstackBox from '../../../components/RstackBox.astro'
 import type { Project } from '../../../content/project-snapshot'
 import { getVisibleProjectWriteups } from '../../../lib/project-writeups'
 import { estimateReadingTime, formatDate } from '../../../lib/posts'
@@ -56,6 +57,7 @@ const readingTime = estimateReadingTime(writeup.body)
           </header>
 
           <Content />
+          {writeup.data.rstack && <RstackBox rstack={writeup.data.rstack} />}
 
           <hr class="rule-dotted" />
           <p class="doc-end"><a href="/projects/">← All projects</a></p>

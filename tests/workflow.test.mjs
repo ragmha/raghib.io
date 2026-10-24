@@ -54,7 +54,7 @@ test('release checks skip only PRs that stay outside the release lane', () => {
 
 test('link check creates an issue once and edits it only when findings change', () => {
   const linkWorkflow = parse(readFileSync(new URL('../.github/workflows/link-check.yml', import.meta.url), 'utf8'))
-  const script = linkWorkflow.jobs.links.steps.find(step => step.run).run
+  const script = linkWorkflow.jobs.links.steps.find(step => step.run?.includes('broken.txt')).run
   const directory = join(process.cwd(), `.test-link-check-${process.pid}`)
   rmSync(directory, { recursive: true, force: true })
   try {
@@ -64,6 +64,7 @@ test('link check creates an issue once and edits it only when findings change', 
     const log = join(directory, 'calls.txt')
     writeFileSync(log, '')
     const mocks = `
+      bun() { printf '%s\\n' 'https://github.com/ragmha/rstack/tree/v0.2.0/skills/diagnose'; }
       curl() { printf '%s' "$MOCK_STATUS"; }
       gh() {
         case "$2" in
@@ -86,7 +87,7 @@ test('link check creates an issue once and edits it only when findings change', 
         env: { ...process.env, MOCK_STATUS: status, MOCK_ISSUE: issue, MOCK_BODY: body, MOCK_LOG: log },
       },
     )
-    const finding = '- `404` https://example.com/broken'
+    const finding = '- `404` https://example.com/broken\n- `404` https://github.com/ragmha/rstack/tree/v0.2.0/skills/diagnose'
 
     assert.equal(run('200').status, 0)
     assert.equal(readFileSync(log, 'utf8'), '')
