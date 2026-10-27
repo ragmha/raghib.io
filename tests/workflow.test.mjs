@@ -92,22 +92,26 @@ test('IndexNow ships its key and lists only URLs that joined or left the sitemap
 
 test('IndexNow pings only after the deploy and cannot fail it', () => {
   const deploy = workflow.jobs.deploy
-  const ping = deploy.steps.findIndex(step => step.run?.includes('https://api.indexnow.org/indexnow'))
+  const ping = deploy.steps.findIndex(step => step.id === 'indexnow')
   assert.ok(ping > deploy.steps.findIndex(step => step.id === 'deployment'))
   assert.equal(deploy.steps[ping]['continue-on-error'], true)
   assert.equal(deploy.env.INDEXNOW_URLS, '${{ needs.seo.outputs.indexnow }}')
   const body = join(process.cwd(), `.test-indexnow-body-${process.pid}`)
+  const args = `${body}.args`
   try {
-    const result = spawnSync('bash', ['--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', `curl() { cat > "$MOCK_BODY"; }\n${deploy.steps[ping].run}`], {
+    const curl = `curl() { printf '%s\\n' "$@" > "$MOCK_ARGS"; cat > "$MOCK_BODY"; }`
+    const result = spawnSync('bash', ['--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', `${curl}\n${deploy.steps[ping].run}`], {
       encoding: 'utf8',
       env: {
         ...process.env,
         INDEXNOW_KEY: 'key-12345',
         INDEXNOW_URLS: '["https://example.com/a/","https://example.com/b/"]',
         MOCK_BODY: body,
+        MOCK_ARGS: args,
       },
     })
     assert.equal(result.status, 0, result.stderr)
+    assert.equal(readFileSync(args, 'utf8').trim().split('\n').at(-1), 'https://api.indexnow.org/indexnow')
     assert.deepEqual(JSON.parse(readFileSync(body, 'utf8')), {
       host: 'example.com',
       key: 'key-12345',
@@ -115,6 +119,7 @@ test('IndexNow pings only after the deploy and cannot fail it', () => {
     })
   } finally {
     rmSync(body, { force: true })
+    rmSync(args, { force: true })
   }
 })
 

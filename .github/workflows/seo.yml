@@ -113,7 +113,8 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v5
       # Best effort: the site is already live, so a rejected ping can't fail it.
-      - if: env.INDEXNOW_URLS != '' && env.INDEXNOW_URLS != '[]'
+      - id: indexnow
+        if: env.INDEXNOW_URLS != '' && env.INDEXNOW_URLS != '[]'
         continue-on-error: true
         run: |
           jq -n --arg key "$INDEXNOW_KEY" --argjson urls "$INDEXNOW_URLS" \
