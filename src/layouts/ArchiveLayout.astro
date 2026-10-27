@@ -8,12 +8,13 @@ interface Props {
   count: number
   itemLabel: string
   showHeading?: boolean
+  noindex?: boolean
 }
 
-const { title, description, count, itemLabel, showHeading = true } = Astro.props
+const { title, description, count, itemLabel, showHeading = true, noindex = false } = Astro.props
 ---
 
-<WritingLayout title={title} description={description}>
+<WritingLayout title={title} description={description} noindex={noindex}>
   <div class="writing-index">
     <main id="main">
       <article class="prose">

@@ -52,6 +52,72 @@ test('release checks skip only PRs that stay outside the release lane', () => {
   }
 })
 
+test('IndexNow ships its key and lists only URLs that joined or left the sitemap', () => {
+  const steps = workflow.jobs.seo.steps
+  const step = steps.find(step => step.id === 'indexnow')
+  assert.ok(steps.indexOf(step) < steps.findIndex(step => step.uses?.startsWith('actions/upload-pages-artifact')))
+  assert.equal(step.if, "github.ref == 'refs/heads/main' && env.INDEXNOW_KEY != ''")
+  assert.equal(workflow.jobs.seo.outputs.indexnow, '${{ steps.indexnow.outputs.urls }}')
+  const directory = join(process.cwd(), `.test-indexnow-${process.pid}`)
+  rmSync(directory, { recursive: true, force: true })
+  try {
+    mkdirSync(join(directory, 'dist'), { recursive: true })
+    mkdirSync(join(directory, 'public'))
+    writeFileSync(join(directory, 'public/CNAME'), 'example.com\n')
+    writeFileSync(join(directory, 'dist/sitemap.txt'), 'https://example.com/\nhttps://example.com/writing/new/\n')
+    const output = join(directory, 'output.txt')
+    const listed = (live, status = 0) => {
+      writeFileSync(output, '')
+      const curl = `curl() { [ "$*" = '-fsS https://example.com/sitemap.txt' ] || return 2; printf '%s' "$MOCK_LIVE"; return "$MOCK_STATUS"; }`
+      const result = spawnSync('bash', ['--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', `${curl}\n${step.run}`], {
+        cwd: directory,
+        encoding: 'utf8',
+        env: { ...process.env, INDEXNOW_KEY: 'key-12345', MOCK_LIVE: live, MOCK_STATUS: String(status), GITHUB_OUTPUT: output },
+      })
+      assert.equal(result.status, 0, result.stderr)
+      const line = readFileSync(output, 'utf8').trim()
+      return line && JSON.parse(line.replace(/^urls=/, ''))
+    }
+    assert.deepEqual(
+      listed('https://example.com/\nhttps://example.com/writing/tag/old/\n'),
+      ['https://example.com/writing/new/', 'https://example.com/writing/tag/old/'],
+    )
+    assert.equal(readFileSync(join(directory, 'dist/key-12345.txt'), 'utf8'), 'key-12345')
+    assert.deepEqual(listed('https://example.com/writing/new/\nhttps://example.com/\n'), [])
+    assert.equal(listed('', 22), '', 'an unreachable live sitemap skips the ping rather than resubmitting every URL')
+  } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
+})
+
+test('IndexNow pings only after the deploy and cannot fail it', () => {
+  const deploy = workflow.jobs.deploy
+  const ping = deploy.steps.findIndex(step => step.run?.includes('https://api.indexnow.org/indexnow'))
+  assert.ok(ping > deploy.steps.findIndex(step => step.id === 'deployment'))
+  assert.equal(deploy.steps[ping]['continue-on-error'], true)
+  assert.equal(deploy.env.INDEXNOW_URLS, '${{ needs.seo.outputs.indexnow }}')
+  const body = join(process.cwd(), `.test-indexnow-body-${process.pid}`)
+  try {
+    const result = spawnSync('bash', ['--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', `curl() { cat > "$MOCK_BODY"; }\n${deploy.steps[ping].run}`], {
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        INDEXNOW_KEY: 'key-12345',
+        INDEXNOW_URLS: '["https://example.com/a/","https://example.com/b/"]',
+        MOCK_BODY: body,
+      },
+    })
+    assert.equal(result.status, 0, result.stderr)
+    assert.deepEqual(JSON.parse(readFileSync(body, 'utf8')), {
+      host: 'example.com',
+      key: 'key-12345',
+      urlList: ['https://example.com/a/', 'https://example.com/b/'],
+    })
+  } finally {
+    rmSync(body, { force: true })
+  }
+})
+
 test('link check creates an issue once and edits it only when findings change', () => {
   const linkWorkflow = parse(readFileSync(new URL('../.github/workflows/link-check.yml', import.meta.url), 'utf8'))
   const script = linkWorkflow.jobs.links.steps.find(step => step.run).run

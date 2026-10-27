@@ -210,7 +210,8 @@ It requires unique titles/descriptions, one H1, canonical and social metadata,
 a real social-preview image, valid author/article schema, working internal links
 and image assets, and correct sitemap/robots/RSS discovery. `/sitemap.xml`
 and `/sitemap.txt` mirror the generated indexable pages; the XML includes
-`lastmod` on published writing.
+`lastmod` on published writing. Tag and topic archives are `noindex` and stay
+out of the sitemap because they only repeat post summaries.
 `llms.txt` and `llms-full.txt` must list exactly the published writing. Every published
 source entry must have a corresponding rendered article with matching metadata;
 drafts must not leak into the build. An intentionally empty writing archive is
@@ -244,6 +245,13 @@ throttling. The gate checks technical readiness, not rankings, keyword demand,
 factual accuracy, or field Core Web Vitals. Those still need editorial review and
 production evidence. After deployment, submit `/sitemap-index.xml` in Search
 Console using an account authorized for the site.
+
+Bing and other IndexNow search engines hear about changes from the deploy
+itself. With an `INDEXNOW_KEY` repository secret set (8–128 letters, digits, or
+hyphens), each `main` deploy publishes `/<key>.txt` and submits the URLs that
+joined or left the sitemap since the previous deploy. Edits to existing pages
+rely on the sitemap. A rejected submission is logged without failing the deploy.
+Google doesn't use IndexNow.
 
 ---
 
