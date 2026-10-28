@@ -7,7 +7,7 @@ These examples show different modes, not one structure to copy.
 - **TIL:** No post is currently a standalone TIL. Keep this as an available
   format for one bounded discovery; do not shorten an essay just to fill it.
 - **Blog posts:** `decide-cheaply-generate-carefully.mdx`,
-  `keep-shipping-copilot-budget-limits-part-1.mdx`,
+  `keep-shipping-budget-limits-part-1.mdx`,
   `not-every-action-item-is-mine.mdx`, and `rfp-without-spreadsheets.mdx`.
 - **Tutorials and references:** `build-your-agent-harness.mdx` and
   `leaving-vercel-dns-lessons.mdx`.
@@ -18,7 +18,7 @@ These examples show different modes, not one structure to copy.
 > permission to use a cheaper model does not make it free, and it does not
 > override an exhausted user budget.
 
-— `src/content/writing/keep-shipping-copilot-budget-limits-part-1.mdx`
+— `src/content/writing/keep-shipping-budget-limits-part-1.mdx`
 
 The discovery is narrow and practical. A TIL can explain the context and
 consequence, then stop.
