@@ -23,13 +23,17 @@ jobs:
           grep -rhoE 'https?://[^][[:space:]<>"'"'"'`()]+' src/content/writing src/content/project-writeups README.md \
             | sed -E 's/[.,;:]+$//' | grep -vE '^https?://(localhost|127\.0\.0\.1)' | sort -u \
             | while read -r url; do
-                code=$(curl -sL -o /dev/null -w '%{http_code}' --max-time 15 -A 'Mozilla/5.0 raghib.io link check' "$url" || true)
+                code=$(curl -sL --retry 2 -o /dev/null -w '%{http_code}' --max-time 15 -A 'Mozilla/5.0 raghib.io link check' "$url" || true)
                 # 401/403/429/999 are usually bot blocking, not dead pages.
                 [[ "$code" =~ ^([23]..|401|403|429|999)$ ]] || echo "- \`$code\` $url" >> broken.txt
               done
-          [ -s broken.txt ] || { echo "All external links work"; exit 0; }
-          cat broken.txt
           open=$(gh issue list --state open --search 'Broken links in:title' --author github-actions[bot] --json number,title --jq '[.[] | select(.title == "Broken links")][0].number // empty')
+          if [ ! -s broken.txt ]; then
+            echo "All external links work"
+            if [ -n "$open" ]; then gh issue close "$open" --comment 'All external links work again.'; fi
+            exit 0
+          fi
+          cat broken.txt
           if [ -n "$open" ]; then
             current=$(gh issue view "$open" --json body --jq .body)
             if [ "$current" != "$(cat broken.txt)" ]; then

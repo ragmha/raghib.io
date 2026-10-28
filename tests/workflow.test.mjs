@@ -52,6 +52,24 @@ test('release checks skip only PRs that stay outside the release lane', () => {
   }
 })
 
+test('skills-only PRs still validate every SKILL.md', () => {
+  const lanes = workflow.jobs.lanes
+  const check = lanes.steps.find(step => step.run === 'node --test tests/skills.test.mjs')
+  assert.equal(check?.if, "steps.lane.outputs.release == 'false'")
+  assert.ok(lanes.steps.some(step => step.uses?.startsWith('actions/checkout') && step.if === check.if), 'the skills are checked out first')
+  assert.equal(lanes.permissions.contents, 'read')
+})
+
+test('the lockfile installs from the public npm registry', () => {
+  const lockfile = readFileSync(new URL('../bun.lock', import.meta.url), 'utf8')
+  const urls = [...lockfile.matchAll(/"(https?:\/\/[^"]+\.tgz)"/g)].map(([, url]) => url)
+  assert.deepEqual(
+    urls.filter(url => !url.startsWith('https://registry.npmjs.org/')),
+    [],
+    'bun.lock names a private registry; restore it and install with `bun install --no-save`',
+  )
+})
+
 test('IndexNow ships its key and lists only URLs that joined or left the sitemap', () => {
   const steps = workflow.jobs.seo.steps
   const step = steps.find(step => step.id === 'indexnow')
@@ -125,7 +143,7 @@ test('IndexNow pings only after the deploy and cannot fail or stall it', () => {
   }
 })
 
-test('link check creates an issue once and edits it only when findings change', () => {
+test('link check creates an issue once, edits it only when findings change, and closes it once links work', () => {
   const linkWorkflow = parse(readFileSync(new URL('../.github/workflows/link-check.yml', import.meta.url), 'utf8'))
   const script = linkWorkflow.jobs.links.steps.find(step => step.run).run
   const directory = join(process.cwd(), `.test-link-check-${process.pid}`)
@@ -146,7 +164,7 @@ test('link check creates an issue once and edits it only when findings change', 
             printf '%s' "$MOCK_ISSUE"
             ;;
           view) printf '%s' "$MOCK_BODY" ;;
-          edit|create) printf '%s\\n' "$*" >> "$MOCK_LOG" ;;
+          edit|create|close) printf '%s\\n' "$*" >> "$MOCK_LOG" ;;
           *) return 2 ;;
         esac
       }
@@ -163,6 +181,10 @@ test('link check creates an issue once and edits it only when findings change', 
 
     assert.equal(run('200').status, 0)
     assert.equal(readFileSync(log, 'utf8'), '')
+
+    assert.equal(run('200', '42').status, 0)
+    assert.match(readFileSync(log, 'utf8'), /issue close 42 --comment/)
+    writeFileSync(log, '')
 
     assert.equal(run('404', '42', finding).status, 0)
     assert.equal(readFileSync(log, 'utf8'), '')
