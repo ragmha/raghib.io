@@ -41,7 +41,6 @@ export function getTaxonomySlug(value: string): string {
 const TAG_LABELS: Record<string, string> = {
   ai: 'AI',
   astro: 'Astro',
-  copilot: 'GitHub Copilot',
   design: 'Design',
   dns: 'DNS',
   dx: 'Developer Experience',

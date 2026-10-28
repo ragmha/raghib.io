@@ -25,6 +25,11 @@ export function readPublication(source, collection, file) {
   if (data.seoTitle !== undefined && (typeof data.seoTitle !== 'string' || !data.seoTitle.trim())) {
     throw new Error(`${file}: seoTitle must be a nonempty string`)
   }
+  // Pages are titled "<search title> · Raghib Hasan", which must fit in 60 characters.
+  const searchTitle = data.seoTitle?.trim() ?? data.title
+  if (searchTitle.length > 44) {
+    throw new Error(`${file}: search title is ${searchTitle.length} characters; set a seoTitle of 44 or fewer`)
+  }
   if (!['string', 'number'].includes(typeof data.date) && !(data.date instanceof Date)) {
     throw new Error(`${file}: published content needs a publication date`)
   }
@@ -38,7 +43,7 @@ export function readPublication(source, collection, file) {
   return {
     collection,
     headline: data.title,
-    searchTitle: data.seoTitle?.trim() ?? data.title,
+    searchTitle,
     description: data.description,
     datePublished: date.toISOString(),
   }
