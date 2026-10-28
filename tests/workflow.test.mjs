@@ -68,7 +68,7 @@ test('IndexNow ships its key and lists only URLs that joined or left the sitemap
     const output = join(directory, 'output.txt')
     const listed = (live, status = 0) => {
       writeFileSync(output, '')
-      const curl = `curl() { [ "$*" = '-fsS https://example.com/sitemap.txt' ] || return 2; printf '%s' "$MOCK_LIVE"; return "$MOCK_STATUS"; }`
+      const curl = `curl() { [ "$*" = '-fsS --connect-timeout 10 --max-time 30 https://example.com/sitemap.txt' ] || return 2; printf '%s' "$MOCK_LIVE"; return "$MOCK_STATUS"; }`
       const result = spawnSync('bash', ['--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', `${curl}\n${step.run}`], {
         cwd: directory,
         encoding: 'utf8',
@@ -84,13 +84,13 @@ test('IndexNow ships its key and lists only URLs that joined or left the sitemap
     )
     assert.equal(readFileSync(join(directory, 'dist/key-12345.txt'), 'utf8'), 'key-12345')
     assert.deepEqual(listed('https://example.com/writing/new/\nhttps://example.com/\n'), [])
-    assert.equal(listed('', 22), '', 'an unreachable live sitemap skips the ping rather than resubmitting every URL')
+    assert.equal(listed('', 28), '', 'a failed or timed-out live sitemap fetch skips the ping rather than resubmitting every URL')
   } finally {
     rmSync(directory, { recursive: true, force: true })
   }
 })
 
-test('IndexNow pings only after the deploy and cannot fail it', () => {
+test('IndexNow pings only after the deploy and cannot fail or stall it', () => {
   const deploy = workflow.jobs.deploy
   const ping = deploy.steps.findIndex(step => step.id === 'indexnow')
   assert.ok(ping > deploy.steps.findIndex(step => step.id === 'deployment'))
@@ -111,7 +111,9 @@ test('IndexNow pings only after the deploy and cannot fail it', () => {
       },
     })
     assert.equal(result.status, 0, result.stderr)
-    assert.equal(readFileSync(args, 'utf8').trim().split('\n').at(-1), 'https://api.indexnow.org/indexnow')
+    const curlArgs = readFileSync(args, 'utf8').trim().split('\n')
+    assert.equal(curlArgs.at(-1), 'https://api.indexnow.org/indexnow')
+    assert.ok(curlArgs.includes('--connect-timeout') && curlArgs.includes('--max-time'), 'a stalled endpoint must not hold up the pages deployment')
     assert.deepEqual(JSON.parse(readFileSync(body, 'utf8')), {
       host: 'example.com',
       key: 'key-12345',

@@ -250,7 +250,8 @@ Bing and other IndexNow search engines hear about changes from the deploy
 itself. With an `INDEXNOW_KEY` repository secret set (8–128 letters, digits, or
 hyphens), each `main` deploy publishes `/<key>.txt` and submits the URLs that
 joined or left the sitemap since the previous deploy. Edits to existing pages
-rely on the sitemap. A rejected submission is logged without failing the deploy.
+rely on the sitemap. A rejected or stalled submission is logged without failing
+the deploy.
 Google doesn't use IndexNow.
 
 ---
