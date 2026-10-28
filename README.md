@@ -37,9 +37,9 @@ bun test --bail               # unit and publication-contract tests
 
 ## Projects
 
-The Projects page is generated from the public repositories in
-[`ragmha/blog-projects`](https://github.com/stars/ragmha/lists/blog-projects).
-Run `bun run sync:projects` with an authenticated `gh` CLI to refresh
+The Projects page is generated from the public repositories in the
+`blog-projects` star list on the ragmha account. The list itself is private,
+so run `bun run sync:projects` with `gh` authenticated as that account to refresh
 `src/content/github-projects.json`, then commit and redeploy. Per-project
 overrides (description, demo/extra links) live in
 `src/content/project-snapshot.ts` and survive future syncs.
@@ -70,8 +70,8 @@ Every writing post uses `src/pages/writing/[slug].astro`, `WritingLayout.astro`,
 and `src/styles/writing.css` for the same header, metadata, contents navigation,
 and reading layout. Keep content in MDX rather than duplicating page markup;
 headings supply the contents list without imposing the same outline on every post.
-Posts name no employer or employer product and carry no disclaimer;
-`tests/no-employer.test.mjs` enforces it.
+Posts and project writeups name no employer or employer product and carry no
+disclaimer; `tests/no-employer.test.mjs` enforces it.
 
 Posts live in `src/content/writing/`. A project can optionally have a longer
 writeup at `/project/<project-name>/writings/`, authored as MDX in
@@ -116,7 +116,8 @@ in `public/diagrams/ICONS-LICENSE.txt`.
 The Friday release simulation includes three Excalidraw concept diagrams. Their SVGs are static exports with embedded Excalifont, accessible text,
 and no client-side drawing library. Match the exported dimensions in the MDX
 when updating a diagram.
-Each has a `-portrait` source/export for viewports up to 60rem. The article uses
+Each has a `-portrait` source/export for viewports up to 60rem, as every
+Excalidraw diagram must; `tests/post-layout.test.mjs` checks the pair. The article uses
 `picture` to switch compositions instead of shrinking labels or requiring
 sideways scrolling. Keep equivalent facts in both versions.
 
@@ -130,9 +131,9 @@ node scripts/check-writing-responsive.mjs
 For a server on another port, set `WRITING_TEST_URL`, for example
 `WRITING_TEST_URL=http://localhost:4322 node scripts/check-writing-responsive.mjs`.
 
-This exercises portrait image selection, diagram legibility, contents navigation,
-the always-visible contents list, the no-JavaScript fallback, and an existing
-published article.
+This exercises portrait image selection, diagram legibility, labels that stay
+inside each diagram, contents navigation, the always-visible contents list, the
+no-JavaScript fallback, and an existing published article.
 
 `bun run export:excalidraw` applies the shared light and dark palettes itself.
 After changing an SVG any other way, run `bun run theme:diagrams`. At build
@@ -141,7 +142,9 @@ time, `src/lib/rehype-inline-diagrams.mjs` inlines
 `data-theme` toggle; Safari only shows the OS theme to SVGs loaded as images.
 A `<picture>` pair (portrait `<source media="(max-width: 60rem)">` plus a
 landscape `<img>`) becomes both inline SVGs, and `writing.css` shows one per
-viewport at the same breakpoint.
+viewport at the same breakpoint. Inlined diagrams reset the root
+`font-size-adjust` from `fonts.css`, so their labels keep the metrics the export
+measured.
 Opened directly, the files still follow the OS theme. Palette roles live in
 `scripts/theme-diagrams.mjs`; preserve pure black/white SVG mask colors.
 
@@ -189,10 +192,11 @@ identifier: keep it stable when editing the workflow. A required status-check
 rule on `main` enforces the gate; merely adding a workflow does not prevent
 merging. A pull request that only changes agent skills or contributor docs
 (see the `lanes` job) skips the checks,
-and the skipped job still reports success. The gate also runs `cspell`
+and the skipped job still reports success; the `lanes` job still validates
+every `SKILL.md`. The gate also runs `cspell`
 (American English) over posts; add real terms to `cspell.json`. A weekly
 `Link check` workflow opens or updates a `Broken links` issue when external
-links fail.
+links fail, and closes it once they all work.
 
 Run the gate locally with:
 
@@ -236,8 +240,10 @@ GitHub repository. Leave the draft uncommitted and unpushed until it is ready
 for source-level review.
 
 An optional `seoTitle` gives search results a shorter title without changing the
-visible article heading. Shared metadata lives in `SeoHead.astro` and
-`src/lib/seo.ts`; regenerate the social card after changing its text or design.
+visible article heading. The search title (`seoTitle`, or `title` without one)
+must be 44 characters or fewer, so the page title stays within 60. Shared
+metadata lives in `SeoHead.astro` and `src/lib/seo.ts`; regenerate the social
+card after changing its text or design.
 No article text or draft is automatically published by the audit.
 
 The vitals check measures mobile LCP and CLS under fixed network and CPU
