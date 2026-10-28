@@ -51,7 +51,7 @@ and restrained hierarchy rather than simulated commands or dense chrome.
   `src/styles/layout.css`
 - Home opening: name, existing introduction, and direct navigation; posts are
   listed only on the writing archive
-- Archives and projects: editorial content beside a `6.5rem` navigation column,
+- Archives and projects: editorial content beside an `8rem` navigation column,
   with a `4rem` gap
 - Article: optional full-bleed cover image (up to 85% of viewport height),
   breadcrumb, large left-aligned title, description, a labelled
