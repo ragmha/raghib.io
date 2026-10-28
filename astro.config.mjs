@@ -30,7 +30,8 @@ export default defineConfig({
   integrations: [
     mdx(),
     sitemap({
-      filter: (page) => new URL(page).pathname.replace(/\/$/, '') !== '/about',
+      // Tag and topic archives are noindex: they only repeat post summaries.
+      filter: (page) => !/^\/(about|writing\/(tag|topic))(\/|$)/.test(new URL(page).pathname),
       serialize: (item) => ({ ...item, lastmod: postDates.get(new URL(item.url).pathname) ?? item.lastmod }),
     }),
     {
