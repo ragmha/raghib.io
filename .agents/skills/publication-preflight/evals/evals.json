@@ -1,0 +1,35 @@
+{
+  "skill_name": "publication-preflight",
+  "evals": [
+    {
+      "id": 1,
+      "name": "draft-preflight",
+      "prompt": "preflight the keep shipping part 2 draft, I want to publish it this week",
+      "expected_output": "A ready or not-ready verdict for src/content/writing/keep-shipping-budget-policy-part-2.mdx with concrete blockers, the checks actually run, and automated results kept apart from editorial judgment. Nothing is edited, committed, or published.",
+      "files": [],
+      "assertions": [
+        "git status is unchanged: no file is edited, and nothing is committed or pushed",
+        "The post's published field is not changed",
+        "The report opens with a ready or not-ready verdict",
+        "The report lists only checks that actually ran, including bun test and cspell",
+        "Automated failures and editorial judgment are reported separately",
+        "The run previews /writing/keep-shipping-budget-policy-part-2/ from this worktree's dev server in light and dark themes at phone and desktop widths",
+        "The report covers keyboard focus and diagram label size at phone width"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "published-post-recheck",
+      "prompt": "Is the DNS cutover post still release-quality? Check it like you would before publishing.",
+      "expected_output": "A verdict for src/content/writing/leaving-vercel-dns-lessons.mdx that checks the production build of the published page and its metadata, the hero and diagrams at phone width, and accessibility, without editing anything.",
+      "files": [],
+      "assertions": [
+        "git status is unchanged",
+        "The run builds the site and checks the published page's title, description, and canonical URL in dist/",
+        "The report states the rendered diagram label size at 360 px for each diagram",
+        "The report confirms every diagram has a text alternative",
+        "The report does not claim a check passed unless it ran"
+      ]
+    }
+  ]
+}

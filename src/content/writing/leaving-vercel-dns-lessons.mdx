@@ -39,8 +39,14 @@ For illustration, imagine an **A record**, a DNS entry that supplies an IPv4
 address, mapping `example.com` to `192.0.2.10`. That address is reserved for
 documentation; this is an example, not a live lookup.
 
-<figure class="excalidraw-figure">
-  <div class="diagram-scroll" role="region" aria-label="From a domain name to a website request; scroll horizontally to explore" tabindex="0">
+<figure class="excalidraw-figure responsive-diagram">
+  <picture>
+    <source
+      media="(max-width: 60rem)"
+      srcSet="/diagrams/dns-lookup-basics-portrait.svg"
+      width="456"
+      height="698"
+    />
     <img
       src="/diagrams/dns-lookup-basics.svg"
       width="992"
@@ -50,7 +56,7 @@ documentation; this is an example, not a live lookup.
       decoding="async"
       alt="Read left to right: the browser asks DNS about example.com, receives the illustrative address 192.0.2.10, then uses HTTPS to request the page from that address."
     />
-  </div>
+  </picture>
   <figcaption>
     A simplified website visit. Looking up the address and fetching the page are
     separate operations.
@@ -87,8 +93,14 @@ nameserver answers named the old DNS provider and HTTP requests reached the old
 host. Those observations show a path to investigate; the recursive nameserver
 answers alone do not prove the parent delegation was responsible.
 
-<figure class="excalidraw-figure">
-  <div class="diagram-scroll" role="region" aria-label="Deployment and DNS routes; scroll horizontally to explore" tabindex="0">
+<figure class="excalidraw-figure responsive-diagram">
+  <picture>
+    <source
+      media="(max-width: 60rem)"
+      srcSet="/diagrams/dns-deploy-versus-delegation-portrait.svg"
+      width="456"
+      height="1066"
+    />
     <img
       src="/diagrams/dns-deploy-versus-delegation.svg"
       width="992"
@@ -97,7 +109,7 @@ answers alone do not prove the parent delegation was responsible.
       decoding="async"
       alt="Read left to right: a successful build puts the new site on the static host. A separate row illustrates one possible failure path: unchanged delegation selects an old DNS zone whose address sends the browser to the previous host and a 404."
     />
-  </div>
+  </picture>
   <figcaption>
     A successful deployment does not change the DNS path visitors follow.
   </figcaption>
@@ -208,8 +220,14 @@ lifetime. If the authority publishes the new address but a resolver still
 returns the old one, check the cached answer's remaining TTL before changing
 more configuration.
 
-<figure class="excalidraw-figure">
-  <div class="diagram-scroll" role="region" aria-label="DNS cache timeline; scroll horizontally to explore" tabindex="0">
+<figure class="excalidraw-figure responsive-diagram">
+  <picture>
+    <source
+      media="(max-width: 60rem)"
+      srcSet="/diagrams/dns-authority-versus-cache-portrait.svg"
+      width="456"
+      height="630"
+    />
     <img
       src="/diagrams/dns-authority-versus-cache.svg"
       width="992"
@@ -218,7 +236,7 @@ more configuration.
       decoding="async"
       alt="The authoritative zone already has the new address. Below it, time runs left to right: a resolver returns the cached old address, its TTL expires, and the next lookup retrieves the new address."
     />
-  </div>
+  </picture>
   <figcaption>
     Two different answers do not necessarily mean two broken systems. One may be
     current zone data; the other may be an unexpired cached answer.

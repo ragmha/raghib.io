@@ -1,0 +1,34 @@
+{
+  "skill_name": "site-change",
+  "evals": [
+    {
+      "id": 1,
+      "name": "search-verification-tag",
+      "prompt": "Bing Webmaster Tools gave me a verification code, 0A1B2C3D4E5F. Add it to the site so I can verify ownership.",
+      "expected_output": "The verification is added as a meta tag in src/components/SeoHead.astro, which every layout includes, rather than as a file in public/. The build and check:seo pass.",
+      "files": [],
+      "assertions": [
+        "Adds a msvalidate.01 meta tag with the code to src/components/SeoHead.astro",
+        "Adds no verification .html or .xml file under public/",
+        "Does not add the tag to only one of BaseLayout.astro or WritingLayout.astro",
+        "bun run build and bun run check:seo pass, and the final message says they ran",
+        "The final message shows the tag in the rendered head of a page and of a post"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "noindex-now-page",
+      "prompt": "Add a /now/ page that says what I'm working on this month: finishing the budget series and reading about evaluation. Keep it out of search results.",
+      "expected_output": "A /now/ page built on the existing layouts and tokens that renders noindex, with the sitemap filter in astro.config.mjs updated so check:seo still finds the sitemap equal to the indexable pages.",
+      "files": [],
+      "assertions": [
+        "Adds src/pages/now.astro (or now/index.astro) using an existing layout",
+        "The page renders <meta name=\"robots\" content=\"noindex\">",
+        "The sitemap filter in astro.config.mjs excludes /now/",
+        "bun run build, bun run check:seo, and bun run check:vitals pass",
+        "Introduces no new colors or fonts outside src/styles/theme.css and fonts.css",
+        "The final message shows the rendered page at phone and desktop widths"
+      ]
+    }
+  ]
+}

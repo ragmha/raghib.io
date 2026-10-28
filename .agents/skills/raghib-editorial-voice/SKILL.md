@@ -81,10 +81,12 @@ only works inside one vendor's product reads as marketing.
    replacing an exploratory voice with polished generic prose.
 3. Keep factual claims inside the evidence. Never invent a customer, scene,
    result, metric, citation, or personal experience.
-4. Preserve frontmatter, disclosures, links, and sources unless asked to edit
-   them. `seoTitle` must remain at most 44 characters.
+4. Preserve frontmatter, links, and sources unless asked to edit them.
+   `seoTitle` must remain at most 44 characters.
 5. Check the piece against its chosen mode in [EXAMPLES.md](EXAMPLES.md), then
-   run `bun run build` and `bun run check:seo` for content changes.
+   run the checks in `AGENTS.md`: `bun test` enforces the no-employer rule,
+   the hero, the diagrams, and the code limit, and `cspell` enforces American
+   English. Use `publication-preflight` before release.
 
 ## Audit for vendor drift
 

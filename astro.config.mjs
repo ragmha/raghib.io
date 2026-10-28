@@ -22,6 +22,7 @@ export default defineConfig({
     '/experiments/context-autopsy/': 'https://lab.raghib.io/context-autopsy/',
     '/experiments/session-flame/': 'https://lab.raghib.io/session-flame/',
     '/experiments/token-diet/': 'https://lab.raghib.io/token-diet/',
+    '/writing/keep-shipping-copilot-budget-limits-part-1/': '/writing/keep-shipping-budget-limits-part-1/',
   },
   image: {
     layout: 'constrained',
