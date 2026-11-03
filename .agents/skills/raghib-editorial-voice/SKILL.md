@@ -68,6 +68,11 @@ only works inside one vendor's product reads as marketing.
   the reader inspect the claim.
 - Separate observed results from hypotheses, proposals, and open questions.
 - Name meaningful limitations; do not let caveats bury the main point.
+- Prefer headings that advance the point, not just label the topic.
+- When useful, give readers a small check they can run before acting.
+- Say when an approach does not fit, including its meaningful trade-offs.
+- End with a concrete next step when it helps; skip generic calls to action
+  and recap sections.
 - Choose headings and length for the mode and material. Avoid stock headings,
   repeated catchphrases, forced anecdotes, hype, filler, and recap sections
   that add nothing.
