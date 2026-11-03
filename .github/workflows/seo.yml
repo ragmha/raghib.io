@@ -6,6 +6,9 @@ on:
   merge_group:
   push:
     branches: [main]
+  # ponytail: daily rebuild releases posts whose date has arrived; narrow the cron if Actions minutes matter.
+  schedule:
+    - cron: '0 6 * * *'
   workflow_dispatch:
 
 permissions:

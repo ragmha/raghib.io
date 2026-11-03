@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { parseDocument } from 'yaml'
 
-export function readPublication(source, collection, file) {
+export function readPublication(source, collection, file, now = new Date()) {
   if (!['writing', 'projectWriteups'].includes(collection)) {
     throw new Error(`${file}: unknown content collection "${collection}"`)
   }
@@ -35,6 +35,8 @@ export function readPublication(source, collection, file) {
   if (!hasBodyContent) {
     throw new Error(`${file}: published content needs an article body`)
   }
+  // Scheduled writing is validated above but stays out of the build until its date.
+  if (collection === 'writing' && date > now) return null
   return {
     collection,
     headline: data.title,

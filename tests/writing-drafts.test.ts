@@ -29,6 +29,16 @@ test('explicit local preview includes a draft without publishing or modifying it
   assert.deepEqual(indexWritingPosts([post, draft], { includeDrafts: false }), [post])
 })
 
+test('a published post dated in the future stays hidden until its date, but not from local preview', () => {
+  const live = entry('live', true, '2026-11-05')
+  const scheduled = entry('scheduled', true, '2026-11-10')
+  const now = new Date('2026-11-07')
+
+  assert.deepEqual(indexWritingPosts([scheduled, live], { now }), [live])
+  assert.deepEqual(indexWritingPosts([scheduled, live], { now: new Date('2026-11-10') }), [scheduled, live])
+  assert.deepEqual(indexWritingPosts([scheduled, live], { now, includeDrafts: true }), [scheduled, live])
+})
+
 test('only the article route opts into development drafts and marks them noindex', () => {
   const article = readFileSync(new URL('../src/pages/writing/[slug].astro', import.meta.url), 'utf8')
   assert.match(article, /getVisiblePosts\(\{ includeDrafts: import\.meta\.env\.DEV \}\)/)

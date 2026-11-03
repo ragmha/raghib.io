@@ -77,6 +77,14 @@ test('body validation treats comment-delimiter fragments as their original text'
   assert.ok(readPublication(source('', body), 'writing', 'fragments.mdx'))
 })
 
+test('scheduled writing is validated now but skipped until its date', () => {
+  const scheduled = source('', 'A practical engineering account.')
+  assert.equal(readPublication(scheduled, 'writing', 'later.mdx', new Date('2026-09-17')), null)
+  assert.ok(readPublication(scheduled, 'writing', 'later.mdx', new Date('2026-09-18')))
+  assert.throws(() => readPublication(source('', ''), 'writing', 'later.mdx', new Date('2026-09-17')), /article body/)
+  assert.ok(readPublication(source('published: true'), 'projectWriteups', 'project.mdx', new Date('2026-09-17')))
+})
+
 test('the gate rejects missing publications, leaked drafts and changed metadata', () => {
   const publication = readPublication(source(), 'writing', 'example.mdx')
   assertPublicationsMatch([publication], [{ ...publication }])
