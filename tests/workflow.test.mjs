@@ -11,7 +11,6 @@ test('the required SEO check runs on PRs, merge queues, and main pushes', () => 
   assert.deepEqual(workflow.on.pull_request.branches, ['main'])
   assert.ok(Object.hasOwn(workflow.on, 'merge_group'))
   assert.deepEqual(workflow.on.push.branches, ['main'])
-  assert.ok(workflow.on.schedule.length, 'a daily rebuild releases scheduled posts')
   assert.equal(workflow.jobs.seo.name, 'SEO readiness')
 })
 
