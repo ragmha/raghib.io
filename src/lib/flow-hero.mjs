@@ -782,6 +782,47 @@ function nightWatchClock(t) {
   t.label([0, R, B + 50], 'FAILURE OWNER?', { dx: -90, dy: 0, tone: 'red' })
 }
 
+function reviewHopper(t) {
+  t.base(-230, -100, 430, 205)
+  const sheet = (x, y, angle, z, tone, w = 26, d = 18) => {
+    const [ux, uy] = [Math.cos(angle), Math.sin(angle)]
+    t.bar([x - ux * w / 2, y - uy * w / 2], [x + ux * w / 2, y + uy * w / 2], d, z, 1.6, tone)
+  }
+
+  // A tall, wide hopper of cheap drafts feeding one narrow lane.
+  for (const [x, y] of [[-196, -56], [-96, -56], [-196, 36], [-96, 36]]) t.box(x - 5, y - 5, 10, 10, B, 62, 'lo')
+  t.cyl(-146, -10, 14, B + 22, 14, 'mid')
+  t.cyl(-146, -10, 30, B + 36, 14, 'mid')
+  t.cyl(-146, -10, 46, B + 50, 14, 'mid')
+  t.cyl(-146, -10, 62, B + 64, 14, 'mid')
+  t.ring(-146, -10, 56, B + 78, 'hi')
+  const heap = [[-161, -22, 0.2, 'hi'], [-126, -14, 2.4, 'mid'], [-148, -2, 1.1, 'hi'], [-166, 8, 0.6, 'mid'], [-136, -28, 0.9, 'lo'], [-151, -12, 2.0, 'hi'], [-142, -8, 0.3, 'mid'], [-156, -16, 1.5, 'hi']]
+  heap.forEach(([x, y, a, tone], i) => sheet(x, y, a, B + 78 + i * 3, tone, 40, 28))
+
+  // The lane before the gate is jammed; after it, work flows.
+  t.bar([-110, -10], [-34, -10], 14, B, 5, 'lo')
+  t.rail([[-110, -10, B + 6], [-38, -10, B + 6]], 'red', false)
+  for (const x of [-100, -86, -72, -58]) sheet(x, -10, 0, B + 6, 'red', 10, 11)
+  for (const [x, y, a] of [[-140, 76, 0.4], [-112, 86, 1.3], [-170, 90, 0.1], [-90, 72, 0.8]]) sheet(x, y, a, B, 'red', 26, 18)
+
+  t.bar([-20, -10], [80, -10], 14, B, 5, 'lo')
+  t.rail([[-20, -10, B + 6], [80, -10, B + 6]], 'green')
+
+  t.box(-36, -34, 12, 12, B, 54, 'mid')
+  t.box(-36, 14, 12, 12, B, 54, 'mid')
+  t.box(-40, -34, 20, 60, B + 54, 9, 'hi', { lit: true })
+  t.lamp([-30, -4, B + 68], 'blue', 5)
+
+  t.tray(80, -44, 120, 70, B, 26, () => {
+    for (let i = 0; i < 4; i++) sheet(140, -10, 0, B + 3 + i * 3, 'green', 64, 40)
+  })
+
+  t.label([-202, -10, B + 80], 'CHEAP DRAFTS', { dx: -50, dy: 0, tone: 'mid' })
+  t.label([-80, -10, B + 8], 'BACKLOG', { dy: 70, tone: 'red' })
+  t.label([-30, -4, B + 68], 'REVIEW CAPACITY', { dx: 80, dy: -50, tone: 'blue' })
+  t.label([140, -10, B + 14], 'SHIPPED', { dy: 80, tone: 'green' })
+}
+
 function vaultWindow(t) {
   t.base(-200, -100, 410, 205)
   const sheet = (x, y, angle, z, tone, w = 26, d = 18) => {
@@ -889,6 +930,17 @@ export const flowHeroes = {
     ],
     thesis: ['Unattended still needs an owner.', 'Name who pays and who answers.'],
     note: 'An illustrative checklist for an unattended job. Nothing here was measured.',
+  },
+  'review-hopper': {
+    art: reviewHopper,
+    label: 'An isometric wide hopper heaped with draft sheets, feeding a narrow lane that passes through one review gate. Red sheets jam the lane and spill on the deck before the gate; green sheets pass beyond it into a tray.',
+    outputs: [
+      { label: 'CHEAP DRAFTS', tone: 'blue' },
+      { label: 'BACKLOG', tone: 'red' },
+      { label: 'SHIPPED', tone: 'green' },
+    ],
+    thesis: ['Generation got cheap.', 'Review became the limit.'],
+    note: 'An illustration of a bottleneck, not a measurement of any team.',
   },
   'vault-window': {
     art: vaultWindow,
