@@ -520,10 +520,95 @@ function budgetInterlock(t) {
   }
 }
 
+function cardCatalog(t) {
+  t.base(-260, -130, 420, 190)
+  const stale = 3
+  const slot = s => -135 + s * 10
+  const guideAt = i => slot(2 + i * 4)
+  const floor = B + 28
+  const cardTop = 28
+  const guideTop = cardTop + 6
+  const tabAt = i => -8 + (i % 3) * 13
+  const heights = [52, 44, 60, 48, 56, 46]
+  const spineZ = i => B + 4 + heights[i] - 8
+
+  // Cabinet: two columns of drawer fronts; the front column's middle drawer is pulled out.
+  t.box(-250, -72, 110, 112, B, 76, 'mid')
+  t.outline(-247, -69, 104, 106, B + 76)
+  for (let r = 0; r < 3; r++) {
+    for (const [y0, y1] of [[-66, -20], [-12, 34]]) {
+      const z0 = B + 4 + r * 24
+      const z1 = z0 + 20
+      if (r === 1 && y0 > -15) continue
+      for (const [p, q] of [[[y0, z0], [y1, z0]], [[y0, z1], [y1, z1]], [[y0, z0], [y0, z1]], [[y1, z0], [y1, z1]]]) {
+        t.seg([-140, p[0], p[1]], [-140, q[0], q[1]], 'lo')
+      }
+      const mid = (y0 + y1) / 2
+      t.box(-142, mid - 7, 2, 14, z0 + 5, 3.5, 'hi')
+      t.seg([-140, mid - 13, z1 - 4], [-140, mid + 13, z1 - 4], 'faint')
+    }
+  }
+
+  // Sources: binders on a back shelf; every card thread ends at one.
+  t.plate(-130, -126, 250, 38, B, 4, 'lo')
+  heights.forEach((h, i) => {
+    const x = guideAt(i)
+    t.box(x - 11, -121, 22, 28, B + 4, h, i === stale ? 'lo' : 'mid')
+    t.seg([x - 11, -93, B + 12], [x + 11, -93, B + 12], 'faint')
+    t.seg([x - 11, -93, B + 4 + h - 8], [x + 11, -93, B + 4 + h - 8], 'faint')
+  })
+
+  // Drawer: dated cards stand upright; every fourth is a tabbed guide, and one has gone stale.
+  t.tray(-142, -12, 242, 46, floor, 20, () => {
+    for (let s = 0; s < 23; s++) {
+      const x = slot(s)
+      const i = (s - 2) / 4
+      const guide = Number.isInteger(i) && i >= 0
+      const old = guide && i === stale
+      const h = (guide ? guideTop : cardTop) + (old ? 24 : 0)
+      t.box(x, -8, 1.4, 38, floor + 3, h, old ? 'hi' : guide ? 'mid' : 'lo', old ? { lit: true } : {})
+      if (guide) t.box(x, tabAt(i), 1.4, old ? 20 : 12, floor + 3 + h, old ? 11 : 5, old ? 'red' : 'hi')
+    }
+  })
+  t.box(100, 1, 3, 20, floor + 6, 3.5, 'hi')
+
+  for (let i = 0; i < 6; i++) {
+    const bad = i === stale
+    const x = guideAt(i)
+    const from = floor + 3 + guideTop + (bad ? 32 : 5)
+    t.seg([x, tabAt(i), from], [x, -93, spineZ(i)], bad ? 'red' : 'mid', { dashed: bad })
+    t.lamp([x, -93, spineZ(i)], bad ? 'red' : 'green', 3.5)
+  }
+  const lines = floor + 3 + guideTop + 24
+  for (const dz of [8, 15, 22]) t.seg([guideAt(stale) + 2, -4, lines - dz], [guideAt(stale) + 2, 26, lines - dz], 'faint')
+
+  // Loupe: the check before acting.
+  t.cyl(130, 18, 10, B, 3, 'mid')
+  t.cyl(130, 18, 2.4, B + 3, 30, 'mid', { steps: 12 })
+  t.line(k.sideRing([130, 18, B + 47], 17, 'y', t.P), 'hi')
+  t.line(k.sideRing([130, 18, B + 47], 14, 'y', t.P), 'faint')
+
+  t.label([guideAt(0), 30, floor + 3 + cardTop], 'DATED CARDS', { dx: -30, dy: 80 })
+  t.label([guideAt(stale), 12, floor + 3 + guideTop + 24], 'STALE CARD', { dy: 90, tone: 'red' })
+  t.label([guideAt(4), -93, spineZ(4)], 'SOURCES', { dy: -56 })
+  t.label([guideAt(5), -40, floor + 27], 'THREAD TO SOURCE', { dx: 90, dy: -20 })
+  t.label([130, 18, B + 47], 'CHECK FIRST', { dx: 56, dy: 0 })
+}
+
 export const flowHeroSvg = hero => render(hero.label, hero.art)
 
 // Labels and outcomes paraphrase each article; nothing here adds a claim the post doesn't make.
 export const flowHeroes = {
+  'card-catalog': {
+    art: cardCatalog,
+    label: 'An isometric card catalog. A cabinet has one drawer pulled out, holding dated index cards with tabbed guides. Each tab is tied by a thread to a source binder on a shelf behind it, and each source ends in a lamp. One raised card has a red tab and a red dashed thread to a red lamp: it is stale. A loupe stands at the side as the check before acting.',
+    outputs: [
+      { label: 'SOURCE CONFIRMED', tone: 'green' },
+      { label: 'STALE: CHECK FIRST', tone: 'red' },
+    ],
+    thesis: ['A memory is a claim.', 'Check it before acting.'],
+    note: 'An illustrative memory store. The threads and the raised card are a metaphor; nothing here was measured.',
+  },
   'agent-harness': {
     art: agentHarness,
     label: 'An isometric ticket gate for an agent harness. A tool-call card from the model passes a key board where only registered tools have a peg, then a turnstile that is the policy gate. Its three exits run the tool, hold it for approval, or drop it in a reject bin, while a paper tape journals every event.',
