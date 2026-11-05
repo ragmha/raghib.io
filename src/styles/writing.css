@@ -530,6 +530,10 @@ main {
   max-width: 100%;
 }
 
+:root[data-theme='dark'] .prose > .theme-adaptive-diagram img {
+  filter: invert(1);
+}
+
 .prose :where(pre, table) {
   max-width: 100%;
   overflow-x: auto;
