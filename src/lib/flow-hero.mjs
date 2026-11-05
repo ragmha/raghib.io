@@ -740,6 +740,48 @@ function twinGauges(t) {
   t.label([170, 26, B + 43], 'INDEPENDENT CHECK', { dy: 70, tone: 'green' })
 }
 
+function nightWatchClock(t) {
+  t.base(-150, -150, 300, 300)
+  const R = 125
+  const ring = Array.from({ length: 49 }, (_, i) => [Math.sin((i / 48) * Math.PI * 2) * R, -Math.cos((i / 48) * Math.PI * 2) * R, B + 2])
+  const station = (x, y, keyed) => {
+    t.box(x - 16, y - 16, 32, 32, B, 34, 'mid')
+    t.box(x - 12, y - 12, 24, 24, B + 34, 4, 'hi')
+    if (keyed) {
+      t.cyl(x, y, 4.5, B + 38, 9, 'hi', { steps: 14 })
+      t.bar([x, y], [x + 11, y], 4, B + 43, 3, 'green')
+      t.lamp([x, y, B + 56], 'green', 5)
+    } else {
+      t.ring(x, y, 7, B + 38, 'red')
+      t.lamp([x, y, B + 50], 'red', 5)
+    }
+  }
+
+  t.rail(ring, 'mid')
+  for (const [x, y, tone] of [[0, -1, 'green'], [-1, 0, 'green'], [1, 0, 'green'], [0, 1, 'red']]) {
+    t.bar([x * 72, y * 72], [x * 112, y * 112], 9, B, 3, 'lo')
+    t.rail([[x * 74, y * 74, B + 4], [x * 110, y * 110, B + 4]], tone, tone !== 'red')
+  }
+  station(0, -R, true)
+  station(-R, 0, true)
+
+  t.cyl(0, 0, 76, B, 14, 'mid')
+  t.cyl(0, 0, 66, B + 14, 8, 'hi', { lit: true, steps: 40 })
+  const ticks = k.radialTicks(0, 0, 62, 48, 4, B + 22, [3, 8], t.P, 0, Math.PI * 2)
+  t.line(ticks.minor, 'faint')
+  t.line(ticks.major, 'mid')
+  t.bar([0, 0], [Math.sin(3.0) * 50, -Math.cos(3.0) * 50], 5, B + 22, 2, 'hi')
+  t.cyl(0, 0, 6, B + 22, 4, 'mid', { steps: 16 })
+
+  station(R, 0, true)
+  station(0, R, false)
+
+  t.label([-R, 0, B + 56], 'NAMED IDENTITY', { dx: -60, dy: 0, tone: 'green' })
+  t.label([0, -R, B + 56], 'AUTHORITY', { dy: -60, tone: 'green' })
+  t.label([R, 0, B + 56], 'BUDGET PAYER', { dx: 60, dy: 0, tone: 'green' })
+  t.label([0, R, B + 50], 'FAILURE OWNER?', { dx: -90, dy: 0, tone: 'red' })
+}
+
 function vaultWindow(t) {
   t.base(-200, -100, 410, 205)
   const sheet = (x, y, angle, z, tone, w = 26, d = 18) => {
@@ -837,6 +879,16 @@ export const flowHeroes = {
     ],
     thesis: ['Agreement can be shared error.', 'An independent check settles it.'],
     note: 'An illustration of correlated error. Nothing here was measured.',
+  },
+  'night-watch-clock': {
+    art: nightWatchClock,
+    label: 'An isometric watchman\'s clock: a lit dial in the center with a sweeping hand, and four key stations on a patrol ring around it. Three stations hold a key and a green lamp, for a named identity, authority and budget payer. The fourth, the failure owner, has an empty keyhole and a red lamp.',
+    outputs: [
+      { label: 'OWNERS NAMED', tone: 'green' },
+      { label: 'NO FAILURE OWNER', tone: 'red' },
+    ],
+    thesis: ['Unattended still needs an owner.', 'Name who pays and who answers.'],
+    note: 'An illustrative checklist for an unattended job. Nothing here was measured.',
   },
   'vault-window': {
     art: vaultWindow,
