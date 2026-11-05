@@ -506,21 +506,11 @@ main {
   background: none;
 }
 
-.diagram-scroll {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-}
-
-.diagram-scroll img,
-.diagram-scroll svg {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  height: auto;
-  margin-inline: auto;
+/* Inlined diagrams keep the text metrics they were exported and checked with.
+   The inherited font-size-adjust in fonts.css would enlarge Excalifont labels
+   past their shapes. */
+svg[data-source] {
+  font-size-adjust: none;
 }
 
 .prose > .excalidraw-figure img,

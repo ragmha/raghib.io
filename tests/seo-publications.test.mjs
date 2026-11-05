@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { readFileSync, readdirSync } from 'node:fs'
 import { test } from 'node:test'
 import { assertPublicationsMatch, readPublication } from '../scripts/lib/seo-publications.mjs'
 
@@ -58,6 +59,23 @@ test('published content rejects bodies containing only whitespace and HTML comme
     '<!-- First note. --><!-- Second note. -->',
   ]) {
     assert.throws(() => readPublication(source('', body), 'writing', 'comments.mdx'), /article body/)
+  }
+})
+
+test('published content keeps its search title to 44 characters', () => {
+  assert.ok(readPublication(source(`seoTitle: "${'x'.repeat(44)}"`), 'writing', 'fits.mdx'))
+  assert.throws(() => readPublication(source(`seoTitle: "${'x'.repeat(45)}"`), 'writing', 'long.mdx'), /44/)
+  assert.throws(() => readPublication(source().replace('title: Example', `title: ${'x'.repeat(45)}`), 'writing', 'long.mdx'), /44/)
+  const longHeadline = source('seoTitle: Short\npublished: true').replace('title: Example', `title: ${'x'.repeat(60)}`)
+  assert.ok(readPublication(longHeadline, 'projectWriteups', 'long-headline.mdx'))
+})
+
+test('every published post and project writeup passes the publication checks', () => {
+  for (const [collection, folder] of [['writing', 'writing'], ['projectWriteups', 'project-writeups']]) {
+    const dir = new URL(`../src/content/${folder}/`, import.meta.url)
+    for (const file of readdirSync(dir).filter((name) => /\.mdx?$/.test(name))) {
+      readPublication(readFileSync(new URL(file, dir), 'utf8'), collection, file)
+    }
   }
 })
 

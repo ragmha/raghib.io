@@ -26,7 +26,20 @@ for hero or diagram work.
    the hero and diagram for clipping, overlap, readability, and horizontal
    page overflow. Keep draft URLs local: unpublished source in a public Git
    repository is still publicly visible.
-5. Run the repository checks in `AGENTS.md`. For a published post, verify the
+5. Check accessibility (WCAG 2.2 AA) in the same preview. CI checks only
+   image alt text and a single H1:
+   - Tab through the page. Every link and control is reachable in reading
+     order, and its focus outline stays visible, not covered by sticky
+     elements.
+   - At 320 px the page reflows without sideways scrolling (code blocks may
+     scroll inside themselves). At 360 px, diagram labels render at 16 px or
+     larger: an inline SVG's smallest `font-size` times its rendered width
+     divided by its `viewBox` width.
+   - Every diagram has a text alternative: `accTitle` and `accDescr` in
+     Mermaid, or `alt` plus an SVG title and description for Excalidraw.
+   - With reduced motion requested, smooth scrolling and transitions stop.
+   - Any new text color meets 4.5:1 contrast in both themes.
+6. Run the repository checks in `AGENTS.md`. For a published post, verify the
    generated page and its metadata in the production build; drafts do not ship
    in production builds.
 

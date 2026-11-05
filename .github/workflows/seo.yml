@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
+      contents: read
       pull-requests: read
     outputs:
       release: ${{ steps.lane.outputs.release }}
@@ -38,6 +39,11 @@ jobs:
             grep -qvE '^(\.agents/|\.impeccable/|\.github/instructions/|(AGENTS|DESIGN|README)\.md$|LICENSE$)' <<< "$files" || release=false
           fi
           echo "release=$release" >> "$GITHUB_OUTPUT"
+      # Skills-only PRs skip the release checks, so the skills are checked here.
+      - if: steps.lane.outputs.release == 'false'
+        uses: actions/checkout@v7
+      - if: steps.lane.outputs.release == 'false'
+        run: node --test tests/skills.test.mjs
 
   seo:
     # The main-branch ruleset requires this exact check name.

@@ -1,0 +1,35 @@
+{
+  "skill_name": "raghib-editorial-voice",
+  "evals": [
+    {
+      "id": 1,
+      "name": "worktree-til",
+      "prompt": "Turn these notes into a short TIL draft: 'git worktree add gives every agent its own checkout. TIL the worktrees share one object store, so a fetch in one shows up in all of them. But each worktree needs its own dependency install; in my repo that's about 40 seconds per worktree.'",
+      "expected_output": "A short draft in TIL mode that keeps to the one discovery in the notes, adds no facts beyond them, and passes the repository checks, with a hero and diagram from post-layout.",
+      "files": [],
+      "assertions": [
+        "Adds one draft post with published: false in src/content/writing/",
+        "The draft reads as a TIL: one discovery, its context, and why it matters, without essay sections",
+        "Every claim and number in the draft appears in the notes or a cited source",
+        "The prose names no employer or employer product",
+        "The search title (seoTitle, or title without one) is 44 characters or fewer",
+        "cspell and bun test pass, and the final message says they ran"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "vendor-drift-audit",
+      "prompt": "Audit my published posts for vendor drift. Don't change anything yet.",
+      "expected_output": "Per-post findings against the vendor-drift checklist and the four neutrality questions, with no files changed and reframing or retiring left to the author.",
+      "files": [],
+      "assertions": [
+        "git status is unchanged",
+        "Covers every post with published: true and only those",
+        "Gives each post a one-sentence 'so what' for a builder outside the author's company, or flags that it can't",
+        "Applies the four neutrality questions from .github/instructions/writing.instructions.md",
+        "Flags titles, seoTitles, descriptions, or headings that name a product instead of a problem",
+        "Asks the author before reframing, retiring, or renaming any post"
+      ]
+    }
+  ]
+}

@@ -61,6 +61,7 @@ try {
       const geometry = await figure.evaluate(element => {
         const picture = element.querySelector('.diagram-variants')
         const image = [...picture.querySelectorAll('svg[data-source]')].find(svg => svg.getClientRects().length)
+        const toImage = image.getScreenCTM().inverse()
         return {
           source: image.dataset.source,
           imageWidth: image.getBoundingClientRect().width,
@@ -68,6 +69,9 @@ try {
           figureWidth: element.clientWidth,
           pictureWidth: picture.clientWidth,
           pictureScrollWidth: picture.scrollWidth,
+          // Where the widest label ends, in the SVG's own units.
+          textRight: Math.max(...[...image.querySelectorAll('text')]
+            .map(text => new DOMPoint(text.getBoundingClientRect().right, 0).matrixTransform(toImage).x)),
         }
       })
       assert.equal(geometry.source.endsWith('-portrait.svg'), width <= 960)
@@ -77,6 +81,7 @@ try {
       const viewBox = svg.match(/\bviewBox="([^"]+)"/)?.[1].split(/\s+/).map(Number)
       const sourceWidth = viewBox[2]
       const sourceHeight = viewBox[3]
+      assert.ok(geometry.textRight <= sourceWidth, `Labels in ${geometry.source} run past its edge at ${width}px`)
       const textSizes = [...svg.matchAll(/font-size="([\d.]+)px"/g)].map(match => Number(match[1]))
       assert.ok(textSizes.length > 0, 'The export must contain measurable labels')
       const minimumText = Math.min(...textSizes) * geometry.imageWidth / sourceWidth
@@ -106,7 +111,11 @@ try {
   await published.goto(`${origin}/writing/leaving-vercel-dns-lessons/`, { waitUntil: 'networkidle' })
   assert.ok(await published.locator('main h1').isVisible())
   assert.ok(await published.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth))
-  assert.ok(await published.locator('.diagram-scroll').count() > 0, 'Existing wide diagrams retain scrolling')
+  const publishedDiagrams = await published.locator('figure.responsive-diagram svg[data-source]').evaluateAll(svgs => svgs
+    .filter(svg => svg.getClientRects().length)
+    .map(svg => svg.dataset.source))
+  assert.equal(publishedDiagrams.length, 3, 'The published article shows each wide diagram once')
+  assert.ok(publishedDiagrams.every(source => source.endsWith('-portrait.svg')), 'Wide diagrams switch to portrait layouts')
   await published.close()
 
   const preview = await browser.newPage()

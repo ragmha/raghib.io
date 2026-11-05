@@ -27,26 +27,34 @@ source code where useful.
 ## Writing
 
 - Posts live in `src/content/writing/*.mdx`. Project skills live in
-  `.agents/skills/` in the [Agent Skills](https://agentskills.io) format, so
-  any agent harness can load them:
+  `.agents/skills/` in the [Agent Skills](https://agentskills.io) format.
+  Copilot loads them from there; Claude Code reads only `.claude/skills/`.
   - `raghib-editorial-voice` drafts and revises posts.
   - `post-layout` covers the hero machine, diagrams, and companion
     repositories.
   - `publication-preflight` checks a draft or post before review or release.
+  - `site-change` covers layouts, metadata, styles, scripts, and CI for the
+    site itself.
 - Every post opens with its own isometric hero machine and includes at least
   one Mermaid or Excalidraw diagram. A tutorial whose code spans more than one
   file, or more than 150 lines, puts the runnable project in a companion
   repository. Tests enforce the hero, the diagram, and the 150-line limit.
-- Posts never name the author's employer or its products (Microsoft, GitHub,
-  Copilot, Azure, LinkedIn, VS Code, OpenAI and similar), and carry no
-  disclaimer. `tests/no-employer.test.mjs` fails CI on any such name outside
-  code blocks and URLs.
-- Posts use American English. `seoTitle` must be 44 characters or fewer.
+- Posts and project writeups never name the author's employer or its products
+  (Microsoft, GitHub, Copilot, Azure, LinkedIn, VS Code, OpenAI and similar),
+  and carry no disclaimer. `tests/no-employer.test.mjs` fails CI on any such
+  name outside code blocks and URLs, including in file names.
+- Posts use American English. The search title (`seoTitle`, or `title`
+  without one) must be 44 characters or fewer; the publication checks enforce
+  it.
 
 ## Checks
 
 Keep the CI job name `SEO readiness` unchanged: branch protection requires it.
-Before handing off, run what CI runs:
+Install with `bun install --frozen-lockfile`. If a user-level registry makes
+Bun rewrite `bun.lock`, use `bun install --no-save` instead: a lockfile that
+names a private registry fails CI. The build renders Mermaid in Chromium, so
+run `bunx playwright install chromium` once. Before handing off, run what CI
+runs:
 
 ```sh
 npx --yes cspell@8.19.4 lint --no-progress

@@ -1,13 +1,14 @@
 ---
-applyTo: "src/content/writing/**"
+applyTo: "src/content/writing/**,src/content/project-writeups/**"
 ---
 
-# Posts: no employer content
+# Posts and writeups: no employer content
 
-The site is independent writing. Posts never name the author's employer or its
-products, and carry no employer disclaimer. `tests/no-employer.test.mjs` fails
-CI on Microsoft, GitHub, Copilot, Azure, LinkedIn, VS Code, OpenAI, Bing and
-similar names outside code blocks and URLs.
+The site is independent writing. Posts and project writeups never name the
+author's employer or its products, and carry no employer disclaimer.
+`tests/no-employer.test.mjs` fails CI on Microsoft, GitHub, Copilot, Azure,
+LinkedIn, VS Code, OpenAI, Bing and similar names outside code blocks and URLs.
+It checks file names too, because a post's file name is its URL.
 
 When reviewing a post, also flag what the keyword test can't catch:
 
