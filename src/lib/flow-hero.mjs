@@ -654,6 +654,52 @@ function sealedGovernor(t) {
   t.label([154, 57, B + 40], 'HUMAN HOLDS KEY', { dy: 70, tone: 'blue' })
 }
 
+function baggageClaim(t) {
+  t.base(-260, -100, 510, 165)
+  const belt = k.planOutline({ x: -224, y: -54, w: 168, d: 88, r: 44 }, B + 10.4, t.P)
+  const bag = (cx, cy, angle, tone) => {
+    const [ux, uy] = [Math.cos(angle), Math.sin(angle)]
+    t.bar([cx - ux * 17, cy - uy * 17], [cx + ux * 17, cy + uy * 17], 22, B + 10, 18, tone)
+    t.bar([cx - ux * 5, cy - uy * 5], [cx + ux * 5, cy + uy * 5], 3, B + 28, 4, 'hi')
+  }
+
+  // Carousel: a stadium belt around a low island, with bags riding it.
+  t.box(-240, -70, 200, 120, B, 10, 'mid', { r: 60 })
+  t.box(-206, -38, 132, 56, B + 10, 8, 'lo', { r: 28 })
+  t.line(belt, 'faint')
+  t.line(belt, 'green', { flow: true, className: 'decision-signal' })
+  bag(-150, -54, 0, 'mid')
+  bag(-224, -10, Math.PI / 2, 'hi')
+  bag(-120, 34, 0, 'mid')
+  bag(-69, -41, Math.PI / 4, 'lo')
+
+  // Transfer belt: a rebuild gantry, then a customs gate with a boom barrier.
+  t.box(-44, -26, 262, 32, B, 4, 'lo')
+  t.rail([[-52, -10, B + 5], [20, -10, B + 5]], 'green')
+  t.rail([[20, -10, B + 5], [140, -10, B + 5]], 'blue')
+  t.rail([[140, -10, B + 5], [215, -10, B + 5]], 'red', false)
+  t.box(22, -34, 8, 8, B, 44, 'mid')
+  t.box(22, 6, 8, 8, B, 44, 'mid')
+  t.box(22, -34, 8, 48, B + 44, 8, 'mid')
+  t.cyl(26, -10, 12, B + 52, 6, 'hi', { steps: 20 })
+  t.ring(26, -10, 7, B + 58, 'mid')
+  t.lamp([26, -10, B + 62], 'blue', 5)
+
+  t.box(130, 14, 30, 30, B, 40, 'mid')
+  t.box(126, 10, 38, 38, B + 40, 5, 'hi')
+  t.lamp([145, 29, B + 53], 'red', 5)
+  t.box(146, 8, 8, 8, B, 20, 'lo')
+  t.bar([150, 14], [150, -42], 8, B + 20, 8, 'hi', { lit: true })
+
+  t.tray(196, -34, 44, 48, B, 14, () => {
+    t.bar([206, -10], [230, -10], 14, B + 3, 10, 'green')
+  })
+
+  t.label([-150, -54, B + 28], 'HISTORY + FILES', { dy: -70, tone: 'green' })
+  t.label([26, -10, B + 62], 'PROCESSES REBUILT', { dy: -80, tone: 'blue' })
+  t.label([145, 48, B + 4], 'CREDENTIALS + APPROVALS', { dy: 50, tone: 'red' })
+}
+
 export const flowHeroSvg = hero => render(hero.label, hero.art)
 
 // Labels and outcomes paraphrase each article; nothing here adds a claim the post doesn't make.
@@ -678,6 +724,17 @@ export const flowHeroes = {
     ],
     thesis: ['Tune the wording freely.', 'Widen the envelope by hand.'],
     note: 'An illustrative design for a hosted automation. Nothing here has been run.',
+  },
+  'baggage-claim': {
+    art: baggageClaim,
+    label: 'An isometric baggage carousel feeding a customs gate. Bags ride a looping belt: they are the history and files a resumed session carries. A transfer belt passes a rebuild gantry with a blue lamp, where processes are rebuilt, then a customs booth with a red lamp and a boom barrier, where credentials and approvals are re-authorized before anything leaves.',
+    outputs: [
+      { label: 'CARRIED', tone: 'green' },
+      { label: 'REBUILT', tone: 'blue' },
+      { label: 'RE-AUTHORIZED', tone: 'red' },
+    ],
+    thesis: ['Resume carries the history.', 'Authority is issued again.'],
+    note: 'An illustrative model of resuming a session. What a given tool carries over varies, so check yours.',
   },
 
   'agent-harness': {
