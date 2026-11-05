@@ -84,7 +84,7 @@ they actually used with release-pinned frontmatter:
 ```yaml
 rstack:
   version: v0.2.0
-  uses: [skills/diagnose, skills/tdd, workflows/issue-triage.md]
+  uses: [skills/diagnose, skills/tdd, skills/triage]
 ```
 
 This renders a **Built with rstack** box after the article. Inline Markdown such
