@@ -69,7 +69,7 @@ The Model Context Protocol draws a similar line for connections. Its 2026-07-28 
 | 3. Snapshot files plus transcript | History and files at one moment | Rules for uncommitted, untracked and ignored files; the snapshot ages | Most code tasks, where processes restart cheaply |
 | 4. Full environment checkpoint | History, files and as much runtime state as can be captured | Heavy, usually needs a like-for-like host, and captures credentials and connections | Rebuilding is expensive: long jobs, slow builds, hard-to-reproduce bugs |
 
-A written handoff is safe by default: nothing is inherited, so credentials and approvals are re-established because they have to be. A model-written note records what the model believed, including a process it assumed was still running. A person-written one costs time.
+A written handoff is the safest default, provided the note holds no credentials and the receiving agent treats any approval it mentions as a claim, not a grant: then nothing is inherited, so credentials and approvals are re-established because they have to be. A model-written note records what the model believed, including a process it assumed was still running. A person-written one costs time.
 
 Transcript-only is right when the work lives in the conversation, and wrong whenever it doesn't, because everything reads as continuous when the text is. A snapshot needs rules decided in advance: committed work on a branch is clean, uncommitted changes need a work-in-progress commit or a patch, and local config such as environment files usually shouldn't travel at all.
 
@@ -94,7 +94,7 @@ I haven't run this. Pick one unfinished task: a bug in a small repository that n
 
 Plant the failures so they're observable: add a commit to the branch between leaving and arriving, stop the server, and keep the secret on the first machine only. On arrival, score each of the five layers as correct, missing, stale or wrongly inherited. Also record time to first useful action and approvals re-asked. Have someone who didn't run the handoff score it from logs and the final tree.
 
-**Evidence for my position:** wrong-state events concentrate in processes, credentials and approvals. "Wrongly inherited" shows up under transcript-only and checkpoint handoffs and never under the written one. The arrival check removes most of them.
+**Evidence for my position:** wrong-state events concentrate in processes, credentials and approvals. "Wrongly inherited" shows up under transcript-only and checkpoint handoffs and never under a written note that carries no secret and no approval. The arrival check removes most of them.
 
 **Evidence against it:**
 
