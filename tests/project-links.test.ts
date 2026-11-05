@@ -1,12 +1,23 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { getProjectLinks } from '../src/lib/project-links'
+import { projectSnapshot } from '../src/content/project-snapshot'
 
 const project = {
   name: 'sample',
   description: 'A project.',
   url: 'https://github.com/example/sample',
 }
+
+test('selected projects retain the published tutorial and lab without duplicate entries', () => {
+  assert.equal(new Set(projectSnapshot.map((project) => project.name)).size, projectSnapshot.length)
+  const harness = projectSnapshot.find((project) => project.name === 'build-your-harness')
+  const lab = projectSnapshot.find((project) => project.name === 'lab')
+  assert.ok(harness)
+  assert.ok(lab)
+  assert.ok(getProjectLinks(harness).some((link) => link.url === 'https://raghib.io/writing/build-your-agent-harness/'))
+  assert.equal(lab.homepage, 'https://lab.raghib.io/')
+})
 
 test('Source is always shown without placeholders for missing optional links', () => {
   assert.deepEqual(getProjectLinks(project), [{ label: 'Source', url: project.url }])

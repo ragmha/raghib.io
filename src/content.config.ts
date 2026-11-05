@@ -21,6 +21,7 @@ const writing = defineCollection({
     topics: z.array(z.enum(TOPICS)).min(1),
     tags: z.array(z.string()).default([]),
     published: z.boolean().default(true),
+    lab: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*$/).optional(),
     rstack,
     cover: z.object({ src: image(), alt: z.string().trim().min(1) }).optional(),
     // Every post opens with an Anatomy illustration: the decision cover or a flow hero.
