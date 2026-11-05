@@ -595,6 +595,65 @@ function cardCatalog(t) {
   t.label([130, 18, B + 47], 'CHECK FIRST', { dx: 56, dy: 0 })
 }
 
+function sealedGovernor(t) {
+  t.base(-190, -90, 380, 178)
+  const g = -10
+  const wording = [[-166, -14], [-148, 0], [-130, 14]]
+
+  // Wording knobs: the part the automation may turn freely.
+  t.plate(-184, -28, 62, 56, B, 16, 'mid')
+  for (const [x, y] of wording) {
+    t.cyl(x, y, 8, B + 16, 6, 'hi', { steps: 18 })
+    t.rule([x, y], [x + 5, y - 4], B + 22, 'mid')
+  }
+  t.rail([[-122, 0, B + 1], [g - 40, 0, B + 1]], 'green')
+
+  // Governor: spindle, sleeve and two flying balls.
+  t.cyl(g, 0, 40, B, 18, 'mid')
+  t.cyl(g, 0, 27, B + 18, 12, 'lo')
+  for (const dx of [-2.5, 2.5]) {
+    t.seg([g + dx, 0, B + 150], [g + dx, -60, B + 112], 'mid')
+    t.seg([g + dx, -60, B + 90], [g + dx, -11, B + 70], 'mid')
+  }
+  t.cyl(g, -60, 16, B + 86, 26, 'mid', { steps: 22 })
+  t.cyl(g, 0, 5.5, B + 30, 138, 'hi', { steps: 14 })
+  t.cyl(g, 0, 13, B + 152, 14, 'mid')
+  t.cyl(g, 0, 7, B + 166, 5, 'hi', { steps: 14 })
+  t.cyl(g, 0, 11, B + 60, 16, 'mid')
+  t.cyl(g, 0, 17, B + 98, 12, 'hi', { lit: true })
+  for (const dx of [-2.5, 2.5]) {
+    t.seg([g + dx, 0, B + 150], [g + dx, 60, B + 112], 'mid')
+    t.seg([g + dx, 60, B + 90], [g + dx, 11, B + 70], 'mid')
+  }
+  t.cyl(g, 60, 16, B + 86, 26, 'mid', { steps: 22 })
+
+  // Padlock on the limit collar.
+  t.box(g + 12, 6, 16, 12, B + 94, 18, 'red')
+  t.line(k.sideRing([g + 20, 12, B + 115], 6, 'y', t.P), 'red')
+  t.seg([g + 20, 18, B + 102], [g + 20, 18, B + 107], 'red')
+
+  // Envelope scale: the sleeve may travel only between the stops.
+  t.box(g + 66, -3, 6, 6, B, 134, 'lo')
+  t.box(g + 65, -4, 8, 8, B + 60, 40, 'green')
+  for (let z = 20; z < 134; z += 12) t.seg([g + 72, -3, B + z], [g + 72, 3, B + z], 'faint')
+  t.seg([g + 11, 0, B + 68], [g + 66, 0, B + 68], 'faint')
+  t.seg([g + 17, 0, B + 104], [g + 66, 0, B + 104], 'faint')
+
+  // Key rack: a human holds the key that moves the collar.
+  t.box(130, 40, 48, 34, B, 40, 'mid')
+  t.line(k.sideRing([178, 57, B + 28], 6, 'x', t.P), 'hi')
+  t.seg([178, 57, B + 22], [178, 57, B + 8], 'hi')
+  t.seg([178, 57, B + 14], [178, 62, B + 14], 'hi')
+  t.seg([178, 57, B + 9], [178, 61, B + 9], 'hi')
+  t.lamp([154, 57, B + 40], 'blue', 5)
+  t.seg([130, 57, B + 36], [g + 20, 14, B + 108], 'blue', { dashed: true })
+
+  t.label([-148, 0, B + 22], 'WORDING TUNES FREELY', { dx: -50, dy: 0, tone: 'green' })
+  t.label([g + 69, 0, B + 80], 'FIXED ENVELOPE', { dx: 80, dy: 0 })
+  t.label([g + 20, 12, B + 121], 'TOOLS, TRIGGERS, BUDGET', { dx: -70, dy: -50, tone: 'red' })
+  t.label([154, 57, B + 40], 'HUMAN HOLDS KEY', { dy: 70, tone: 'blue' })
+}
+
 export const flowHeroSvg = hero => render(hero.label, hero.art)
 
 // Labels and outcomes paraphrase each article; nothing here adds a claim the post doesn't make.
@@ -609,6 +668,18 @@ export const flowHeroes = {
     thesis: ['A memory is a claim.', 'Check it before acting.'],
     note: 'An illustrative memory store. The threads and the raised card are a metaphor; nothing here was measured.',
   },
+  'sealed-governor': {
+    art: sealedGovernor,
+    label: 'An isometric centrifugal governor. Wording knobs feed a spindle with two swinging balls and a sliding sleeve. A fixed scale beside the spindle marks the envelope the sleeve may travel, and a padlocked collar above it is the limit. A key rack with a blue lamp stands to one side: a human holds the key that moves the collar.',
+    outputs: [
+      { label: 'WORDING FREE', tone: 'green' },
+      { label: 'HUMAN WIDENS', tone: 'blue' },
+      { label: 'NO SELF-WIDEN', tone: 'red' },
+    ],
+    thesis: ['Tune the wording freely.', 'Widen the envelope by hand.'],
+    note: 'An illustrative design for a hosted automation. Nothing here has been run.',
+  },
+
   'agent-harness': {
     art: agentHarness,
     label: 'An isometric ticket gate for an agent harness. A tool-call card from the model passes a key board where only registered tools have a peg, then a turnstile that is the policy gate. Its three exits run the tool, hold it for approval, or drop it in a reject bin, while a paper tape journals every event.',
