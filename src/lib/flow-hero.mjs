@@ -700,6 +700,46 @@ function baggageClaim(t) {
   t.label([145, 48, B + 4], 'CREDENTIALS + APPROVALS', { dy: 50, tone: 'red' })
 }
 
+function twinGauges(t) {
+  t.base(-230, -100, 480, 175)
+  const gauge = (x, y, r, z, angle, tone, o = {}) => {
+    t.cyl(x, y, r, z, 5, 'mid', { steps: 32, lit: o.lit })
+    const ticks = k.radialTicks(x, y, r - 3, 22, 4, z + 5, [3, 7], t.P, -2.2, 4.4)
+    t.line(ticks.minor, 'faint')
+    t.line(ticks.major, 'mid')
+    t.line(k.radialTicks(x, y, r - 3, 4, 1, z + 5, [8, 8], t.P, 1.0, 1.2).major, 'red')
+    t.bar([x, y], [x + Math.sin(angle) * (r - 7), y - Math.cos(angle) * (r - 7)], 3, z + 5, 2, tone)
+    t.cyl(x, y, 3.5, z + 5, 3, 'mid', { steps: 14 })
+  }
+
+  // One tank, two outlets: a shared manifold carrying both agents' gauges, and a separate clean line.
+  t.cyl(-170, -10, 42, B, 70, 'mid')
+  t.cyl(-170, -10, 34, B + 70, 4, 'lo')
+  t.ring(-170, -10, 28, B + 74, 'mid')
+
+  t.bar([-130, -42], [170, -42], 12, B + 10, 12, 'lo')
+  t.rail([[-130, -42, B + 23], [170, -42, B + 23]], 'blue')
+
+  // The fault sits upstream of both taps, so both gauges inherit it.
+  t.box(-98, -52, 20, 20, B + 8, 22, 'red')
+  t.lamp([-88, -42, B + 34], 'red', 5)
+
+  t.cyl(10, -42, 13, B + 10, 28, 'lo')
+  gauge(10, -42, 34, B + 38, 0.3, 'blue')
+  t.cyl(100, -42, 13, B + 10, 28, 'lo')
+  gauge(100, -42, 34, B + 38, 0.3, 'blue')
+
+  t.bar([-130, 26], [170, 26], 12, B + 4, 12, 'lo')
+  t.rail([[-130, 26, B + 17], [170, 26, B + 17]], 'green')
+  t.cyl(170, 26, 15, B + 4, 34, 'hi')
+  gauge(170, 26, 40, B + 38, 1.8, 'red', { lit: true })
+
+  t.label([10, -42, B + 43], 'AGENT A: FINE', { dy: -60, tone: 'blue' })
+  t.label([100, -42, B + 43], 'AGENT B: FINE', { dx: 90, dy: -30, tone: 'blue' })
+  t.label([-88, -42, B + 34], 'SHARED FAULT', { dy: -60, tone: 'red' })
+  t.label([170, 26, B + 43], 'INDEPENDENT CHECK', { dy: 70, tone: 'green' })
+}
+
 export const flowHeroSvg = hero => render(hero.label, hero.art)
 
 // Labels and outcomes paraphrase each article; nothing here adds a claim the post doesn't make.
@@ -735,6 +775,17 @@ export const flowHeroes = {
     ],
     thesis: ['Resume carries the history.', 'Authority is issued again.'],
     note: 'An illustrative model of resuming a session. What a given tool carries over varies, so check yours.',
+  },
+  'twin-gauges': {
+    art: twinGauges,
+    label: 'An isometric pair of gauges fed by the same pipe, plus a third independent calibration gauge. A fault upstream of the fork leaves both paired gauges reading fine, in agreement, while the separate gauge on its own clean line sits in the red zone.',
+    outputs: [
+      { label: 'AGREEMENT', tone: 'blue' },
+      { label: 'INDEPENDENT', tone: 'green' },
+      { label: 'SHARED FAULT', tone: 'red' },
+    ],
+    thesis: ['Agreement can be shared error.', 'An independent check settles it.'],
+    note: 'An illustration of correlated error. Nothing here was measured.',
   },
 
   'agent-harness': {
