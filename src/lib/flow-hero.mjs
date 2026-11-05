@@ -740,6 +740,57 @@ function twinGauges(t) {
   t.label([170, 26, B + 43], 'INDEPENDENT CHECK', { dy: 70, tone: 'green' })
 }
 
+function vaultWindow(t) {
+  t.base(-200, -100, 410, 205)
+  const sheet = (x, y, angle, z, tone, w = 26, d = 18) => {
+    const [ux, uy] = [Math.cos(angle), Math.sin(angle)]
+    t.bar([x - ux * w / 2, y - uy * w / 2], [x + ux * w / 2, y + uy * w / 2], d, z, 1.6, tone)
+  }
+
+  // Vault: a window on the left-front face, a round door on the right-front face.
+  t.box(-180, -90, 150, 110, B, 84, 'mid')
+  t.outline(-174, -84, 138, 98, B + 84)
+  t.box(-166, 20, 8, 5, B + 26, 6, 'hi')
+  t.box(-166, 20, 100, 5, B + 26, 6, 'hi')
+  t.box(-166, 20, 100, 5, B + 70, 6, 'hi')
+  t.box(-166, 20, 8, 5, B + 32, 38, 'hi')
+  t.box(-74, 20, 8, 5, B + 32, 38, 'hi')
+  for (const dx of [0, 26, 52]) t.seg([-158 + dx, 26, B + 34], [-122 + dx, 26, B + 68], 'green')
+  t.seg([-112, 26, B + 34], [-74, 26, B + 68], 'green')
+  t.line(k.sideRing([-30, -35, B + 52], 26, 'x', t.P), 'hi')
+  t.line(k.sideRing([-30, -35, B + 52], 17, 'x', t.P), 'mid')
+  t.seg([-30, -35 - 17, B + 52], [-30, -35 + 17, B + 52], 'mid')
+  t.seg([-30, -35, B + 35], [-30, -35, B + 69], 'mid')
+  t.line(k.sideRing([-30, -35, B + 52], 5, 'x', t.P), 'hi')
+
+  // Draft counter in front of the window.
+  t.box(-166, 50, 100, 34, B, 26, 'mid')
+  sheet(-132, 67, 0.15, B + 26, 'blue', 34, 22)
+  sheet(-100, 70, -0.2, B + 26, 'blue', 26, 18)
+
+  // Chute: a narrow channel from the door, locked until a key turns.
+  t.bar([-30, -35], [36, -35], 22, B, 14, 'lo')
+  t.rail([[-30, -35, B + 15], [36, -35, B + 15]], 'red', false)
+  t.box(36, -52, 34, 34, B, 44, 'hi', { lit: true })
+  t.line(k.sideRing([53, -18, B + 24], 6, 'y', t.P), 'red')
+  t.lamp([53, -35, B + 44], 'red', 5)
+  t.bar([70, -35], [120, -35], 22, B, 14, 'lo')
+  t.tray(120, -66, 80, 64, B, 24, () => {
+    sheet(160, -35, 0.1, B + 3, 'mid', 44, 30)
+    sheet(160, -35, -0.1, B + 5, 'hi', 44, 30)
+  })
+
+  // The key sits apart from the lock, with a person.
+  t.box(34, 10, 28, 20, B, 12, 'mid')
+  t.ring(42, 20, 4, B + 12, 'hi')
+  t.bar([46, 20], [58, 20], 3, B + 12, 2, 'hi')
+  t.lamp([48, 20, B + 20], 'blue', 4)
+
+  t.label([-166, 22, B + 50], 'READ-ONLY WINDOW', { dx: -70, dy: 0, tone: 'green' })
+  t.label([-116, 67, B + 28], 'DRAFT COUNTER', { dy: 80, tone: 'blue' })
+  t.label([53, -35, B + 44], 'SUBMIT NEEDS A KEY', { dy: -80, tone: 'red' })
+}
+
 export const flowHeroSvg = hero => render(hero.label, hero.art)
 
 // Labels and outcomes paraphrase each article; nothing here adds a claim the post doesn't make.
@@ -786,6 +837,17 @@ export const flowHeroes = {
     ],
     thesis: ['Agreement can be shared error.', 'An independent check settles it.'],
     note: 'An illustration of correlated error. Nothing here was measured.',
+  },
+  'vault-window': {
+    art: vaultWindow,
+    label: 'An isometric vault with a read-only viewing window, a draft counter and a keyed withdrawal chute. The window shows what is inside through glass. Slips are drafted on the counter. The chute only opens with a key held by a person, so submitting is separate from reading and drafting.',
+    outputs: [
+      { label: 'READ', tone: 'green' },
+      { label: 'DRAFT', tone: 'blue' },
+      { label: 'SUBMIT NEEDS A KEY', tone: 'red' },
+    ],
+    thesis: ['Access is capability.', 'Submitting is permission.'],
+    note: 'An illustrative split of authority. Nothing here was measured.',
   },
 
   'agent-harness': {
