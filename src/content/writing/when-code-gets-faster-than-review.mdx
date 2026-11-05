@@ -30,7 +30,8 @@ J. D. C. Little's
 shows that, under finite means and stationary processes, the mean number of
 units in a system equals their arrival rate times the mean time each spends
 there. Read it for review and it is bookkeeping: open changes equal the rate at
-which changes are opened times the average time from open to merge. It does not
+which changes are opened times the average time each stays open, until it merges
+or closes. It does not
 say which of the three to change. It says they cannot move independently.
 
 The second source is Eliyahu Goldratt's novel
@@ -153,9 +154,11 @@ out to the team.
 
 **What to look at.** Changes opened per week; open count; time from open to
 first review; time from open to merge, as median and 90th percentile. Little's
-Law is accounting, so open count should roughly equal opened-per-week times
-average time to merge. A big gap points to abandoned or draft changes in the
-data, not to a finding. Add rough depth proxies: comments per change, the share
+Law is accounting, so over a stretch with steady arrivals, average open count
+should roughly equal opened-per-week times average time open, counting changes
+closed without merging. A big gap points to a shifting arrival rate or to
+changes still open at the edges of the period, not to a finding. Keep time to
+merge as its own outcome. Add rough depth proxies: comments per change, the share
 approved with none, and merged changes later reverted or followed by a fix.
 
 **Evidence for the claim.** Volume rises, reviewer count stays flat, and open
