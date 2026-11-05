@@ -1,0 +1,110 @@
+---
+title: "A Session Is More Than Chat History"
+seoTitle: "Moving an AI Coding Session Between Devices"
+description: "Resuming a transcript on another device doesn't resume the work. Five kinds of session state cross a device boundary under different rules, and approvals and credentials shouldn't carry over silently."
+date: "2026-10-24"
+topics: ["AI Tools"]
+tags: ["ai", "agents", "session-state", "security", "handoff"]
+published: true
+hero: "baggage-claim"
+---
+
+You start a task with a coding assistant on your laptop. Later you want to continue on your phone, or hand it to a hosted agent that runs somewhere else. Most tools offer some form of "resume": reopen the conversation and carry on.
+
+That restores the conversation. It doesn't restore the work.
+
+A session is a bundle of five kinds of state, and they cross a device boundary under different rules. **History and files can carry over. Processes have to be rebuilt. Credentials and approvals have to be granted again on the new surface, not inherited from the old one.** Most surprises come from treating one kind of state as another.
+
+This is a design argument and a test I haven't run, not a report on any particular tool.
+
+## Five kinds of state
+
+<figure class="excalidraw-figure responsive-diagram">
+  <picture>
+    <source
+      media="(max-width: 60rem)"
+      srcSet="/diagrams/a-session-is-more-than-chat-history-layers-portrait.svg"
+      width="456"
+      height="706"
+    />
+    <img
+      src="/diagrams/a-session-is-more-than-chat-history-layers.svg"
+      width="956"
+      height="566"
+      loading="lazy"
+      decoding="async"
+      alt="A stack of five layers, each with what happens to it on a new surface. History, meaning messages and tool results, carries. Files, meaning the working tree and branch, carry if synced. Processes, meaning servers, watchers and shells, are rebuilt. Credentials, meaning tokens, keys and sign-ins, are re-issued. Approvals, meaning permission to run or push, are re-asked; this is the highlighted layer."
+    />
+  </picture>
+  <figcaption>
+    The top two layers are data. The bottom three belong to a machine or a person. The highlighted layer is the one I'd worry about most.
+    <a href="/diagrams/a-session-is-more-than-chat-history-layers.svg" target="_blank" rel="noopener noreferrer">Open full-size diagram.</a>
+  </figcaption>
+</figure>
+
+- **History** is messages, tool output and plans. It's data, so it copies exactly.
+- **Files** are the working tree, the branch, and anything uncommitted, untracked or ignored. They go as far as they're synced.
+- **Processes** are dev servers, test watchers, long builds and shells with the right variables exported. They're memory and open handles on one machine.
+- **Credentials** are tokens, keys and signed-in accounts.
+- **Approvals** are a person's "yes, run that" and "yes, push it." An approval isn't a fact about the world. It's one person's decision about one action, made while looking at one view of the situation.
+
+## Where a handoff breaks
+
+**An approval quietly applies somewhere new.** On the laptop you allowed a push to a branch. The transcript records that as text. If the new surface reads the text and acts on it, authority crossed devices through a side door. A transcript can't tell a real approval from text claiming one.
+
+The Model Context Protocol draws a similar line for connections. Its 2026-07-28 revision has no protocol-level sessions. A server that needs state across requests mints a handle, and the [security guidance](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/security_best_practices) says servers "MUST NOT treat possession of a state handle as authentication." The [authorization specification](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization) requires authorization "in every HTTP request from client to server." Those rules cover protocol connections, not coding sessions or human approvals. I borrow the principle: continuity isn't authority. In the [agent harness I built earlier](/writing/build-your-agent-harness/), an approval is bound to a recorded tool call, not to an authenticated person.
+
+**A process the transcript assumes is still running.** The history says the dev server is up on a port. On the new surface it isn't. A model that trusts the transcript can spend its next steps debugging a connection error as if it were a code bug.
+
+**A branch that moved.** The transcript says the fix is in one file on one branch. Since then the branch gained someone else's commit, or the edit was never pushed from the first machine. The next step lands on a tree the history doesn't describe, and nothing flags it, because files and history are stored in different places.
+
+**A secret that exists only on the first machine.** The task needed a key from a local environment file or a signed-in session. Nothing in the history says so, because nobody typed it. The new surface fails, or falls back to whatever other credential is in reach. The opposite fix is worse: a secret in the transcript travels everywhere the transcript is stored.
+
+## Four ways to hand off
+
+| Strategy | What arrives | What it costs | Wins when |
+|---|---|---|---|
+| 1. Fresh start, written handoff | Whatever the note says | Someone writes it; detail and dead ends are lost | Surfaces differ a lot, the task is bounded, or old history is noise |
+| 2. Resume the transcript only | History | Cheapest, but files, processes and permissions drift from what the text believes | The work lives in the conversation: planning, review, drafting |
+| 3. Snapshot files plus transcript | History and files at one moment | Rules for uncommitted, untracked and ignored files; the snapshot ages | Most code tasks, where processes restart cheaply |
+| 4. Full environment checkpoint | History, files and as much runtime state as can be captured | Heavy, usually needs a like-for-like host, and captures credentials and connections | Rebuilding is expensive: long jobs, slow builds, hard-to-reproduce bugs |
+
+A written handoff is safe by default: nothing is inherited, so credentials and approvals are re-established because they have to be. A model-written note records what the model believed, including a process it assumed was still running. A person-written one costs time.
+
+Transcript-only is right when the work lives in the conversation, and wrong whenever it doesn't, because everything reads as continuous when the text is. A snapshot needs rules decided in advance: committed work on a branch is clean, uncommitted changes need a work-in-progress commit or a patch, and local config such as environment files usually shouldn't travel at all.
+
+A full checkpoint looks like the complete answer and is the likeliest to carry authority by accident, because the environment it captures is where credentials and open connections live. Sockets to other machines and time-limited tokens are probably stale on arrival. A token that's still valid is the worse case: it lets the new surface act as the old one.
+
+I'd default to a snapshot plus an arrival check, fall back to a written handoff when the surfaces differ a lot, and keep full checkpoints for work where rebuilding is expensive.
+
+## What the new surface does on arrival
+
+Whichever strategy you pick, arrival is where the layers get separated:
+
+1. **Check files against the history.** Compare the branch and revision with what the transcript says. Stop on a mismatch instead of reconciling it silently.
+2. **Rebuild processes from a list, not from memory.** Start what the task needs, then confirm it's up.
+3. **Get credentials locally.** Sign in on the new surface, scoped to the task. If the task needs a secret that exists only on the first machine, say so and stop.
+4. **Ask for approvals again.** Show earlier ones as context ("on the laptop you allowed pushing this branch") and let the person re-grant in one step. Carry standing policy, read again from its source. Don't carry one-off decisions.
+
+The cost is friction. Re-asking everything trains people to approve without reading, so I'd limit it to actions that change the world, spend money or leave the machine, and let read-only steps follow standing policy. I don't know whether that line holds up in daily use.
+
+## Planting the failures
+
+I haven't run this. Pick one unfinished task: a bug in a small repository that needs a dev server to reproduce, a secret in a local environment file, and one action, pushing a branch, that needs approval. Stop it with the server running, one approval granted and edits uncommitted. Hand it across a real surface change, such as laptop to a hosted run you drive from your phone, five times with each of the four strategies. That's twenty handoffs.
+
+Plant the failures so they're observable: add a commit to the branch between leaving and arriving, stop the server, and keep the secret on the first machine only. On arrival, score each of the five layers as correct, missing, stale or wrongly inherited. Also record time to first useful action and approvals re-asked. Have someone who didn't run the handoff score it from logs and the final tree.
+
+**Evidence for my position:** wrong-state events concentrate in processes, credentials and approvals. "Wrongly inherited" shows up under transcript-only and checkpoint handoffs and never under the written one. The arrival check removes most of them.
+
+**Evidence against it:**
+
+- Transcript-only handoffs arrive about as clean as the others, so the split isn't doing work for this task shape.
+- Most errors are in history, from lossy notes, which would make the split the wrong axis.
+- Approvals never carry over because the tool already re-asks, so the risk is hypothetical.
+- The full checkpoint scores clean, so its cost is justified more often than I assumed.
+
+The limit: twenty handoffs of one task on one pair of surfaces says little about other work, and the result describes the tools tested as much as the idea. The people involved will learn the task, so vary the planted fault between runs.
+
+## Re-granting without reading
+
+How much of a past approval is safe to show as a prompt instead of a grant? A one-tap "re-grant" may turn into approving without reading. And does a list of intended processes beat a free-text note, or just move the same errors into a structured field? I'd start the test with a written handoff and a transcript-only resume, because the gap between those two shows how much the layers matter.
