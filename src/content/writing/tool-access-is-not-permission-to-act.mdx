@@ -84,8 +84,9 @@ Option 1 is not foolish. In a scratch workspace where everything is
 reversible, a confused deputy can only confuse itself. Option 2 gets the
 granularity wrong: "may use the send tool" describes the tool, and the harm
 lives in the arguments. Option 3 puts a person at the point where harm becomes
-possible. Option 4 limits the damage after a mistake gets through, because a
-credential good for one request and a short window can do only that one thing.
+possible. Option 4 limits the damage after a mistake gets through, but only if
+the credential is bound to the approved request and consumed when it runs. Scope
+and a short window alone still let a send token send twice before it lapses.
 
 They combine: a person approving an action can be what mints a credential
 scoped to exactly that action.
