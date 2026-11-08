@@ -45,7 +45,10 @@ Run `bun run sync:projects` with an authenticated `gh` CLI to refresh
 overrides (description, demo/extra links) live in
 `src/content/project-snapshot.ts` and survive future syncs.
 The same file owns the selected projects and their order; syncing the star list
-does not remove them or duplicate them.
+does not remove them or duplicate them. Repository identities (owner/name) are
+compared case-insensitively, with selected entries taking precedence. Distinct
+repositories must have unique project names, also case-insensitively; a collision
+with a selected project fails site checks and builds rather than hiding a project.
 
 ## Experiments
 
@@ -119,7 +122,7 @@ A post can open with a full-bleed cover image. Put the image in
 ```yaml
 cover:
   src: ../../assets/covers/my-post.jpg
-  alt: "What the image shows"
+  alt: 'What the image shows'
 ```
 
 Every post needs at least one Mermaid or Excalidraw diagram. Choose its type

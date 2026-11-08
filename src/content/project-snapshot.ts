@@ -9,7 +9,10 @@ export interface Project {
   extraLinks?: { label: string; url: string }[]
 }
 
-const overrides: Record<string, Partial<Pick<Project, 'description' | 'homepage' | 'extraLinks'>>> = {
+const overrides: Record<
+  string,
+  Partial<Pick<Project, 'description' | 'homepage' | 'extraLinks'>>
+> = {
   'ragmha/apple-books-mcp': {
     description: 'Connect AI assistants to your Apple Books library.',
   },
@@ -18,19 +21,28 @@ const overrides: Record<string, Partial<Pick<Project, 'description' | 'homepage'
 const selectedProjects: Project[] = [
   {
     name: 'build-your-harness',
-    description: 'Build a TypeScript and Bun AI agent harness from first principles.',
+    description:
+      'Build a TypeScript and Bun AI agent harness from first principles.',
     url: 'https://github.com/ragmha/build-your-harness',
-    extraLinks: [{ label: 'Tutorial', url: 'https://raghib.io/writing/build-your-agent-harness/' }],
+    extraLinks: [
+      {
+        label: 'Tutorial',
+        url: 'https://raghib.io/writing/build-your-agent-harness/',
+      },
+    ],
   },
   {
     name: 'lab',
-    description: 'Interactive experiments in agent sessions, context, token use, and browser games.',
+    description:
+      'Interactive experiments in agent sessions, context, token use, and browser games.',
     url: 'https://github.com/ragmha/lab',
     homepage: 'https://lab.raghib.io/',
   },
 ]
 
-export function buildProjectSnapshot(syncedProjects: readonly Project[]): Project[] {
+export function buildProjectSnapshot(
+  syncedProjects: readonly Project[],
+): Project[] {
   const repositories = new Set<string>()
   const names = new Set<string>()
   const projects: Project[] = []
@@ -39,7 +51,9 @@ export function buildProjectSnapshot(syncedProjects: readonly Project[]): Projec
     if (repositories.has(repository)) continue
     const name = project.name.toLowerCase()
     if (names.has(name)) {
-      throw new Error(`Distinct repositories share project name "${project.name}". Project names must be unique.`)
+      throw new Error(
+        `Distinct repositories share project name "${project.name}". Project names must be unique.`,
+      )
     }
     repositories.add(repository)
     names.add(name)
