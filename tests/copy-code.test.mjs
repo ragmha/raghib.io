@@ -29,6 +29,7 @@ function page(clipboard) {
       createElement: (tag) => {
         const element = {
           tag,
+          disabled: false,
           attributes: {},
           children: [],
           setAttribute(key, value) {
@@ -54,9 +55,11 @@ function page(clipboard) {
 
 test('copy preserves exact code text, announces success, and remains retryable', async () => {
   let copied
+  let writes = 0
   const p = page({
     writeText: async (text) => {
       copied = text
+      writes++
     },
   })
   assert.equal(p.button.type, 'button')
@@ -68,6 +71,8 @@ test('copy preserves exact code text, announces success, and remains retryable',
   assert.equal(p.status.textContent, 'Copied!')
   assert.equal(p.button.disabled, false)
   assert.equal(p.errors.length, 0)
+  await p.button.click()
+  assert.equal(writes, 2)
 })
 
 test('denied and unavailable clipboard show manual-copy guidance without losing code', async () => {
@@ -85,5 +90,38 @@ test('denied and unavailable clipboard show manual-copy guidance without losing 
     assert.equal(p.button.disabled, false)
     assert.equal(p.errors.length, 1)
     assert.equal(p.code.textContent, 'const x = "<value>";\n  x\n')
+    await p.button.click()
+    assert.equal(p.errors.length, 2)
+  }
+})
+
+test('copy stays enabled while pending and permits retry after either outcome', async () => {
+  for (const denied of [false, true]) {
+    let settle
+    let writes = 0
+    const p = page({
+      writeText: () => {
+        writes++
+        return new Promise((resolve, reject) => {
+          settle = () => (denied ? reject(new Error('Denied')) : resolve())
+        })
+      },
+    })
+    const first = p.button.click()
+    assert.equal(p.button.disabled, false)
+    await p.button.click()
+    assert.equal(writes, 1)
+    settle()
+    await first
+    assert.equal(p.button.disabled, false)
+    assert.equal(
+      p.status.textContent,
+      denied ? 'Copy failed. Select the code and copy manually.' : 'Copied!',
+    )
+    const retry = p.button.click()
+    assert.equal(writes, 2)
+    assert.equal(p.status.textContent, '')
+    settle()
+    await retry
   }
 })

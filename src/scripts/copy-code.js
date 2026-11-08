@@ -12,8 +12,10 @@ document.querySelectorAll('.prose pre > code').forEach((code, index) => {
   controls.append(status, button)
   pre.append(controls)
 
+  let pending = false
   button.addEventListener('click', async () => {
-    button.disabled = true
+    if (pending) return
+    pending = true
     status.textContent = ''
     try {
       await navigator.clipboard.writeText(code.textContent ?? '')
@@ -22,7 +24,7 @@ document.querySelectorAll('.prose pre > code').forEach((code, index) => {
       status.textContent = 'Copy failed. Select the code and copy manually.'
       console.error('Could not copy code to the clipboard.', error)
     } finally {
-      button.disabled = false
+      pending = false
     }
   })
 })
