@@ -5,12 +5,12 @@ import { flowHeroes, flowHeroSvg } from '../src/lib/flow-hero.mjs'
 
 const escapeXml = value => value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
 
-test('every post opens with a known Anatomy hero', () => {
+test('declared post heroes are known', () => {
   const names = new Set(['decision', ...Object.keys(flowHeroes)])
   const dir = new URL('../src/content/writing/', import.meta.url)
   for (const file of readdirSync(dir).filter(name => /\.mdx?$/.test(name))) {
     const hero = readFileSync(new URL(file, dir), 'utf8').match(/^hero:\s*"?([\w-]+)"?\s*$/m)?.[1]
-    assert.ok(names.has(hero), `${file} declares a hero (got ${hero})`)
+    if (hero) assert.ok(names.has(hero), `${file} declares a known hero (got ${hero})`)
   }
 })
 

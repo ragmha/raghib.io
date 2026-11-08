@@ -1,6 +1,8 @@
-# Examples from Raghib's writing
+# Evidence from Raghib's writing
 
-These examples show different modes, not one structure to copy.
+These examples show different modes and ways of thinking, not templates or a
+formula to repeat. Compare drafts with the archive for repeated arguments,
+openings, examples, or conclusions—not for topic overlap alone.
 
 ## Working mode for the current archive
 

@@ -62,7 +62,9 @@ const published = new Intl.DateTimeFormat('en-US', {
   )}
   <div class="shell shell-solo">
     <main id="main" class="post-layout">
-      {post.data.hero === 'decision' ? <DecisionHero /> : <FlowHero name={post.data.hero} />}
+      {post.data.hero && (post.data.hero === 'decision'
+        ? <DecisionHero />
+        : <FlowHero name={post.data.hero} />)}
       <header class="post-head">
         {!post.data.published && (
           <p class="draft-notice">Draft preview — not published. Review the account and conclusions before publishing.</p>

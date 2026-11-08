@@ -6,10 +6,11 @@ description: Helps draft, revise, and review Raghib Hasan's technology writing i
 # Raghib's editorial voice
 
 Build on Raghib's own writing, not another writer's voice or a fixed article
-formula. Preserve the curious, first-person thought process when it is genuine:
-notice something in practice, ask what it means, explore possible explanations
-or approaches, and state what remains unknown. First person is a choice, not a
-requirement.
+formula. The site is a place to share the author's interests, learning, and
+knowledge—not marketing, a CV, company promotion, or an AI-search content mill.
+Preserve the author's actual thoughts and phrasing where they carry personality.
+First person, reflection, and argument are choices, not requirements; never
+invent an opinion or experience to make a piece feel personal.
 
 `AGENTS.md` is authoritative: keep the writing independent, cross-industry,
 and understandable beyond a narrow specialist audience. Use [EXAMPLES.md](EXAMPLES.md)
@@ -35,27 +36,14 @@ elements from another mode, but do not make every post follow the same rhythm.
 If a piece is hybrid, prioritize the reader's main job: learn one fact (TIL),
 think through an idea (blog), or reproduce a result (tutorial).
 
-## Fundamentals first
+## Subject and evidence
 
-Lead with durable AI engineering fundamentals rather than a specific tool or
-API: tools change quickly, while problems like evaluation, reliability, and
-cost apply across providers. Readers include people at AI labs; a post that
-only works inside one vendor's product reads as marketing.
-
-- **Write about the problem, not the product.** Name the underlying problem
-  (evaluation, context construction, cost, latency, reliability, safety,
-  feedback loops). The tool you used belongs in the method, not the title.
-- **Lay out the options before you pick one.** Lay out the realistic
-  approaches, what each costs, and when each one wins. Leave the reader with
-  the questions that decide it in their context, not a verdict for everyone.
-- **Ground claims in sources.** Cite primary sources (papers, model cards,
-  official docs, benchmarks) for factual claims, and say what a benchmark
-  does and does not measure.
-- **Evaluation is part of the work.** For any AI system, state how you know it
-  works: the rubric or metric, the data, the baseline, and the failure cases.
-- **Make the result reusable.** Make the takeaway transfer across providers:
-  use a swappable interface in code, or an open standard (MCP, OpenTelemetry,
-  Agent Skills) instead of one vendor's feature.
+Let the subject determine how much context, comparison, and technical detail a
+piece needs. Name a product when it is genuinely central to the reader's task;
+do not make a product the subject just to promote it. Cite reliable sources
+for claims that need them, explain what measurements establish, and separate
+observations from interpretations and proposals. Do not add a comparison,
+evaluation, or abstraction merely to make every piece reusable or comprehensive.
 
 ## Writing principles
 
@@ -73,14 +61,15 @@ only works inside one vendor's product reads as marketing.
 - Say when an approach does not fit, including its meaningful trade-offs.
 - End with a concrete next step when it helps; skip generic calls to action
   and recap sections.
-- Choose headings and length for the mode and material. Avoid stock headings,
-  repeated catchphrases, forced anecdotes, hype, filler, and recap sections
-  that add nothing.
+- Choose structure, headings, and length for the mode and material. Avoid
+  stock headings, repeated catchphrases, forced anecdotes, hype, filler, and
+  recap sections that add nothing.
 
 ## Workflow
 
 1. Read the draft or notes, `AGENTS.md`, and relevant source material. Record
-   the intended reader, primary mode, central idea, evidence, and uncertainties.
+   the intended reader, central idea, evidence, and uncertainties; choose a
+   mode only when it helps guide the work.
 2. Preserve the author's actual thinking and phrasing where they carry
    personality. Edit for clarity, order, grammar, and precision without
    replacing an exploratory voice with polished generic prose.
@@ -88,8 +77,14 @@ only works inside one vendor's product reads as marketing.
    result, metric, citation, or personal experience.
 4. Preserve frontmatter, disclosures, links, and sources unless asked to edit
    them. `seoTitle` must remain at most 44 characters.
-5. Check the piece against its chosen mode in [EXAMPLES.md](EXAMPLES.md), then
-   run `bun run build` and `bun run check:seo` for content changes.
+5. Use [EXAMPLES.md](EXAMPLES.md) as evidence of range, not a template. For a
+   substantive preflight, compare the draft with a few relevant recent posts
+   for a repeated argument, opening, example, or conclusion. Report the exact
+   passages and offer revision options; do not score originality or rewrite
+   automatically.
+6. Use a hero or diagram only when it clarifies the material. Search discovery
+   and SEO are checks after the idea is written, not a reason to reshape it.
+   Run `bun run build` and `bun run check:seo` for content changes.
 
 ## Audit for vendor drift
 
@@ -101,17 +96,15 @@ unpublish, rename slugs, or rewrite without the author's go-ahead.
 - **Problem, not product.** `title`, `seoTitle`, `description`, and headings
   name the problem or pattern. A vendor name belongs only where it is a cited
   source, a step the reader runs, or the incident being explained.
-- **Why and what before how.** In a blog post, most of the text covers the
-  constraint, the pattern, its trade-offs, and the evidence; tool setup
-  supports them. Tutorials are exempt: the steps are the point.
+- **Independent, not neutral by default.** A clear argument is welcome when
+  it is the author's and is grounded in evidence; do not manufacture
+  neutrality or suppress a supported point of view.
 - **Plain findings.** Keep genuine uncertainty; cut justification that defends
   the author's diligence instead of informing the reader.
 - **Product tours.** A post that mainly lists one product's features should be
   reframed around a pattern or retired. Ask the author which.
 - **No employer.** Never name the author's employer or its products; describe
   the pattern instead. `tests/no-employer.test.mjs` enforces this.
-- **Neutrality check.** No vendor, the employer included, is favored or
-  disfavored. Run the four questions in
-  `.github/instructions/writing.instructions.md`: does it take a side, is every
-  claim public, would the vendor publish it, is it a substitute. Flag failures
-  to the author.
+- **Independence check.** Apply the same four questions as
+  `.github/instructions/writing.instructions.md`. Flag conflicts or unsupported
+  claims to the author; do not treat a supported point of view as a failure.
