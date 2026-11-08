@@ -17,7 +17,6 @@ measured.
 | --- | --- |
 | Remote-eligible | 41% |
 | Based in the United States | 63% |
-| Median minimum experience | 5 years (609 postings state it) |
 | Median posted pay, range midpoint | $210k (242 postings state a $ range) |
 | Biggest hirers | OpenAI 72, Palantir 54, Databricks 43, Anthropic 35, LangChain 17 |
 
@@ -71,8 +70,9 @@ Also measured: Azure 16%, Full-stack 16%, RAG & retrieval 15%, Prompt engineerin
   stakeholder, and owning something end to end; practise building a small API
   integration in Python.
 - **Writing about it:** cite "N% of postings on forwarddeployed.fun, <date>",
-  never "most FDEs". A post on FDE hiring is a big-tech hiring topic, so apply
-  the [employer-disclaimer](../employer-disclaimer/SKILL.md) skill.
+  never "most FDEs". Follow `AGENTS.md` for vendor neutrality and the
+  no-employer rule; use [publication-preflight](../publication-preflight/SKILL.md)
+  before publication.
 
 ## Limits
 
@@ -82,18 +82,27 @@ Also measured: Azure 16%, Full-stack 16%, RAG & retrieval 15%, Prompt engineerin
   few hirers (see the KPI table).
 - Pay is the midpoint of a posting's first dollar range; US and non-US dollars
   are mixed, and many postings state none.
+- Experience is omitted from this stored snapshot because the original
+  extractor also counted company tenure. Refresh to recompute it with the
+  corrected pattern, which requires explicit experience wording.
 - The site refreshes hourly. Refresh before quoting numbers publicly.
 
 ## Refresh
 
 ```sh
-python3 .github/skills/fde-skills-demand/scripts/fde_demand.py
+python3 .agents/skills/fde-skills-demand/scripts/fde_demand.py
 ```
 
 The first run fetches every posting (about three minutes) and caches the
-descriptions in the system temp directory. Rerun if it reports `skipped`
+descriptions in the system temp directory for one hour. Rerun if it reports `skipped`
 postings, replace the Snapshot section with the output, then check **Read it**
 against the new table. Skill patterns live in `SKILLS` at the top of the
 script; its asserts guard the false positives they were tuned against. If no
 roles or descriptions come back, the site's markup changed: fix `roles()` or
 `describe()`.
+
+Run the offline regression checks without fetching postings:
+
+```sh
+python3 -B .agents/skills/fde-skills-demand/scripts/test_fde_demand.py
+```

@@ -5,7 +5,7 @@ Reads every role listed on forwarddeployed.fun plus its full job description,
 then counts the postings whose description matches each skill pattern.
 Stdlib only. Descriptions are cached in the system temp dir.
 
-    python3 .github/skills/fde-skills-demand/scripts/fde_demand.py
+    python3 .agents/skills/fde-skills-demand/scripts/fde_demand.py
 """
 import collections
 import datetime
@@ -16,6 +16,7 @@ import re
 import statistics
 import sys
 import tempfile
+import time
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
@@ -74,8 +75,8 @@ SKILLS = {
 }
 GROUP = {skill: group for group, skills in SKILLS.items() for skill in skills}
 YEARS = re.compile(
-    r"(\d{1,2})(?:\+|\s*(?:-|–|to)\s*\d{1,2}\+?)\s*years"
-    r"|(\d{1,2})\s*years?\W?\s*(?:of\s+)?(?:[\w/&,-]+\s+){0,5}?experience"
+    r"\b(\d{1,2})(?:\+|\s*(?:-|–|to)\s*\d{1,2}\+?)?\s*years?['’]?\s+"
+    r"(?:of\s+)?(?:[\w/&,-]+\s+){0,5}?experience\b"
 )
 PAY = re.compile(r"\$\s?(\d{2,3})(?:,\d{3}(?:\.\d{2})?|k)\s*(?:-|–|—|to)\s*\$?\s?(\d{2,3})(?:,\d{3}|k)")
 
@@ -109,7 +110,7 @@ def roles():
 
 def describe(role):
     path = os.path.join(CACHE, role["href"].strip("/").replace("/", "_") + ".txt")
-    if not os.path.exists(path):
+    if not os.path.exists(path) or time.time() - os.path.getmtime(path) >= 3600:
         try:
             page = fetch(SITE + role["href"])
             body = page.split('<div class="description">', 1)[1].split("</article>", 1)[0]
