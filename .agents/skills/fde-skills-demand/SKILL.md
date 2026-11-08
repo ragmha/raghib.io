@@ -13,35 +13,35 @@ measured.
 
 919 of 919 roles parsed, from 351 companies on [forwarddeployed.fun](https://www.forwarddeployed.fun/). Share = postings whose full description matches the skill's pattern.
 
-| KPI | Value |
-| --- | --- |
-| Remote-eligible | 41% |
-| Based in the United States | 63% |
-| Median posted pay, range midpoint | $210k (242 postings state a $ range) |
-| Biggest hirers | OpenAI 72, Palantir 54, Databricks 43, Anthropic 35, LangChain 17 |
+| KPI                               | Value                                                             |
+| --------------------------------- | ----------------------------------------------------------------- |
+| Remote-eligible                   | 41%                                                               |
+| Based in the United States        | 63%                                                               |
+| Median posted pay, range midpoint | $210k (242 postings state a $ range)                              |
+| Biggest hirers                    | OpenAI 72, Palantir 54, Databricks 43, Anthropic 35, LangChain 17 |
 
-| # | Skill | Group | Share |
-| --- | --- | --- | --- |
-| 1 | Communication | Customer | 76% |
-| 2 | End-to-end ownership | Customer | 72% |
-| 3 | Stakeholder & executive management | Customer | 67% |
-| 4 | APIs & integrations | Build | 66% |
-| 5 | Customer-facing | Customer | 63% |
-| 6 | Ambiguity & problem solving | Customer | 62% |
-| 7 | Python | Build | 61% |
-| 8 | AI agents | AI | 57% |
-| 9 | Architecture & system design | Build | 57% |
-| 10 | LLMs & generative AI | AI | 54% |
-| 11 | Travel | Customer | 47% |
-| 12 | Machine learning | AI | 31% |
-| 13 | TypeScript | Build | 27% |
-| 14 | AWS | Infra | 25% |
-| 15 | Evals | AI | 24% |
-| 16 | JavaScript / Node | Build | 24% |
-| 17 | Pre-sales & POCs | Customer | 24% |
-| 18 | Data pipelines & ETL | Build | 19% |
-| 19 | SQL | Build | 17% |
-| 20 | GCP | Infra | 17% |
+| #   | Skill                              | Group    | Share |
+| --- | ---------------------------------- | -------- | ----- |
+| 1   | Communication                      | Customer | 76%   |
+| 2   | End-to-end ownership               | Customer | 72%   |
+| 3   | Stakeholder & executive management | Customer | 67%   |
+| 4   | APIs & integrations                | Build    | 66%   |
+| 5   | Customer-facing                    | Customer | 63%   |
+| 6   | Ambiguity & problem solving        | Customer | 62%   |
+| 7   | Python                             | Build    | 61%   |
+| 8   | AI agents                          | AI       | 57%   |
+| 9   | Architecture & system design       | Build    | 57%   |
+| 10  | LLMs & generative AI               | AI       | 54%   |
+| 11  | Travel                             | Customer | 47%   |
+| 12  | Machine learning                   | AI       | 31%   |
+| 13  | TypeScript                         | Build    | 27%   |
+| 14  | AWS                                | Infra    | 25%   |
+| 15  | Evals                              | AI       | 24%   |
+| 16  | JavaScript / Node                  | Build    | 24%   |
+| 17  | Pre-sales & POCs                   | Customer | 24%   |
+| 18  | Data pipelines & ETL               | Build    | 19%   |
+| 19  | SQL                                | Build    | 17%   |
+| 20  | GCP                                | Infra    | 17%   |
 
 Also measured: Azure 16%, Full-stack 16%, RAG & retrieval 15%, Prompt engineering 15%, Docker & containers 13%, Kubernetes 13%, CI/CD 13%, Security clearance 12%, React 12%, Java 10%, MCP 9%, C++ 8%, Go 7%, Fine-tuning 7%, Terraform & IaC 6%, Rust 4%.
 
