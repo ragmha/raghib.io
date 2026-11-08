@@ -29,9 +29,10 @@ to look.
 Take three voters that are each right 70% of the time. If their errors are fully
 independent, the majority is right about 78% of the time (0.7³ + 3 × 0.7² × 0.3
 = 0.784). If they always make the same errors, the majority is right 70% of the
-time: no gain, at three times the cost. Real models sit somewhere between. That
-arithmetic is an illustration, not data, and the gap between the two cases is
-what you would want to measure on your own task.
+time: no gain, at three times the cost. Those are two illustrative cases, not
+bounds: errors can overlap in ways that leave the majority worse than any single
+voter. The arithmetic is an illustration, not data, and how your models' errors
+overlap is what you would want to measure on your own task.
 
 Why would model errors overlap? My reasoning is that models are trained on
 overlapping public text, with similar architectures and similar recipes, so some
@@ -71,8 +72,9 @@ The mechanism is noisy, independent errors canceling out. It wins when the model
 is usually right, its slips differ from sample to sample, and the answer is
 short enough to compare. A cheap diagnostic, which I have not run: look at how
 the wrong answers are distributed. If they scatter while the right answer
-repeats, voting helps. If one wrong answer keeps coming back, the error is
-systematic and the vote locks it in.
+repeats more often than any of them, voting helps. If one wrong answer comes
+back as often as the right one, or more often, the error is systematic and the
+vote locks it in.
 
 ### Cross-model checks
 
