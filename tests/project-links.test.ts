@@ -49,9 +49,9 @@ test('syncing selected repositories with different capitalization preserves cura
     {
       ...project,
       name: 'Build-Your-Harness',
-      url: 'https://github.com/RAGMHA/Build-Your-Harness',
+      url: 'https://github.com/RAGMHA/Build-Your-Harness.git/',
     },
-    { ...project, name: 'Lab', url: 'https://github.com/RAGMHA/Lab' },
+    { ...project, name: 'Lab', url: 'https://github.com/RAGMHA/Lab/' },
     project,
   ])
   assert.deepEqual(
@@ -101,7 +101,7 @@ test('synced repository identities are deduplicated and editorial overrides igno
     {
       ...project,
       name: 'apple-books-mcp',
-      url: 'https://github.com/RAGMHA/Apple-Books-MCP',
+      url: 'https://github.com/RAGMHA/Apple-Books-MCP.git/',
     },
   ])
   assert.deepEqual(

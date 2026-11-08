@@ -52,7 +52,10 @@ export function buildProjectSnapshot(
   const names = new Set<string>()
   const projects: Project[] = []
   for (const project of [...selectedProjects, ...syncedProjects]) {
-    const repository = new URL(project.url).pathname.slice(1).toLowerCase()
+    const repository = new URL(project.url).pathname
+      .replace(/^\/+|\/+$/g, '')
+      .replace(/\.git$/i, '')
+      .toLowerCase()
     if (repositories.has(repository)) continue
     const name = project.name.toLowerCase()
     if (names.has(name)) {
