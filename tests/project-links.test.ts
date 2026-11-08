@@ -12,7 +12,12 @@ const project = {
   url: 'https://github.com/example/sample',
 }
 
-test('selected projects retain the published tutorial and lab without duplicate entries', () => {
+test('selected projects retain existing tutorials, writeups, and labs without duplicates', () => {
+  const emptySync = buildProjectSnapshot([])
+  assert.deepEqual(
+    emptySync.map((project) => project.name),
+    ['build-your-harness', 'lab', 'apple-books-mcp'],
+  )
   assert.equal(
     new Set(projectSnapshot.map((project) => project.name)).size,
     projectSnapshot.length,
@@ -21,8 +26,15 @@ test('selected projects retain the published tutorial and lab without duplicate 
     (project) => project.name === 'build-your-harness',
   )
   const lab = projectSnapshot.find((project) => project.name === 'lab')
+  const appleBooks = emptySync.find(
+    (project) => project.name === 'apple-books-mcp',
+  )
   assert.ok(harness)
   assert.ok(lab)
+  assert.ok(appleBooks)
+  assert.ok(
+    projectSnapshot.some((project) => project.name === 'apple-books-mcp'),
+  )
   assert.ok(
     getProjectLinks(harness).some(
       (link) =>
@@ -44,13 +56,13 @@ test('syncing selected repositories with different capitalization preserves cura
   ])
   assert.deepEqual(
     projects.map((entry) => entry.name),
-    ['build-your-harness', 'lab', 'sample'],
+    ['build-your-harness', 'lab', 'apple-books-mcp', 'sample'],
   )
   assert.ok(
     getProjectLinks(projects[0]).some((link) => link.label === 'Tutorial'),
   )
   assert.equal(projects[1].homepage, 'https://lab.raghib.io/')
-  assert.deepEqual(projects[2], project)
+  assert.deepEqual(projects[3], project)
 })
 
 test('distinct repositories with conflicting display names fail instead of disappearing', () => {
@@ -94,10 +106,10 @@ test('synced repository identities are deduplicated and editorial overrides igno
   ])
   assert.deepEqual(
     projects.map((entry) => entry.name),
-    ['build-your-harness', 'lab', 'sample', 'apple-books-mcp'],
+    ['build-your-harness', 'lab', 'apple-books-mcp', 'sample'],
   )
   assert.equal(
-    projects[3].description,
+    projects[2].description,
     'Connect AI assistants to your Apple Books library.',
   )
 })

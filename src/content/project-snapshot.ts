@@ -38,6 +38,11 @@ const selectedProjects: Project[] = [
     url: 'https://github.com/ragmha/lab',
     homepage: 'https://lab.raghib.io/',
   },
+  {
+    name: 'apple-books-mcp',
+    description: 'Connect AI assistants to your Apple Books library.',
+    url: 'https://github.com/ragmha/apple-books-mcp',
+  },
 ]
 
 export function buildProjectSnapshot(

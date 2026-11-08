@@ -37,8 +37,9 @@ bun test --bail               # unit and publication-contract tests
 
 ## Projects
 
-The Projects page leads with a small selection already supported by the site's
-content (the harness tutorial and the lab), followed by public repositories in
+The Projects page leads with projects already supported by the site's content
+(the harness tutorial, the lab, and the Apple Books writeup), followed by public
+repositories in
 [`ragmha/blog-projects`](https://github.com/stars/ragmha/lists/blog-projects).
 Run `bun run sync:projects` with an authenticated `gh` CLI to refresh
 `src/content/github-projects.json`, then commit and redeploy. Per-project
