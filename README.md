@@ -46,8 +46,9 @@ overrides (description, demo/extra links) live in
 `src/content/project-snapshot.ts` and survive future syncs.
 The same file owns the selected projects and their order; syncing the star list
 does not remove them or duplicate them. Repository identities (owner/name) are
-compared case-insensitively, with selected entries taking precedence. Distinct
-repositories must have unique project names, also case-insensitively; any name
+compared case-insensitively after removing trailing slashes and a `.git` suffix,
+with selected entries taking precedence. Distinct repositories must have unique
+project names, also case-insensitively; any name
 collision between distinct repositories fails site checks and builds rather than
 hiding a project.
 
