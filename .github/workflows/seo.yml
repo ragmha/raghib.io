@@ -54,6 +54,8 @@ jobs:
     env:
       PUBLIC_CF_BEACON_TOKEN: ${{ github.ref == 'refs/heads/main' && vars.CF_WEB_ANALYTICS_TOKEN || '' }}
       INDEXNOW_KEY: ${{ github.ref == 'refs/heads/main' && secrets.INDEXNOW_KEY || '' }}
+      # Encrypts talks marked `locked: true`; without it they ship only a request link.
+      TALK_CODE: ${{ secrets.TALK_CODE }}
     steps:
       - uses: actions/checkout@v7
 

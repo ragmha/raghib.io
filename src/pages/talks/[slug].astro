@@ -1,0 +1,193 @@
+---
+import WritingLayout from '../../layouts/WritingLayout.astro'
+import { formatDate } from '../../lib/posts'
+import { seal } from '../../lib/talk-lock'
+import { getTalks, renderDeck, viewRequestUrl, type Talk } from '../../lib/talks'
+
+export async function getStaticPaths() {
+  return (await getTalks()).map((talk) => ({ params: { slug: talk.id }, props: { talk } }))
+}
+
+interface Props {
+  talk: Talk
+}
+
+const { talk } = Astro.props
+const { title, description, date, kind, locked } = talk.data
+const deck = await renderDeck(talk)
+const slides = deck.match(/<svg data-marpit-svg/g)?.length ?? 0
+// Dev shows locked decks so they can be written; builds without a code ship only the request link.
+const showDeck = !locked || import.meta.env.DEV
+const code = process.env.TALK_CODE?.trim()
+const sealed = !showDeck && code ? await seal(deck, code) : undefined
+const downloads = [
+  ['PDF', 'pdf'],
+  ['PowerPoint', 'pptx'],
+]
+---
+
+<WritingLayout title={title} description={description}>
+  <div class="shell shell-solo">
+    <main id="main" class="post-layout">
+      <header class="post-head">
+        <nav class="post-crumbs" aria-label="Breadcrumb">
+          <a href="/talks/">Talks</a> / <span>{kind}</span>
+        </nav>
+        <h1>{title}</h1>
+        <p class="post-lede">{description}</p>
+        <dl class="post-facts">
+          <div><dt>Date:</dt><dd><time datetime={date.toISOString()}>{formatDate(date)}</time></dd></div>
+          <div><dt>Slides:</dt><dd>{slides}</dd></div>
+          {locked && <div><dt>Status:</dt><dd>In progress</dd></div>}
+        </dl>
+        {!locked && (
+          <details class="talk-download">
+            <summary>Download</summary>
+            <ul role="list">
+              {downloads.map(([label, extension]) => (
+                <li><a href={`/talks/${talk.id}/${talk.id}.${extension}`} download>{label} (.{extension})</a></li>
+              ))}
+            </ul>
+          </details>
+        )}
+      </header>
+
+      {showDeck ? (
+        <div class="talk-deck" set:html={deck} />
+      ) : (
+        <section class="talk-locked" aria-labelledby="talk-locked-title">
+          <h2 id="talk-locked-title">This presentation is still in progress</h2>
+          <p>Ask to view it. Each request tells me which talk to finish first, and you will hear back when it is published.</p>
+          <p><a class="talk-button" href={viewRequestUrl(talk)}>Can I view this presentation?</a></p>
+          {sealed && (
+            <form class="talk-unlock" data-sealed={sealed}>
+              <label for="talk-code">Have a view code?</label>
+              <div class="talk-unlock-row">
+                <input id="talk-code" name="code" type="password" autocomplete="off" required />
+                <button class="talk-button" type="submit">View</button>
+              </div>
+              <p class="talk-status" role="status"></p>
+            </form>
+          )}
+        </section>
+      )}
+    </main>
+  </div>
+</WritingLayout>
+
+<script>
+  import { browser } from '@marp-team/marp-core/browser'
+  import { open } from '../../lib/talk-lock'
+
+  // Marp's polyfill keeps slide content scaled inside the SVG in WebKit.
+  const deck = document.querySelector<HTMLElement>('.talk-deck')
+  if (deck) browser(deck)
+
+  const form = document.querySelector<HTMLFormElement>('.talk-unlock')
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault()
+    const status = form.querySelector('.talk-status')!
+    status.textContent = 'Checking the code…'
+    try {
+      const unlocked = document.createElement('div')
+      unlocked.className = 'talk-deck'
+      unlocked.tabIndex = -1
+      unlocked.innerHTML = await open(form.dataset.sealed!, String(new FormData(form).get('code')))
+      form.closest('.talk-locked')!.replaceWith(unlocked)
+      browser(unlocked)
+      unlocked.focus()
+    } catch {
+      status.textContent = 'That code did not work. Check it and try again.'
+    }
+  })
+</script>
+
+<style>
+  /* Global: an unlocked deck is created in the browser without Astro's scope attribute. */
+  :global(.talk-deck svg[data-marpit-svg]) {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0 0 1.25rem;
+    border: 1px solid var(--rule);
+  }
+
+  :global(.talk-deck:focus) {
+    outline: none;
+  }
+
+  .talk-download {
+    margin-top: 1.5rem;
+    font-size: 0.8rem;
+  }
+
+  .talk-download ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .talk-download summary,
+  .talk-button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 1rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: 0.25rem;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.8rem;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .talk-locked {
+    display: grid;
+    gap: 1rem;
+    max-width: 40rem;
+    padding: 2rem;
+    border: 1px solid var(--rule);
+    background: var(--paper-sunk);
+  }
+
+  .talk-locked h2 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  .talk-locked p {
+    margin: 0;
+    color: var(--ink-muted);
+  }
+
+  .talk-unlock {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule);
+    font-size: 0.85rem;
+  }
+
+  .talk-unlock-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .talk-unlock input {
+    flex: 1 1 12rem;
+    min-height: 44px;
+    padding: 0 0.75rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: 0.25rem;
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+  }
+</style>

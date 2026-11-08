@@ -1,0 +1,21 @@
+name: Can I view this presentation?
+description: Ask to view a talk on raghib.io that is still in progress.
+title: "Can I view: "
+labels: ["view-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for asking. Requests tell me which talk to finish first. This issue is public, so leave out contact details and company names. I'll reply here and close the issue when the presentation is published.
+  - type: input
+    id: talk
+    attributes:
+      label: Talk
+      description: Filled in from the talk page.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: What would you use it for? (optional)
+      description: For example a team discussion, a meetup, or your own learning.

@@ -64,4 +64,18 @@ const projectWriteups = defineCollection({
   }),
 })
 
-export const collections = { writing, projectWriteups }
+// Marp decks. The page renders each file with Marp, so its frontmatter also
+// carries Marp directives such as `paginate`; zod drops those here.
+const talks = defineCollection({
+  loader: glob({ pattern: '*.md', base: './src/content/talks' }),
+  schema: z.object({
+    title: z.string().min(1),
+    description: z.string().min(1),
+    date: z.coerce.date(),
+    kind: z.enum(['talk', 'workshop']),
+    // Locked decks ship encrypted with TALK_CODE until they are ready.
+    locked: z.boolean().default(false),
+  }),
+})
+
+export const collections = { writing, projectWriteups, talks }
