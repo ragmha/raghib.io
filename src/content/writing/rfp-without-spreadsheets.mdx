@@ -17,7 +17,7 @@ So I tried a different shape: **what if each answer came with a sandbox that che
 
 ## The experiment
 
-The sample project is public at [github.com/ragmha/rfp-sandbox](https://github.com/ragmha/rfp-sandbox).
+The sample project is public at [rfp-sandbox](https://github.com/ragmha/rfp-sandbox).
 The run below is [this recorded report](https://github.com/ragmha/rfp-sandbox/blob/fee92e337877d73dc4f5706a2ac9564c9ef3fcb8/report.json),
 pinned to the commit whose source hashes it records.
 
@@ -54,6 +54,18 @@ Six "yes" answers became three locally supported results, one contradiction, one
 stale observation, and one unknown. The checks make those decisions without a model.
 The report includes its timestamp and source/configuration hashes; rerunning later
 can change freshness results.
+
+```mermaid
+flowchart TD
+    accTitle: How the sandbox classifies a vendor claim
+    accDescr: The sandbox checks a vendor answer against evidence and reports it as supported, contradicted, stale, or unknown depending on what the check finds.
+    claim["Vendor answer"] --> check["Sandbox checks evidence"]
+    check -->|Current evidence| supports{"Does evidence support the answer?"}
+    supports -->|Yes| supported["Supported"]
+    supports -->|No| contradicted["Contradicted"]
+    check -->|Old evidence| stale["Stale"]
+    check -->|No evidence| unknown["Unknown"]
+```
 
 ## Small enough to inspect
 

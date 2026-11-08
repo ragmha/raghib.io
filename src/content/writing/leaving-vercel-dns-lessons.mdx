@@ -82,7 +82,7 @@ registration; it is not a stop on every visitor's DNS lookup:
 5. **TLS and routing** — certificate issuance and the relationship between the
    apex domain and `www`.
 
-In this migration, the site was deploying to GitHub Pages, while recorded
+In this migration, the site was deploying to a new static host, while recorded
 nameserver answers named the old DNS provider and HTTP requests reached the old
 host. Those observations show a path to investigate; the recursive nameserver
 answers alone do not prove the parent delegation was responsible.
@@ -95,7 +95,7 @@ answers alone do not prove the parent delegation was responsible.
       height="640"
       loading="lazy"
       decoding="async"
-      alt="Read left to right: a successful build puts the new site on GitHub Pages. A separate row illustrates one possible failure path: unchanged delegation selects an old DNS zone whose address sends the browser to the previous host and a 404."
+      alt="Read left to right: a successful build puts the new site on the static host. A separate row illustrates one possible failure path: unchanged delegation selects an old DNS zone whose address sends the browser to the previous host and a 404."
     />
   </div>
   <figcaption>
@@ -104,7 +104,7 @@ answers alone do not prove the parent delegation was responsible.
 </figure>
 
 You do not have to move DNS providers when you move hosting: Vercel DNS can stay
-in place while GitHub Pages serves the site. If the DNS records need to change,
+in place while the static host serves the site. If the DNS records need to change,
 update the zone whose answers visitors actually use.
 
 ## Why the Control Panel Misleads You
@@ -152,7 +152,7 @@ ns1.vercel-dns.com
 ns2.vercel-dns.com
 ```
 
-The site was deploying to GitHub Pages while that answer named Vercel DNS. That
+The site was deploying to the static host while that answer named Vercel DNS. That
 can be a valid arrangement. The active zone's hosting records and the HTTP
 response needed separate checks.
 
@@ -175,7 +175,7 @@ Error messages help narrow the investigation:
 | Signature | What it tells you |
 |---|---|
 | `DEPLOYMENT_NOT_FOUND` | The vendor received the request but could not find the deployment |
-| "There isn't a GitHub Pages site here" | Pages is reachable but has no site for this hostname |
+| The host's "no site here" page | The host is reachable but has no site for this hostname |
 | [Cloudflare error 1000](https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/error-1000/) | Cloudflare blocked the request; investigate a prohibited target or other documented configuration causes |
 | [Cloudflare error 1016](https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/error-1016/) | Cloudflare cannot resolve the origin hostname |
 | `NoSuchBucket` | The requested bucket does not exist |
@@ -322,7 +322,7 @@ Separately, the earlier troubleshooting reply recorded:
 - Nameservers: `dns1.registrar-servers.com` and `dns2.registrar-servers.com`.
 - Apex A records: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`,
   and `185.199.111.153`.
-- `www` CNAME: `ragmha.github.io`.
+- `www` CNAME: the static host's default domain.
 - HTTP `200`; TLS provisioning was still pending, and no successful HTTPS
   response was recorded.
 

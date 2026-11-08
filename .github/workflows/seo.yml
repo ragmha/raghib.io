@@ -16,13 +16,44 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # Release checks gate what ships with the blog. A PR that only touches agent
+  # skills or contributor docs skips them.
+  lanes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      pull-requests: read
+    outputs:
+      release: ${{ steps.lane.outputs.release }}
+    steps:
+      - id: lane
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          release=true
+          if [ -n "$PR" ]; then
+            files=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --paginate --jq '.[].filename')
+            # ponytail: prefix list; move to a paths-filter action if lanes multiply
+            grep -qvE '^(\.agents/|\.impeccable/|\.github/instructions/|(AGENTS|DESIGN|README)\.md$|LICENSE$)' <<< "$files" || release=false
+          fi
+          echo "release=$release" >> "$GITHUB_OUTPUT"
+
   seo:
     # The main-branch ruleset requires this exact check name.
     name: SEO readiness
+    needs: lanes
+    # A job skipped by `if` reports success, so the required check still passes
+    # for other lanes (a skipped workflow would stay pending and block merging).
+    # If `lanes` fails, its output is empty and the checks run.
+    if: ${{ !cancelled() && needs.lanes.outputs.release != 'false' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    outputs:
+      indexnow: ${{ steps.indexnow.outputs.urls }}
     env:
       PUBLIC_CF_BEACON_TOKEN: ${{ github.ref == 'refs/heads/main' && vars.CF_WEB_ANALYTICS_TOKEN || '' }}
+      INDEXNOW_KEY: ${{ github.ref == 'refs/heads/main' && secrets.INDEXNOW_KEY || '' }}
     steps:
       - uses: actions/checkout@v7
 
@@ -45,6 +76,18 @@ jobs:
       - run: bun run check:seo
       - run: bun run check:vitals
 
+      # IndexNow (Bing and other engines) wants changed URLs, not the whole
+      # site: publish the key, then diff the sitemap against the live deploy.
+      - id: indexnow
+        if: github.ref == 'refs/heads/main' && env.INDEXNOW_KEY != ''
+        run: |
+          printf '%s' "$INDEXNOW_KEY" > "dist/$INDEXNOW_KEY.txt"
+          live=$(curl -fsS --connect-timeout 10 --max-time 30 "https://$(cat public/CNAME)/sitemap.txt") ||
+            { echo '::warning::IndexNow skipped: the live sitemap is unavailable'; exit 0; }
+          urls=$(LC_ALL=C comm -3 <(LC_ALL=C sort <<< "$live") <(LC_ALL=C sort dist/sitemap.txt) |
+            tr -d '\t' | jq -Rsc 'split("\n") | map(select(length > 0))')
+          echo "urls=$urls" >> "$GITHUB_OUTPUT"
+
       - if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v5
         with:
@@ -63,6 +106,20 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+      INDEXNOW_URLS: ${{ needs.seo.outputs.indexnow }}
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
+      # Best effort: the site is already live, so a rejected or stalled ping
+      # can't fail this deploy or hold up the next one.
+      - id: indexnow
+        if: env.INDEXNOW_URLS != '' && env.INDEXNOW_URLS != '[]'
+        continue-on-error: true
+        run: |
+          jq -n --arg key "$INDEXNOW_KEY" --argjson urls "$INDEXNOW_URLS" \
+            '{host: ($urls[0] | split("/")[2]), key: $key, urlList: $urls}' |
+            curl -sS --fail-with-body --connect-timeout 10 --max-time 30 -w 'IndexNow: HTTP %{http_code}\n' \
+              -H 'Content-Type: application/json; charset=utf-8' --data-binary @- \
+              https://api.indexnow.org/indexnow

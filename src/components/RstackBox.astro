@@ -1,0 +1,42 @@
+---
+import type { CollectionEntry } from 'astro:content'
+import { rstackUrl } from '../lib/rstack.mjs'
+
+interface Props {
+  rstack: NonNullable<CollectionEntry<'writing'>['data']['rstack']>
+}
+
+const { rstack } = Astro.props
+---
+
+<aside class="rstack-box" aria-label="Built with rstack">
+  <p><strong>Built with rstack</strong> <span>{rstack.version}</span></p>
+  <ul>
+    {rstack.uses.map((path) => (
+      <li><a href={rstackUrl(rstack.version, path)}>{path}</a></li>
+    ))}
+  </ul>
+</aside>
+
+<style>
+  .rstack-box {
+    margin-block: 2rem;
+    padding: 1rem;
+    border: 1px solid var(--rule-strong);
+    font-size: 0.85rem;
+    overflow-wrap: anywhere;
+  }
+
+  .rstack-box p {
+    margin: 0;
+  }
+
+  .rstack-box span {
+    color: var(--ink-muted);
+  }
+
+  .rstack-box ul {
+    margin: 0.5rem 0 0;
+    padding-left: 1.25rem;
+  }
+</style>

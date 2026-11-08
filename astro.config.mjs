@@ -5,7 +5,7 @@ import rehypeMermaid from 'rehype-mermaid'
 import sitemap from '@astrojs/sitemap'
 import rehypeParts from './src/lib/rehype-parts.mjs'
 import rehypeInlineDiagrams from './src/lib/rehype-inline-diagrams.mjs'
-import rehypeEmployerDisclaimer from './src/lib/rehype-employer-disclaimer.mjs'
+import rehypeRstackLinks from './src/lib/rehype-rstack-links.mjs'
 import { readPublication } from './scripts/lib/seo-publications.mjs'
 
 const writingDir = 'src/content/writing'
@@ -17,6 +17,13 @@ for (const file of (await readdir(writingDir)).filter((file) => /\.mdx?$/.test(f
 
 export default defineConfig({
   site: 'https://raghib.io',
+  redirects: {
+    '/experiments/': 'https://lab.raghib.io/',
+    '/experiments/chess/': 'https://lab.raghib.io/chess/',
+    '/experiments/context-autopsy/': 'https://lab.raghib.io/context-autopsy/',
+    '/experiments/session-flame/': 'https://lab.raghib.io/session-flame/',
+    '/experiments/token-diet/': 'https://lab.raghib.io/token-diet/',
+  },
   image: {
     layout: 'constrained',
     responsiveStyles: true,
@@ -24,7 +31,8 @@ export default defineConfig({
   integrations: [
     mdx(),
     sitemap({
-      filter: (page) => new URL(page).pathname.replace(/\/$/, '') !== '/about',
+      // Tag and topic archives are noindex: they only repeat post summaries.
+      filter: (page) => !/^\/(about|writing\/(tag|topic))(\/|$)/.test(new URL(page).pathname),
       serialize: (item) => ({ ...item, lastmod: postDates.get(new URL(item.url).pathname) ?? item.lastmod }),
     }),
     {
@@ -62,7 +70,10 @@ export default defineConfig({
           strategy: 'inline-svg',
           mermaidConfig: {
             theme: 'base',
-            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+            // Same stack as --font-mono in src/styles/fonts.css, so first visits
+            // fall back to the same font as the body text, not Courier.
+            fontFamily:
+              "'JetBrains Mono', ui-monospace, 'SF Mono', SFMono-Regular, 'IBM Plex Mono', Menlo, Consolas, 'Liberation Mono', monospace",
             themeCSS: `
               .node rect, .node circle, .node ellipse, .node polygon, .node path {
                 fill: var(--theme-surface) !important;
@@ -93,8 +104,8 @@ export default defineConfig({
           },
         },
       ],
-      rehypeEmployerDisclaimer,
       rehypeParts,
+      rehypeRstackLinks,
       rehypeInlineDiagrams,
     ],
   },

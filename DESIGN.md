@@ -1,7 +1,5 @@
 # Design System
 
-<!-- impeccable:design-schema 1 -->
-
 ## Direction
 
 raghib.io is a restrained independent publishing home. Its author introduction,
@@ -14,9 +12,7 @@ The supplied `matchaonmuffins.dev` reference is the layout authority: direct tex
 ## Color
 
 Use the shared tokens in `src/styles/theme.css`; do not introduce a separate
-palette for a new page. The one exception is data inside an experiment chart,
-which may use a ranked hue spectrum when every hue keeps dark labels at 4.5:1
-contrast or better; the surrounding page still uses the shared tokens.
+palette for a new page.
 
 Colors follow the neutral palette of the OpenAI Developers blog; the layout and
 typography remain this site's own.
@@ -55,7 +51,7 @@ and restrained hierarchy rather than simulated commands or dense chrome.
   `src/styles/layout.css`
 - Home opening: name, existing introduction, and direct navigation; posts are
   listed only on the writing archive
-- Archives and projects: editorial content beside a `6.5rem` navigation column,
+- Archives and projects: editorial content beside an `8rem` navigation column,
   with a `4rem` gap
 - Article: optional full-bleed cover image (up to 85% of viewport height),
   breadcrumb, large left-aligned title, description, a labelled
@@ -68,9 +64,6 @@ and restrained hierarchy rather than simulated commands or dense chrome.
 - Concept diagrams with portrait exports switch to stacked compositions below
   60rem. They fit the column without horizontal scrolling or shrinking labels
   into unreadable text; other wide technical diagrams retain their scroll region.
-- Tool experiments may use a full-viewport app frame instead of the reading
-  frame: a compact header with tabs, a fixed control row, and panels that scroll
-  internally while the page itself does not
 
 ## Components
 
@@ -79,12 +72,6 @@ and restrained hierarchy rather than simulated commands or dense chrome.
 - Callouts use a full one-pixel border and a compact semantic label.
 - Code blocks use a solid near-black surface and one-pixel border.
 - Images remain square-edged enough to read as evidence, not decorative media.
-- The Copilot credit-journey illustration uses an ink-on-paper treatment:
-  original GHCP-user and GH-admin figures, a desk and whiteboard, open
-  handwritten dialogue, and no comic-card frames. Automation is the admin's
-  tool, not a third persona. The user has headphones and casual clothing;
-  the admin has glasses, an ID badge, and a policy clipboard. Both layouts
-  retain these cues so the roles are recognizable without reading the labels.
 - Diagram ink, paper, and highlighted surfaces adapt together through
   `scripts/theme-diagrams.mjs`; dark surfaces must not retain black export text.
 - Focus uses a visible two-pixel theme-highlight outline with offset.

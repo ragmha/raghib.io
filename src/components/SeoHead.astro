@@ -21,7 +21,7 @@ const analyticsToken = import.meta.env.PROD ? import.meta.env.PUBLIC_CF_BEACON_T
 <meta name="google-site-verification" content="nDnkJr6HtOuiBMwDvx0eCVMmlFmpYPM4bkeaecyE8bE" />
 <meta name="msvalidate.01" content="0AA21192F77463D9FF0EB9E144120117" />
 <link rel="canonical" href={metadata.canonical.href} />
-{noindex && <meta name="robots" content="noindex, nofollow" />}
+{noindex && <meta name="robots" content="noindex" />}
 <meta property="og:type" content={metadata.openGraphType} />
 <meta property="og:site_name" content={SITE_NAME} />
 <meta property="og:title" content={metadata.pageTitle} />
@@ -50,5 +50,7 @@ const analyticsToken = import.meta.env.PROD ? import.meta.env.PUBLIC_CF_BEACON_T
     data-cf-beacon={JSON.stringify({ token: analyticsToken })}
   />
 )}
-<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+{/* Google Search can't use SVG favicons; keep the PNG first. */}
+<link rel="icon" href="/favicon-192.png" type="image/png" sizes="192x192" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
 <meta name="generator" content={Astro.generator} />
