@@ -30,10 +30,22 @@ const selectedProjects: Project[] = [
   },
 ]
 
-export const projectSnapshot: Project[] = [
-  ...selectedProjects,
-  ...githubProjects.filter((project) => !selectedProjects.some((selected) => selected.name === project.name)),
-].map((project) => ({
-  ...project,
-  ...overrides['repository' in project ? project.repository : ''],
-}))
+export function buildProjectSnapshot(syncedProjects: readonly Project[]): Project[] {
+  const repositories = new Set<string>()
+  const names = new Set<string>()
+  const projects: Project[] = []
+  for (const project of [...selectedProjects, ...syncedProjects]) {
+    const repository = new URL(project.url).pathname.slice(1).toLowerCase()
+    if (repositories.has(repository)) continue
+    const name = project.name.toLowerCase()
+    if (names.has(name)) {
+      throw new Error(`Distinct repositories share project name "${project.name}". Project names must be unique.`)
+    }
+    repositories.add(repository)
+    names.add(name)
+    projects.push({ ...project, ...overrides[repository] })
+  }
+  return projects
+}
+
+export const projectSnapshot = buildProjectSnapshot(githubProjects)

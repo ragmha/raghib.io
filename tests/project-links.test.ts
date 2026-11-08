@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { getProjectLinks } from '../src/lib/project-links'
-import { projectSnapshot } from '../src/content/project-snapshot'
+import { buildProjectSnapshot, projectSnapshot } from '../src/content/project-snapshot'
 
 const project = {
   name: 'sample',
@@ -17,6 +17,40 @@ test('selected projects retain the published tutorial and lab without duplicate 
   assert.ok(lab)
   assert.ok(getProjectLinks(harness).some((link) => link.url === 'https://raghib.io/writing/build-your-agent-harness/'))
   assert.equal(lab.homepage, 'https://lab.raghib.io/')
+})
+
+test('syncing selected repositories with different capitalization preserves curated projects once', () => {
+  const projects = buildProjectSnapshot([
+    { ...project, name: 'Build-Your-Harness', url: 'https://github.com/RAGMHA/Build-Your-Harness' },
+    { ...project, name: 'Lab', url: 'https://github.com/RAGMHA/Lab' },
+    project,
+  ])
+  assert.deepEqual(projects.map((entry) => entry.name), ['build-your-harness', 'lab', 'sample'])
+  assert.ok(getProjectLinks(projects[0]).some((link) => link.label === 'Tutorial'))
+  assert.equal(projects[1].homepage, 'https://lab.raghib.io/')
+  assert.deepEqual(projects[2], project)
+})
+
+test('distinct repositories with conflicting display names fail instead of disappearing', () => {
+  for (const name of ['lab', 'Lab', 'build-your-harness', 'Build-Your-Harness']) {
+    assert.throws(() => buildProjectSnapshot([
+      { ...project, name, url: `https://github.com/example/${name}` },
+    ]), /Distinct repositories share project name/)
+  }
+  assert.throws(() => buildProjectSnapshot([
+    project,
+    { ...project, name: 'Sample', url: 'https://github.com/another/Sample' },
+  ]), /Distinct repositories share project name/)
+})
+
+test('synced repository identities are deduplicated and editorial overrides ignore capitalization', () => {
+  const projects = buildProjectSnapshot([
+    project,
+    { ...project, name: 'Sample', url: 'https://github.com/EXAMPLE/Sample' },
+    { ...project, name: 'apple-books-mcp', url: 'https://github.com/RAGMHA/Apple-Books-MCP' },
+  ])
+  assert.deepEqual(projects.map((entry) => entry.name), ['build-your-harness', 'lab', 'sample', 'apple-books-mcp'])
+  assert.equal(projects[3].description, 'Connect AI assistants to your Apple Books library.')
 })
 
 test('Source is always shown without placeholders for missing optional links', () => {
