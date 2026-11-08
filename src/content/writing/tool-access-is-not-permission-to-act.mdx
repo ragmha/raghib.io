@@ -1,0 +1,183 @@
+---
+title: "Tool Access Is Not Permission to Act"
+seoTitle: "Tool Access Is Not Permission to Act"
+description: "Connecting an agent to a tool gives it capability, not permission. Four ways to separate reading from acting, and what each costs."
+date: "2026-10-28"
+topics: ["AI Tools"]
+tags: ["ai", "agents", "security", "least-privilege", "governance"]
+published: true
+hero: "vault-window"
+---
+
+Connecting an agent to a mailbox, a ticket tracker or a file store takes one
+setup step. It is easy to read that step as a decision about what the agent
+may do. It is a decision about what the agent can do.
+
+Reading a document, drafting a reply to it and sending that reply are three
+different levels of authority. A bad read exposes information to a model. A bad
+draft wastes a person's time. A bad send reaches someone who cannot un-receive
+it. An agent acting for a user should hold the narrowest of the three by
+default, and widen only one action at a time.
+
+## Capability is not permission
+
+The clearest statement of the trap I know is Norm Hardy's 1988 paper,
+[The Confused Deputy](http://cap-lore.com/CapTheory/ConfusedDeputy.html). A
+compiler held write authority over a system directory so it could keep its own
+statistics file. A user invoked it and passed an output file name that happened
+to be the billing file. The compiler had the authority, so it overwrote the
+billing file. Hardy's diagnosis: the program ran with authority from two
+sources and had no way of saying which one a given write was using.
+
+Swap the compiler for an agent, the user's file name for a sentence inside a
+document, and the shape is the same. The agent holds the user's authority. The
+content it reads is written by someone else. Nothing in the connection says
+whose purpose a given action serves. The paper predates language models and
+says nothing about prompt injection; its remedy is to make the name of a thing
+and the right to use it the same object.
+
+Two other sources set a vocabulary, and each stops short:
+
+- Saltzer and Schroeder's 1975 paper,
+  [The Protection of Information in Computer Systems](https://web.mit.edu/Saltzer/www/publications/protection/),
+  states least privilege: every program and user should operate with the least
+  set of privileges needed for the job. It also asks that the default be lack
+  of access. It does not say how to size a "job" for something whose next step
+  depends on what it just read.
+- [RFC 6749 section 3.3](https://www.rfc-editor.org/rfc/rfc6749#section-3.3)
+  defines the `scope` parameter as strings the authorization server defines.
+  The server may ignore or narrow what a client asks for, and must say when it
+  does. It gives you a way to name narrow authority. It does not say what
+  scopes should exist or whether using one is wise right now.
+
+The [MCP authorization specification](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization)
+is how an open standard handles this for agent tools. Authorization is
+optional. It builds on OAuth, tells clients to follow least privilege, and lets
+a server answer an under-scoped call with a 403 naming the scope it needs, so
+the client can step up. It does not decide whether a model should use a scope
+it holds. Its security guidance has a confused-deputy section, but that covers
+OAuth proxy servers and consent cookies, a real problem that is not this one.
+
+## The document is the attacker's pen
+
+An agent reads files, pages and messages that other people wrote. Greshake and
+colleagues call this
+[indirect prompt injection](https://arxiv.org/abs/2302.12173): applications
+that feed retrieved data into a model blur the line between data and
+instructions, so text placed where the agent will find it can steer how and
+whether the agent calls its other tools. They report that effective mitigations
+were lacking at the time of writing.
+
+Detecting hostile text is a bet on the model, and it will sometimes lose.
+Limiting what a steered agent can do holds when it does.
+
+## Four ways to hold the authority
+
+| Option | What it costs | Wins when |
+|---|---|---|
+| 1. Broad connection, trust the model's judgment | Nothing up front. Every steered action runs with the user's full authority | The environment is disposable and every action can be undone |
+| 2. Per-tool allow lists | Someone maintains the list. It is per tool, not per action, so an allowed send tool sends anything | A few tools with narrow jobs, or whole tools you never need |
+| 3. Read-only by default, an approval step before any write | A person in the loop for each write, with latency and approval fatigue | Writes are rare, consequential or hard to undo |
+| 4. Scoped, short-lived credentials per action | Machinery to mint, scope and expire credentials, and a service that offers narrow scopes | Approval does not scale, or the service already issues fine-grained tokens |
+
+Option 1 is not foolish. In a scratch workspace where everything is
+reversible, a confused deputy can only confuse itself. Option 2 gets the
+granularity wrong: "may use the send tool" describes the tool, and the harm
+lives in the arguments. Option 3 puts a person at the point where harm becomes
+possible. Option 4 limits the damage after a mistake gets through, but only if
+the credential is bound to the approved request and consumed when it runs. Scope
+and a short window alone still let a send token send twice before it lapses.
+
+They combine: a person approving an action can be what mints a credential
+scoped to exactly that action.
+
+## A state machine of authority
+
+<figure class="excalidraw-figure responsive-diagram">
+  <picture>
+    <source
+      media="(max-width: 60rem)"
+      srcSet="/diagrams/tool-access-is-not-permission-to-act-states-portrait.svg"
+      width="447"
+      height="986"
+    />
+    <img
+      src="/diagrams/tool-access-is-not-permission-to-act-states.svg"
+      width="1006"
+      height="584"
+      loading="lazy"
+      decoding="async"
+      alt="Four states in a row: read-only, drafted, approved, executed. Draft moves read-only to drafted. A person approving moves drafted to approved. Execute moves approved to executed. Dashed arrows return drafted, approved and executed to read-only on rejection, expiry or a spent credential."
+    />
+  </picture>
+  <figcaption>
+    The agent starts read-only. Content it reads can shape a draft, but only a
+    person approving the exact action moves a draft to approved.
+    <a href="/diagrams/tool-access-is-not-permission-to-act-states.svg" target="_blank" rel="noopener noreferrer">Open full-size diagram.</a>
+  </figcaption>
+</figure>
+
+The agent rests in read-only. It can propose a write, which creates a draft: an
+action described but not sent. Anything the agent read may have shaped that
+draft, including a document written by someone hostile, so a draft carries no
+authority. Only a person approving moves it to approved, and approved covers
+one action. Executing it spends the authority. Rejection, expiry or use sends
+the agent back to read-only, so a stale approval cannot be reused.
+
+## The approval must show the real action
+
+An approval screen that says "Send a reply to the vendor" asks a person to
+approve a description. The model wrote that description from the same content
+that may be hostile. The screen should show the exact request: recipients,
+body, attachments, and for an API call the method, address and parameters.
+The [MCP tools specification](https://modelcontextprotocol.io/specification/2026-07-28/server/tools)
+takes the same position: clients should show tool inputs before calling a
+server, to avoid malicious or accidental data exfiltration, and a human should
+always be able to deny an invocation. If the parameters change after approval, it is a new request.
+
+There is a second cost, and I have no measurement for it. If every call asks,
+people will approve without reading, and an approval that is always yes
+carries no information. That moves the failure from the model to the person.
+Saltzer and Schroeder name a related principle, psychological acceptability:
+the interface should make it easy for users to apply protections correctly and
+routinely. The design response I would try is to ask rarely, by making
+read-only the default so most work needs no prompt. An earlier post on
+[building an agent harness](/writing/build-your-agent-harness/) covers where an
+approval checkpoint can sit in the loop.
+
+## Counting injected writes
+
+Nothing below has been run. Build a small agent with one read tool that returns
+a document and one write tool that records a message to a log and delivers
+nothing. The corpus holds documents with no instructions and documents with
+instructions aimed at the write tool, in several forms: plain text, a quoted
+email thread, a comment, a link. The task is to summarize each document. Run
+the same model and documents under all four options, several times each.
+
+Measure two rates per option: how often the agent attempts the write, and how
+often the write executes. Attempts mostly show the model; execution shows the
+system. Also measure tasks where a write is the right outcome, so a locked-down
+option cannot win by doing nothing.
+
+What would count against my position:
+
+- If the attempt rate on injected documents under option 1 sits near the
+  rate on benign ones, trusting that model's judgment is better supported than
+  I assume. It would not cover other models or injections written against it.
+- If option 3 executes injected writes about as often as option 1, approvals
+  are being passed through and the step is theater.
+- If option 4 blocks injected writes but fails so many legitimate tasks that
+  nobody would keep it on, its cost beats its benefit for that workload.
+
+The limitation: a fixed set of phrasings measures those phrasings. A low
+attempt rate today says nothing certain about the next model or an attacker who
+adapts. Approval fatigue also needs people; a scripted approver cannot stand
+in for them.
+
+## Who decides to widen authority?
+
+I do not know whether approvals stay meaningful when an agent drafts dozens of
+writes a day. I do not know how to scope a credential to one exact action when
+a service offers only coarse scopes. And I do not know who should own the
+decision to widen authority: the person using the agent, the team that
+connected it, or the service that holds the data.

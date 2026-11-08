@@ -520,10 +520,440 @@ function budgetInterlock(t) {
   }
 }
 
+function cardCatalog(t) {
+  t.base(-260, -130, 420, 190)
+  const stale = 3
+  const slot = s => -135 + s * 10
+  const guideAt = i => slot(2 + i * 4)
+  const floor = B + 28
+  const cardTop = 28
+  const guideTop = cardTop + 6
+  const tabAt = i => -8 + (i % 3) * 13
+  const heights = [52, 44, 60, 48, 56, 46]
+  const spineZ = i => B + 4 + heights[i] - 8
+
+  // Cabinet: two columns of drawer fronts; the front column's middle drawer is pulled out.
+  t.box(-250, -72, 110, 112, B, 76, 'mid')
+  t.outline(-247, -69, 104, 106, B + 76)
+  for (let r = 0; r < 3; r++) {
+    for (const [y0, y1] of [[-66, -20], [-12, 34]]) {
+      const z0 = B + 4 + r * 24
+      const z1 = z0 + 20
+      if (r === 1 && y0 > -15) continue
+      for (const [p, q] of [[[y0, z0], [y1, z0]], [[y0, z1], [y1, z1]], [[y0, z0], [y0, z1]], [[y1, z0], [y1, z1]]]) {
+        t.seg([-140, p[0], p[1]], [-140, q[0], q[1]], 'lo')
+      }
+      const mid = (y0 + y1) / 2
+      t.box(-142, mid - 7, 2, 14, z0 + 5, 3.5, 'hi')
+      t.seg([-140, mid - 13, z1 - 4], [-140, mid + 13, z1 - 4], 'faint')
+    }
+  }
+
+  // Sources: binders on a back shelf; every card thread ends at one.
+  t.plate(-130, -126, 250, 38, B, 4, 'lo')
+  heights.forEach((h, i) => {
+    const x = guideAt(i)
+    t.box(x - 11, -121, 22, 28, B + 4, h, i === stale ? 'lo' : 'mid')
+    t.seg([x - 11, -93, B + 12], [x + 11, -93, B + 12], 'faint')
+    t.seg([x - 11, -93, B + 4 + h - 8], [x + 11, -93, B + 4 + h - 8], 'faint')
+  })
+
+  // Drawer: dated cards stand upright; every fourth is a tabbed guide, and one has gone stale.
+  t.tray(-142, -12, 242, 46, floor, 20, () => {
+    for (let s = 0; s < 23; s++) {
+      const x = slot(s)
+      const i = (s - 2) / 4
+      const guide = Number.isInteger(i) && i >= 0
+      const old = guide && i === stale
+      const h = (guide ? guideTop : cardTop) + (old ? 24 : 0)
+      t.box(x, -8, 1.4, 38, floor + 3, h, old ? 'hi' : guide ? 'mid' : 'lo', old ? { lit: true } : {})
+      if (guide) t.box(x, tabAt(i), 1.4, old ? 20 : 12, floor + 3 + h, old ? 11 : 5, old ? 'red' : 'hi')
+    }
+  })
+  t.box(100, 1, 3, 20, floor + 6, 3.5, 'hi')
+
+  for (let i = 0; i < 6; i++) {
+    const bad = i === stale
+    const x = guideAt(i)
+    const from = floor + 3 + guideTop + (bad ? 32 : 5)
+    t.seg([x, tabAt(i), from], [x, -93, spineZ(i)], bad ? 'red' : 'mid', { dashed: bad })
+    t.lamp([x, -93, spineZ(i)], bad ? 'red' : 'green', 3.5)
+  }
+  const lines = floor + 3 + guideTop + 24
+  for (const dz of [8, 15, 22]) t.seg([guideAt(stale) + 2, -4, lines - dz], [guideAt(stale) + 2, 26, lines - dz], 'faint')
+
+  // Loupe: the check before acting.
+  t.cyl(130, 18, 10, B, 3, 'mid')
+  t.cyl(130, 18, 2.4, B + 3, 30, 'mid', { steps: 12 })
+  t.line(k.sideRing([130, 18, B + 47], 17, 'y', t.P), 'hi')
+  t.line(k.sideRing([130, 18, B + 47], 14, 'y', t.P), 'faint')
+
+  t.label([guideAt(0), 30, floor + 3 + cardTop], 'DATED CARDS', { dx: -30, dy: 80 })
+  t.label([guideAt(stale), 12, floor + 3 + guideTop + 24], 'STALE CARD', { dy: 90, tone: 'red' })
+  t.label([guideAt(4), -93, spineZ(4)], 'SOURCES', { dy: -56 })
+  t.label([guideAt(5), -40, floor + 27], 'THREAD TO SOURCE', { dx: 90, dy: -20 })
+  t.label([130, 18, B + 47], 'CHECK FIRST', { dx: 56, dy: 0 })
+}
+
+function sealedGovernor(t) {
+  t.base(-190, -90, 380, 178)
+  const g = -10
+  const wording = [[-166, -14], [-148, 0], [-130, 14]]
+
+  // Wording knobs: the part the automation may turn freely.
+  t.plate(-184, -28, 62, 56, B, 16, 'mid')
+  for (const [x, y] of wording) {
+    t.cyl(x, y, 8, B + 16, 6, 'hi', { steps: 18 })
+    t.rule([x, y], [x + 5, y - 4], B + 22, 'mid')
+  }
+  t.rail([[-122, 0, B + 1], [g - 40, 0, B + 1]], 'green')
+
+  // Governor: spindle, sleeve and two flying balls.
+  t.cyl(g, 0, 40, B, 18, 'mid')
+  t.cyl(g, 0, 27, B + 18, 12, 'lo')
+  for (const dx of [-2.5, 2.5]) {
+    t.seg([g + dx, 0, B + 150], [g + dx, -60, B + 112], 'mid')
+    t.seg([g + dx, -60, B + 90], [g + dx, -11, B + 70], 'mid')
+  }
+  t.cyl(g, -60, 16, B + 86, 26, 'mid', { steps: 22 })
+  t.cyl(g, 0, 5.5, B + 30, 138, 'hi', { steps: 14 })
+  t.cyl(g, 0, 13, B + 152, 14, 'mid')
+  t.cyl(g, 0, 7, B + 166, 5, 'hi', { steps: 14 })
+  t.cyl(g, 0, 11, B + 60, 16, 'mid')
+  t.cyl(g, 0, 17, B + 98, 12, 'hi', { lit: true })
+  for (const dx of [-2.5, 2.5]) {
+    t.seg([g + dx, 0, B + 150], [g + dx, 60, B + 112], 'mid')
+    t.seg([g + dx, 60, B + 90], [g + dx, 11, B + 70], 'mid')
+  }
+  t.cyl(g, 60, 16, B + 86, 26, 'mid', { steps: 22 })
+
+  // Padlock on the limit collar.
+  t.box(g + 12, 6, 16, 12, B + 94, 18, 'red')
+  t.line(k.sideRing([g + 20, 12, B + 115], 6, 'y', t.P), 'red')
+  t.seg([g + 20, 18, B + 102], [g + 20, 18, B + 107], 'red')
+
+  // Envelope scale: the sleeve may travel only between the stops.
+  t.box(g + 66, -3, 6, 6, B, 134, 'lo')
+  t.box(g + 65, -4, 8, 8, B + 60, 40, 'green')
+  for (let z = 20; z < 134; z += 12) t.seg([g + 72, -3, B + z], [g + 72, 3, B + z], 'faint')
+  t.seg([g + 11, 0, B + 68], [g + 66, 0, B + 68], 'faint')
+  t.seg([g + 17, 0, B + 104], [g + 66, 0, B + 104], 'faint')
+
+  // Key rack: a human holds the key that moves the collar.
+  t.box(130, 40, 48, 34, B, 40, 'mid')
+  t.line(k.sideRing([178, 57, B + 28], 6, 'x', t.P), 'hi')
+  t.seg([178, 57, B + 22], [178, 57, B + 8], 'hi')
+  t.seg([178, 57, B + 14], [178, 62, B + 14], 'hi')
+  t.seg([178, 57, B + 9], [178, 61, B + 9], 'hi')
+  t.lamp([154, 57, B + 40], 'blue', 5)
+  t.seg([130, 57, B + 36], [g + 20, 14, B + 108], 'blue', { dashed: true })
+
+  t.label([-148, 0, B + 22], 'WORDING TUNES FREELY', { dx: -50, dy: 0, tone: 'green' })
+  t.label([g + 69, 0, B + 80], 'FIXED ENVELOPE', { dx: 80, dy: 0 })
+  t.label([g + 20, 12, B + 121], 'TOOLS, TRIGGERS, BUDGET', { dx: -70, dy: -50, tone: 'red' })
+  t.label([154, 57, B + 40], 'HUMAN HOLDS KEY', { dy: 70, tone: 'blue' })
+}
+
+function baggageClaim(t) {
+  t.base(-260, -100, 510, 165)
+  const belt = k.planOutline({ x: -224, y: -54, w: 168, d: 88, r: 44 }, B + 10.4, t.P)
+  const bag = (cx, cy, angle, tone) => {
+    const [ux, uy] = [Math.cos(angle), Math.sin(angle)]
+    t.bar([cx - ux * 17, cy - uy * 17], [cx + ux * 17, cy + uy * 17], 22, B + 10, 18, tone)
+    t.bar([cx - ux * 5, cy - uy * 5], [cx + ux * 5, cy + uy * 5], 3, B + 28, 4, 'hi')
+  }
+
+  // Carousel: a stadium belt around a low island, with bags riding it.
+  t.box(-240, -70, 200, 120, B, 10, 'mid', { r: 60 })
+  t.box(-206, -38, 132, 56, B + 10, 8, 'lo', { r: 28 })
+  t.line(belt, 'faint')
+  t.line(belt, 'green', { flow: true, className: 'decision-signal' })
+  bag(-150, -54, 0, 'mid')
+  bag(-224, -10, Math.PI / 2, 'hi')
+  bag(-120, 34, 0, 'mid')
+  bag(-69, -41, Math.PI / 4, 'lo')
+
+  // Transfer belt: a rebuild gantry, then a customs gate with a boom barrier.
+  t.box(-44, -26, 262, 32, B, 4, 'lo')
+  t.rail([[-52, -10, B + 5], [20, -10, B + 5]], 'green')
+  t.rail([[20, -10, B + 5], [140, -10, B + 5]], 'blue')
+  t.rail([[140, -10, B + 5], [215, -10, B + 5]], 'red', false)
+  t.box(22, -34, 8, 8, B, 44, 'mid')
+  t.box(22, 6, 8, 8, B, 44, 'mid')
+  t.box(22, -34, 8, 48, B + 44, 8, 'mid')
+  t.cyl(26, -10, 12, B + 52, 6, 'hi', { steps: 20 })
+  t.ring(26, -10, 7, B + 58, 'mid')
+  t.lamp([26, -10, B + 62], 'blue', 5)
+
+  t.box(130, 14, 30, 30, B, 40, 'mid')
+  t.box(126, 10, 38, 38, B + 40, 5, 'hi')
+  t.lamp([145, 29, B + 53], 'red', 5)
+  t.box(146, 8, 8, 8, B, 20, 'lo')
+  t.bar([150, 14], [150, -42], 8, B + 20, 8, 'hi', { lit: true })
+
+  t.tray(196, -34, 44, 48, B, 14, () => {
+    t.bar([206, -10], [230, -10], 14, B + 3, 10, 'green')
+  })
+
+  t.label([-150, -54, B + 28], 'HISTORY + FILES', { dy: -70, tone: 'green' })
+  t.label([26, -10, B + 62], 'PROCESSES REBUILT', { dy: -80, tone: 'blue' })
+  t.label([145, 48, B + 4], 'CREDENTIALS + APPROVALS', { dy: 50, tone: 'red' })
+}
+
+function twinGauges(t) {
+  t.base(-230, -100, 480, 175)
+  const gauge = (x, y, r, z, angle, tone, o = {}) => {
+    t.cyl(x, y, r, z, 5, 'mid', { steps: 32, lit: o.lit })
+    const ticks = k.radialTicks(x, y, r - 3, 22, 4, z + 5, [3, 7], t.P, -2.2, 4.4)
+    t.line(ticks.minor, 'faint')
+    t.line(ticks.major, 'mid')
+    t.line(k.radialTicks(x, y, r - 3, 4, 1, z + 5, [8, 8], t.P, 1.0, 1.2).major, 'red')
+    t.bar([x, y], [x + Math.sin(angle) * (r - 7), y - Math.cos(angle) * (r - 7)], 3, z + 5, 2, tone)
+    t.cyl(x, y, 3.5, z + 5, 3, 'mid', { steps: 14 })
+  }
+
+  // One tank, two outlets: a shared manifold carrying both agents' gauges, and a separate clean line.
+  t.cyl(-170, -10, 42, B, 70, 'mid')
+  t.cyl(-170, -10, 34, B + 70, 4, 'lo')
+  t.ring(-170, -10, 28, B + 74, 'mid')
+
+  t.bar([-130, -42], [170, -42], 12, B + 10, 12, 'lo')
+  t.rail([[-130, -42, B + 23], [170, -42, B + 23]], 'blue')
+
+  // The fault sits upstream of both taps, so both gauges inherit it.
+  t.box(-98, -52, 20, 20, B + 8, 22, 'red')
+  t.lamp([-88, -42, B + 34], 'red', 5)
+
+  t.cyl(10, -42, 13, B + 10, 28, 'lo')
+  gauge(10, -42, 34, B + 38, 0.3, 'blue')
+  t.cyl(100, -42, 13, B + 10, 28, 'lo')
+  gauge(100, -42, 34, B + 38, 0.3, 'blue')
+
+  t.bar([-130, 26], [170, 26], 12, B + 4, 12, 'lo')
+  t.rail([[-130, 26, B + 17], [170, 26, B + 17]], 'green')
+  t.cyl(170, 26, 15, B + 4, 34, 'hi')
+  gauge(170, 26, 40, B + 38, 1.8, 'red', { lit: true })
+
+  t.label([10, -42, B + 43], 'AGENT A: FINE', { dy: -60, tone: 'blue' })
+  t.label([100, -42, B + 43], 'AGENT B: FINE', { dx: 90, dy: -30, tone: 'blue' })
+  t.label([-88, -42, B + 34], 'SHARED FAULT', { dy: -60, tone: 'red' })
+  t.label([170, 26, B + 43], 'INDEPENDENT CHECK', { dy: 70, tone: 'green' })
+}
+
+function nightWatchClock(t) {
+  t.base(-150, -150, 300, 300)
+  const R = 125
+  const ring = Array.from({ length: 49 }, (_, i) => [Math.sin((i / 48) * Math.PI * 2) * R, -Math.cos((i / 48) * Math.PI * 2) * R, B + 2])
+  const station = (x, y, keyed) => {
+    t.box(x - 16, y - 16, 32, 32, B, 34, 'mid')
+    t.box(x - 12, y - 12, 24, 24, B + 34, 4, 'hi')
+    if (keyed) {
+      t.cyl(x, y, 4.5, B + 38, 9, 'hi', { steps: 14 })
+      t.bar([x, y], [x + 11, y], 4, B + 43, 3, 'green')
+      t.lamp([x, y, B + 56], 'green', 5)
+    } else {
+      t.ring(x, y, 7, B + 38, 'red')
+      t.lamp([x, y, B + 50], 'red', 5)
+    }
+  }
+
+  t.rail(ring, 'mid')
+  for (const [x, y, tone] of [[0, -1, 'green'], [-1, 0, 'green'], [1, 0, 'green'], [0, 1, 'red']]) {
+    t.bar([x * 72, y * 72], [x * 112, y * 112], 9, B, 3, 'lo')
+    t.rail([[x * 74, y * 74, B + 4], [x * 110, y * 110, B + 4]], tone, tone !== 'red')
+  }
+  station(0, -R, true)
+  station(-R, 0, true)
+
+  t.cyl(0, 0, 76, B, 14, 'mid')
+  t.cyl(0, 0, 66, B + 14, 8, 'hi', { lit: true, steps: 40 })
+  const ticks = k.radialTicks(0, 0, 62, 48, 4, B + 22, [3, 8], t.P, 0, Math.PI * 2)
+  t.line(ticks.minor, 'faint')
+  t.line(ticks.major, 'mid')
+  t.bar([0, 0], [Math.sin(3.0) * 50, -Math.cos(3.0) * 50], 5, B + 22, 2, 'hi')
+  t.cyl(0, 0, 6, B + 22, 4, 'mid', { steps: 16 })
+
+  station(R, 0, true)
+  station(0, R, false)
+
+  t.label([-R, 0, B + 56], 'NAMED IDENTITY', { dx: -60, dy: 0, tone: 'green' })
+  t.label([0, -R, B + 56], 'AUTHORITY', { dy: -60, tone: 'green' })
+  t.label([R, 0, B + 56], 'BUDGET PAYER', { dx: 60, dy: 0, tone: 'green' })
+  t.label([0, R, B + 50], 'FAILURE OWNER?', { dx: -90, dy: 0, tone: 'red' })
+}
+
+function reviewHopper(t) {
+  t.base(-230, -100, 430, 205)
+  const sheet = (x, y, angle, z, tone, w = 26, d = 18) => {
+    const [ux, uy] = [Math.cos(angle), Math.sin(angle)]
+    t.bar([x - ux * w / 2, y - uy * w / 2], [x + ux * w / 2, y + uy * w / 2], d, z, 1.6, tone)
+  }
+
+  // A tall, wide hopper of cheap drafts feeding one narrow lane.
+  for (const [x, y] of [[-196, -56], [-96, -56], [-196, 36], [-96, 36]]) t.box(x - 5, y - 5, 10, 10, B, 62, 'lo')
+  t.cyl(-146, -10, 14, B + 22, 14, 'mid')
+  t.cyl(-146, -10, 30, B + 36, 14, 'mid')
+  t.cyl(-146, -10, 46, B + 50, 14, 'mid')
+  t.cyl(-146, -10, 62, B + 64, 14, 'mid')
+  t.ring(-146, -10, 56, B + 78, 'hi')
+  const heap = [[-161, -22, 0.2, 'hi'], [-126, -14, 2.4, 'mid'], [-148, -2, 1.1, 'hi'], [-166, 8, 0.6, 'mid'], [-136, -28, 0.9, 'lo'], [-151, -12, 2.0, 'hi'], [-142, -8, 0.3, 'mid'], [-156, -16, 1.5, 'hi']]
+  heap.forEach(([x, y, a, tone], i) => sheet(x, y, a, B + 78 + i * 3, tone, 40, 28))
+
+  // The lane before the gate is jammed; after it, work flows.
+  t.bar([-110, -10], [-34, -10], 14, B, 5, 'lo')
+  t.rail([[-110, -10, B + 6], [-38, -10, B + 6]], 'red', false)
+  for (const x of [-100, -86, -72, -58]) sheet(x, -10, 0, B + 6, 'red', 10, 11)
+  for (const [x, y, a] of [[-140, 76, 0.4], [-112, 86, 1.3], [-170, 90, 0.1], [-90, 72, 0.8]]) sheet(x, y, a, B, 'red', 26, 18)
+
+  t.bar([-20, -10], [80, -10], 14, B, 5, 'lo')
+  t.rail([[-20, -10, B + 6], [80, -10, B + 6]], 'green')
+
+  t.box(-36, -34, 12, 12, B, 54, 'mid')
+  t.box(-36, 14, 12, 12, B, 54, 'mid')
+  t.box(-40, -34, 20, 60, B + 54, 9, 'hi', { lit: true })
+  t.lamp([-30, -4, B + 68], 'blue', 5)
+
+  t.tray(80, -44, 120, 70, B, 26, () => {
+    for (let i = 0; i < 4; i++) sheet(140, -10, 0, B + 3 + i * 3, 'green', 64, 40)
+  })
+
+  t.label([-202, -10, B + 80], 'CHEAP DRAFTS', { dx: -50, dy: 0, tone: 'mid' })
+  t.label([-80, -10, B + 8], 'BACKLOG', { dy: 70, tone: 'red' })
+  t.label([-30, -4, B + 68], 'REVIEW CAPACITY', { dx: 80, dy: -50, tone: 'blue' })
+  t.label([140, -10, B + 14], 'SHIPPED', { dy: 80, tone: 'green' })
+}
+
+function vaultWindow(t) {
+  t.base(-200, -100, 410, 205)
+  const sheet = (x, y, angle, z, tone, w = 26, d = 18) => {
+    const [ux, uy] = [Math.cos(angle), Math.sin(angle)]
+    t.bar([x - ux * w / 2, y - uy * w / 2], [x + ux * w / 2, y + uy * w / 2], d, z, 1.6, tone)
+  }
+
+  // Vault: a window on the left-front face, a round door on the right-front face.
+  t.box(-180, -90, 150, 110, B, 84, 'mid')
+  t.outline(-174, -84, 138, 98, B + 84)
+  t.box(-166, 20, 8, 5, B + 26, 6, 'hi')
+  t.box(-166, 20, 100, 5, B + 26, 6, 'hi')
+  t.box(-166, 20, 100, 5, B + 70, 6, 'hi')
+  t.box(-166, 20, 8, 5, B + 32, 38, 'hi')
+  t.box(-74, 20, 8, 5, B + 32, 38, 'hi')
+  for (const dx of [0, 26, 52]) t.seg([-158 + dx, 26, B + 34], [-122 + dx, 26, B + 68], 'green')
+  t.seg([-112, 26, B + 34], [-74, 26, B + 68], 'green')
+  t.line(k.sideRing([-30, -35, B + 52], 26, 'x', t.P), 'hi')
+  t.line(k.sideRing([-30, -35, B + 52], 17, 'x', t.P), 'mid')
+  t.seg([-30, -35 - 17, B + 52], [-30, -35 + 17, B + 52], 'mid')
+  t.seg([-30, -35, B + 35], [-30, -35, B + 69], 'mid')
+  t.line(k.sideRing([-30, -35, B + 52], 5, 'x', t.P), 'hi')
+
+  // Draft counter in front of the window.
+  t.box(-166, 50, 100, 34, B, 26, 'mid')
+  sheet(-132, 67, 0.15, B + 26, 'blue', 34, 22)
+  sheet(-100, 70, -0.2, B + 26, 'blue', 26, 18)
+
+  // Chute: a narrow channel from the door, locked until a key turns.
+  t.bar([-30, -35], [36, -35], 22, B, 14, 'lo')
+  t.rail([[-30, -35, B + 15], [36, -35, B + 15]], 'red', false)
+  t.box(36, -52, 34, 34, B, 44, 'hi', { lit: true })
+  t.line(k.sideRing([53, -18, B + 24], 6, 'y', t.P), 'red')
+  t.lamp([53, -35, B + 44], 'red', 5)
+  t.bar([70, -35], [120, -35], 22, B, 14, 'lo')
+  t.tray(120, -66, 80, 64, B, 24, () => {
+    sheet(160, -35, 0.1, B + 3, 'mid', 44, 30)
+    sheet(160, -35, -0.1, B + 5, 'hi', 44, 30)
+  })
+
+  // The key sits apart from the lock, with a person.
+  t.box(34, 10, 28, 20, B, 12, 'mid')
+  t.ring(42, 20, 4, B + 12, 'hi')
+  t.bar([46, 20], [58, 20], 3, B + 12, 2, 'hi')
+  t.lamp([48, 20, B + 20], 'blue', 4)
+
+  t.label([-166, 22, B + 50], 'READ-ONLY WINDOW', { dx: -70, dy: 0, tone: 'green' })
+  t.label([-116, 67, B + 28], 'DRAFT COUNTER', { dy: 80, tone: 'blue' })
+  t.label([53, -35, B + 44], 'SUBMIT NEEDS A KEY', { dy: -80, tone: 'red' })
+}
+
 export const flowHeroSvg = hero => render(hero.label, hero.art)
 
 // Labels and outcomes paraphrase each article; nothing here adds a claim the post doesn't make.
 export const flowHeroes = {
+  'card-catalog': {
+    art: cardCatalog,
+    label: 'An isometric card catalog. A cabinet has one drawer pulled out, holding dated index cards with tabbed guides. Each tab is tied by a thread to a source binder on a shelf behind it, and each source ends in a lamp. One raised card has a red tab and a red dashed thread to a red lamp: it is stale. A loupe stands at the side as the check before acting.',
+    outputs: [
+      { label: 'SOURCE CONFIRMED', tone: 'green' },
+      { label: 'STALE: CHECK FIRST', tone: 'red' },
+    ],
+    thesis: ['A memory is a claim.', 'Check it before acting.'],
+    note: 'An illustrative memory store. The threads and the raised card are a metaphor; nothing here was measured.',
+  },
+  'sealed-governor': {
+    art: sealedGovernor,
+    label: 'An isometric centrifugal governor. Wording knobs feed a spindle with two swinging balls and a sliding sleeve. A fixed scale beside the spindle marks the envelope the sleeve may travel, and a padlocked collar above it is the limit. A key rack with a blue lamp stands to one side: a human holds the key that moves the collar.',
+    outputs: [
+      { label: 'WORDING FREE', tone: 'green' },
+      { label: 'HUMAN WIDENS', tone: 'blue' },
+      { label: 'NO SELF-WIDEN', tone: 'red' },
+    ],
+    thesis: ['Tune the wording freely.', 'Widen the envelope by hand.'],
+    note: 'An illustrative design for a hosted automation. Nothing here has been run.',
+  },
+  'baggage-claim': {
+    art: baggageClaim,
+    label: 'An isometric baggage carousel feeding a customs gate. Bags ride a looping belt: they are the history and files a resumed session carries. A transfer belt passes a rebuild gantry with a blue lamp, where processes are rebuilt, then a customs booth with a red lamp and a boom barrier, where credentials and approvals are re-authorized before anything leaves.',
+    outputs: [
+      { label: 'CARRIED', tone: 'green' },
+      { label: 'REBUILT', tone: 'blue' },
+      { label: 'RE-AUTHORIZED', tone: 'red' },
+    ],
+    thesis: ['Resume carries the history.', 'Authority is issued again.'],
+    note: 'An illustrative model of resuming a session. What a given tool carries over varies, so check yours.',
+  },
+  'twin-gauges': {
+    art: twinGauges,
+    label: 'An isometric pair of gauges fed by the same pipe, plus a third independent calibration gauge. A fault upstream of the fork leaves both paired gauges reading fine, in agreement, while the separate gauge on its own clean line sits in the red zone.',
+    outputs: [
+      { label: 'AGREEMENT', tone: 'blue' },
+      { label: 'INDEPENDENT', tone: 'green' },
+      { label: 'SHARED FAULT', tone: 'red' },
+    ],
+    thesis: ['Agreement can be shared error.', 'An independent check settles it.'],
+    note: 'An illustration of correlated error. Nothing here was measured.',
+  },
+  'night-watch-clock': {
+    art: nightWatchClock,
+    label: 'An isometric watchman\'s clock: a lit dial in the center with a sweeping hand, and four key stations on a patrol ring around it. Three stations hold a key and a green lamp, for a named identity, authority and budget payer. The fourth, the failure owner, has an empty keyhole and a red lamp.',
+    outputs: [
+      { label: 'OWNERS NAMED', tone: 'green' },
+      { label: 'NO FAILURE OWNER', tone: 'red' },
+    ],
+    thesis: ['Unattended still needs an owner.', 'Name who pays and who answers.'],
+    note: 'An illustrative checklist for an unattended job. Nothing here was measured.',
+  },
+  'review-hopper': {
+    art: reviewHopper,
+    label: 'An isometric wide hopper heaped with draft sheets, feeding a narrow lane that passes through one review gate. Red sheets jam the lane and spill on the deck before the gate; green sheets pass beyond it into a tray.',
+    outputs: [
+      { label: 'CHEAP DRAFTS', tone: 'blue' },
+      { label: 'BACKLOG', tone: 'red' },
+      { label: 'SHIPPED', tone: 'green' },
+    ],
+    thesis: ['Generation got cheap.', 'Review became the limit.'],
+    note: 'An illustration of a bottleneck, not a measurement of any team.',
+  },
+  'vault-window': {
+    art: vaultWindow,
+    label: 'An isometric vault with a read-only viewing window, a draft counter and a keyed withdrawal chute. The window shows what is inside through glass. Slips are drafted on the counter. The chute only opens with a key held by a person, so submitting is separate from reading and drafting.',
+    outputs: [
+      { label: 'READ', tone: 'green' },
+      { label: 'DRAFT', tone: 'blue' },
+      { label: 'SUBMIT NEEDS A KEY', tone: 'red' },
+    ],
+    thesis: ['Access is capability.', 'Submitting is permission.'],
+    note: 'An illustrative split of authority. Nothing here was measured.',
+  },
+
   'agent-harness': {
     art: agentHarness,
     label: 'An isometric ticket gate for an agent harness. A tool-call card from the model passes a key board where only registered tools have a peg, then a turnstile that is the policy gate. Its three exits run the tool, hold it for approval, or drop it in a reject bin, while a paper tape journals every event.',
