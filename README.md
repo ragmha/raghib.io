@@ -37,12 +37,20 @@ bun test --bail               # unit and publication-contract tests
 
 ## Projects
 
-The Projects page is generated from the public repositories in
+The Projects page leads with selected projects defined in
+`src/content/project-snapshot.ts`, followed by public repositories in
 [`ragmha/blog-projects`](https://github.com/stars/ragmha/lists/blog-projects).
 Run `bun run sync:projects` with an authenticated `gh` CLI to refresh
 `src/content/github-projects.json`, then commit and redeploy. Per-project
 overrides (description, demo/extra links) live in
 `src/content/project-snapshot.ts` and survive future syncs.
+The same file owns the selected projects and their order; syncing the star list
+does not remove them or duplicate them. Repository identities (owner/name) are
+compared case-insensitively after removing trailing slashes and a `.git` suffix,
+with selected entries taking precedence. Distinct repositories must have unique
+project names, also case-insensitively; any name
+collision between distinct repositories fails site checks and builds rather than
+hiding a project.
 
 ## Experiments
 
@@ -64,12 +72,24 @@ sitemap and skipped by the SEO and vitals checks. App code, data, and downloads
 live only in the lab repository.
 The blog's shared theme, layouts, fonts, and writing documentation remain here.
 
+Writing frontmatter can declare `lab: <lab-slug>` (or a nested path such as
+`universe/passport`). This renders a companion experiment link. Only declare a
+pairing when the experiment actually accompanies that post; shared topics are
+not enough. The lab's reciprocal field is `writing: <writing-slug>`.
+`/content-links.json` publishes `{writings: [{slug, lab?}]}` for published
+posts only; the lab publishes `{labs: [{slug, writing?}]}` at the same path.
+Cross-repository checks can fetch those manifests or use local build snapshots.
+Check both destinations and reciprocal declarations when updating either side.
+
 ## Writing and project writeups
 
 Every writing post uses `src/pages/writing/[slug].astro`, `WritingLayout.astro`,
 and `src/styles/writing.css` for the same header, metadata, contents navigation,
 and reading layout. Keep content in MDX rather than duplicating page markup;
 headings supply the contents list without imposing the same outline on every post.
+Code examples get keyboard-accessible Copy controls using the native clipboard
+API. Success and failure are announced inline; manual selection still works
+without JavaScript or clipboard permission. Diagrams are not copy targets.
 Posts name no employer or employer product and carry no disclaimer;
 `tests/no-employer.test.mjs` enforces it.
 
@@ -104,7 +124,7 @@ A post can open with a full-bleed cover image. Put the image in
 ```yaml
 cover:
   src: ../../assets/covers/my-post.jpg
-  alt: "What the image shows"
+  alt: 'What the image shows'
 ```
 
 Every post needs at least one Mermaid or Excalidraw diagram. Choose its type
