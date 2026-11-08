@@ -12,7 +12,7 @@ const writingDir = 'src/content/writing'
 const postDates = new Map()
 for (const file of (await readdir(writingDir)).filter((file) => /\.mdx?$/.test(file))) {
   const post = readPublication(await readFile(`${writingDir}/${file}`, 'utf8'), 'writing', file)
-  if (post) postDates.set(`/writing/${file.replace(/\.mdx?$/, '')}/`, post.datePublished)
+  if (post) postDates.set(`/writing/${file.replace(/\.mdx?$/, '')}/`, post.dateModified ?? post.datePublished)
 }
 
 export default defineConfig({

@@ -24,6 +24,7 @@ const writing = defineCollection({
         .regex(/^\/(?!\/)/)
         .optional(),
       date: z.coerce.date(),
+      updated: z.coerce.date().optional(),
       topics: z.array(z.enum(TOPICS)).min(1),
       tags: z.array(z.string()).default([]),
       published: z.boolean().default(true),

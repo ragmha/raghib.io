@@ -89,6 +89,7 @@ try {
         twitterCard: meta('meta[name="twitter:card"]'),
         twitterImage: meta('meta[name="twitter:image"]'),
         datePublished: meta('meta[property="article:published_time"]'),
+        dateModified: meta('meta[property="article:modified_time"]'),
         links: [...document.querySelectorAll('a[href]')].map((element) => element.getAttribute('href')),
         ids: [...document.querySelectorAll('[id]')].map((element) => element.id),
         mainLinks: [...document.querySelectorAll('main a[href]')].map((element) => element.getAttribute('href')),
@@ -146,6 +147,7 @@ try {
       assert.equal(article.headline, metadata.h1[0], `Article schema preserves the visible headline for ${file}`)
       assert.equal(article.datePublished, metadata.datePublished, `Consistent publication date for ${file}`)
       assert.ok(Number.isFinite(Date.parse(article.datePublished)), `Valid publication date for ${file}`)
+      assert.equal(article.dateModified, metadata.dateModified, `Consistent update date for ${file}`)
       assert.equal(article.author.name, 'Raghib Hasan', `Article author for ${file}`)
       renderedArticles.push({
         collection: path.startsWith('/writing/') ? 'writing' : 'projectWriteups',
@@ -153,6 +155,7 @@ try {
         searchTitle: metadata.title,
         description: metadata.description,
         datePublished: article.datePublished,
+        dateModified: article.dateModified,
       })
       if (
         path.startsWith('/writing/') &&

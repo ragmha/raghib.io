@@ -47,6 +47,14 @@ test('published content rejects empty bodies and invalid frontmatter instead of 
   assert.throws(() => readPublication(source().replace('2026-09-18', 'not-a-date'), 'writing', 'invalid.mdx'), /date/)
   assert.throws(() => readPublication('No frontmatter', 'writing', 'invalid.mdx'), /frontmatter/)
   assert.throws(() => readPublication(source('title: Duplicate'), 'writing', 'invalid.mdx'), /unique/)
+  assert.throws(() => readPublication(source('updated: "not-a-date"'), 'writing', 'invalid.mdx'), /updated/)
+  assert.throws(() => readPublication(source('updated: "2026-09-17"'), 'writing', 'invalid.mdx'), /updated/)
+})
+
+test('an update date is reported separately from the publication date', () => {
+  const publication = readPublication(source('updated: "2026-11-08"'), 'writing', 'example.mdx')
+  assert.equal(publication.datePublished, '2026-09-18T00:00:00.000Z')
+  assert.equal(publication.dateModified, '2026-11-08T00:00:00.000Z')
 })
 
 test('published content rejects bodies containing only whitespace and HTML comments', () => {

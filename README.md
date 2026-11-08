@@ -274,6 +274,8 @@ drafts must not leak into the build. An intentionally empty writing archive is
 valid. Editable `.excalidraw` originals belong outside `public/`.
 
 Published writing needs a title, description, date, and nonempty body.
+An optional `updated` date, on or after `date`, shows next to the publication
+date and sets `dateModified` and the sitemap `lastmod`.
 Whitespace and HTML comments alone do not count as a body. The body check
 looks for content outside comments; it does not sanitize or render HTML.
 Use `published: false` for writing drafts; project writeups default to unpublished.

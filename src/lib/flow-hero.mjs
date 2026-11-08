@@ -932,6 +932,49 @@ function narrationPress(t) {
   t.label([154, -83, B + 14], 'MERGE GATES', { dy: -80, tone: 'green' })
 }
 
+function sightGlass(t) {
+  t.base(-150, -90, 230, 200)
+  const [gx, gy] = [30, 46]
+
+  // Drum: riveted courses, then a dome with an inspection hatch.
+  for (let i = 0; i < 3; i++) {
+    t.cyl(-60, -10, 58, B + i * 42, 38, 'mid', { steps: 40 })
+    t.cyl(-60, -10, 61, B + i * 42 + 38, 4, 'lo', { steps: 40 })
+  }
+  t.cyl(-60, -10, 50, B + 126, 8, 'lo', { steps: 36 })
+  t.cyl(-60, -10, 18, B + 134, 5, 'hi', { steps: 24 })
+  t.ring(-60, -10, 12, B + 139, 'mid')
+  t.bar([-68, -10], [-52, -10], 3, B + 139, 4, 'blue')
+
+  // Isolation cocks pipe the glass to the drum at the bottom and top.
+  for (const z of [B + 18, B + 118]) {
+    t.bar([-14, 18], [gx, gy], 8, z, 8, 'lo')
+    t.cyl(8, 32, 6, z + 8, 4, 'mid', { steps: 14 })
+    t.bar([2, 32], [14, 32], 2.4, z + 12, 2, 'hi')
+  }
+
+  // Sight glass: ten segments, seven lit, under a red band at the top.
+  t.cyl(gx, gy, 4, B, 16, 'lo', { steps: 14 })
+  t.cyl(gx, gy, 11, B + 16, 6, 'mid', { steps: 20 })
+  for (let i = 0; i < 10; i++) {
+    const z = B + 22 + i * 10
+    if (i === 8) t.cyl(gx, gy, 10, z - 1, 1.5, 'red', { steps: 20 })
+    t.cyl(gx, gy, 7, z, 9, i < 7 ? 'green' : 'hi', { steps: 20, lit: i === 6 })
+  }
+  t.cyl(gx, gy, 11, B + 122, 6, 'mid', { steps: 20 })
+  t.lamp([gx, gy, B + 128], 'red', 5)
+
+  // Drain cock at the foot of the drum.
+  t.bar([-60, 44], [-60, 76], 7, B + 4, 7, 'lo')
+  t.cyl(-60, 80, 7, B, 14, 'mid', { steps: 16 })
+  t.bar([-68, 80], [-52, 80], 2.4, B + 14, 2, 'hi')
+
+  t.label([-60, -10, B + 143], '/CONTEXT HATCH', { dy: -60, tone: 'blue' })
+  t.label([-118, -10, B + 70], 'CONTEXT WINDOW', { dx: -60, dy: 0 })
+  t.label([gx + 7, gy, B + 87], 'STATUS LINE', { dx: 80, dy: -24, tone: 'green' })
+  t.label([gx, gy, B + 128], 'COMPACTION AHEAD', { dx: 80, dy: -40, tone: 'red' })
+}
+
 export const flowHeroSvg = hero => render(hero.label, hero.art)
 
 // Labels and outcomes paraphrase each article; nothing here adds a claim the post doesn't make.
@@ -946,6 +989,17 @@ export const flowHeroes = {
     ],
     thesis: ['The agent reviews and asks.', 'The gates decide the merge.'],
     note: 'An illustration of the pipeline in the post. It hasn’t run end to end yet.',
+  },
+  'sight-glass': {
+    art: sightGlass,
+    label: 'An isometric boiler drum with a sight glass. The drum is the context window. A glass tube piped to its side is the status line: seven of ten segments are lit green, below a red band marked compaction ahead. A hatch on top stands for opening the drum to inspect it in full.',
+    outputs: [
+      { label: 'READ AT A GLANCE', tone: 'green' },
+      { label: 'OPEN TO INSPECT', tone: 'blue' },
+      { label: 'COMPACTION AHEAD', tone: 'red' },
+    ],
+    thesis: ['Read the level at a glance.', 'Open the hatch to inspect it.'],
+    note: 'An illustration of the gauge in the post. The level shown is not a measurement.',
   },
   'card-catalog': {
     art: cardCatalog,
