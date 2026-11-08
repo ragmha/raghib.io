@@ -76,7 +76,7 @@ SKILLS = {
 GROUP = {skill: group for group, skills in SKILLS.items() for skill in skills}
 YEARS = re.compile(
     r"\b(\d{1,2})(?:\+|\s*(?:-|–|to)\s*\d{1,2}\+?)?\s*years?['’]?\s+"
-    r"(?:of\s+)?(?:[\w/&,-]+\s+){0,5}?experience\b"
+    r"(?:of\s+)?(?:(?:[\w/&,+#-]|\.(?=\w))+\s+){0,5}?experience\b"
 )
 PAY = re.compile(r"\$\s?(\d{2,3})(?:,\d{3}(?:\.\d{2})?|k)\s*(?:-|–|—|to)\s*\$?\s?(\d{2,3})(?:,\d{3}|k)")
 

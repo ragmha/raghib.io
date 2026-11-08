@@ -15,7 +15,15 @@ class DemandTests(unittest.TestCase):
             ("Requirements: 4 to 6 years of experience.", 4),
             ("Requirements: 1 year of experience.", 1),
             ("For 10+ years we have built software.", None),
+            ("For 10 years at Node.js. Experience with Python is required.", None),
+            ("For 10 years at C++. Experience with Python is required.", None),
+            ("For 10 years at C#. Experience with Python is required.", None),
+            ("For 10 years at .NET. Experience with Python is required.", None),
         ]
+        for technology in ("C++", "C#", ".NET", "Node.js"):
+            for duration in ("3", "3+", "3-5", "3 to 5"):
+                cases.append((f"Requirements: {duration} years of {technology} experience.", 3))
+            cases.append((f"Requirements: 4 years of {technology}.", None))
         for text, expected in cases:
             with self.subTest(text=text):
                 self.assertEqual(fde_demand.first_number(fde_demand.YEARS, text.lower()), expected)
