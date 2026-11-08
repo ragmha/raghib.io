@@ -17,6 +17,13 @@ export async function renderDeck(talk: Talk): Promise<string> {
   return `<style>${css}</style>${html}`
 }
 
+// Slide titles without the cover, so a locked page can show what the talk covers.
+export function outline(talk: Talk): string[] {
+  return [...(talk.body ?? '').matchAll(/^## (.+)$/gm)]
+    .map(([, title]) => title.replace(/[*_`]/g, '').trim())
+    .filter((title) => title !== talk.data.title)
+}
+
 // Requests are public issues, so they count demand; codes go out privately.
 export function viewRequestUrl(talk: Talk): string {
   const query = new URLSearchParams({

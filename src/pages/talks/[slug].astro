@@ -2,7 +2,7 @@
 import WritingLayout from '../../layouts/WritingLayout.astro'
 import { formatDate } from '../../lib/posts'
 import { seal } from '../../lib/talk-lock'
-import { getTalks, renderDeck, viewRequestUrl, type Talk } from '../../lib/talks'
+import { getTalks, outline, renderDeck, viewRequestUrl, type Talk } from '../../lib/talks'
 
 export async function getStaticPaths() {
   return (await getTalks()).map((talk) => ({ params: { slug: talk.id }, props: { talk } }))
@@ -55,21 +55,33 @@ const downloads = [
       {showDeck ? (
         <div class="talk-deck" set:html={deck} />
       ) : (
-        <section class="talk-locked" aria-labelledby="talk-locked-title">
-          <h2 id="talk-locked-title">This presentation is still in progress</h2>
-          <p>Ask to view it. Each request tells me which talk to finish first, and you will hear back when it is published.</p>
-          <p><a class="talk-button" href={viewRequestUrl(talk)}>Can I view this presentation?</a></p>
-          {sealed && (
-            <form class="talk-unlock" data-sealed={sealed}>
-              <label for="talk-code">Have a view code?</label>
-              <div class="talk-unlock-row">
-                <input id="talk-code" name="code" type="password" autocomplete="off" required />
-                <button class="talk-button" type="submit">View</button>
-              </div>
-              <p class="talk-status" role="status"></p>
-            </form>
-          )}
-        </section>
+        <div class="talk-locked">
+          <section aria-labelledby="talk-outline-title">
+            <h2 id="talk-outline-title">What it covers</h2>
+            <ol class="talk-outline">
+              {outline(talk).map((title) => <li>{title}</li>)}
+            </ol>
+          </section>
+          <section class="talk-ask" aria-labelledby="talk-ask-title">
+            <h2 id="talk-ask-title">Want to see it?</h2>
+            <p>The slides are still being written. Each request tells me which talk to finish first, and you will hear back when it is published.</p>
+            <a class="talk-cta" href={viewRequestUrl(talk)}>Can I view this presentation?</a>
+            <p class="talk-note">Opens a short GitHub issue. Requests are public.</p>
+            {sealed && (
+              <details class="talk-code">
+                <summary>Have a view code?</summary>
+                <form class="talk-unlock" data-sealed={sealed}>
+                  <label for="talk-code">View code</label>
+                  <div class="talk-unlock-row">
+                    <input id="talk-code" name="code" type="password" autocomplete="off" required />
+                    <button class="talk-button" type="submit">View</button>
+                  </div>
+                  <p class="talk-status" role="status"></p>
+                </form>
+              </details>
+            )}
+          </section>
+        </div>
       )}
     </main>
   </div>
@@ -148,30 +160,86 @@ const downloads = [
 
   .talk-locked {
     display: grid;
-    gap: 1rem;
+    gap: 3.5rem;
     max-width: 40rem;
-    padding: 2rem;
-    border: 1px solid var(--rule);
-    background: var(--paper-sunk);
   }
 
   .talk-locked h2 {
-    margin: 0;
+    margin: 0 0 1rem;
     font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--ink);
   }
 
-  .talk-locked p {
+  .talk-outline {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: slide;
+    border-top: 1px solid var(--rule);
+  }
+
+  .talk-outline li {
+    display: grid;
+    grid-template-columns: 3ch 1fr;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--rule);
+    color: var(--ink);
+    counter-increment: slide;
+  }
+
+  .talk-outline li::before {
+    content: counter(slide);
+    color: var(--ink-faint);
+  }
+
+  .talk-ask p {
     margin: 0;
     color: var(--ink-muted);
+  }
+
+  .talk-cta {
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px;
+    margin-top: 1.5rem;
+    padding: 0 1.25rem;
+    border-radius: 0.25rem;
+    background: var(--ink);
+    color: var(--paper);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .talk-cta:hover {
+    background: var(--theme-highlight);
+  }
+
+  .talk-ask .talk-note {
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+  }
+
+  .talk-code {
+    margin-top: 2rem;
+    font-size: 0.85rem;
+  }
+
+  .talk-code summary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--ink-muted);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    cursor: pointer;
   }
 
   .talk-unlock {
     display: grid;
     gap: 0.5rem;
-    margin-top: 1rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--rule);
-    font-size: 0.85rem;
+    margin-top: 0.5rem;
   }
 
   .talk-unlock-row {
@@ -182,6 +250,7 @@ const downloads = [
 
   .talk-unlock input {
     flex: 1 1 12rem;
+    min-width: 0;
     min-height: 44px;
     padding: 0 0.75rem;
     border: 1px solid var(--rule-strong);
