@@ -37,9 +37,8 @@ bun test --bail               # unit and publication-contract tests
 
 ## Projects
 
-The Projects page leads with projects already supported by the site's content
-(the harness tutorial, the lab, and the Apple Books writeup), followed by public
-repositories in
+The Projects page leads with selected projects defined in
+`src/content/project-snapshot.ts`, followed by public repositories in
 [`ragmha/blog-projects`](https://github.com/stars/ragmha/lists/blog-projects).
 Run `bun run sync:projects` with an authenticated `gh` CLI to refresh
 `src/content/github-projects.json`, then commit and redeploy. Per-project
@@ -48,8 +47,9 @@ overrides (description, demo/extra links) live in
 The same file owns the selected projects and their order; syncing the star list
 does not remove them or duplicate them. Repository identities (owner/name) are
 compared case-insensitively, with selected entries taking precedence. Distinct
-repositories must have unique project names, also case-insensitively; a collision
-with a selected project fails site checks and builds rather than hiding a project.
+repositories must have unique project names, also case-insensitively; any name
+collision between distinct repositories fails site checks and builds rather than
+hiding a project.
 
 ## Experiments
 
