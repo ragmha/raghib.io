@@ -90,14 +90,15 @@ site theme from `src/styles/talk-theme.css`. After `astro build`,
 `scripts/export-talks.mjs` writes `<slug>.pdf` and an image-only `<slug>.pptx`
 next to each public deck for the Download menu.
 
-A deck marked `locked: true` shows its slide titles as an outline, then a
+A deck marked `locked: true` is shared on request. Its page shows a
 "Can I view this presentation?" button that opens a prefilled public issue
-(`.github/ISSUE_TEMPLATE/view-request.yml`, label `view-request`). Compare the
-page's views with `gh issue list -l view-request` to see the demand.
+(`.github/ISSUE_TEMPLATE/view-request.yml`, label `view-request`); reply there
+to send the slides. Compare the page's views with
+`gh issue list -l view-request` to see the demand.
 When the `TALK_CODE` Actions secret is set, the build also encrypts the
 locked deck with AES-GCM (`src/lib/talk-lock.ts`), and a "Have a view code?"
 disclosure lets anyone with the code view it in the browser. Without the
-secret, locked pages contain only the slide titles. `astro dev` always shows
+secret, locked pages contain no slide content. `astro dev` always shows
 locked decks. Remove `locked` to publish.
 
 ## Writing and project writeups

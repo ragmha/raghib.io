@@ -2,7 +2,7 @@
 import WritingLayout from '../../layouts/WritingLayout.astro'
 import { formatDate } from '../../lib/posts'
 import { seal } from '../../lib/talk-lock'
-import { getTalks, outline, renderDeck, viewRequestUrl, type Talk } from '../../lib/talks'
+import { getTalks, renderDeck, viewRequestUrl, type Talk } from '../../lib/talks'
 
 export async function getStaticPaths() {
   return (await getTalks()).map((talk) => ({ params: { slug: talk.id }, props: { talk } }))
@@ -38,7 +38,7 @@ const downloads = [
         <dl class="post-facts">
           <div><dt>Date:</dt><dd><time datetime={date.toISOString()}>{formatDate(date)}</time></dd></div>
           <div><dt>Slides:</dt><dd>{slides}</dd></div>
-          {locked && <div><dt>Status:</dt><dd>In progress</dd></div>}
+          {locked && <div><dt>Access:</dt><dd>On request</dd></div>}
         </dl>
         {!locked && (
           <details class="talk-download">
@@ -55,33 +55,25 @@ const downloads = [
       {showDeck ? (
         <div class="talk-deck" set:html={deck} />
       ) : (
-        <div class="talk-locked">
-          <section aria-labelledby="talk-outline-title">
-            <h2 id="talk-outline-title">What it covers</h2>
-            <ol class="talk-outline">
-              {outline(talk).map((title) => <li>{title}</li>)}
-            </ol>
-          </section>
-          <section class="talk-ask" aria-labelledby="talk-ask-title">
-            <h2 id="talk-ask-title">Want to see it?</h2>
-            <p>The slides are still being written. Each request tells me which talk to finish first, and you will hear back when it is published.</p>
-            <a class="talk-cta" href={viewRequestUrl(talk)}>Can I view this presentation?</a>
-            <p class="talk-note">Opens a short GitHub issue. Requests are public.</p>
-            {sealed && (
-              <details class="talk-code">
-                <summary>Have a view code?</summary>
-                <form class="talk-unlock" data-sealed={sealed}>
-                  <label for="talk-code">View code</label>
-                  <div class="talk-unlock-row">
-                    <input id="talk-code" name="code" type="password" autocomplete="off" required />
-                    <button class="talk-button" type="submit">View</button>
-                  </div>
-                  <p class="talk-status" role="status"></p>
-                </form>
-              </details>
-            )}
-          </section>
-        </div>
+        <section class="talk-locked" aria-labelledby="talk-ask-title">
+          <h2 id="talk-ask-title">Want to see it?</h2>
+          <p>The slides are shared on request. Ask, and I will send them to you.</p>
+          <a class="talk-cta" href={viewRequestUrl(talk)}>Can I view this presentation?</a>
+          <p class="talk-note">Opens a short GitHub issue. Requests are public.</p>
+          {sealed && (
+            <details class="talk-code">
+              <summary>Have a view code?</summary>
+              <form class="talk-unlock" data-sealed={sealed}>
+                <label for="talk-code">View code</label>
+                <div class="talk-unlock-row">
+                  <input id="talk-code" name="code" type="password" autocomplete="off" required />
+                  <button class="talk-button" type="submit">View</button>
+                </div>
+                <p class="talk-status" role="status"></p>
+              </form>
+            </details>
+          )}
+        </section>
       )}
     </main>
   </div>
@@ -159,8 +151,6 @@ const downloads = [
   }
 
   .talk-locked {
-    display: grid;
-    gap: 3.5rem;
     max-width: 40rem;
   }
 
@@ -171,29 +161,7 @@ const downloads = [
     color: var(--ink);
   }
 
-  .talk-outline {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    counter-reset: slide;
-    border-top: 1px solid var(--rule);
-  }
-
-  .talk-outline li {
-    display: grid;
-    grid-template-columns: 3ch 1fr;
-    padding: 0.85rem 0;
-    border-bottom: 1px solid var(--rule);
-    color: var(--ink);
-    counter-increment: slide;
-  }
-
-  .talk-outline li::before {
-    content: counter(slide);
-    color: var(--ink-faint);
-  }
-
-  .talk-ask p {
+  .talk-locked p {
     margin: 0;
     color: var(--ink-muted);
   }
@@ -215,7 +183,7 @@ const downloads = [
     background: var(--theme-highlight);
   }
 
-  .talk-ask .talk-note {
+  .talk-locked .talk-note {
     margin-top: 0.75rem;
     font-size: 0.8rem;
     color: var(--ink-faint);

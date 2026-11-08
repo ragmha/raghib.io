@@ -1,12 +1,12 @@
 name: Can I view this presentation?
-description: Ask to view a talk on raghib.io that is still in progress.
+description: Ask for the slides of a talk on raghib.io.
 title: "Can I view: "
 labels: ["view-request"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for asking. Requests tell me which talk to finish first. This issue is public, so leave out contact details and company names. I'll reply here and close the issue when the presentation is published.
+        Thanks for asking. This issue is public, so leave out contact details and company names. I'll reply here to get the slides to you.
   - type: input
     id: talk
     attributes:
