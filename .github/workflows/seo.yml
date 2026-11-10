@@ -48,7 +48,7 @@ jobs:
     # If `lanes` fails, its output is empty and the checks run.
     if: ${{ !cancelled() && needs.lanes.outputs.release != 'false' }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 30
     outputs:
       indexnow: ${{ steps.indexnow.outputs.urls }}
     env:
@@ -68,13 +68,23 @@ jobs:
       - run: npx --yes cspell@8.19.4 lint --no-progress
       - run: bun install --frozen-lockfile
       # rehype-mermaid renders diagrams to SVG at build time via headless
-      # Chromium, so the browser must be present before `bun run build`.
-      - run: bunx playwright install --with-deps chromium
+      # Chromium, so the browser must be present before `bun run build`. The
+      # experiments' browser tests also run in WebKit.
+      - run: bunx playwright install --with-deps chromium webkit
       # PowerShell cold starts on the runner can exceed Bun's 5s default.
       - run: bun test --bail --timeout 20000
+      - run: bun run --filter experiments test
+      # Builds the blog, then apps/experiments into dist/experiments.
       - run: bun run build
       - run: bun run check:seo
       - run: bun run check:vitals
+      - run: node apps/experiments/scripts/check-content-links.mjs
+      - run: bun run --filter experiments test:browser
+      - uses: actions/upload-artifact@v7
+        with:
+          name: experiments-performance
+          path: .checks/performance.json
+          if-no-files-found: error
 
       # IndexNow (Bing and other engines) wants changed URLs, not the whole
       # site: publish the key, then diff the sitemap against the live deploy.

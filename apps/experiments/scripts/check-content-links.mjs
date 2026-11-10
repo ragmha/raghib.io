@@ -46,7 +46,7 @@ export function checkContentLinks(labs, writings) {
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   try {
-    const source = process.argv[2] ?? 'https://raghib.io/content-links.json'
+    const source = process.argv[2] ?? fileURLToPath(new URL('../../../dist/content-links.json', import.meta.url))
     let remote
     if (source.startsWith('https://')) {
       const response = await fetch(source, { signal: AbortSignal.timeout(15_000) })

@@ -1,17 +1,17 @@
 import assert from 'node:assert/strict'
-import { existsSync, readFileSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import config from '../astro.config.mjs'
+import experiments from '../apps/experiments/astro.config.mjs'
 
-const slugs = ['chess', 'context-autopsy', 'session-flame', 'token-diet']
+const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8')
 
-test('experiments live in the lab: nav links there and old routes use native redirects', () => {
-  const nav = readFileSync(new URL('../src/components/SiteNav.astro', import.meta.url), 'utf8')
-  assert.ok(nav.includes('href="https://lab.raghib.io/"'), 'nav must link to the lab')
-  assert.equal(config.redirects['/experiments/'], 'https://lab.raghib.io/')
-  for (const slug of slugs) {
-    assert.equal(config.redirects[`/experiments/${slug}/`], `https://lab.raghib.io/${slug}/`)
-  }
-  assert.equal(existsSync(new URL('../src/pages/experiments/', import.meta.url)), false, 'experiment pages belong in the lab')
-  assert.equal(existsSync(new URL('../public/experiments/', import.meta.url)), false, 'experiment assets belong in the lab')
+test('experiments are pages at /experiments/ in the site build, not redirects', () => {
+  assert.equal(config.redirects, undefined)
+  assert.ok(read('../src/components/SiteNav.astro').includes('href="/experiments/"'), 'nav must link to the experiments')
+  assert.ok(read('../src/pages/writing/[slug].astro').includes('href={`/experiments/${post.data.lab}/`}'))
+  assert.equal(experiments.site, config.site)
+  assert.equal(experiments.base, '/experiments')
+  assert.equal(experiments.outDir, '../../dist/experiments')
+  assert.match(JSON.parse(read('../package.json')).scripts.build, /bun run --filter experiments build$/)
 })
