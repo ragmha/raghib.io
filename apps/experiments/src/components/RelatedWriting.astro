@@ -1,7 +1,8 @@
 ---
 import inventory from '../data/content-links.json'
 
-const slug = Astro.url.pathname.replace(/^\/|\/$/g, '')
+const base = import.meta.env.BASE_URL.replace(/\/$/, '')
+const slug = Astro.url.pathname.slice(base.length).replace(/^\/|\/$/g, '')
 const entry: { slug: string; writing?: string } | undefined = inventory.labs.find((lab) => lab.slug === slug)
 ---
 

@@ -43,7 +43,8 @@ test('GitHub language snapshot contains positive byte counts, unique names and s
   }
 })
 
-test('GitHub Pages custom domain matches the canonical Astro site', () => {
-  assert.equal(readFileSync('public/CNAME', 'utf8').trim(), 'lab.raghib.io')
-  assert.equal(config.site, 'https://lab.raghib.io')
+test('experiments are served from raghib.io/experiments/ inside the site build', () => {
+  assert.equal(config.site, 'https://raghib.io')
+  assert.equal(config.base, '/experiments')
+  assert.equal(config.outDir, '../../dist/experiments')
 })

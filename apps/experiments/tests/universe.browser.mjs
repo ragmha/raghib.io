@@ -18,7 +18,7 @@ test('Universe guide: ordered practice, inventory, persistence, fallbacks and re
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' })
     const errors = []
     page.on('pageerror', (error) => errors.push(error.message))
-    await page.goto(new URL('/universe/', base).href, { waitUntil: 'networkidle' })
+    await page.goto(new URL('./universe/', base).href, { waitUntil: 'networkidle' })
     assert.equal((await page.locator('.edition p').nth(1).innerText()).replace(/\s+/g, ' '),
       'Overview + official recap + 31 launch-day changelog posts. Not every conference session.')
     assert.equal(await page.locator('.lesson:visible').count(), 1)
@@ -86,7 +86,7 @@ test('Universe guide: ordered practice, inventory, persistence, fallbacks and re
     assert.ok(await page.locator('.release:visible').count() >= 5)
     assert.ok(await page.locator('.release:visible').evaluateAll((nodes) => nodes.every((node) => node.dataset.group === 'Security' && node.dataset.status === 'Public preview')))
     await page.locator('#clear-filters').click()
-    await page.goto(new URL('/universe/#lesson-7', base).href, { waitUntil: 'networkidle' })
+    await page.goto(new URL('./universe/#lesson-7', base).href, { waitUntil: 'networkidle' })
     assert.equal(await page.locator('#lesson-7').isVisible(), true)
     page.once('dialog', (dialog) => dialog.dismiss())
     await page.locator('#reset-progress').click()
@@ -98,21 +98,21 @@ test('Universe guide: ordered practice, inventory, persistence, fallbacks and re
     if (process.env.LAB_SCREENSHOT_DIR) await mkdir(process.env.LAB_SCREENSHOT_DIR, { recursive: true })
     for (const width of [1440, 900, 390, 320]) {
       await page.setViewportSize({ width, height: 1000 })
-      await page.goto(new URL('/universe/', base).href, { waitUntil: 'networkidle' })
+      await page.goto(new URL('./universe/', base).href, { waitUntil: 'networkidle' })
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `No page overflow at ${width}px`)
       assert.ok(await page.locator('.lesson-nav a').evaluateAll((links) => links.every((link) => link.getBoundingClientRect().height >= 44)))
       await page.locator('.lesson-nav [data-lesson-link="1"]').click()
       assert.equal(await page.locator('#lesson-1').isVisible(), true)
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true)
       if (process.env.LAB_SCREENSHOT_DIR && [1440, 390].includes(width)) {
-        await page.goto(new URL('/universe/', base).href, { waitUntil: 'networkidle' })
+        await page.goto(new URL('./universe/', base).href, { waitUntil: 'networkidle' })
         await page.screenshot({ path: join(process.env.LAB_SCREENSHOT_DIR, `universe-${width}.png`), fullPage: false })
-        await page.goto(new URL('/universe/#lesson-1', base).href, { waitUntil: 'networkidle' })
+        await page.goto(new URL('./universe/#lesson-1', base).href, { waitUntil: 'networkidle' })
         await page.screenshot({ path: join(process.env.LAB_SCREENSHOT_DIR, `universe-lesson-${width}.png`), fullPage: false })
       }
     }
     await page.emulateMedia({ colorScheme: 'dark' })
-    await page.goto(new URL('/universe/', base).href, { waitUntil: 'networkidle' })
+    await page.goto(new URL('./universe/', base).href, { waitUntil: 'networkidle' })
     assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark')
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true)
     await page.close()
@@ -123,14 +123,14 @@ test('Universe guide: ordered practice, inventory, persistence, fallbacks and re
         else Object.defineProperty(Storage.prototype, `${failure}Item`, { value: () => { throw new Error('Storage denied') } })
       }, { failure, key })
       const fallback = await context.newPage()
-      await fallback.goto(new URL('/universe/', base).href, { waitUntil: 'networkidle' })
+      await fallback.goto(new URL('./universe/', base).href, { waitUntil: 'networkidle' })
       assert.match(await fallback.locator('#storage-status').innerText(), /this tab only/)
       await fallback.locator('[data-complete="0"]').check()
       assert.equal(await fallback.locator('#progress-label').innerText(), '1 of 8 lessons complete')
       await context.close()
     }
     const plain = await browser.newPage({ javaScriptEnabled: false, viewport: { width: 390, height: 900 } })
-    await plain.goto(new URL('/universe/', base).href, { waitUntil: 'networkidle' })
+    await plain.goto(new URL('./universe/', base).href, { waitUntil: 'networkidle' })
     assert.equal(await plain.locator('.lesson:visible').count(), 8)
     assert.equal(await plain.locator('.release:visible').count(), inventoryCount)
     assert.equal(await plain.locator('#release-search').isDisabled(), true)
@@ -148,7 +148,7 @@ test('public Passport: mobile reading, device persistence, guide sharing, and ca
       const serverErrors = []
       const canvas = await startServer(store, (error) => serverErrors.push(error))
       const browser = await chromium.launch({ channel: process.env.LAB_BROWSER_CHANNEL })
-      const url = new URL('/universe/passport/', base).href
+      const url = new URL('./universe/passport/', base).href
       try {
         const page = await browser.newPage({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' })
         const errors = []
@@ -257,7 +257,7 @@ test('public Passport: mobile reading, device persistence, guide sharing, and ca
       const browser = await webkit.launch()
       try {
         const page = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
-        await page.goto(new URL('/universe/passport/', base).href, { waitUntil: 'networkidle' })
+        await page.goto(new URL('./universe/passport/', base).href, { waitUntil: 'networkidle' })
         await page.getByRole('button', { name: 'Stamp step 0', exact: true }).click()
         await page.waitForFunction(() => document.querySelector('.tally').textContent.startsWith('1 of 8'))
         await page.reload({ waitUntil: 'networkidle' })

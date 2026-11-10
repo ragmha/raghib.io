@@ -23,7 +23,8 @@ const tabs = [
 
 const description =
   'See where a coding-agent session spent its time: prompts, model turns, tools, and sub-agents as an interactive flame chart. Runs in your browser.'
-const home = new URL('/', Astro.site ?? Astro.url)
+const base = import.meta.env.BASE_URL.replace(/\/$/, '')
+const home = new URL(`${base}/`, Astro.site ?? Astro.url)
 const appJsonLd = JSON.stringify({
   '@context': 'https://schema.org',
   '@graph': [{
@@ -52,7 +53,7 @@ const appJsonLd = JSON.stringify({
   <script is:inline type="application/ld+json" set:html={appJsonLd} />
   <header class="app-bar">
     <div class="app-title">
-      <a class="app-back" href="/"><span aria-hidden="true">←</span> Experiments</a>
+      <a class="app-back" href={`${base}/`}><span aria-hidden="true">←</span> Experiments</a>
       <h1 id="page-title">Where Did the Time Go?</h1>
       <p id="coverage" class="coverage">{sampleSummary.coverage}</p>
     </div>
@@ -357,8 +358,8 @@ const appJsonLd = JSON.stringify({
         <code>~</code>. These helpers list session IDs and dates, then copy one raw log.
       </p>
       <div class="actions">
-        <a href="/copilot-export.sh" download>Download Bash helper</a>
-        <a href="/copilot-export.ps1" download>Download PowerShell helper</a>
+        <a href={`${base}/copilot-export.sh`} download>Download Bash helper</a>
+        <a href={`${base}/copilot-export.ps1`} download>Download PowerShell helper</a>
       </div>
       <pre><code>bash copilot-export.sh --list
 bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code></pre>
@@ -1720,7 +1721,7 @@ bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code>
       if (!run) return
       const request = ++runRequest
       try {
-        const response = await fetch(`/session-flame/runs/${run.file}`)
+        const response = await fetch(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/session-flame/runs/${run.file}`)
         if (!response.ok) throw new Error(`The recorded run could not be loaded (HTTP ${response.status}).`)
         const next = parseSession(await response.text())
         if (request !== runRequest) return

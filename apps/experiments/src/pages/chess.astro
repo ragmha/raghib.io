@@ -8,6 +8,7 @@ import { contextBudget, pieceSprites, pieceNames, recentPlies, squares, skillLev
 const description =
   'Play a local chess AI and follow each move through a live diagram: rules checks, Stockfish search, and the reply. Everything runs in your browser.'
 const start = new Chess()
+const base = import.meta.env.BASE_URL.replace(/\/$/, '')
 ---
 
 <BaseLayout
@@ -21,7 +22,7 @@ const start = new Chess()
        left over, and the live trace scrolls inside its own panel. -->
   <header class="app-bar">
     <div class="app-title">
-      <a class="app-back" href="/"><span aria-hidden="true">←</span> Experiments</a>
+      <a class="app-back" href={`${base}/`}><span aria-hidden="true">←</span> Experiments</a>
       <h1 id="page-title">Can a Browser Tab Beat You at Chess?</h1>
       <p class="intro">Make a move, then follow what happens behind the board. Stockfish runs on your device, not on a server.</p>
     </div>
@@ -165,8 +166,8 @@ const start = new Chess()
         <p class="credit">
           All game computation stays in this tab. Engine:
           <a href="https://github.com/nmrugg/stockfish.js">Stockfish.js 19.0.1</a>, lite single-threaded
-          (<a href="/chess/COPYING.txt">GPLv3</a> ·
-          <a href="/chess/SOURCE.txt">source and build information</a>).
+          (<a href={`${base}/chess/COPYING.txt`}>GPLv3</a> ·
+          <a href={`${base}/chess/SOURCE.txt`}>source and build information</a>).
           Rules: <a href="https://github.com/jhlywa/chess.js">chess.js</a>.
           Reloading clears the game.
           By <a href="https://raghib.io/">Raghib Hasan</a>.

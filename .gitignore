@@ -1,11 +1,13 @@
 # dependencies
-/node_modules
+node_modules/
 
 # testing
 /coverage
+.checks/
+.copilot-export-fixture-*/
 
 # Astro
-/.astro/
+.astro/
 /dist/
 
 # misc

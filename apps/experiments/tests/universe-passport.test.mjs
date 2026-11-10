@@ -44,7 +44,7 @@ function statusWithHost(host) {
 }
 
 test('serves the panel assets under a strict CSP', async () => {
-  for (const [path, type] of [['/', 'text/html'], ['/app.mjs', 'text/javascript'], ['/apps/site/src/data/universe-progress.mjs', 'text/javascript'], ['/apps/site/src/data/universe.mjs', 'text/javascript'], ['/styles.css', 'text/css']]) {
+  for (const [path, type] of [['/', 'text/html'], ['/app.mjs', 'text/javascript'], ['/apps/experiments/src/data/universe-progress.mjs', 'text/javascript'], ['/apps/experiments/src/data/universe.mjs', 'text/javascript'], ['/styles.css', 'text/css']]) {
     const response = await fetch(`${server.origin}${path}`)
     assert.equal(response.status, 200, path)
     assert.match(response.headers.get('content-type'), new RegExp(type))

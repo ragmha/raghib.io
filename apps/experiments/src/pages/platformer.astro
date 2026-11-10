@@ -5,6 +5,7 @@ import '../styles/site.css'
 
 const description =
   'Play a 32-stage pixel platformer with sound, keyboard, touch, or gamepad controls.'
+const base = import.meta.env.BASE_URL.replace(/\/$/, '')
 ---
 
 <BaseLayout
@@ -16,7 +17,7 @@ const description =
 >
   <header class="app-bar">
     <div class="app-title">
-      <a class="app-back" href="/"><span aria-hidden="true">←</span> Experiments</a>
+      <a class="app-back" href={`${base}/`}><span aria-hidden="true">←</span> Experiments</a>
       <h1 id="page-title">Can You Reach the Last Flag?</h1>
       <p class="intro">A 32-stage pixel platformer with sound and keyboard, touch, or gamepad controls.</p>
     </div>
@@ -55,7 +56,7 @@ const description =
         <span>Gamepads work too</span>
       </p>
       <p class="credit">
-        <a href="/platformer/LICENSE.txt">License</a>.
+        <a href={`${base}/platformer/LICENSE.txt`}>License</a>.
       </p>
     </div>
   </main>

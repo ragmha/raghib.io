@@ -299,7 +299,7 @@ function requestReply(turn: Turn) {
     return
   }
   try {
-    const activeWorker = new Worker('/chess/stockfish-19-lite-single.js')
+    const activeWorker = new Worker(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/chess/stockfish-19-lite-single.js`)
     worker = activeWorker
     activeWorker.onmessage = ({ data }: MessageEvent<unknown>) => {
       if (worker !== activeWorker) return

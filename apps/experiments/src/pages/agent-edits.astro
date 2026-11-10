@@ -8,7 +8,8 @@ const sample = analyzeEdits([parseEdits(demoEdits)])
 const sampleCategories = summarizeCategories(sample.agents)
 const number = (value: number) => new Intl.NumberFormat('en-US').format(value)
 const description = 'See what each coding agent actually changed: file edits grouped by evals, instructions, skills, prompts, tools, tests, dependencies, config, docs, and runtime.'
-const home = new URL('/', Astro.site ?? Astro.url)
+const base = import.meta.env.BASE_URL.replace(/\/$/, '')
+const home = new URL(`${base}/`, Astro.site ?? Astro.url)
 const appJsonLd = JSON.stringify({
   '@context': 'https://schema.org',
   '@type': 'WebApplication',

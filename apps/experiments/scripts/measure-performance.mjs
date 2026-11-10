@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { chromium } from 'playwright'
 import inventory from '../src/data/content-links.json' with { type: 'json' }
 
-const base = process.env.LAB_TEST_URL ?? 'https://lab.raghib.io'
+const base = process.env.LAB_TEST_URL ?? 'https://raghib.io/experiments/'
 const browser = await chromium.launch()
 const pages = []
 try {
@@ -35,7 +35,7 @@ try {
           }
         }).observe({ type: 'layout-shift', buffered: true })
       })
-      const response = await page.goto(new URL(path, base).href, { waitUntil: 'networkidle', timeout: 90_000 })
+      const response = await page.goto(new URL(`.${path}`, base).href, { waitUntil: 'networkidle', timeout: 90_000 })
       if (!response?.ok()) throw new Error(`${path} returned HTTP ${response?.status()}`)
       await page.waitForTimeout(3000)
       pages.push(await page.evaluate(() => {

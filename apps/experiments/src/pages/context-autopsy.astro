@@ -32,7 +32,8 @@ const sampleFacts = [
 
 const description =
   'See how Claude Code, Codex, and GitHub Copilot sessions use the model: context per call, cache reuse, output, tools, and cross-model cost. Runs in your browser.'
-const home = new URL('/', Astro.site ?? Astro.url)
+const base = import.meta.env.BASE_URL.replace(/\/$/, '')
+const home = new URL(`${base}/`, Astro.site ?? Astro.url)
 const appJsonLd = JSON.stringify({
   '@context': 'https://schema.org',
   '@graph': [{
@@ -85,7 +86,7 @@ const appJsonLd = JSON.stringify({
           <button id="tools-tab" type="button" role="tab" aria-label="Tools and coverage notes" aria-selected="false" aria-controls="tools-panel" tabindex="-1">Tools</button>
           <button id="data-tab" type="button" role="tab" aria-selected="false" aria-controls="data-panel" tabindex="-1">Your session</button>
         </div>
-        <a class="all-link" href="/">All experiments</a>
+        <a class="all-link" href={`${base}/`}>All experiments</a>
       </div>
 
       <section id="overview-panel" class="tab-panel overview-grid" role="tabpanel" aria-labelledby="overview-tab" tabindex="0">
@@ -278,8 +279,8 @@ const appJsonLd = JSON.stringify({
               helpers list IDs and dates, then copy the chosen raw file locally.
             </p>
             <div class="actions">
-              <a href="/copilot-export.sh" download>Download Copilot Bash helper</a>
-              <a href="/copilot-export.ps1" download>Download Copilot PowerShell helper</a>
+              <a href={`${base}/copilot-export.sh`} download>Download Copilot Bash helper</a>
+              <a href={`${base}/copilot-export.ps1`} download>Download Copilot PowerShell helper</a>
             </div>
             <pre><code>bash copilot-export.sh --list
 bash copilot-export.sh --session SESSION_ID --output copilot-events.jsonl</code></pre>

@@ -19,7 +19,8 @@ const canvas = document.getElementById('game-screen') as HTMLCanvasElement
 const ctx = canvas.getContext('2d')!
 let scale = 4
 
-const sheet = (name: string) => Object.assign(new Image(), { src: `/platformer/${name}.png` })
+const base = import.meta.env.BASE_URL.replace(/\/$/, '')
+const sheet = (name: string) => Object.assign(new Image(), { src: `${base}/platformer/${name}.png` })
 const TILES = sheet('tiles')
 const PLAYERS = sheet('players')
 const MOBS = sheet('mobs')
@@ -478,7 +479,7 @@ new ResizeObserver(() => {
 }).observe(canvas)
 
 // The site face uses font-display: optional, which a cold canvas load can miss for the whole page.
-const hudFont = new FontFace('Pixel Game HUD', 'url(/fonts/jetbrains-mono/JetBrainsMono-Bold.woff2)', { weight: '700' })
+const hudFont = new FontFace('Pixel Game HUD', `url(${base}/fonts/jetbrains-mono/JetBrainsMono-Bold.woff2)`, { weight: '700' })
 document.fonts.add(hudFont)
 Promise.all([hudFont.load().catch(() => null), ...[TILES, PLAYERS, MOBS].map((img) => img.decode())]).then(() => {
   const level = LEVELS[0]()

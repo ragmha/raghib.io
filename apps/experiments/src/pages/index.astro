@@ -61,6 +61,7 @@ const experiments = [
     alt: 'Pixel-art character running past question blocks and green hills under a blue sky.',
   },
 ]
+const base = import.meta.env.BASE_URL.replace(/\/$/, '')
 ---
 
 <BaseLayout
@@ -87,7 +88,7 @@ const experiments = [
     <section class="languages" aria-labelledby="languages-title">
       <div class="language-heading">
         <h2 id="languages-title">Languages</h2>
-        <a href="https://github.com/ragmha/lab">Source bytes on GitHub ↗</a>
+        <a href="https://github.com/ragmha/raghib.io/tree/main/apps/experiments">Source bytes on GitHub ↗</a>
       </div>
       <div class="language-bar" aria-hidden="true">
         {languages.map((language) => <span style={{ width: `${language.percentage}%`, background: language.color ?? 'var(--theme-muted)' }} />)}
@@ -102,9 +103,9 @@ const experiments = [
     <ul class="experiment-grid" role="list">
       {experiments.map((experiment, index) => (
         <li>
-          <a class="experiment" href={`/${experiment.slug}/`} aria-labelledby={experiment.slug}>
+          <a class="experiment" href={`${base}/${experiment.slug}/`} aria-labelledby={experiment.slug}>
             <picture class="experiment-preview">
-              <source media="(prefers-reduced-motion: no-preference)" srcset={`/previews/${experiment.slug}.gif`} type="image/gif" />
+              <source media="(prefers-reduced-motion: no-preference)" srcset={`${base}/previews/${experiment.slug}.gif`} type="image/gif" />
               <Image
                 src={experiment.image}
                 alt={experiment.alt}
@@ -129,9 +130,9 @@ const experiments = [
 
     <footer>
       <nav aria-label="Lab navigation">
-        <a href="/universe/passport/">[Universe Passport]</a>
+        <a href={`${base}/universe/passport/`}>[Universe Passport]</a>
         <a href="https://raghib.io/">[writing]</a>
-        <a href="https://github.com/ragmha/lab">[source]</a>
+        <a href="https://github.com/ragmha/raghib.io/tree/main/apps/experiments">[source]</a>
       </nav>
       <span>{experiments.length} experiments</span>
     </footer>

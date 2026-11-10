@@ -1,0 +1,8 @@
+[install]
+# Hoisted, as before the workspace: blog scripts import transitive packages
+# (vfile, hast-util-from-html) that isolated installs would hide.
+linker = "hoisted"
+
+[test]
+# `bun test` at the root runs the blog suite; apps/experiments runs its own.
+root = "tests"

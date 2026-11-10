@@ -3,9 +3,10 @@
   "version": "0.2.0",
   "private": true,
   "type": "module",
+  "workspaces": ["apps/*"],
   "scripts": {
     "dev": "astro dev",
-    "build": "astro check && astro build",
+    "build": "astro check && astro build && bun run --filter experiments build",
     "check": "astro check",
     "theme:diagrams": "node scripts/theme-diagrams.mjs",
     "export:excalidraw": "bun scripts/export-excalidraw.mjs",

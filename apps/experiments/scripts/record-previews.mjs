@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { chromium } from 'playwright'
 
-const base = process.argv[2] ?? 'http://localhost:4321'
+const base = process.argv[2] ?? 'http://localhost:4321/experiments'
 const out = new URL('../public/previews/', import.meta.url).pathname
 const size = { width: 1280, height: 800 }
 

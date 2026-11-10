@@ -16,7 +16,7 @@ test('content links report gaps and reject invalid, missing or non-reciprocal pa
   expect(checkContentLinks([], undefined).errors).toHaveLength(1)
   expect(checkContentLinks([{ slug: 123 }], []).errors).toHaveLength(1)
   const routes = readdirSync('src/pages', { recursive: true })
-    .filter((path) => typeof path === 'string' && path.endsWith('.astro') && !['index.astro', '404.astro'].includes(path))
+    .filter((path) => typeof path === 'string' && path.endsWith('.astro') && path !== 'index.astro')
     .map((path) => String(path).replace(/\.astro$/, ''))
   expect(inventory.labs.map((lab) => lab.slug).sort()).toEqual(routes.sort())
   for (const lab of inventory.labs) {

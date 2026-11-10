@@ -29,14 +29,14 @@ const renderedLines = (page, selector) => page.locator(selector).evaluateAll((el
 const breaksOnlyAfterSlash = (lines) => lines.slice(0, -1).every((line) => line.endsWith('/'))
 
 test('published writing pairs render accessible exact links, including nested lab routes', { skip: !base }, async () => {
-  const response = await fetch(new URL('/content-links.json', base))
+  const response = await fetch(new URL('./content-links.json', base))
   assert.equal(response.status, 200)
   const { labs } = await response.json()
   const browser = await chromium.launch()
   try {
     const page = await browser.newPage()
     for (const { slug, writing } of labs) {
-      const response = await page.goto(new URL(`/${slug}/`, base).href, { waitUntil: 'domcontentloaded' })
+      const response = await page.goto(new URL(`./${slug}/`, base).href, { waitUntil: 'domcontentloaded' })
       assert.equal(response.status(), 200)
       const related = page.getByRole('complementary', { name: 'Related writing' }).getByRole('link')
       assert.equal(await related.count(), writing ? 1 : 0)
@@ -56,7 +56,7 @@ test('code examples copy exact text, report clipboard denial, and stay readable 
   try {
     for (const path of ['/context-autopsy/', '/session-flame/']) {
       const page = await browser.newPage({ permissions: ['clipboard-read', 'clipboard-write'] })
-      await page.goto(new URL(path, base).href, { waitUntil: 'networkidle' })
+      await page.goto(new URL(`.${path}`, base).href, { waitUntil: 'networkidle' })
       if (path === '/context-autopsy/') await page.getByRole('tab', { name: 'Your session' }).click()
       else await page.getByRole('button', { name: 'Help', exact: true }).click()
       await page.locator('.export-help > summary').click()
@@ -74,7 +74,7 @@ test('code examples copy exact text, report clipboard denial, and stay readable 
       assert.equal(await page.evaluate(() => getSelection().toString()), await code.textContent())
       await page.close()
       const noScript = await browser.newPage({ javaScriptEnabled: false })
-      await noScript.goto(new URL(path, base).href)
+      await noScript.goto(new URL(`.${path}`, base).href)
       assert.equal(await noScript.locator('.code-copy button').count(), 0)
       assert.ok(await noScript.locator('pre > code').count() > 0)
       await noScript.close()
@@ -92,7 +92,7 @@ test('homepage terminal grid keeps native keyboard links and works without JavaS
       await page.goto(base, { waitUntil: 'networkidle' })
       const panels = page.locator('.experiment-grid a')
       assert.deepEqual(await panels.evaluateAll((links) => links.map((link) => link.getAttribute('href'))),
-        ['/session-flame/', '/context-autopsy/', '/token-diet/', '/agent-edits/', '/chess/', '/platformer/'])
+        ['/session-flame/', '/context-autopsy/', '/token-diet/', '/agent-edits/', '/chess/', '/platformer/'].map((path) => `/experiments${path}`))
       assert.equal(await page.locator('h1').innerText(), 'Raghib’s Lab — Experiments')
       const total = languages.reduce((sum, language) => sum + language.size, 0)
       assert.deepEqual(await page.locator('.language-legend li').allTextContents(), languages.map(({ node, size }) => `${node.name} ${(size / total * 100).toFixed(1)}%`))
@@ -118,13 +118,13 @@ test('homepage terminal grid keeps native keyboard links and works without JavaS
       await page.keyboard.press('Tab')
       assert.equal(await panels.nth(1).evaluate((link) => link === document.activeElement), true)
       await page.keyboard.press('Enter')
-      await page.waitForURL(new URL('/context-autopsy/', base).href)
+      await page.waitForURL(new URL('./context-autopsy/', base).href)
       await page.close()
     }
     const motion = await browser.newPage({ reducedMotion: 'no-preference' })
     await motion.goto(base, { waitUntil: 'networkidle' })
     assert.deepEqual(await motion.locator('.experiment-preview img').evaluateAll((images) => images.map((img) => new URL(img.currentSrc).pathname)),
-      ['/previews/session-flame.gif', '/previews/context-autopsy.gif', '/previews/token-diet.gif', '/previews/agent-edits.gif', '/previews/chess.gif', '/previews/platformer.gif'])
+      ['session-flame', 'context-autopsy', 'token-diet', 'agent-edits', 'chess', 'platformer'].map((slug) => `/experiments/previews/${slug}.gif`))
   } finally {
     await browser.close()
   }
@@ -139,7 +139,7 @@ test('agent edits show one filterable category table and import locally offline'
     const mutations = []
     page.on('pageerror', (error) => errors.push(error.message))
     page.on('request', (request) => { if (request.method() !== 'GET') mutations.push(request.url()) })
-    await page.goto(new URL('/agent-edits/', base).href, { waitUntil: 'networkidle' })
+    await page.goto(new URL('./agent-edits/', base).href, { waitUntil: 'networkidle' })
     assert.equal(await page.locator('h1').innerText(), 'What Did the Agent Actually Write?')
     assert.match(await page.locator('#status').textContent(), /illustrative/i)
     await page.locator('#demo-button').click()
@@ -258,7 +258,7 @@ test('agent edits reject overlapping selections and drops while importing', { sk
         }
       }
     })
-    await page.goto(new URL('/agent-edits/', base).href, { waitUntil: 'networkidle' })
+    await page.goto(new URL('./agent-edits/', base).href, { waitUntil: 'networkidle' })
     const records = (path) => JSON.stringify([
       { type: 'tool.execution_start', data: { toolCallId: 'a', toolName: 'create', arguments: { path, file_text: 'line' } } },
       { type: 'tool.execution_complete', data: { toolCallId: 'a', success: true } },
@@ -300,7 +300,7 @@ test('pixel platformer presentation is generic and keeps its controls discoverab
   const browser = await chromium.launch()
   try {
     const page = await browser.newPage()
-    await page.goto(new URL('/platformer/', base).href, { waitUntil: 'networkidle' })
+    await page.goto(new URL('./platformer/', base).href, { waitUntil: 'networkidle' })
     assert.equal(await page.title(), 'Pixel Platformer: A 32-Stage Browser Game — Raghib’s Lab')
     assert.equal(await page.locator('h1').innerText(), 'Can You Reach the Last Flag?')
     assert.equal(await page.locator('#game-screen').getAttribute('aria-label'), 'Pixel platformer game screen')
@@ -340,7 +340,7 @@ test('pixel platformer gamepad play exposes audio activation and basic pause/tit
         constructor(...args) { super(...args); window.gameAudio = this }
       }
     })
-    await page.goto(new URL('/platformer/', base).href, { waitUntil: 'networkidle' })
+    await page.goto(new URL('./platformer/', base).href, { waitUntil: 'networkidle' })
     await page.waitForFunction(() => window.gameText.includes('PIXEL PLATFORMER'))
     await page.waitForTimeout(10_500)
     assert.equal(await page.evaluate(() => window.gameText.includes('PIXEL PLATFORMER')), true)
@@ -385,7 +385,7 @@ test('pixel platformer touch controls fit narrow portrait and landscape screens'
     for (const viewport of [{ width: 320, height: 568 }, { width: 568, height: 320 }]) {
       const context = await browser.newContext({ viewport, isMobile: true, hasTouch: true })
       const page = await context.newPage()
-      await page.goto(new URL('/platformer/', base).href, { waitUntil: 'networkidle' })
+      await page.goto(new URL('./platformer/', base).href, { waitUntil: 'networkidle' })
       const buttons = await page.locator('.pad button').evaluateAll((els) => els.map((el) => {
         const { left, top, right, bottom } = el.getBoundingClientRect()
         return { visible: getComputedStyle(el).visibility !== 'hidden' && getComputedStyle(el).display !== 'none', left, top, right, bottom }
@@ -441,8 +441,8 @@ test('standalone pages have working local links, assets and lab canonicals', { s
       page.on('response', (response) => { if (response.status() >= 400) badResponses.push(response.url()) })
       page.on('request', (request) => requests.push(request))
       for (const path of paths) {
-        await page.goto(new URL(path, base).href, { waitUntil: 'networkidle' })
-        assert.equal(await page.locator('link[rel="canonical"]').getAttribute('href'), `https://lab.raghib.io${path}`)
+        await page.goto(new URL(`.${path}`, base).href, { waitUntil: 'networkidle' })
+        assert.equal(await page.locator('link[rel="canonical"]').getAttribute('href'), `https://raghib.io/experiments${path}`)
         assert.equal(await page.locator('h1').count(), 1)
         assert.equal(await page.locator('#theme-toggle').isVisible(), true)
         const dark = await page.locator('html').getAttribute('data-theme')
@@ -454,7 +454,7 @@ test('standalone pages have working local links, assets and lab canonicals', { s
           (nodes) => nodes.map((node) => node.getAttribute('href') ?? node.getAttribute('src')),
         )
         for (const link of new Set(links)) {
-          assert.doesNotMatch(link, /^\/(?:experiments|writing|projects|social-card)/)
+          assert.match(link, /^\/experiments\//, 'Root-relative URLs stay inside the experiments base')
           assert.equal((await page.request.get(new URL(link, base).href)).ok(), true, `${path} → ${link}`)
         }
       }
@@ -475,7 +475,7 @@ test('all nine published flame fixtures load from the new asset paths', { skip: 
     const page = await browser.newPage()
     const errors = []
     page.on('pageerror', (error) => errors.push(error.message))
-    await page.goto(new URL('/session-flame/', base).href, { waitUntil: 'networkidle' })
+    await page.goto(new URL('./session-flame/', base).href, { waitUntil: 'networkidle' })
     for (const run of recorded.runs) {
       await page.locator('#run-model').selectOption('sample')
       await page.locator('#run-model').selectOption(run.model)
@@ -501,7 +501,7 @@ test('context autopsy imports through its worker offline; token diet controls re
     const mutations = []
     page.on('pageerror', (error) => errors.push(error.message))
     page.on('request', (request) => { if (request.method() !== 'GET') mutations.push(request.url()) })
-    await page.goto(new URL('/context-autopsy/', base).href, { waitUntil: 'networkidle' })
+    await page.goto(new URL('./context-autopsy/', base).href, { waitUntil: 'networkidle' })
     await context.setOffline(true)
     await page.locator('#data-tab').click()
     await page.locator('#session-files').setInputFiles({
@@ -517,7 +517,7 @@ test('context autopsy imports through its worker offline; token diet controls re
     await page.locator('#clear-button').click()
     assert.equal(await page.locator('#clear-button').isHidden(), true)
     await context.setOffline(false)
-    await page.goto(new URL('/token-diet/', base).href, { waitUntil: 'networkidle' })
+    await page.goto(new URL('./token-diet/', base).href, { waitUntil: 'networkidle' })
     assert.equal(await page.locator('.replay').count(), 1)
     await page.locator('.replay').click()
     await page.locator('label[for="tab-round-two"]').click()

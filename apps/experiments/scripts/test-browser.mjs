@@ -2,22 +2,23 @@ import { spawn } from 'node:child_process'
 import { once } from 'node:events'
 import { mkdir } from 'node:fs/promises'
 import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { run } from 'node:test'
 import { spec } from 'node:test/reporters'
 import { setTimeout } from 'node:timers/promises'
 
-const base = process.env.LAB_TEST_URL ?? 'http://127.0.0.1:4397'
+const base = process.env.LAB_TEST_URL ?? 'http://127.0.0.1:4397/experiments/'
 const runtime = resolve('.checks/browser-runtime')
 await mkdir(runtime, { recursive: true })
 const env = {
   ...process.env,
   TMPDIR: runtime,
   LAB_TEST_URL: base,
-  CHESS_TEST_URL: new URL('/chess/', base).href,
-  SESSION_FLAME_TEST_URL: new URL('/session-flame/', base).href,
+  CHESS_TEST_URL: new URL('chess/', base).href,
+  SESSION_FLAME_TEST_URL: new URL('session-flame/', base).href,
 }
 const server = process.env.LAB_TEST_URL ? null : spawn(process.execPath, [
-  'node_modules/astro/astro.js', 'preview', '--host', '127.0.0.1', '--port', '4397',
+  fileURLToPath(new URL('astro.js', import.meta.resolve('astro/package.json'))), 'preview', '--host', '127.0.0.1', '--port', '4397',
 ], { env, stdio: ['ignore', 'pipe', 'pipe'] })
 let serverOutput = ''
 server?.stdout.on('data', (chunk) => { serverOutput += chunk })

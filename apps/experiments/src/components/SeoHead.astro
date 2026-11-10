@@ -11,11 +11,13 @@ const {
 const name = 'Raghib’s Lab'
 const pageTitle = `${title} — ${name}`
 const canonical = new URL(Astro.url.pathname, Astro.site)
+const base = import.meta.env.BASE_URL.replace(/\/$/, '')
+const home = new URL(`${base}/`, Astro.site)
 const website = JSON.stringify({
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  '@id': new URL('/#website', Astro.site).href,
-  url: Astro.site?.href,
+  '@id': new URL('#website', home).href,
+  url: home.href,
   name,
   author: { '@type': 'Person', name: 'Raghib Hasan', url: 'https://raghib.io/' },
 }).replace(/</g, '\\u003c')
@@ -33,6 +35,6 @@ const website = JSON.stringify({
 <meta property="og:description" content={description} />
 <meta property="og:url" content={canonical.href} />
 <meta name="twitter:card" content="summary" />
-<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
 <script is:inline type="application/ld+json" set:html={website} />
 <meta name="generator" content={Astro.generator} />
