@@ -43,8 +43,7 @@ test('GitHub language snapshot contains positive byte counts, unique names and s
   }
 })
 
-test('experiments are served from raghib.io/experiments/ inside the site build', () => {
+test('experiments are served from raghib.io/experiments/', () => {
   assert.equal(config.site, 'https://raghib.io')
   assert.equal(config.base, '/experiments')
-  assert.equal(config.outDir, '../../dist/experiments')
 })

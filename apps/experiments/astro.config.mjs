@@ -1,10 +1,9 @@
 import { defineConfig } from 'astro/config'
 
-// Served at raghib.io/experiments/: builds into the site's dist next to the blog.
+// Served at raghib.io/experiments/: the root build copies dist/ into the site's dist/experiments/.
 export default defineConfig({
   site: 'https://raghib.io',
   base: '/experiments',
-  outDir: '../../dist/experiments',
   output: 'static',
   trailingSlash: 'always',
 })

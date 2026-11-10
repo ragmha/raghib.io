@@ -34,7 +34,7 @@ them only when intentionally producing a different dataset.
 
 ## Run
 
-From `apps/site`:
+From `apps/experiments`:
 
 ```sh
 export CREDITS=100
@@ -66,7 +66,7 @@ setup (a-e), plus all five Token Optimizer runs whenever setup f is present.
 Every summary checks token totals, usage charges, and redaction before writing
 the JSON file.
 
-The public page is `https://lab.raghib.io/token-diet/`. Round 1 and the regression-hunt
+The public page is `https://raghib.io/experiments/token-diet/`. Round 1 and the regression-hunt
 Round 2 have separate views, each with its own call waterfall, measurements,
 task prompt, method, and conclusions. The published JSON contains aggregate
 call metrics and short redacted tool labels, not raw Copilot event logs, source

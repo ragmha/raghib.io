@@ -1,22 +1,33 @@
-# @lab/site
+# experiments
 
-The Astro site behind [lab.raghib.io](https://lab.raghib.io/). Each static lab
-is a page in `src/pages/`.
+The Astro app behind [raghib.io/experiments](https://raghib.io/experiments/),
+a workspace in this repository. Each static experiment is a page in
+`src/pages/`. It builds with `base: '/experiments'`, and the root
+`bun run build` copies its `dist/` into the site's `dist/experiments/`.
 
-| Lab | What it does |
+| Experiment | What it does |
 | --- | --- |
-| [Universe Passport](https://lab.raghib.io/universe/passport/) | Learn the Universe 2026 releases, stamp lessons, and check your understanding |
-| [Universe field guide](https://lab.raghib.io/universe/) | Read the lessons, optional labs, release inventory, and download the slides |
-| [Agent Edits](https://lab.raghib.io/agent-edits/) | Inspect local agent edit calls by agent, artifact category, and file |
-| [Chess](https://lab.raghib.io/chess/) | Play Stockfish locally |
-| [Context Autopsy](https://lab.raghib.io/context-autopsy/) | Inspect agent-session context and token use |
-| [Session Flame](https://lab.raghib.io/session-flame/) | Replay sessions as a flame chart |
-| [Pixel Platformer](https://lab.raghib.io/platformer/) | Play a 32-stage pixel platformer in the browser |
-| [Token Diet](https://lab.raghib.io/token-diet/) | Compare recorded token-use experiments |
+| [Universe Passport](https://raghib.io/experiments/universe/passport/) | Learn the Universe 2026 releases, stamp lessons, and check your understanding |
+| [Universe field guide](https://raghib.io/experiments/universe/) | Read the lessons, optional labs, release inventory, and download the slides |
+| [Agent Edits](https://raghib.io/experiments/agent-edits/) | Inspect local agent edit calls by agent, artifact category, and file |
+| [Chess](https://raghib.io/experiments/chess/) | Play Stockfish locally |
+| [Context Autopsy](https://raghib.io/experiments/context-autopsy/) | Inspect agent-session context and token use |
+| [Session Flame](https://raghib.io/experiments/session-flame/) | Replay sessions as a flame chart |
+| [Pixel Platformer](https://raghib.io/experiments/platformer/) | Play a 32-stage pixel platformer in the browser |
+| [Token Diet](https://raghib.io/experiments/token-diet/) | Compare recorded token-use experiments |
 
 Scripts (`dev`, `check`, `build`, `preview`, `test`, `test:browser`) run from
-here or from the root. Add new browser suites to the `files` list in
-`scripts/test-browser.mjs`.
+here or from the root with `bun run --filter experiments <script>`. Browser
+tests run against the built app in Chromium and WebKit
+(`bunx playwright install chromium webkit`), then record
+`.checks/performance.json` at the repository root. Add new browser suites to
+the `files` list in `scripts/test-browser.mjs`.
+
+To add an experiment, create `src/pages/<slug>.astro`, add it to the
+`experiments` list in `src/pages/index.astro`, and list the route in
+`src/data/content-links.json`. Links, assets, workers and fetches must include
+the base path through `import.meta.env.BASE_URL`; the browser tests fail on
+root-relative URLs outside `/experiments/`.
 
 ## Universe progress
 
@@ -31,3 +42,5 @@ never run agents, change permissions, or spend credits.
 
 The [token-diet reproduction kit](scripts/token-diet/README.md) can consume paid
 model credits.
+
+See [sources and licenses](PROVENANCE.md).

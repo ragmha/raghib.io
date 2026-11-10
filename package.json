@@ -6,7 +6,7 @@
   "workspaces": ["apps/*"],
   "scripts": {
     "dev": "astro dev",
-    "build": "astro check && astro build && bun run --filter experiments build",
+    "build": "bun run --filter experiments build && astro check && astro build",
     "check": "astro check",
     "theme:diagrams": "node scripts/theme-diagrams.mjs",
     "export:excalidraw": "bun scripts/export-excalidraw.mjs",
