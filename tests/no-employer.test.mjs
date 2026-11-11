@@ -7,7 +7,7 @@ import { test } from 'node:test'
 const BANNED = /\b(microsoft|copilot|azure|github|linkedin|vs ?code|work ?iq|decision-1|hydrafusion|openai|bing)\b/i
 
 // The author's per-post exceptions: these words are allowed only in the named file.
-const ALLOWED = { 'copilot-cli-context-gauge.mdx': /\b(github|copilot)\b/gi }
+const ALLOWED = { 'copilot-cli-spotify-status-line.mdx': /\b(github|copilot)\b/gi }
 
 const prose = (text) => text
   .replace(/^```[\s\S]*?^```/gm, '')

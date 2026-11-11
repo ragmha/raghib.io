@@ -51,9 +51,9 @@ source code where useful.
   `.github/workflows/narration.yml` generates and commits it, then dispatches
   the `narration-review` agent, which can dispatch `article-merge`. Locally: `bun run narration:generate`.
   Edit `narration-review.md`, then run `gh aw compile`; never edit its lock file.
-- A revised published post keeps its `date`, sets `updated` to the revision
-  date (shown as "Last updated"), and adds a dated entry under a final
-  `## Changelog` section that says what changed and why.
+- A revised published post keeps its `date` and sets `updated` to the revision
+  date (shown as "Last updated"). Keep revision history in GitHub rather than
+  adding an in-post changelog.
 
 ## Talks
 
