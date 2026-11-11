@@ -28,7 +28,7 @@ for (const file of (await readdir(source)).filter((name) => name.endsWith('.md')
   const deck = `dist/talks/${slug}/${slug}.md`
   // From dist/talks/<slug>/, ../../ is the site root.
   const withLocalPaths = (value) => value.replaceAll('](/', '](../../').replaceAll('src="/', 'src="../../')
-  const locked = parse(/^---\n([\s\S]*?)\n---/.exec(markdown)?.[1] ?? '')?.locked
+  const locked = parse(/^---\r?\n([\s\S]*?)\r?\n---/.exec(markdown)?.[1] ?? '')?.locked
 
   if (locked) {
     const preview = `dist/talks/${slug}/${slug}-preview.md`
