@@ -81,6 +81,22 @@ or non-reciprocal pairs.
 Cross-repository checks can fetch those manifests or use local build snapshots.
 Check both destinations and reciprocal declarations when updating either side.
 
+## Talks
+
+`/talks/` lists talks and workshops written as [Marp](https://marp.app) decks
+in `src/content/talks/*.md` (frontmatter: `title`, `description`, `date`,
+`kind: talk | workshop`, optional `locked`). Each deck renders inline in the
+site theme from `src/styles/talk-theme.css`. After `astro build`,
+`scripts/export-talks.mjs` writes `<slug>.pdf` and an image-only `<slug>.pptx`
+next to each public deck for the Download menu.
+
+A deck marked `locked: true` keeps its full slides on request. Its page shows
+the cover slide and a one-slide PDF preview; a separate "Can I view this
+presentation?" link opens a prefilled public issue
+(`.github/ISSUE_TEMPLATE/view-request.yml`, label `view-request`). Compare the
+page's views with `gh issue list -l view-request` to see the demand.
+`astro dev` always shows locked decks. Remove `locked` to publish.
+
 ## Writing and project writeups
 
 Every writing post uses `src/pages/writing/[slug].astro`, `WritingLayout.astro`,

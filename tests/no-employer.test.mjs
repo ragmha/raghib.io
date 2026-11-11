@@ -12,8 +12,10 @@ const prose = (text) => text
   .replace(/https?:\/\/\S+/g, '')
 
 const dir = new URL('../src/content/writing/', import.meta.url)
+const talks = new URL('../src/content/talks/', import.meta.url)
 const sources = [
   ...readdirSync(dir).filter((name) => name.endsWith('.mdx')).map((name) => [name, new URL(name, dir)]),
+  ...readdirSync(talks).filter((name) => name.endsWith('.md')).map((name) => [`talks/${name}`, new URL(name, talks)]),
   ['flow-hero.mjs', new URL('../src/lib/flow-hero.mjs', import.meta.url)],
 ]
 

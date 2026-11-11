@@ -51,6 +51,20 @@ source code where useful.
   the `narration-review` agent, which can dispatch `article-merge`. Locally: `bun run narration:generate`.
   Edit `narration-review.md`, then run `gh aw compile`; never edit its lock file.
 
+## Talks
+
+- Talks and workshops are [Marp](https://marp.app) decks in
+  `src/content/talks/*.md`, styled by `src/styles/talk-theme.css`. Slides use
+  `##` headings; the page owns the H1. `bun run build` also exports each
+  public deck to PDF and image-only PPTX.
+- Talks follow the same rule as posts: no employer, product, client, or
+  customer names (`tests/no-employer.test.mjs` scans them too).
+- `locked: true` keeps the full deck on request. The cover slide and a
+  one-slide PDF preview remain public; a separate "Can I view this
+  presentation?" link opens a public `view-request` issue to count demand.
+  This is a soft gate, not access control: never lock anything confidential.
+  Remove `locked` to publish.
+
 ## Checks
 
 Keep the CI job name `SEO readiness` unchanged: branch protection requires it.
