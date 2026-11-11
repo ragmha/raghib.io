@@ -3,6 +3,7 @@ import { render, type CollectionEntry } from 'astro:content'
 import { Picture } from 'astro:assets'
 import WritingLayout from '../../layouts/WritingLayout.astro'
 import PartsNav from '../../components/PartsNav.astro'
+import AudioPlayer from '../../components/AudioPlayer.astro'
 import DecisionHero from '../../components/DecisionHero.astro'
 import FlowHero from '../../components/FlowHero.astro'
 import RstackBox from '../../components/RstackBox.astro'
@@ -74,6 +75,7 @@ const published = new Intl.DateTimeFormat('en-US', {
         </nav>
         <h1 id="post-title">{post.data.title}</h1>
         <p class="post-lede">{post.data.description}</p>
+        {post.data.published && <AudioPlayer slug={getPostSlug(post)} />}
         <dl class="post-facts">
           <div><dt>Topics:</dt><dd>{post.data.topics.map((topic, i) => (
             <>{i > 0 && ', '}{post.data.published

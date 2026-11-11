@@ -11,6 +11,7 @@
     "export:excalidraw": "bun scripts/export-excalidraw.mjs",
     "check:seo": "bun scripts/check-seo.mjs",
     "check:vitals": "bun scripts/check-web-vitals.mjs",
+    "narration:generate": "uv run --python 3.12 --with 'kokoro>=0.9.4' --with soundfile python scripts/generate-narration.py",
     "generate:social-card": "bun scripts/generate-social-card.mjs",
     "preview": "astro preview",
     "sync:projects": "bun scripts/sync-projects.ts"

@@ -874,10 +874,79 @@ function vaultWindow(t) {
   t.label([53, -35, B + 44], 'SUBMIT NEEDS A KEY', { dy: -80, tone: 'red' })
 }
 
+function narrationPress(t) {
+  t.base(-270, -110, 540, 220)
+
+  // Manuscript feeder: a stack of article sheets.
+  t.plate(-252, -50, 74, 92, B, 6)
+  for (let i = 0; i < 6; i++) t.box(-244 + i, -42, 56, 74, B + 7 + i * 2, 1.2, i === 5 ? 'hi' : 'lo')
+  for (let row = 0; row < 5; row++) t.rule([-234, -30 + row * 12], [-200 - (row % 2) * 12, -30 + row * 12], B + 19.4, 'mid')
+  t.rail([[-178, -4, B + 1], [-150, -4, B + 1]])
+
+  // Sieve: prose falls through; diagram cards are caught and drop into a bin.
+  t.tray(-150, -44, 64, 76, B, 18, () => {
+    for (let x = -140; x < -92; x += 8) t.rule([x, -36], [x, 24], B + 4, 'faint')
+    t.box(-138, -26, 24, 18, B + 4, 1.4, 'red')
+  })
+  t.tray(-150, 50, 64, 46, B, 22, () => {
+    t.box(-138, 60, 26, 20, B + 3, 1.2, 'red')
+    t.box(-132, 66, 24, 18, B + 4.2, 1.2, 'red')
+  }, 'lo')
+  t.rail([[-86, -4, B + 1], [-58, -4, B + 1]])
+
+  // The loupe's stand sits behind the lathe, so it is drawn first.
+  t.box(-46, -100, 14, 14, B, 52, 'lo')
+
+  // Record lathe: the speech model cuts the same groove for the same text.
+  t.plate(-58, -64, 128, 118, B, 12)
+  t.cyl(4, -4, 46, B + 12, 6, 'mid')
+  for (const r of [38, 30, 22]) t.ring(4, -4, r, B + 18, 'faint')
+  t.cyl(4, -4, 7, B + 18, 7, 'hi', { steps: 16 })
+  t.box(46, -56, 14, 14, B + 12, 22, 'lo')
+  t.bar([53, -49], [20, -14], 4, B + 34, 3, 'hi')
+  t.box(14, -20, 12, 12, B + 26, 8, 'mid')
+
+  // Inspector's loupe on an arm over the groove: the one step that reads.
+  t.bar([-39, -93], [-12, -36], 4, B + 52, 3, 'mid')
+  t.cyl(-12, -36, 13, B + 46, 5, 'hi', { lit: true })
+  t.ring(-12, -36, 8, B + 51, 'mid')
+  t.lamp([-39, -93, B + 56], 'blue', 4)
+  t.rail([[70, -4, B + 1], [120, -4, B + 1]], 'green')
+
+  // Dispatch barrier with its own interlock lamps; the loupe can't lift it.
+  t.plate(120, -96, 70, 26, B, 10)
+  for (const [i, x] of [130, 142, 154, 166, 178].entries()) t.lamp([x, -83, B + 10], i === 4 ? 'blue' : 'green', 4)
+  t.box(124, -46, 14, 14, B, 46, 'mid')
+  t.box(124, 30, 14, 14, B, 46, 'mid')
+  t.bar([131, -39], [131, 37], 6, B + 46, 5, 'hi')
+  t.tray(170, -44, 84, 80, B, 20, () => {
+    t.cyl(212, -4, 28, B + 3, 2, 'green')
+    t.cyl(212, -4, 28, B + 5, 2, 'green')
+    t.cyl(212, -4, 5, B + 7, 2, 'hi', { steps: 14 })
+  })
+
+  t.label([-216, -4, B + 20], 'ARTICLE TEXT', { dy: -110 })
+  t.label([-112, 74, B + 24], 'DIAGRAMS STAY VISUAL', { dy: 80, tone: 'red' })
+  t.label([4, -4, B + 24], 'SPEECH MODEL', { dy: 160 })
+  t.label([-12, -36, B + 51], 'AGENT REVIEW', { dy: -110, tone: 'blue' })
+  t.label([154, -83, B + 14], 'MERGE GATES', { dy: -80, tone: 'green' })
+}
+
 export const flowHeroSvg = hero => render(hero.label, hero.art)
 
 // Labels and outcomes paraphrase each article; nothing here adds a claim the post doesn't make.
 export const flowHeroes = {
+  'narration-press': {
+    art: narrationPress,
+    label: 'An isometric record-pressing line. A stack of article sheets feeds a sieve that catches diagram cards and drops them into a bin, so diagrams stay visual. The prose reaches a record lathe, the speech model, which cuts the same groove for the same text. A loupe on an arm over the groove is the agent review, the only step that reads. A barrier with its own interlock lamps opens to a tray of finished records; the loupe cannot lift it.',
+    outputs: [
+      { label: 'DIAGRAMS STAY VISUAL', tone: 'red' },
+      { label: 'AGENT REVIEW', tone: 'blue' },
+      { label: 'MERGE GATES', tone: 'green' },
+    ],
+    thesis: ['The agent reviews and asks.', 'The gates decide the merge.'],
+    note: 'An illustration of the pipeline in the post. It hasn’t run end to end yet.',
+  },
   'card-catalog': {
     art: cardCatalog,
     label: 'An isometric card catalog. A cabinet has one drawer pulled out, holding dated index cards with tabbed guides. Each tab is tied by a thread to a source binder on a shelf behind it, and each source ends in a lamp. One raised card has a red tab and a red dashed thread to a red lamp: it is stale. A loupe stands at the side as the check before acting.',
