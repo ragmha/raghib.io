@@ -1,0 +1,72 @@
+---
+import { existsSync } from 'node:fs'
+
+interface Props {
+  slug: string
+}
+
+const { slug } = Astro.props
+const src = `/audio/${slug}.mp3`
+const available = existsSync(new URL(`../../public${src}`, import.meta.url))
+---
+
+{available && (
+  <div
+    class="article-audio"
+    data-audio-player
+    data-voice-heart={src}
+    data-voice-michael={`/audio/${slug}-am_michael.mp3`}
+    role="group"
+    aria-label="Article audio"
+  >
+    <audio src={src} preload="metadata"></audio>
+    <button class="audio-play" type="button" data-play aria-label="Play article audio">
+      <svg class="play-icon" viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M4 2.5 13 8l-9 5.5z" fill="currentColor" />
+      </svg>
+      <svg class="pause-icon" viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M4 3h3v10H4zm5 0h3v10H9z" fill="currentColor" />
+      </svg>
+    </button>
+    <div class="audio-main">
+      <div class="audio-heading">
+        <strong>Listen to article</strong>
+        <span data-time>0:00 / --:--</span>
+      </div>
+      <input
+        class="audio-seek"
+        data-seek
+        type="range"
+        min="0"
+        max="0"
+        value="0"
+        step="0.1"
+        aria-label="Seek through article audio"
+        disabled
+      />
+      <p class="audio-status" data-status role="status" hidden></p>
+    </div>
+    <div class="audio-options">
+      <label class="audio-voice">
+        <span class="visually-hidden">Narration voice</span>
+        <select data-voice aria-label="Narration voice">
+          <option value="heart">Heart</option>
+          <option value="michael">Michael</option>
+        </select>
+      </label>
+      <label class="audio-speed">
+        <span class="visually-hidden">Playback speed</span>
+        <select data-speed aria-label="Playback speed">
+          <option value="1">1×</option>
+          <option value="1.25">1.25×</option>
+          <option value="1.5">1.5×</option>
+          <option value="2">2×</option>
+        </select>
+      </label>
+    </div>
+  </div>
+)}
+
+<script>
+  import '../scripts/audio-player.js'
+</script>
