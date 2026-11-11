@@ -45,9 +45,8 @@ source code where useful.
 - Published posts carry static narration in two local Kokoro voices under
   `public/audio/`; `public/audio/narration.json` records which text each file
   speaks, and a test fails when audio is missing or stale. On a pull request,
-  `.github/workflows/narration.yml` generates and commits it, deploys a preview
-  when Cloudflare credentials are set, and dispatches the `narration-review`
-  agent, which can dispatch `article-merge`. Locally: `bun run narration:generate`.
+  `.github/workflows/narration.yml` generates and commits it, then dispatches
+  the `narration-review` agent, which can dispatch `article-merge`. Locally: `bun run narration:generate`.
   Edit `narration-review.md`, then run `gh aw compile`; never edit its lock file.
 
 ## Checks

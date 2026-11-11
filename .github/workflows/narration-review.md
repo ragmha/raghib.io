@@ -14,9 +14,6 @@ on:
       posts:
         description: Comma-separated slugs of changed published articles
         required: true
-      preview:
-        description: Public preview URL, if one was deployed
-        required: false
 
 permissions:
   contents: read
@@ -52,7 +49,7 @@ timeout-minutes: 15
 # Narration review
 
 Pull request #${{ github.event.inputs.pull_request }} changes these published articles: `${{ github.event.inputs.posts }}`.
-The author's last commit is `${{ github.event.inputs.reviewed_sha }}`. Preview: ${{ github.event.inputs.preview }}
+The author's last commit is `${{ github.event.inputs.reviewed_sha }}`.
 
 Each article will be read aloud by a text-to-speech voice. The exact text the voice reads is in
 `/tmp/gh-aw/narration/<slug>.txt`, one paragraph per line. The article source is
@@ -72,8 +69,7 @@ Ignore style and wording; the author owns those.
 
 Then post one comment on pull request #${{ github.event.inputs.pull_request }} with `add_comment`
 (set `item_number` to the pull request number). Start it with `### Narration review`, give a one-line
-verdict, then a short list of problems with the quoted spoken text, or "No problems found." If a
-preview URL is set, link each article as `<preview>/writing/<slug>/`.
+verdict, then a short list of problems with the quoted spoken text, or "No problems found."
 
 If you found no problems, also call `dispatch_workflow` for `article-merge` with inputs
 `pull_request` = `${{ github.event.inputs.pull_request }}` and

@@ -16,7 +16,7 @@ once per listener. No speech API is called, and nothing is billed per play.
 
 Getting audio was the easy part. The harder question came when I wanted it to
 happen on its own: I write a post, open a pull request, and the narration,
-a preview and the merge follow. That sounds like a job for an agent. Most of
+a review and the merge follow. That sounds like a job for an agent. Most of
 it isn't.
 
 So the pipeline is mostly ordinary build steps, with one agent step in the
@@ -110,8 +110,8 @@ of them stops the merge with a comment that says why:
 ```mermaid
 flowchart TD
     accTitle: How an article pull request reaches main
-    accDescr: The author pushes an article. A build step generates narration and a preview. The agent reviews the spoken text; if it finds problems it comments and stops. If not, it requests a merge, and deterministic gates check the author, the files, the reviewed commit, the hold label and the required checks. Passing gates merge and deploy; failing gates leave the pull request for a manual merge.
-    push(["Author pushes an article"]) --> build["Generate narration and preview"]
+    accDescr: The author pushes an article. A build step generates narration. The agent reviews the spoken text; if it finds problems it comments and stops. If not, it requests a merge, and deterministic gates check the author, the files, the reviewed commit, the hold label and the required checks. Passing gates merge and deploy; failing gates leave the pull request for a manual merge.
+    push(["Author pushes an article"]) --> build["Generate narration"]
     build --> agent["Agent reviews the spoken text"]
     agent --> found{"Problems found?"}
     found -->|"yes"| comment(["Comment; author fixes"])
@@ -128,7 +128,7 @@ flowchart TD
   after it may only be the generated audio. If I push again mid-review, the
   merge waits for a new review.
 - **Hold:** a `hold` label keeps any pull request for a manual merge. It's my
-  way to ask for a look at the preview first.
+  way to read the post once more before it ships.
 - **Checks:** the required build check must pass on the final commit.
 
 The agent's verdict is one input among those five, and it's the only one a
