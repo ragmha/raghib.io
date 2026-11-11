@@ -4,9 +4,9 @@ import inventory from '../src/data/content-links.json'
 import { checkContentLinks } from '../scripts/check-content-links.mjs'
 
 test('content links report gaps and reject invalid, missing or non-reciprocal pairs', () => {
-  const labs = [{ slug: 'token-diet', writing: 'agent-diet' }, { slug: 'universe/passport' }]
+  const labs = [{ slug: 'token-diet', writing: 'agent-diet' }, { slug: 'chess/openings' }]
   expect(checkContentLinks(labs, [{ slug: 'agent-diet', lab: 'token-diet' }])).toEqual({
-    errors: [], gaps: ['lab:universe/passport has no writing'],
+    errors: [], gaps: ['lab:chess/openings has no writing'],
   })
   expect(checkContentLinks(labs, []).errors).toHaveLength(1)
   expect(checkContentLinks(labs, [{ slug: 'agent-diet' }]).errors).toHaveLength(1)

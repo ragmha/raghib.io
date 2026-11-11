@@ -69,8 +69,8 @@ not redirects. The SEO and vitals checks audit the blog's pages, including
 every link into `/experiments/`. Experiment pages have their own unit, browser,
 and performance tests and stay out of the sitemap.
 
-Writing frontmatter can declare `lab: <lab-slug>` (or a nested path such as
-`universe/passport`). This renders a companion experiment link. Only declare a
+Writing frontmatter can declare `lab: <lab-slug>`. This renders a companion
+experiment link. Only declare a
 pairing when the experiment actually accompanies that post; shared topics are
 not enough. The experiment's reciprocal field is `writing: <writing-slug>` in
 `apps/experiments/src/data/content-links.json`. `/content-links.json` publishes

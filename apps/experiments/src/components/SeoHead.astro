@@ -5,11 +5,11 @@ interface Props {
 }
 
 const {
-  title = 'Experiments',
+  title,
   description = 'Browser-only experiments by Raghib Hasan.',
 } = Astro.props
-const name = 'Raghib’s Lab'
-const pageTitle = `${title} — ${name}`
+const name = 'Experiments'
+const pageTitle = title ? `${title} — ${name}` : `${name} — Raghib Hasan`
 const canonical = new URL(Astro.url.pathname, Astro.site)
 const base = import.meta.env.BASE_URL.replace(/\/$/, '')
 const home = new URL(`${base}/`, Astro.site)

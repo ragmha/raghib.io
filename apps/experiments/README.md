@@ -7,8 +7,6 @@ a workspace in this repository. Each static experiment is a page in
 
 | Experiment | What it does |
 | --- | --- |
-| [Universe Passport](https://raghib.io/experiments/universe/passport/) | Learn the Universe 2026 releases, stamp lessons, and check your understanding |
-| [Universe field guide](https://raghib.io/experiments/universe/) | Read the lessons, optional labs, release inventory, and download the slides |
 | [Agent Edits](https://raghib.io/experiments/agent-edits/) | Inspect local agent edit calls by agent, artifact category, and file |
 | [Chess](https://raghib.io/experiments/chess/) | Play Stockfish locally |
 | [Context Autopsy](https://raghib.io/experiments/context-autopsy/) | Inspect agent-session context and token use |
@@ -28,17 +26,6 @@ To add an experiment, create `src/pages/<slug>.astro`, add it to the
 `src/data/content-links.json`. Links, assets, workers and fetches must include
 the base path through `import.meta.env.BASE_URL`; the browser tests fail on
 root-relative URLs outside `/experiments/`.
-
-## Universe progress
-
-Progress stays on your device; the Passport and field guide share it in the
-same browser. **Export progress** and **Import** move it between devices or the
-[Copilot canvas](../../.github/extensions/universe-passport/), which saves under
-`~/.copilot/extensions/universe-passport/artifacts/` (`COPILOT_HOME` overrides
-the base). No accounts, sync, or team tracking.
-
-Release availability is a sourced snapshot checked 1–2 November 2026. Lessons
-never run agents, change permissions, or spend credits.
 
 The [token-diet reproduction kit](scripts/token-diet/README.md) can consume paid
 model credits.

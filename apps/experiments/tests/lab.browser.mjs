@@ -28,7 +28,7 @@ const renderedLines = (page, selector) => page.locator(selector).evaluateAll((el
 }))
 const breaksOnlyAfterSlash = (lines) => lines.slice(0, -1).every((line) => line.endsWith('/'))
 
-test('published writing pairs render accessible exact links, including nested lab routes', { skip: !base }, async () => {
+test('published writing pairs render accessible exact links', { skip: !base }, async () => {
   const response = await fetch(new URL('./content-links.json', base))
   assert.equal(response.status, 200)
   const { labs } = await response.json()
@@ -93,7 +93,7 @@ test('homepage terminal grid keeps native keyboard links and works without JavaS
       const panels = page.locator('.experiment-grid a')
       assert.deepEqual(await panels.evaluateAll((links) => links.map((link) => link.getAttribute('href'))),
         ['/session-flame/', '/context-autopsy/', '/token-diet/', '/agent-edits/', '/chess/', '/platformer/'].map((path) => `/experiments${path}`))
-      assert.equal(await page.locator('h1').innerText(), 'Raghib’s Lab — Experiments')
+      assert.equal(await page.locator('h1').innerText(), 'Experiments')
       const total = languages.reduce((sum, language) => sum + language.size, 0)
       assert.deepEqual(await page.locator('.language-legend li').allTextContents(), languages.map(({ node, size }) => `${node.name} ${(size / total * 100).toFixed(1)}%`))
       const percentages = await page.locator('.language-bar span').evaluateAll((segments) => segments.map((segment) => Number.parseFloat(segment.style.width)))
@@ -106,7 +106,7 @@ test('homepage terminal grid keeps native keyboard links and works without JavaS
         const scale = document.querySelector('#flask-toggle svg').getScreenCTM().d
         return Math.abs(wordmark.bottom - (glass.bottom + 1.5 * scale))
       })
-      assert.ok(baselineGap < 1, `Visible flask and LAB baselines differ by ${baselineGap}px at ${width}px`)
+      assert.ok(baselineGap < 1, `Visible flask and wordmark baselines differ by ${baselineGap}px at ${width}px`)
       assert.equal(await page.locator('.experiment-grid').evaluate((grid) => getComputedStyle(grid).gridTemplateColumns.split(' ').length), width > 1088 ? 3 : width > 672 ? 2 : 1)
       assert.equal(await page.locator('.experiment-preview img').count(), 6)
       assert.doesNotMatch(await page.locator('.experiment-preview img').first().evaluate((img) => img.currentSrc), /\.gif$/)
@@ -301,7 +301,7 @@ test('pixel platformer presentation is generic and keeps its controls discoverab
   try {
     const page = await browser.newPage()
     await page.goto(new URL('./platformer/', base).href, { waitUntil: 'networkidle' })
-    assert.equal(await page.title(), 'Pixel Platformer: A 32-Stage Browser Game — Raghib’s Lab')
+    assert.equal(await page.title(), 'Pixel Platformer: A 32-Stage Browser Game — Experiments')
     assert.equal(await page.locator('h1').innerText(), 'Can You Reach the Last Flag?')
     assert.equal(await page.locator('#game-screen').getAttribute('aria-label'), 'Pixel platformer game screen')
     const copy = await page.locator('body').innerText()

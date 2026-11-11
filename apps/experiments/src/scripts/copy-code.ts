@@ -1,7 +1,5 @@
 document.querySelectorAll<HTMLElement>('pre > code').forEach((code, index) => {
   const pre = code.parentElement!
-  // ponytail: Universe already owns its prompt controls and permission reminders.
-  if (pre.closest('.prompt-area')) return
   if (!code.id) code.id = `copy-code-${index}`
   const toolbar = document.createElement('div')
   toolbar.className = 'code-copy'

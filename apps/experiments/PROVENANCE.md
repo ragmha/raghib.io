@@ -41,7 +41,8 @@ The blog still needs its shared theme/header components, theme controller,
 layouts, styles, fonts, favicon, and its own SEO/nav components. They were
 copied, not moved out of the blog. Compatibility download copies may also
 remain in the blog. Experiment-only code/data/test cleanup and legacy URL
-redirects are maintained in that repository separately.
+redirects were handled in that repository; the redirects were removed when the
+lab moved back as `apps/experiments/`.
 
 ## Licenses
 
