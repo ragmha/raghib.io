@@ -23,6 +23,8 @@ source code where useful.
   reduced motion, readable contrast and line length), and comfortable for
   long-form reading.
 - `DESIGN.md` is the visual design reference.
+- A Bun workspace: the blog is the root package and the browser experiments
+  are `apps/experiments`, served at `/experiments/` from the same build.
 
 ## Writing
 
@@ -57,7 +59,10 @@ Before handing off, run what CI runs:
 ```sh
 npx --yes cspell@8.19.4 lint --no-progress
 bun test --bail --timeout 20000
+bun run --filter experiments test
 bun run build
 bun run check:seo
 bun run check:vitals
+node apps/experiments/scripts/check-content-links.mjs
+bun run --filter experiments test:browser
 ```

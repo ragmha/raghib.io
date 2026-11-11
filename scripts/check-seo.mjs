@@ -60,7 +60,10 @@ try {
   let home
   const outputFiles = await readdir(root, { recursive: true })
   assert.ok(!outputFiles.some((file) => file.endsWith('.excalidraw')), 'Editable diagram sources must stay out of the deployment')
-  const htmlFiles = outputFiles.filter((file) => file.endsWith('.html'))
+  // ponytail: experiments have their own browser and performance tests and stay
+  // out of the sitemap; blog links into /experiments/ are still checked below.
+  // Audit them here once they ship social cards and @graph schema.
+  const htmlFiles = outputFiles.filter((file) => file.endsWith('.html') && !/^experiments[\\/]/.test(file))
   for (const file of htmlFiles) {
     const metadata = await page.evaluate((html) => {
       const document = new DOMParser().parseFromString(html, 'text/html')

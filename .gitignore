@@ -1,12 +1,14 @@
 # dependencies
-/node_modules
+node_modules/
 
 # testing
 /coverage
+.checks/
+.copilot-export-fixture-*/
 
 # Astro
-/.astro/
-/dist/
+.astro/
+dist/
 
 # misc
 .DS_Store

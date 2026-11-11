@@ -18,7 +18,15 @@ test('site audits pass before the main-branch artifact can deploy', () => {
   const job = workflow.jobs.seo
   const steps = job.steps
   const upload = steps.findIndex(step => step.uses?.startsWith('actions/upload-pages-artifact'))
-  for (const command of ['bun test --bail --timeout 20000', 'bun run build', 'bun run check:seo', 'bun run check:vitals']) {
+  for (const command of [
+    'bun test --bail --timeout 20000',
+    'bun run --filter experiments test',
+    'bun run build',
+    'bun run check:seo',
+    'bun run check:vitals',
+    'node apps/experiments/scripts/check-content-links.mjs',
+    'bun run --filter experiments test:browser',
+  ]) {
     const index = steps.findIndex(step => step.run === command)
     assert.ok(index >= 0 && index < upload, `${command} must pass before artifact upload`)
   }

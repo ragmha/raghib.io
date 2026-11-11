@@ -1,4 +1,4 @@
-import { copyFile, readFile, readdir, writeFile } from 'node:fs/promises'
+import { copyFile, cp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { defineConfig } from 'astro/config'
 import mdx from '@astrojs/mdx'
 import rehypeMermaid from 'rehype-mermaid'
@@ -17,13 +17,6 @@ for (const file of (await readdir(writingDir)).filter((file) => /\.mdx?$/.test(f
 
 export default defineConfig({
   site: 'https://raghib.io',
-  redirects: {
-    '/experiments/': 'https://lab.raghib.io/',
-    '/experiments/chess/': 'https://lab.raghib.io/chess/',
-    '/experiments/context-autopsy/': 'https://lab.raghib.io/context-autopsy/',
-    '/experiments/session-flame/': 'https://lab.raghib.io/session-flame/',
-    '/experiments/token-diet/': 'https://lab.raghib.io/token-diet/',
-  },
   image: {
     layout: 'constrained',
     responsiveStyles: true,
@@ -47,6 +40,17 @@ export default defineConfig({
             copyFile(new URL('sitemap-0.xml', dir), new URL('sitemap.xml', dir)),
             writeFile(new URL('sitemap.txt', dir), `${urls.join('\n')}\n`),
           ])
+        },
+      },
+    },
+    {
+      // `bun run build` builds apps/experiments first; ship it at /experiments/.
+      name: 'experiments',
+      hooks: {
+        'astro:build:done': async ({ dir }) => {
+          const target = new URL('experiments/', dir)
+          await rm(target, { recursive: true, force: true })
+          await cp(new URL('./apps/experiments/dist/', import.meta.url), target, { recursive: true })
         },
       },
     },

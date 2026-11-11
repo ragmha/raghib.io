@@ -1,0 +1,40 @@
+---
+import '../styles/global.css'
+import SeoHead from '../components/SeoHead.astro'
+import ThemeInit from '../components/ThemeInit.astro'
+import RelatedWriting from '../components/RelatedWriting.astro'
+
+interface Props {
+  title?: string
+  description?: string
+  bodyClass?: string
+  pageClass?: string
+  defaultTheme?: 'dark' | 'system'
+}
+
+const {
+  title,
+  description,
+  bodyClass,
+  pageClass,
+  defaultTheme,
+} = Astro.props
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <SeoHead title={title} description={description} />
+    {defaultTheme && <ThemeInit defaultTheme={defaultTheme} />}
+  </head>
+  <body class={bodyClass}>
+    <div class:list={['page', pageClass]}>
+      <slot />
+      <RelatedWriting />
+    </div>
+    <script>
+      import '../scripts/copy-code'
+    </script>
+  </body>
+</html>
+
