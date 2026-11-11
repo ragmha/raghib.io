@@ -7,6 +7,11 @@ import { chromium } from 'playwright'
 import { parse } from 'yaml'
 import { extractCoverSlide } from '../src/lib/talk-preview.ts'
 
+// Ubuntu 24.04 runners block the unprivileged user namespaces Chromium's
+// sandbox needs. Playwright already launches without it for rehype-mermaid,
+// and these decks are our own content.
+process.env.CHROME_NO_SANDBOX ??= '1'
+
 const source = 'src/content/talks'
 const exportOptions = [
   '--html',
