@@ -19,6 +19,9 @@ This post builds both paths for the GitHub Copilot CLI with one Node.js script,
 the same file on macOS and Windows. The footer shows the track, and a key
 pauses or resumes it.
 
+The script has been checked with mocked Spotify responses. Live Spotify
+playback and execution on Windows are not yet verified.
+
 ## Give the footer something new to say
 
 Run `/statusline` (alias `/footer`) and you can turn on built-in items for the
@@ -207,13 +210,14 @@ need:
 3. Sign in once, from a macOS terminal or PowerShell:
 
    ```sh
-   node $HOME/.copilot/spotify.mjs login YOUR_CLIENT_ID
+   node "$HOME/.copilot/spotify.mjs" login YOUR_CLIENT_ID
    ```
 
    Open the link it prints and approve. The script saves `spotify.json` next to
-   itself. The refresh token in that file can only read what's playing and
-   control playback, and it lasts six months. When it expires, the line goes
-   blank; run `login` again.
+   itself. Keep that file private and out of version control: its tokens grant
+   access to what's playing and control of playback. The refresh token
+   [expires after six months](https://developer.spotify.com/documentation/web-api/tutorials/refreshing-tokens).
+   When it expires, the line goes blank; run `login` again.
 
 4. Add the command to `~/.copilot/settings.json`, keeping any settings already
    there. On Windows, write `$USERPROFILE` instead of `$HOME`; the CLI fills in
@@ -236,9 +240,9 @@ need:
    ▶ So What · Miles Davis
    ```
 
-Every run is one request to Spotify, from every session you have open. Session
-events add runs too: in a test, one agent reply added five. Spotify counts an
-app's requests over a
+Each status refresh makes a playback request, from every session you have
+open. Session events add runs between timer ticks, and renewing a token makes
+a separate authorization request. Spotify counts an app's API requests over a
 [rolling 30 seconds](https://developer.spotify.com/documentation/web-api/concepts/rate-limits),
 so pick the longest interval you can live with. If you hit the limit, the line
 goes blank until Spotify accepts requests again.
@@ -254,7 +258,7 @@ agent. On Windows, `!` commands run in PowerShell, which also understands
 `$HOME`:
 
 ```sh
-!node $HOME/.copilot/spotify.mjs toggle
+!node "$HOME/.copilot/spotify.mjs" toggle
 ```
 
 It prints `Paused` or `Playing`. Like any `!` command, the command and its
