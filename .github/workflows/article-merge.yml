@@ -35,7 +35,7 @@ jobs:
       - id: gates
         run: |
           pr=$(gh pr view "$PR" -R "$GITHUB_REPOSITORY" \
-            --json state,isDraft,baseRefName,author,labels,headRefOid,files,commits)
+            --json state,isDraft,baseRefName,author,labels,headRefOid,files)
           fail() { echo "reason=$1" >> "$GITHUB_OUTPUT"; echo "::error::$1"; exit 1; }
           [ "$(jq -r .state <<< "$pr")" = OPEN ] || fail 'the pull request is not open'
           [ "$(jq -r .isDraft <<< "$pr")" = false ] || fail 'the pull request is a draft'
@@ -45,10 +45,16 @@ jobs:
           # ponytail: path allowlist for an article PR; anything else merges by hand
           outside=$(jq -r '.files[].path' <<< "$pr" | grep -vE '^(src/content/writing/[^/]+\.mdx|public/audio/[^/]+|public/diagrams/.+|public/social-card-[^/]+\.png|src/assets/.+|src/lib/flow-hero\.mjs|cspell\.json)$' || true)
           [ -z "$outside" ] || fail "files outside an article change: $(paste -sd' ' <<< "$outside")"
-          # The agent reviewed the author's last commit; later commits may only be generated audio.
-          human=$(jq -r '[.commits[] | select(all(.authors[]; .email != "41898282+github-actions[bot]@users.noreply.github.com"))] | last | .oid' <<< "$pr")
-          [ "$human" = "$REVIEWED" ] || fail 'the author pushed after the review; it will run again'
-          echo "head=$(jq -r .headRefOid <<< "$pr")" >> "$GITHUB_OUTPUT"
+          # The agent reviewed REVIEWED; anything on top of it may only be generated audio.
+          head=$(jq -r .headRefOid <<< "$pr")
+          compare=$(gh api "repos/$GITHUB_REPOSITORY/compare/$REVIEWED...$head" \
+            --jq '.status, .files[].filename') || fail 'the reviewed commit was not found'
+          case "$(head -n1 <<< "$compare")" in
+            ahead|identical) ;;
+            *) fail 'the reviewed commit is no longer in the pull request; it will run again' ;;
+          esac
+          ! tail -n +2 <<< "$compare" | grep -qvE '^(public/audio/[^/]+)?$' || fail 'the article changed after the review; it will run again'
+          echo "head=$head" >> "$GITHUB_OUTPUT"
 
       - name: Wait for SEO readiness on the head commit
         env:
@@ -68,6 +74,9 @@ jobs:
       - env:
           HEAD: ${{ steps.gates.outputs.head }}
         run: |
+          # The wait above can be long; honor a hold label added during it.
+          gh pr view "$PR" -R "$GITHUB_REPOSITORY" --json labels --jq '[.labels[].name] | index("hold") | not' | grep -qx true ||
+            { echo '::notice::The hold label was added; leaving the merge to the author.'; exit 0; }
           gh pr merge "$PR" -R "$GITHUB_REPOSITORY" --squash --match-head-commit "$HEAD"
           # A merge made with GITHUB_TOKEN starts no push workflow, so deploy explicitly.
           gh workflow run seo.yml -R "$GITHUB_REPOSITORY" --ref main

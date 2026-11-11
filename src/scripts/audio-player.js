@@ -11,7 +11,12 @@ for (const player of document.querySelectorAll('[data-audio-player]')) {
     michael: player.dataset.voiceMichael,
   }
   const preferenceKey = 'article-audio-voice'
-  const savedVoice = localStorage.getItem(preferenceKey)
+  let savedVoice = null
+  try {
+    savedVoice = localStorage.getItem(preferenceKey)
+  } catch {
+    // Storage may be unavailable (private mode); the default voice applies.
+  }
   let resumeAfterVoiceChange = false
   let resumeAt = 0
 
@@ -95,7 +100,11 @@ for (const player of document.querySelectorAll('[data-audio-player]')) {
     play.disabled = false
     seek.disabled = true
     status.hidden = true
-    localStorage.setItem(preferenceKey, voice.value)
+    try {
+      localStorage.setItem(preferenceKey, voice.value)
+    } catch {
+      // The choice still applies to this page.
+    }
     audio.load()
   })
 }

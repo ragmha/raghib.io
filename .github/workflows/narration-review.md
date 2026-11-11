@@ -15,6 +15,11 @@ on:
         description: Comma-separated slugs of changed published articles
         required: true
 
+# Dispatches all run on main, so scope cancellation to the pull request.
+concurrency:
+  group: narration-review-${{ github.event.inputs.pull_request }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pull-requests: read
