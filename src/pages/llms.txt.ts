@@ -19,7 +19,7 @@ This file is a machine-readable index for LLMs and AI assistants. The full text 
 - [Writing](${link('/writing/')}): Every published article.
 - [Projects](${link('/projects/')}): Open-source projects and write-ups.
 - [Talks](${link('/talks/')}): Slides from talks and workshops.
-- [Experiments](https://lab.raghib.io/): Interactive experiments that accompany the writing.
+- [Experiments](${link('/experiments/')}): Interactive experiments that accompany the writing.
 - [RSS feed](${link('/writing/feed.xml')}): Subscribe to new posts.
 
 ## Posts

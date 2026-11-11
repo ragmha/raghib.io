@@ -32,11 +32,11 @@ const selectedProjects: Project[] = [
     ],
   },
   {
-    name: 'lab',
+    name: 'experiments',
     description:
       'Interactive experiments in agent sessions, context, token use, and browser games.',
-    url: 'https://github.com/ragmha/lab',
-    homepage: 'https://lab.raghib.io/',
+    url: 'https://github.com/ragmha/raghib.io/tree/main/apps/experiments',
+    homepage: 'https://raghib.io/experiments/',
   },
   {
     name: 'apple-books-mcp',

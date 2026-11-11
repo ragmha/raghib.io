@@ -106,7 +106,7 @@ const published = new Intl.DateTimeFormat('en-US', {
         <article class="prose">
           <Content />
           {post.data.lab && (
-            <p><a href={`https://lab.raghib.io/${post.data.lab}/`}>Explore the companion lab experiment →</a></p>
+            <p><a href={`/experiments/${post.data.lab}/`}>Explore the companion experiment →</a></p>
           )}
           {post.data.rstack && <RstackBox rstack={post.data.rstack} />}
 

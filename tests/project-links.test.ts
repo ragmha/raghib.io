@@ -16,7 +16,7 @@ test('selected projects retain existing tutorials, writeups, and labs without du
   const emptySync = buildProjectSnapshot([])
   assert.deepEqual(
     emptySync.map((project) => project.name),
-    ['build-your-harness', 'lab', 'apple-books-mcp'],
+    ['build-your-harness', 'experiments', 'apple-books-mcp'],
   )
   assert.equal(
     new Set(projectSnapshot.map((project) => project.name)).size,
@@ -25,12 +25,14 @@ test('selected projects retain existing tutorials, writeups, and labs without du
   const harness = projectSnapshot.find(
     (project) => project.name === 'build-your-harness',
   )
-  const lab = projectSnapshot.find((project) => project.name === 'lab')
+  const experiments = projectSnapshot.find(
+    (project) => project.name === 'experiments',
+  )
   const appleBooks = emptySync.find(
     (project) => project.name === 'apple-books-mcp',
   )
   assert.ok(harness)
-  assert.ok(lab)
+  assert.ok(experiments)
   assert.ok(appleBooks)
   assert.ok(
     projectSnapshot.some((project) => project.name === 'apple-books-mcp'),
@@ -41,7 +43,7 @@ test('selected projects retain existing tutorials, writeups, and labs without du
         link.url === 'https://raghib.io/writing/build-your-agent-harness/',
     ),
   )
-  assert.equal(lab.homepage, 'https://lab.raghib.io/')
+  assert.equal(experiments.homepage, 'https://raghib.io/experiments/')
 })
 
 test('syncing selected repositories with different capitalization preserves curated projects once', () => {
@@ -51,24 +53,28 @@ test('syncing selected repositories with different capitalization preserves cura
       name: 'Build-Your-Harness',
       url: 'https://github.com/RAGMHA/Build-Your-Harness.git/',
     },
-    { ...project, name: 'Lab', url: 'https://github.com/RAGMHA/Lab/' },
+    {
+      ...project,
+      name: 'Experiments',
+      url: 'https://github.com/RAGMHA/Raghib.io/tree/main/apps/experiments/',
+    },
     project,
   ])
   assert.deepEqual(
     projects.map((entry) => entry.name),
-    ['build-your-harness', 'lab', 'apple-books-mcp', 'sample'],
+    ['build-your-harness', 'experiments', 'apple-books-mcp', 'sample'],
   )
   assert.ok(
     getProjectLinks(projects[0]).some((link) => link.label === 'Tutorial'),
   )
-  assert.equal(projects[1].homepage, 'https://lab.raghib.io/')
+  assert.equal(projects[1].homepage, 'https://raghib.io/experiments/')
   assert.deepEqual(projects[3], project)
 })
 
 test('distinct repositories with conflicting display names fail instead of disappearing', () => {
   for (const name of [
-    'lab',
-    'Lab',
+    'experiments',
+    'Experiments',
     'build-your-harness',
     'Build-Your-Harness',
   ]) {
@@ -106,7 +112,7 @@ test('synced repository identities are deduplicated and editorial overrides igno
   ])
   assert.deepEqual(
     projects.map((entry) => entry.name),
-    ['build-your-harness', 'lab', 'apple-books-mcp', 'sample'],
+    ['build-your-harness', 'experiments', 'apple-books-mcp', 'sample'],
   )
   assert.equal(
     projects[2].description,
