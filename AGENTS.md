@@ -42,6 +42,13 @@ source code where useful.
   disclaimer. `tests/no-employer.test.mjs` fails CI on any such name outside
   code blocks and URLs.
 - Posts use American English. `seoTitle` must be 44 characters or fewer.
+- Published posts carry static narration in two local Kokoro voices under
+  `public/audio/`; `public/audio/narration.json` records which text each file
+  speaks, and a test fails when audio is missing or stale. On a pull request,
+  `.github/workflows/narration.yml` generates and commits it, deploys a preview
+  when Cloudflare credentials are set, and dispatches the `narration-review`
+  agent, which can dispatch `article-merge`. Locally: `bun run narration:generate`.
+  Edit `narration-review.md`, then run `gh aw compile`; never edit its lock file.
 
 ## Checks
 

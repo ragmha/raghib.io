@@ -1,0 +1,134 @@
+name: Article narration
+
+# A pull request that changes writing gets narration and a public preview.
+# Pushes and merges made with GITHUB_TOKEN start no workflows, so this job
+# dispatches the next steps itself: `SEO readiness` on the new head, then the
+# narration review agent, which can dispatch the merge.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/content/writing/**'
+      - 'scripts/generate-narration.py'
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: narration-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  narrate:
+    # Fork pull requests get no write token; they keep the manual path.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR: ${{ github.event.pull_request.number }}
+      HUMAN_SHA: ${{ github.event.pull_request.head.sha }}
+      HEAD_REF: ${{ github.head_ref }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      PREVIEW_PROJECT: ${{ vars.PREVIEW_PAGES_PROJECT || 'raghib-io-preview' }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref }}
+
+      - id: stale
+        run: |
+          stale=$(python3 scripts/generate-narration.py --stale)
+          echo "$stale"
+          echo "any=$([ -n "$stale" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - if: steps.stale.outputs.any == 'true'
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - if: steps.stale.outputs.any == 'true'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq espeak-ng ffmpeg
+          # The CPU wheel avoids several gigabytes of CUDA libraries.
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -q 'kokoro>=0.9.4' soundfile
+          python scripts/generate-narration.py
+
+      - id: push
+        if: steps.stale.outputs.any == 'true'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/audio
+          git commit -m 'Generate article narration'
+          git push origin "HEAD:$HEAD_REF"
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.5
+      - run: bun install --frozen-lockfile
+      - run: bunx playwright install --with-deps chromium
+      - run: bun run build
+
+      # Preview deployments on pages.dev are served with X-Robots-Tag: noindex.
+      - id: preview
+        if: env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
+        run: |
+          npx --yes wrangler@4 pages project create "$PREVIEW_PROJECT" --production-branch main 2>/dev/null || true
+          npx --yes wrangler@4 pages deploy dist --project-name "$PREVIEW_PROJECT" --branch "pr-$PR" --commit-dirty=true
+          echo "url=https://pr-$PR.$PREVIEW_PROJECT.pages.dev" >> "$GITHUB_OUTPUT"
+
+      - id: posts
+        run: |
+          python3 scripts/generate-narration.py --text "$RUNNER_TEMP/narration"
+          slugs=$(gh pr diff "$PR" --name-only | sed -nE 's|^src/content/writing/([^/]+)\.mdx$|\1|p' |
+            while read -r slug; do [ -f "$RUNNER_TEMP/narration/$slug.txt" ] && echo "$slug"; done | paste -sd, -)
+          echo "slugs=$slugs" >> "$GITHUB_OUTPUT"
+
+      - env:
+          PREVIEW: ${{ steps.preview.outputs.url }}
+          SLUGS: ${{ steps.posts.outputs.slugs }}
+        run: |
+          marker='<!-- article-preview -->'
+          {
+            echo "$marker"
+            echo '### Article preview'
+            if [ -n "$PREVIEW" ]; then
+              for slug in ${SLUGS//,/ }; do echo "- [$slug]($PREVIEW/writing/$slug/)"; done
+              echo "- [Whole site]($PREVIEW/)"
+            else
+              echo 'No public preview: set the `CLOUDFLARE_API_TOKEN` secret and `CLOUDFLARE_ACCOUNT_ID` variable.'
+            fi
+            echo
+            echo "Narration: $([ "${{ steps.push.outputs.pushed }}" = true ] && echo 'generated and committed' || echo 'already current')."
+          } > comment.md
+          id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
+            --jq "[.[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marker\")))][0].id // empty")
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F body=@comment.md >/dev/null
+          else
+            gh pr comment "$PR" --body-file comment.md
+          fi
+
+      # The required check must report on the commit this job pushed.
+      - if: steps.push.outputs.pushed == 'true'
+        run: gh workflow run seo.yml --ref "$HEAD_REF"
+
+      - if: steps.posts.outputs.slugs != ''
+        env:
+          SLUGS: ${{ steps.posts.outputs.slugs }}
+          PREVIEW: ${{ steps.preview.outputs.url }}
+        run: |
+          gh workflow run narration-review.lock.yml --ref main \
+            -f pull_request="$PR" -f reviewed_sha="$HUMAN_SHA" -f posts="$SLUGS" -f preview="$PREVIEW" ||
+            echo '::warning::Narration review is not on main yet; merge this pull request by hand.'
