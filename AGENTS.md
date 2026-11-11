@@ -57,12 +57,11 @@ source code where useful.
   public deck to PDF and image-only PPTX.
 - Talks follow the same rule as posts: no employer, product, client, or
   customer names (`tests/no-employer.test.mjs` scans them too).
-- `locked: true` keeps a deck's slides off the site; they are shared on
-  request. The page shows a "Can I view this presentation?" link to a public
-  `view-request` issue, which is how demand is counted. If the `TALK_CODE`
-  Actions secret is set, the deck ships AES-GCM-encrypted and anyone with that
-  code can view it. This is a soft gate, not access control: never lock
-  anything confidential. Remove `locked` to publish.
+- `locked: true` keeps the full deck on request. The cover slide and a
+  one-slide PDF preview remain public; a separate "Can I view this
+  presentation?" link opens a public `view-request` issue to count demand.
+  This is a soft gate, not access control: never lock anything confidential.
+  Remove `locked` to publish.
 
 ## Checks
 

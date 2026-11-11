@@ -5,28 +5,38 @@ import { readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { marpCli } from '@marp-team/marp-cli'
 import { chromium } from 'playwright'
 import { parse } from 'yaml'
+import { extractCoverSlide } from '../src/lib/talk-preview.ts'
 
 const source = 'src/content/talks'
+const exportOptions = [
+  '--html',
+  '--allow-local-files',
+  '--theme',
+  'src/styles/talk-theme.css',
+  '--browser-path',
+  chromium.executablePath(),
+]
 
 for (const file of (await readdir(source)).filter((name) => name.endsWith('.md'))) {
   const markdown = await readFile(`${source}/${file}`, 'utf8')
-  if (parse(/^---\n([\s\S]*?)\n---/.exec(markdown)?.[1] ?? '')?.locked) continue
-
   const slug = file.replace(/\.md$/, '')
   const deck = `dist/talks/${slug}/${slug}.md`
   // From dist/talks/<slug>/, ../../ is the site root.
-  await writeFile(deck, markdown.replaceAll('](/', '](../../').replaceAll('src="/', 'src="../../'))
+  const withLocalPaths = (value) => value.replaceAll('](/', '](../../').replaceAll('src="/', 'src="../../')
+  const locked = parse(/^---\n([\s\S]*?)\n---/.exec(markdown)?.[1] ?? '')?.locked
+
+  if (locked) {
+    const preview = `dist/talks/${slug}/${slug}-preview.md`
+    await writeFile(preview, withLocalPaths(extractCoverSlide(markdown)))
+    const status = await marpCli([preview, '--pdf', ...exportOptions])
+    if (status !== 0) throw new Error(`Marp preview export failed for ${slug}`)
+    await rm(preview)
+    continue
+  }
+
+  await writeFile(deck, withLocalPaths(markdown))
   for (const format of ['--pdf', '--pptx']) {
-    const status = await marpCli([
-      deck,
-      format,
-      '--html',
-      '--allow-local-files',
-      '--theme',
-      'src/styles/talk-theme.css',
-      '--browser-path',
-      chromium.executablePath(),
-    ])
+    const status = await marpCli([deck, format, ...exportOptions])
     if (status !== 0) throw new Error(`Marp ${format} export failed for ${slug}`)
   }
   await rm(deck)

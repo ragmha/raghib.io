@@ -1,8 +1,7 @@
 ---
 import WritingLayout from '../../layouts/WritingLayout.astro'
 import { formatDate } from '../../lib/posts'
-import { seal } from '../../lib/talk-lock'
-import { getTalks, renderDeck, viewRequestUrl, type Talk } from '../../lib/talks'
+import { getTalks, renderCoverSlide, renderDeck, viewRequestUrl, type Talk } from '../../lib/talks'
 
 export async function getStaticPaths() {
   return (await getTalks()).map((talk) => ({ params: { slug: talk.id }, props: { talk } }))
@@ -16,10 +15,10 @@ const { talk } = Astro.props
 const { title, description, date, kind, locked } = talk.data
 const deck = await renderDeck(talk)
 const slides = deck.match(/<svg data-marpit-svg/g)?.length ?? 0
-// Dev shows locked decks so they can be written; builds without a code ship only the request link.
+// Dev shows locked decks so they can be written; production shows the cover and request flow.
 const showDeck = !locked || import.meta.env.DEV
-const code = process.env.TALK_CODE?.trim()
-const sealed = !showDeck && code ? await seal(deck, code) : undefined
+// ponytail: a public cover works as the poster; the remaining slides stay locked.
+const cover = locked && !showDeck ? await renderCoverSlide(talk) : undefined
 const downloads = [
   ['PDF', 'pdf'],
   ['PowerPoint', 'pptx'],
@@ -36,7 +35,8 @@ const downloads = [
         <h1>{title}</h1>
         <p class="post-lede">{description}</p>
         <dl class="post-facts">
-          <div><dt>Date:</dt><dd><time datetime={date.toISOString()}>{formatDate(date)}</time></dd></div>
+          <div><dt>Format:</dt><dd>{kind}</dd></div>
+          <div><dt>When:</dt><dd><time datetime={date.toISOString()}>{formatDate(date)}</time></dd></div>
           <div><dt>Slides:</dt><dd>{slides}</dd></div>
           {locked && <div><dt>Access:</dt><dd>On request</dd></div>}
         </dl>
@@ -52,27 +52,24 @@ const downloads = [
         )}
       </header>
 
+      {cover && (
+        <figure class="talk-cover">
+          <div class="talk-cover-slide" role="img" aria-label={`Cover slide for ${title}`} set:html={cover} />
+          <figcaption>Cover slide from the {slides}-slide presentation.</figcaption>
+        </figure>
+      )}
+
       {showDeck ? (
         <div class="talk-deck" set:html={deck} />
       ) : (
         <section class="talk-locked" aria-labelledby="talk-ask-title">
-          <h2 id="talk-ask-title">Want to see it?</h2>
-          <p>The slides are shared on request. Ask, and I will send them to you.</p>
-          <a class="talk-cta" href={viewRequestUrl(talk)}>Can I view this presentation?</a>
+          <h2 id="talk-ask-title">Presentation preview</h2>
+          <p>The first slide is public. The full presentation is shared on request.</p>
+          <a class="talk-cta" href={`/talks/${talk.id}/${talk.id}-preview.pdf`}>View the slide (PDF)</a>
+          <p class="talk-request">
+            <a href={viewRequestUrl(talk)}>Can I view this presentation?</a>
+          </p>
           <p class="talk-note">Opens a short GitHub issue. Requests are public.</p>
-          {sealed && (
-            <details class="talk-code">
-              <summary>Have a view code?</summary>
-              <form class="talk-unlock" data-sealed={sealed}>
-                <label for="talk-code">View code</label>
-                <div class="talk-unlock-row">
-                  <input id="talk-code" name="code" type="password" autocomplete="off" required />
-                  <button class="talk-button" type="submit">View</button>
-                </div>
-                <p class="talk-status" role="status"></p>
-              </form>
-            </details>
-          )}
         </section>
       )}
     </main>
@@ -81,34 +78,18 @@ const downloads = [
 
 <script>
   import { browser } from '@marp-team/marp-core/browser'
-  import { open } from '../../lib/talk-lock'
 
   // Marp's polyfill keeps slide content scaled inside the SVG in WebKit.
   const deck = document.querySelector<HTMLElement>('.talk-deck')
   if (deck) browser(deck)
-
-  const form = document.querySelector<HTMLFormElement>('.talk-unlock')
-  form?.addEventListener('submit', async (event) => {
-    event.preventDefault()
-    const status = form.querySelector('.talk-status')!
-    status.textContent = 'Checking the code…'
-    try {
-      const unlocked = document.createElement('div')
-      unlocked.className = 'talk-deck'
-      unlocked.tabIndex = -1
-      unlocked.innerHTML = await open(form.dataset.sealed!, String(new FormData(form).get('code')))
-      form.closest('.talk-locked')!.replaceWith(unlocked)
-      browser(unlocked)
-      unlocked.focus()
-    } catch {
-      status.textContent = 'That code did not work. Check it and try again.'
-    }
-  })
+  const cover = document.querySelector<HTMLElement>('.talk-cover-slide')
+  if (cover) browser(cover)
 </script>
 
 <style>
   /* Global: an unlocked deck is created in the browser without Astro's scope attribute. */
-  :global(.talk-deck svg[data-marpit-svg]) {
+  :global(.talk-deck svg[data-marpit-svg]),
+  :global(.talk-cover-slide svg[data-marpit-svg]) {
     display: block;
     width: 100%;
     height: auto;
@@ -116,8 +97,14 @@ const downloads = [
     border: 1px solid var(--rule);
   }
 
-  :global(.talk-deck:focus) {
-    outline: none;
+  .talk-cover {
+    margin: 0 0 2.5rem;
+  }
+
+  .talk-cover figcaption {
+    margin-top: 0.5rem;
+    color: var(--ink-faint);
+    font-size: 0.75rem;
   }
 
   .talk-download {
@@ -134,8 +121,7 @@ const downloads = [
     list-style: none;
   }
 
-  .talk-download summary,
-  .talk-button {
+  .talk-download summary {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
@@ -189,42 +175,8 @@ const downloads = [
     color: var(--ink-faint);
   }
 
-  .talk-code {
-    margin-top: 2rem;
-    font-size: 0.85rem;
+  .talk-locked .talk-request {
+    margin-top: 1.25rem;
   }
 
-  .talk-code summary {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    color: var(--ink-muted);
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-    cursor: pointer;
-  }
-
-  .talk-unlock {
-    display: grid;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-  }
-
-  .talk-unlock-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .talk-unlock input {
-    flex: 1 1 12rem;
-    min-width: 0;
-    min-height: 44px;
-    padding: 0 0.75rem;
-    border: 1px solid var(--rule-strong);
-    border-radius: 0.25rem;
-    background: var(--paper);
-    color: var(--ink);
-    font: inherit;
-  }
 </style>

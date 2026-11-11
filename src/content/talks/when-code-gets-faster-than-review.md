@@ -1,6 +1,6 @@
 ---
-title: "When Code Gets Faster Than Review"
-description: "A talk version of the essay: when an assistant makes a change cheap to write, the scarce step becomes deciding it is safe to merge, and five ways to respond."
+title: "AI Speeds Up Coding. Code Review Becomes the Bottleneck."
+description: "Why faster coding doesn't always mean faster delivery, and what teams can do when code review becomes the bottleneck."
 date: "2026-11-08"
 kind: "talk"
 locked: true
@@ -10,7 +10,7 @@ paginate: true
 <!-- _class: cover -->
 <!-- _paginate: false -->
 
-## When Code Gets Faster Than Review
+## AI Speeds Up Coding. Code Review Becomes the Bottleneck.
 
 Raghib Hasan
 

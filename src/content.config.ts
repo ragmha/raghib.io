@@ -73,7 +73,6 @@ const talks = defineCollection({
     description: z.string().min(1),
     date: z.coerce.date(),
     kind: z.enum(['talk', 'workshop']),
-    // Locked decks ship encrypted with TALK_CODE until they are ready.
     locked: z.boolean().default(false),
   }),
 })
