@@ -4,7 +4,9 @@
   "files": ["src/content/**/*.{md,mdx}"],
   "words": [
     "Abramov",
+    "Amdahl",
     "ANAME",
+    "Claessen",
     "copilotstatusline",
     "cutover",
     "cutovers",
@@ -21,6 +23,7 @@
     "Goldratt",
     "Greshake",
     "Hasan",
+    "Jakob",
     "groupby",
     "Namecheap",
     "noall",

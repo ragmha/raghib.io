@@ -980,6 +980,210 @@ function inspectionConveyor(t) {
   t.label([22, 108, B + 16], 'WITHHOLD', { dy: 70, tone: 'red' })
 }
 
+function latencyBudget(t) {
+  t.base(-270, -130, 540, 260)
+  for (const [y, tone] of [[-84, 'blue'], [0, 'mid'], [84, 'green']]) {
+    t.rail([[0, 0, B + 1], [70, y, B + 1], [172, y, B + 1]], tone)
+  }
+
+  t.plate(-250, -112, 90, 62, B, 8)
+  t.cyl(-205, -82, 24, B + 8, 24, 'lo')
+  t.dial(-205, -82, 20, B + 32, 1.2)
+  t.bar([-205, -56], [-205, -25], 8, B + 6, 8, 'mid')
+  t.plate(-248, -30, 180, 60, B, 8)
+  for (let x = -234; x < -76; x += 20) t.bar([x, -23], [x, 23], 7, B + 8, 4, 'lo')
+  for (const y of [-27, 24]) t.box(-244, y, 172, 3, B + 12, 4, 'hi')
+  for (const x of [-222, -172, -122]) t.box(x, -15, 26, 30, B + 12, 5, 'mid')
+
+  t.plate(-58, -36, 58, 72, B, 8)
+  t.cyl(-29, 0, 22, B + 8, 12, 'hi', { lit: true })
+  t.bar([-29, 0], [1, 24], 5, B + 20, 4, 'mid')
+  t.cyl(-29, 0, 5, B + 20, 5, 'hi', { steps: 16 })
+  for (const [y, tone] of [[-24, 'blue'], [0, 'mid'], [24, 'green']]) t.lamp([-6, y, B + 8], tone, 3)
+
+  t.plate(178, -110, 66, 52, B, 8)
+  t.cyl(211, -84, 19, B + 8, 4, 'lo')
+  t.cyl(211, -84, 15, B + 12, 15, 'blue')
+  t.cyl(211, -84, 6, B + 27, 4, 'hi', { steps: 16 })
+  t.cyl(211, -84, 3, B + 31, 5, 'mid', { steps: 12 })
+  t.tray(178, -25, 66, 50, B, 15, () => {
+    for (let i = 0; i < 3; i++) t.box(188 + i, -15, 42, 30, B + 3 + i * 2, 1.2, 'hi')
+  })
+  t.plate(178, 57, 66, 54, B, 8)
+  t.box(184, 63, 8, 42, B + 8, 20, 'lo')
+  t.box(230, 63, 8, 42, B + 8, 20, 'lo')
+  t.bar([188, 69], [234, 69], 5, B + 28, 4, 'mid')
+  t.cyl(211, 69, 3, B + 12, 20, 'green', { steps: 12 })
+  t.box(198, 78, 26, 22, B + 8, 8, 'green')
+
+  t.label([-205, -82, B + 35], 'FASTER DRIVE', { dx: -60, dy: -75 })
+  t.label([-29, 0, B + 25], 'SPEND THE TIME', { dy: 110 })
+  t.label([211, -84, B + 36], 'ASK', { dx: 62, dy: -45, tone: 'blue' })
+  t.label([244, 0, B + 15], 'ANSWER', { dx: 70, dy: 0 })
+  t.label([234, 84, B + 28], 'CHECK', { dx: 60, dy: 45, tone: 'green' })
+}
+
+function receiptScale(t) {
+  t.base(-265, -130, 530, 260)
+  t.rail([[-154, 0, B + 1], [-70, 0, B + 1]], 'mid', false)
+  for (const [y, tone] of [[-82, 'green'], [0, 'red'], [82, 'blue']]) {
+    t.rail([[64, 0, B + 1], [116, y, B + 1], [180, y, B + 1]], tone, false)
+  }
+
+  t.plate(-242, -66, 88, 132, B, 10)
+  t.box(-232, -58, 68, 34, B + 10, 30, 'lo')
+  for (const x of [-220, -178]) t.cyl(x, -42, 10, B + 40, 4, 'mid')
+  t.box(-226, -20, 56, 68, B + 10, 1.5, 'hi')
+  for (let y = -10; y < 44; y += 10) t.rule([-218, y], [-180 + (y % 20 ? 8 : 0), y], B + 11.5, 'mid')
+  t.box(-234, 52, 72, 5, B + 10, 8, 'mid')
+
+  t.plate(-60, -55, 120, 110, B, 10)
+  t.cyl(0, 0, 22, B + 10, 30, 'lo')
+  for (const z of [B + 16, B + 22, B + 28, B + 34]) t.ring(0, 0, 24, z, 'mid')
+  for (const x of [-44, 44]) t.cyl(x, -36, 4, B + 10, 36, 'mid', { steps: 12 })
+  t.plate(-54, -44, 108, 88, B + 46, 6, 'hi', { lit: true })
+  t.box(-24, -23, 48, 46, B + 52, 28, 'blue')
+  t.box(-3, -23, 6, 46, B + 80, 0.8, 'hi')
+  t.rule([-24, 0], [24, 0], B + 80, 'mid')
+  t.plate(-28, -112, 56, 46, B, 10)
+  t.dial(0, -89, 19, B + 10, 0.1)
+
+  for (const [y, tone] of [[-82, 'green'], [0, 'red'], [82, 'blue']]) {
+    t.tray(182, y - 25, 60, 50, B, 18, () => {
+      if (tone !== 'blue') t.box(195, y - 13, tone === 'green' ? 30 : 20, 26, B + 3, 10, tone)
+    })
+    t.lamp([248, y, B + 8], tone, 4)
+  }
+
+  t.label([-198, -42, B + 44], 'THE REPORT', { dx: -60, dy: -65 })
+  t.label([0, 0, B + 80], 'CHECK THE RESULT', { dy: -130 })
+  t.label([242, -82, B + 18], 'MATCH', { dx: 65, dy: -25, tone: 'green' })
+  t.label([242, 0, B + 18], 'MISMATCH', { dx: 80, dy: 0, tone: 'red' })
+  t.label([242, 82, B + 18], 'UNKNOWN', { dx: 65, dy: 45, tone: 'blue' })
+}
+
+function templateJig(t) {
+  t.base(-280, -135, 560, 270)
+  t.rail([[-170, -50, B + 1], [-110, -50, B + 1]], 'mid', false)
+  t.rail([[-170, -80, B + 1], [90, -80, B + 1]], 'green', false)
+  t.rail([[-20, 20, B + 1], [120, 75, B + 1]], 'red', false)
+
+  t.plate(-258, -102, 88, 100, B, 8)
+  for (let i = 0; i < 3; i++) t.plate(-246 + i * 2, -90 + i * 2, 62, 70, B + 8 + i * 3, 2, i === 2 ? 'hi' : 'lo')
+  for (const x of [-230, -202]) t.cyl(x, -55, 5, B + 16, 5, 'mid', { steps: 16 })
+
+  t.plate(-112, -47, 94, 104, B, 10)
+  t.box(-106, -41, 18, 82, B + 10, 62, 'lo')
+  t.box(-106, -41, 76, 20, B + 72, 12, 'mid')
+  t.cyl(-43, -31, 12, B + 50, 22, 'mid')
+  t.cyl(-43, -31, 3, B + 24, 26, 'hi', { steps: 12 })
+  for (const y of [-3, 32]) t.bar([-92, y], [-28, y], 4, B + 10, 5, 'hi')
+  t.box(-88, -2, 52, 32, B + 15, 6, 'mid')
+  t.box(-75, 4, 28, 20, B + 21, 4, 'blue')
+  t.dial(-97, 45, 10, B + 10, -0.5)
+
+  t.plate(90, -112, 92, 82, B, 10)
+  for (const x of [104, 151]) t.box(x, -100, 8, 58, B + 10, 18, 'mid')
+  t.box(115, -91, 30, 36, B + 10, 8, 'green')
+  t.bar([108, -100], [155, -100], 5, B + 28, 4, 'hi')
+  t.lamp([174, -47, B + 10], 'green', 4)
+
+  // The master opening is narrower than the copied jig; the same part cannot enter.
+  t.plate(118, 38, 110, 80, B, 10, 'hi', { lit: true })
+  for (const x of [148, 176]) t.box(x, 47, 8, 43, B + 10, 22, 'mid')
+  t.bar([152, 47], [180, 47], 5, B + 32, 4, 'hi')
+  t.box(151, 92, 30, 18, B + 10, 8, 'red')
+  for (let x = 132; x < 218; x += 8) t.rule([x, 112], [x, x % 16 ? 116 : 118], B + 10, 'mid')
+  t.lamp([215, 72, B + 10], 'red', 4)
+
+  t.label([-218, -55, B + 21], 'ONE INTERPRETATION', { dx: -65, dy: -65 })
+  t.label([-43, -31, B + 84], 'IMPLEMENTATION', { dy: -90 })
+  t.label([155, -71, B + 32], 'COPIED CHECK: PASS', { dx: 80, dy: -65, tone: 'green' })
+  t.label([181, 101, B + 18], 'MASTER: FAIL', { dx: 70, dy: 55, tone: 'red' })
+}
+
+function sharedReservoir(t) {
+  t.base(-280, -135, 560, 270)
+  t.bar([-190, 18], [-190, -86], 10, B + 2, 10, 'lo')
+  t.bar([-190, -86], [4, -86], 10, B + 2, 10, 'lo')
+  t.rail([[-190, 18, B + 13], [-190, -86, B + 13], [4, -86, B + 13]], 'green')
+  t.bar([190, 18], [190, -66], 10, B + 2, 10, 'lo')
+  t.bar([190, -66], [92, -66], 10, B + 2, 10, 'lo')
+  t.rail([[190, 18, B + 13], [190, -66, B + 13], [92, -66, B + 13]], 'blue')
+
+  const pump = (x, tone) => {
+    t.plate(x - 48, -30, 96, 142, B, 10)
+    t.tray(x - 37, 58, 74, 42, B + 10, 12, () => {
+      for (let i = 0; i < 3; i++) t.box(x - 26 + i, 65, 48, 25, B + 13 + i * 2, 1.2, 'hi')
+    })
+    t.cyl(x, 18, 23, B + 10, 44, 'mid')
+    for (const z of [B + 18, B + 44]) t.ring(x, 18, 24, z, 'lo')
+    t.cyl(x, 18, 8, B + 54, 18, tone, { steps: 18 })
+    t.bar([x - 30, 18], [x + 30, 18], 6, B + 72, 5, 'hi')
+    for (const dx of [-30, 30]) t.cyl(x + dx, 18, 5, B + 69, 11, 'lo', { steps: 16 })
+    t.dial(x - 28, -12, 10, B + 10, x < 0 ? -0.7 : 0.9)
+  }
+  pump(-190, 'green')
+
+  t.cyl(48, -80, 46, B, 70, 'mid')
+  for (const z of [B + 16, B + 52]) t.ring(48, -80, 47, z, 'lo')
+  t.cyl(48, -80, 40, B + 70, 2, 'lo')
+  t.cyl(48, -80, 34, B + 72, 1, 'blue', { lit: true })
+  t.ring(48, -80, 43, B + 73, 'hi')
+  t.bar([76, -48], [88, -32], 5, B + 8, 5, 'mid')
+  t.seg([88, -32, B + 8], [88, -32, B + 58], 'blue')
+  for (const z of [B + 18, B + 30, B + 42, B + 54]) t.seg([84, -32, z], [92, -32, z], 'mid')
+  pump(190, 'blue')
+
+  t.label([-190, 18, B + 80], 'WORKSPACE A', { dx: -70, dy: -70, tone: 'green' })
+  t.label([48, -80, B + 73], 'ONE SHARED SERVICE', { dy: -90 })
+  t.label([190, 18, B + 80], 'WORKSPACE B', { dx: 75, dy: -45, tone: 'blue' })
+  t.label([88, -32, B + 30], 'SHARED EFFECT', { dx: -120, dy: 90, tone: 'blue' })
+}
+
+function shutdownBench(t) {
+  t.base(-280, -130, 560, 260)
+  t.plate(-252, -108, 440, 26, B, 6, 'lo')
+  t.box(-238, -101, 414, 12, B + 6, 1, 'hi')
+  for (let x = -230; x < 170; x += 14) t.rule([x, -99], [x + 6, -99], B + 7, 'mid')
+  for (const x of [-246, 202]) {
+    t.cyl(x, -95, 19, B + 6, 12, 'mid')
+    t.ring(x, -95, 12, B + 18, 'faint')
+    t.cyl(x, -95, 4, B + 18, 5, 'hi', { steps: 12 })
+  }
+
+  t.plate(-254, -34, 72, 72, B, 8)
+  for (let i = 0; i < 4; i++) t.box(-246 + i, -24, 50, 48, B + 8 + i * 2, 1.2, 'lo')
+  t.plate(-176, -38, 278, 76, B, 8)
+  for (let x = -164; x < 96; x += 20) t.bar([x, -30], [x, 30], 6, B + 8, 4, 'lo')
+  for (const y of [-36, 33]) t.box(-172, y, 270, 3, B + 12, 5, 'mid')
+  for (const y of [-42, 34]) t.box(-176, y, 12, 12, B + 8, 42, 'mid')
+  t.bar([-170, -36], [-170, 40], 7, B + 50, 5, 'red')
+  for (const y of [-25, -5, 15]) t.box(-174, y, 8, 8, B + 55, 1, 'hi')
+
+  t.tray(-92, -30, 72, 60, B + 12, 14, () => {
+    t.box(-77, -16, 40, 32, B + 15, 16, 'blue')
+  })
+  t.dial(-54, 70, 17, B, 0.7)
+  t.lamp([-54, 70, B + 4], 'blue', 3)
+
+  // A visible gap in the coupling leaves the records intact but disconnects the drive.
+  t.plate(128, -35, 108, 70, B, 8)
+  t.cyl(188, 0, 27, B + 8, 32, 'lo')
+  t.cyl(188, 0, 20, B + 40, 4, 'mid')
+  for (let x = 169; x <= 205; x += 6) t.rule([x, -12], [x, 12], B + 44, 'faint')
+  t.bar([88, 0], [112, 0], 10, B + 12, 8, 'mid')
+  t.bar([134, 0], [160, 0], 10, B + 12, 8, 'mid')
+  t.plate(112, 60, 54, 42, B, 6)
+  t.cyl(139, 81, 14, B + 6, 8, 'hi', { lit: true })
+  t.cyl(139, 81, 6, B + 14, 2, 'lo', { steps: 16 })
+
+  t.label([-170, 0, B + 55], 'STOP INTAKE', { dx: -65, dy: -85, tone: 'red' })
+  t.label([-54, 0, B + 31], 'RESOLVE WORK', { dy: 145, tone: 'blue' })
+  t.label([139, 81, B + 16], 'REVOKE ACCESS', { dx: 70, dy: 65, tone: 'red' })
+  t.label([202, -95, B + 23], 'KEEP RECORD', { dx: 70, dy: -65, tone: 'green' })
+}
+
 function statusRadio(t) {
   t.base(-160, -90, 320, 180)
 
@@ -1023,6 +1227,61 @@ export const flowHeroSvg = hero => render(hero.label, hero.art)
 
 // Labels and outcomes paraphrase each article; nothing here adds a claim the post doesn't make.
 export const flowHeroes = {
+  'latency-budget': {
+    art: latencyBudget,
+    label: 'An isometric inspection conveyor. A faster drive feeds a lit selector with three paths: a tray for an earlier answer, a measuring fixture for a check, and a bell for a clarifying question. The selector represents a choice about how to use time, not an automatic improvement in correctness.',
+    outputs: [
+      { label: 'ANSWER', tone: 'mid' },
+      { label: 'CHECK', tone: 'green' },
+      { label: 'ASK', tone: 'blue' },
+    ],
+    thesis: ['Speed makes room for a choice.', 'Spend it on what the task needs.'],
+    note: 'An illustrative response budget, not measured latency. A second pass is only useful if it adds useful evidence.',
+  },
+  'receipt-scale': {
+    art: receiptScale,
+    label: 'An isometric parcel weighing station. A printer produces the report at the left, while a lit scale inspects the parcel itself. Separate trays represent a match, a mismatch, and an unknown result. The printed report does not determine the reading.',
+    outputs: [
+      { label: 'MATCH', tone: 'green' },
+      { label: 'MISMATCH', tone: 'red' },
+      { label: 'UNKNOWN', tone: 'blue' },
+    ],
+    thesis: ['The report says what was done.', 'The result needs its own evidence.'],
+    note: 'An illustrative check of a requested effect. A matching observation alone does not establish causality or permanence.',
+  },
+  'template-jig': {
+    art: templateJig,
+    label: 'An isometric pattern-copying mill. One template guides both the cutter and a copied checking jig, which accepts the part. A separate lit master gauge has a narrower opening and rejects that same part. Passing the copied check does not establish that the requirement was met.',
+    outputs: [
+      { label: 'COPIED CHECK: PASS', tone: 'green' },
+      { label: 'MASTER: FAIL', tone: 'red' },
+    ],
+    thesis: ['Code and tests can share a mistake.', 'Check the intended requirement separately.'],
+    note: 'A constructed example of a shared interpretation. An independent check still needs a correct requirement.',
+  },
+  'shared-reservoir': {
+    art: sharedReservoir,
+    label: 'An isometric pair of hand pumps on separate bases, each holding its own stack of work cards. Both pipes reach one tank with a lit water surface and a shared level gauge. Separate local workspaces can still change the same external service.',
+    outputs: [
+      { label: 'WORKSPACE A', tone: 'green' },
+      { label: 'WORKSPACE B', tone: 'blue' },
+      { label: 'SHARED EFFECT', tone: 'blue' },
+    ],
+    thesis: ['The local work can be copied.', 'The external world may still be shared.'],
+    note: 'Illustrative shared targets. What a copy isolates or carries over depends on the environment and its configuration.',
+  },
+  'shutdown-bench': {
+    art: shutdownBench,
+    label: 'An isometric conveyor being retired. A closed inlet barrier stops new work, one parcel waits for its outcome to be resolved, and a removed drive coupling is lit on a separate tray. A paper record remains on its reels after the drive is disconnected.',
+    outputs: [
+      { label: 'STOP INTAKE', tone: 'red' },
+      { label: 'RESOLVE WORK', tone: 'blue' },
+      { label: 'REVOKE ACCESS', tone: 'red' },
+      { label: 'KEEP RECORD', tone: 'green' },
+    ],
+    thesis: ['Stopping intake leaves work behind.', 'Close its effects, access, and ownership.'],
+    note: 'Planned retirement, not an incident procedure. Harmful activity may require immediate containment before reconciliation.',
+  },
   'inspection-conveyor': {
     art: inspectionConveyor,
     label: 'An isometric mail-inspection conveyor. A clock feeds recurring envelopes onto rollers beneath a lit inspection lens, representing interpretation. A separate franking press represents a constrained output job. Marked envelopes collect in a blue tray awaiting human review; withheld outputs sit in a red tray. Inspection does not authorize a write, and a marked envelope is not a final decision.',
