@@ -1,0 +1,10 @@
+{
+  "labs": [
+    { "slug": "session-flame" },
+    { "slug": "context-autopsy" },
+    { "slug": "token-diet" },
+    { "slug": "agent-edits" },
+    { "slug": "chess" },
+    { "slug": "platformer" }
+  ]
+}

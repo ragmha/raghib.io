@@ -874,10 +874,129 @@ function vaultWindow(t) {
   t.label([53, -35, B + 44], 'SUBMIT NEEDS A KEY', { dy: -80, tone: 'red' })
 }
 
+function narrationPress(t) {
+  t.base(-270, -110, 540, 220)
+
+  // Manuscript feeder: a stack of article sheets.
+  t.plate(-252, -50, 74, 92, B, 6)
+  for (let i = 0; i < 6; i++) t.box(-244 + i, -42, 56, 74, B + 7 + i * 2, 1.2, i === 5 ? 'hi' : 'lo')
+  for (let row = 0; row < 5; row++) t.rule([-234, -30 + row * 12], [-200 - (row % 2) * 12, -30 + row * 12], B + 19.4, 'mid')
+  t.rail([[-178, -4, B + 1], [-150, -4, B + 1]])
+
+  // Sieve: prose falls through; diagram cards are caught and drop into a bin.
+  t.tray(-150, -44, 64, 76, B, 18, () => {
+    for (let x = -140; x < -92; x += 8) t.rule([x, -36], [x, 24], B + 4, 'faint')
+    t.box(-138, -26, 24, 18, B + 4, 1.4, 'red')
+  })
+  t.tray(-150, 50, 64, 46, B, 22, () => {
+    t.box(-138, 60, 26, 20, B + 3, 1.2, 'red')
+    t.box(-132, 66, 24, 18, B + 4.2, 1.2, 'red')
+  }, 'lo')
+  t.rail([[-86, -4, B + 1], [-58, -4, B + 1]])
+
+  // The loupe's stand sits behind the lathe, so it is drawn first.
+  t.box(-46, -100, 14, 14, B, 52, 'lo')
+
+  // Record lathe: the speech model cuts the same groove for the same text.
+  t.plate(-58, -64, 128, 118, B, 12)
+  t.cyl(4, -4, 46, B + 12, 6, 'mid')
+  for (const r of [38, 30, 22]) t.ring(4, -4, r, B + 18, 'faint')
+  t.cyl(4, -4, 7, B + 18, 7, 'hi', { steps: 16 })
+  t.box(46, -56, 14, 14, B + 12, 22, 'lo')
+  t.bar([53, -49], [20, -14], 4, B + 34, 3, 'hi')
+  t.box(14, -20, 12, 12, B + 26, 8, 'mid')
+
+  // Inspector's loupe on an arm over the groove: the one step that reads.
+  t.bar([-39, -93], [-12, -36], 4, B + 52, 3, 'mid')
+  t.cyl(-12, -36, 13, B + 46, 5, 'hi', { lit: true })
+  t.ring(-12, -36, 8, B + 51, 'mid')
+  t.lamp([-39, -93, B + 56], 'blue', 4)
+  t.rail([[70, -4, B + 1], [120, -4, B + 1]], 'green')
+
+  // Dispatch barrier with its own interlock lamps; the loupe can't lift it.
+  t.plate(120, -96, 70, 26, B, 10)
+  for (const [i, x] of [130, 142, 154, 166, 178].entries()) t.lamp([x, -83, B + 10], i === 4 ? 'blue' : 'green', 4)
+  t.box(124, -46, 14, 14, B, 46, 'mid')
+  t.box(124, 30, 14, 14, B, 46, 'mid')
+  t.bar([131, -39], [131, 37], 6, B + 46, 5, 'hi')
+  t.tray(170, -44, 84, 80, B, 20, () => {
+    t.cyl(212, -4, 28, B + 3, 2, 'green')
+    t.cyl(212, -4, 28, B + 5, 2, 'green')
+    t.cyl(212, -4, 5, B + 7, 2, 'hi', { steps: 14 })
+  })
+
+  t.label([-216, -4, B + 20], 'ARTICLE TEXT', { dy: -110 })
+  t.label([-112, 74, B + 24], 'DIAGRAMS STAY VISUAL', { dy: 80, tone: 'red' })
+  t.label([4, -4, B + 24], 'SPEECH MODEL', { dy: 160 })
+  t.label([-12, -36, B + 51], 'AGENT REVIEW', { dy: -110, tone: 'blue' })
+  t.label([154, -83, B + 14], 'MERGE GATES', { dy: -80, tone: 'green' })
+}
+
+function statusRadio(t) {
+  t.base(-160, -90, 320, 180)
+
+  // The receiver's display shows state; its controls are separate.
+  t.plate(-138, -70, 276, 140, B, 18, 'lo')
+  t.plate(-120, -54, 150, 106, B + 18, 5, 'mid')
+  t.box(-110, -44, 130, 36, B + 23, 5, 'hi')
+  t.box(-105, -39, 120, 26, B + 28, 2, 'green', { lit: true })
+
+  // Speaker cone and grille.
+  t.cyl(70, -5, 43, B + 18, 13, 'mid', { steps: 36 })
+  t.ring(70, -5, 35, B + 31, 'lo')
+  t.ring(70, -5, 27, B + 32, 'hi')
+  t.ring(70, -5, 17, B + 33, 'lo')
+  t.cyl(70, -5, 8, B + 34, 3, 'mid', { steps: 18 })
+  for (let x = 43; x <= 97; x += 9) {
+    t.bar([x, -23], [x, 13], 1.8, B + 38, 1, 'hi')
+  }
+
+  // Tuning dial, transport keys, and small indicators.
+  t.dial(-86, 34, 14, B + 24, 0.7, 'hi')
+  for (const x of [-48, -18, 12]) {
+    t.plate(x, 22, 20, 22, B + 23, 3, 'mid')
+    t.box(x + 4, 26, 12, 14, B + 26, 2, 'hi')
+  }
+  for (let x = 47; x <= 83; x += 12) {
+    t.cyl(x, 43, 2.5, B + 23, 2, 'blue', { steps: 12 })
+  }
+
+  // A separate shortcut stands for control outside the status-line hook.
+  t.plate(152, -30, 48, 60, B, 8, 'blue')
+  t.plate(160, -22, 32, 44, B + 8, 6, 'mid')
+  t.box(166, -16, 20, 32, B + 14, 2, 'hi')
+
+  t.label([-45, -26, B + 30], 'TRACK STATUS', { dx: -10, dy: -80, tone: 'green' })
+  t.label([176, 0, B + 16], 'KEY SHORTCUT', { dx: 10, dy: -18, tone: 'blue' })
+  t.label([-18, 32, B + 28], 'CONTROL SEPARATE', { dy: 104, tone: 'red' })
+}
+
 export const flowHeroSvg = hero => render(hero.label, hero.art)
 
 // Labels and outcomes paraphrase each article; nothing here adds a claim the post doesn't make.
 export const flowHeroes = {
+  'narration-press': {
+    art: narrationPress,
+    label: 'An isometric record-pressing line. A stack of article sheets feeds a sieve that catches diagram cards and drops them into a bin, so diagrams stay visual. The prose reaches a record lathe, the speech model, which cuts the same groove for the same text. A loupe on an arm over the groove is the agent review, the only step that reads. A barrier with its own interlock lamps opens to a tray of finished records; the loupe cannot lift it.',
+    outputs: [
+      { label: 'DIAGRAMS STAY VISUAL', tone: 'red' },
+      { label: 'AGENT REVIEW', tone: 'blue' },
+      { label: 'MERGE GATES', tone: 'green' },
+    ],
+    thesis: ['The agent reviews and asks.', 'The gates decide the merge.'],
+    note: 'An illustration of the pipeline in the post. It hasn’t run end to end yet.',
+  },
+  'status-radio': {
+    art: statusRadio,
+    label: 'An isometric radio console. A lit display stands for a track shown in the CLI footer. A separate keyboard shortcut represents playback control sent directly to the player, not through the status line.',
+    outputs: [
+      { label: 'TRACK STATUS', tone: 'green' },
+      { label: 'KEY SHORTCUT', tone: 'blue' },
+      { label: 'CONTROL SEPARATE', tone: 'red' },
+    ],
+    thesis: ['Show what matters outside.', 'Keep control separate.'],
+    note: 'An illustration of the idea. The real footer is a single line of text.',
+  },
   'card-catalog': {
     art: cardCatalog,
     label: 'An isometric card catalog. A cabinet has one drawer pulled out, holding dated index cards with tabbed guides. Each tab is tied by a thread to a source binder on a shelf behind it, and each source ends in a lamp. One raised card has a red tab and a red dashed thread to a red lamp: it is stale. A loupe stands at the side as the check before acting.',

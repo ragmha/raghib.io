@@ -1,0 +1,90 @@
+name: Article merge
+
+# Dispatched by the narration review agent once the spoken text is clean.
+# The agent only asks; these gates decide. Add the `hold` label to a pull
+# request to keep it for a manual merge.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pull_request:
+        description: Pull request number
+        required: true
+      reviewed_sha:
+        description: Commit the agent reviewed
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+  checks: read
+
+concurrency:
+  group: article-merge-${{ inputs.pull_request }}
+
+jobs:
+  merge:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR: ${{ inputs.pull_request }}
+      REVIEWED: ${{ inputs.reviewed_sha }}
+    steps:
+      - id: gates
+        run: |
+          pr=$(gh pr view "$PR" -R "$GITHUB_REPOSITORY" \
+            --json state,isDraft,baseRefName,author,labels,headRefOid,files)
+          fail() { echo "reason=$1" >> "$GITHUB_OUTPUT"; echo "::error::$1"; exit 1; }
+          [ "$(jq -r .state <<< "$pr")" = OPEN ] || fail 'the pull request is not open'
+          [ "$(jq -r .isDraft <<< "$pr")" = false ] || fail 'the pull request is a draft'
+          [ "$(jq -r .baseRefName <<< "$pr")" = main ] || fail 'the pull request does not target main'
+          [ "$(jq -r .author.login <<< "$pr")" = "$GITHUB_REPOSITORY_OWNER" ] || fail "only the site owner's articles merge automatically"
+          jq -e '[.labels[].name] | index("hold") | not' <<< "$pr" >/dev/null || fail 'the pull request has the hold label'
+          # ponytail: path allowlist for an article PR; anything else merges by hand
+          outside=$(jq -r '.files[].path' <<< "$pr" | grep -vE '^(src/content/writing/[^/]+\.mdx|public/audio/[^/]+|public/diagrams/.+|public/social-card-[^/]+\.png|src/assets/.+|src/lib/flow-hero\.mjs|cspell\.json)$' || true)
+          [ -z "$outside" ] || fail "files outside an article change: $(paste -sd' ' <<< "$outside")"
+          # The agent reviewed REVIEWED; anything on top of it may only be generated audio.
+          head=$(jq -r .headRefOid <<< "$pr")
+          compare=$(gh api "repos/$GITHUB_REPOSITORY/compare/$REVIEWED...$head" \
+            --jq '.status, .files[].filename') || fail 'the reviewed commit was not found'
+          case "$(head -n1 <<< "$compare")" in
+            ahead|identical) ;;
+            *) fail 'the reviewed commit is no longer in the pull request; it will run again' ;;
+          esac
+          ! tail -n +2 <<< "$compare" | grep -qvE '^(public/audio/[^/]+)?$' || fail 'the article changed after the review; it will run again'
+          echo "head=$head" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for SEO readiness on the head commit
+        env:
+          HEAD: ${{ steps.gates.outputs.head }}
+        run: |
+          for _ in $(seq 60); do
+            run=$(gh api "repos/$GITHUB_REPOSITORY/commits/$HEAD/check-runs?check_name=SEO%20readiness" \
+              --jq '[.check_runs[] | select(.app.id == 15368)] | sort_by(.started_at) | last | "\(.status) \(.conclusion)"')
+            case "$run" in
+              'completed success') exit 0 ;;
+              completed*) echo '::error::SEO readiness failed'; exit 1 ;;
+            esac
+            sleep 30
+          done
+          echo '::error::SEO readiness did not finish in 30 minutes'; exit 1
+
+      - env:
+          HEAD: ${{ steps.gates.outputs.head }}
+        run: |
+          # The wait above can be long; honor a hold label added during it.
+          gh pr view "$PR" -R "$GITHUB_REPOSITORY" --json labels --jq '[.labels[].name] | index("hold") | not' | grep -qx true ||
+            { echo '::notice::The hold label was added; leaving the merge to the author.'; exit 0; }
+          gh pr merge "$PR" -R "$GITHUB_REPOSITORY" --squash --match-head-commit "$HEAD"
+          # A merge made with GITHUB_TOKEN starts no push workflow, so deploy explicitly.
+          gh workflow run seo.yml -R "$GITHUB_REPOSITORY" --ref main
+
+      - if: failure()
+        env:
+          REASON: ${{ steps.gates.outputs.reason }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh pr comment "$PR" -R "$GITHUB_REPOSITORY" \
+            --body "Automatic merge stopped: ${REASON:-see the [run log]($RUN)}. Merge by hand when ready."

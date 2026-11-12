@@ -60,7 +60,10 @@ try {
   let home
   const outputFiles = await readdir(root, { recursive: true })
   assert.ok(!outputFiles.some((file) => file.endsWith('.excalidraw')), 'Editable diagram sources must stay out of the deployment')
-  const htmlFiles = outputFiles.filter((file) => file.endsWith('.html'))
+  // ponytail: experiments have their own browser and performance tests and stay
+  // out of the sitemap; blog links into /experiments/ are still checked below.
+  // Audit them here once they ship social cards and @graph schema.
+  const htmlFiles = outputFiles.filter((file) => file.endsWith('.html') && !/^experiments[\\/]/.test(file))
   for (const file of htmlFiles) {
     const metadata = await page.evaluate((html) => {
       const document = new DOMParser().parseFromString(html, 'text/html')
@@ -86,6 +89,7 @@ try {
         twitterCard: meta('meta[name="twitter:card"]'),
         twitterImage: meta('meta[name="twitter:image"]'),
         datePublished: meta('meta[property="article:published_time"]'),
+        dateModified: meta('meta[property="article:modified_time"]'),
         links: [...document.querySelectorAll('a[href]')].map((element) => element.getAttribute('href')),
         ids: [...document.querySelectorAll('[id]')].map((element) => element.id),
         mainLinks: [...document.querySelectorAll('main a[href]')].map((element) => element.getAttribute('href')),
@@ -143,6 +147,7 @@ try {
       assert.equal(article.headline, metadata.h1[0], `Article schema preserves the visible headline for ${file}`)
       assert.equal(article.datePublished, metadata.datePublished, `Consistent publication date for ${file}`)
       assert.ok(Number.isFinite(Date.parse(article.datePublished)), `Valid publication date for ${file}`)
+      assert.equal(article.dateModified, metadata.dateModified, `Consistent update date for ${file}`)
       assert.equal(article.author.name, 'Raghib Hasan', `Article author for ${file}`)
       renderedArticles.push({
         collection: path.startsWith('/writing/') ? 'writing' : 'projectWriteups',
@@ -150,6 +155,7 @@ try {
         searchTitle: metadata.title,
         description: metadata.description,
         datePublished: article.datePublished,
+        dateModified: article.dateModified,
       })
       if (
         path.startsWith('/writing/') &&

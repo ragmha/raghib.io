@@ -1,0 +1,34 @@
+---
+import ArchiveLayout from '../../layouts/ArchiveLayout.astro'
+import PostList from '../../components/PostList.astro'
+import { formatDate } from '../../lib/posts'
+import { getTalks } from '../../lib/talks'
+
+const talks = await getTalks()
+---
+
+<ArchiveLayout
+  title="Talks"
+  count={talks.length}
+  itemLabel="talk"
+  description="Talks and workshops by Raghib Hasan, with slides to view online or download as PDF or PowerPoint."
+>
+  <p class="talks-intro">
+    Slides from talks and workshops. Decks marked on request are not public yet; ask, and I will send them to you.
+  </p>
+  <PostList
+    posts={talks.map((talk) => ({
+      href: `/talks/${talk.id}/`,
+      date: formatDate(talk.data.date),
+      readingTime: talk.data.locked ? `${talk.data.kind} · on request` : talk.data.kind,
+      title: talk.data.title,
+      description: talk.data.description,
+    }))}
+  />
+</ArchiveLayout>
+
+<style>
+  .talks-intro {
+    color: var(--ink-muted);
+  }
+</style>

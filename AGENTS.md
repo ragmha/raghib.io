@@ -30,6 +30,8 @@ content mill. Essays link to experiments, projects, and source code where useful
   reduced motion, readable contrast and line length), and comfortable for
   long-form reading.
 - `DESIGN.md` is the visual design reference.
+- A Bun workspace: the blog is the root package and the browser experiments
+  are `apps/experiments`, served at `/experiments/` from the same build.
 
 ## Writing
 
@@ -47,8 +49,32 @@ content mill. Essays link to experiments, projects, and source code where useful
 - Posts never name the author's employer or its products (Microsoft, GitHub,
   Copilot, Azure, LinkedIn, VS Code, OpenAI and similar), and carry no
   disclaimer. `tests/no-employer.test.mjs` fails CI on any such name outside
-  code blocks and URLs.
+  code blocks and URLs. Its `ALLOWED` map lists the author's per-post
+  exceptions; add one only when the author decides a post must name the tool.
 - Posts use American English. `seoTitle` must be 44 characters or fewer.
+- Published posts carry static narration in two local Kokoro voices under
+  `public/audio/`; `public/audio/narration.json` records which text each file
+  speaks, and a test fails when audio is missing or stale. On a pull request,
+  `.github/workflows/narration.yml` generates and commits it, then dispatches
+  the `narration-review` agent, which can dispatch `article-merge`. Locally: `bun run narration:generate`.
+  Edit `narration-review.md`, then run `gh aw compile`; never edit its lock file.
+- A revised published post keeps its `date` and sets `updated` to the revision
+  date (shown as "Last updated"). Keep revision history in GitHub rather than
+  adding an in-post changelog.
+
+## Talks
+
+- Talks and workshops are [Marp](https://marp.app) decks in
+  `src/content/talks/*.md`, styled by `src/styles/talk-theme.css`. Slides use
+  `##` headings; the page owns the H1. `bun run build` also exports each
+  public deck to PDF and image-only PPTX.
+- Talks follow the same rule as posts: no employer, product, client, or
+  customer names (`tests/no-employer.test.mjs` scans them too).
+- `locked: true` keeps the full deck on request. The cover slide and a
+  one-slide PDF preview remain public; a separate "Can I view this
+  presentation?" link opens a public `view-request` issue to count demand.
+  This is a soft gate, not access control: never lock anything confidential.
+  Remove `locked` to publish.
 
 ## Checks
 
@@ -58,7 +84,10 @@ Before handing off, run what CI runs:
 ```sh
 npx --yes cspell@8.19.4 lint --no-progress
 bun test --bail --timeout 20000
+bun run --filter experiments test
 bun run build
 bun run check:seo
 bun run check:vitals
+node apps/experiments/scripts/check-content-links.mjs
+bun run --filter experiments test:browser
 ```

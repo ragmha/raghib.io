@@ -27,12 +27,15 @@ Open [http://localhost:4321](http://localhost:4321).
 ```bash
 bun dev                      # local development
 bun run check                # Astro and TypeScript checks
-bun run build                # static production build
+bun run build                # experiments, then the blog, into dist/
 bun run check:seo             # audit the fresh production build (requires Chromium)
 bun run check:vitals          # controlled mobile LCP/CLS regression checks
 bun run generate:social-card  # regenerate public/social-card.png
 bun run sync:projects         # refresh projects from the selected GitHub star list
 bun test --bail               # unit and publication-contract tests
+bun run --filter experiments dev           # experiments at localhost:4321/experiments/
+bun run --filter experiments test          # experiments unit tests
+bun run --filter experiments test:browser  # after a build; needs Chromium and WebKit
 ```
 
 ## Projects
@@ -54,32 +57,45 @@ hiding a project.
 
 ## Experiments
 
-The browser apps now live at [lab.raghib.io](https://lab.raghib.io/) and are
-maintained independently in [ragmha/lab](https://github.com/ragmha/lab).
-That repository owns their source, tests, benchmark data, reproduction kit,
-and deployment instructions:
+This repository is a Bun workspace. The blog is the root package; the browser
+experiments are [`apps/experiments`](apps/experiments/README.md), an Astro app
+with its own pages, tests, data, and reproduction kits. Its history from
+[ragmha/lab](https://github.com/ragmha/lab) is merged here.
 
-- [Local chess](https://lab.raghib.io/chess/)
-- [What’s Under the Prompt?](https://lab.raghib.io/context-autopsy/)
-- [Where Did the Time Go?](https://lab.raghib.io/session-flame/)
-- [Token Diet](https://lab.raghib.io/token-diet/)
+`bun run build` builds the experiments with `base: '/experiments'`, then the
+blog, and copies them into `dist/experiments/`, so one GitHub Pages deployment
+serves both: `/experiments/` and every `/experiments/<name>/` are real pages,
+not redirects. The SEO and vitals checks audit the blog's pages, including
+every link into `/experiments/`. Experiment pages have their own unit, browser,
+and performance tests and stay out of the sitemap.
 
-The site navigation links to the lab. Native Astro redirects in
-`astro.config.mjs` send `/experiments/` and each old `/experiments/<name>/`
-page URL there. On this static site Astro emits HTML redirects;
-no redirect JavaScript is required. Redirect pages are excluded from the
-sitemap and skipped by the SEO and vitals checks. App code, data, and downloads
-live only in the lab repository.
-The blog's shared theme, layouts, fonts, and writing documentation remain here.
-
-Writing frontmatter can declare `lab: <lab-slug>` (or a nested path such as
-`universe/passport`). This renders a companion experiment link. Only declare a
+Writing frontmatter can declare `lab: <lab-slug>`. This renders a companion
+experiment link. Only declare a
 pairing when the experiment actually accompanies that post; shared topics are
-not enough. The lab's reciprocal field is `writing: <writing-slug>`.
-`/content-links.json` publishes `{writings: [{slug, lab?}]}` for published
-posts only; the lab publishes `{labs: [{slug, writing?}]}` at the same path.
+not enough. The experiment's reciprocal field is `writing: <writing-slug>` in
+`apps/experiments/src/data/content-links.json`. `/content-links.json` publishes
+`{writings: [{slug, lab?}]}` for published posts only; the experiments publish
+`{labs: [{slug, writing?}]}` at `/experiments/content-links.json`. After a
+build, `node apps/experiments/scripts/check-content-links.mjs` fails on missing
+or non-reciprocal pairs.
 Cross-repository checks can fetch those manifests or use local build snapshots.
 Check both destinations and reciprocal declarations when updating either side.
+
+## Talks
+
+`/talks/` lists talks and workshops written as [Marp](https://marp.app) decks
+in `src/content/talks/*.md` (frontmatter: `title`, `description`, `date`,
+`kind: talk | workshop`, optional `locked`). Each deck renders inline in the
+site theme from `src/styles/talk-theme.css`. After `astro build`,
+`scripts/export-talks.mjs` writes `<slug>.pdf` and an image-only `<slug>.pptx`
+next to each public deck for the Download menu.
+
+A deck marked `locked: true` keeps its full slides on request. Its page shows
+the cover slide and a one-slide PDF preview; a separate "Can I view this
+presentation?" link opens a prefilled public issue
+(`.github/ISSUE_TEMPLATE/view-request.yml`, label `view-request`). Compare the
+page's views with `gh issue list -l view-request` to see the demand.
+`astro dev` always shows locked decks. Remove `locked` to publish.
 
 ## Writing and project writeups
 
@@ -258,6 +274,8 @@ drafts must not leak into the build. An intentionally empty writing archive is
 valid. Editable `.excalidraw` originals belong outside `public/`.
 
 Published writing needs a title, description, date, and nonempty body.
+An optional `updated` date, on or after `date`, shows next to the publication
+date and sets `dateModified` and the sitemap `lastmod`.
 Whitespace and HTML comments alone do not count as a body. The body check
 looks for content outside comments; it does not sanitize or render HTML.
 Use `published: false` for writing drafts; project writeups default to unpublished.

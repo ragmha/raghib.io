@@ -1,0 +1,87 @@
+name: Article narration
+
+# A pull request that changes writing gets narration.
+# Pushes and merges made with GITHUB_TOKEN start no workflows, so this job
+# dispatches the next steps itself: `SEO readiness` on the new head, then the
+# narration review agent, which can dispatch the merge.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/content/writing/**'
+      - 'scripts/generate-narration.py'
+
+permissions:
+  contents: write
+  pull-requests: read
+  actions: write
+
+concurrency:
+  group: narration-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  narrate:
+    # Fork pull requests get no write token; they keep the manual path.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR: ${{ github.event.pull_request.number }}
+      HUMAN_SHA: ${{ github.event.pull_request.head.sha }}
+      HEAD_REF: ${{ github.head_ref }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref }}
+
+      - id: stale
+        run: |
+          stale=$(python3 scripts/generate-narration.py --stale)
+          echo "$stale"
+          echo "any=$([ -n "$stale" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - if: steps.stale.outputs.any == 'true'
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - if: steps.stale.outputs.any == 'true'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq espeak-ng ffmpeg
+          # The CPU wheel avoids several gigabytes of CUDA libraries.
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -q 'kokoro>=0.9.4' soundfile
+          python scripts/generate-narration.py
+
+      - id: push
+        if: steps.stale.outputs.any == 'true'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/audio
+          git commit -m 'Generate article narration'
+          git push origin "HEAD:$HEAD_REF"
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      - id: posts
+        run: |
+          python3 scripts/generate-narration.py --text "$RUNNER_TEMP/narration"
+          slugs=$(gh pr diff "$PR" --name-only | sed -nE 's|^src/content/writing/([^/]+)\.mdx$|\1|p' |
+            while read -r slug; do [ -f "$RUNNER_TEMP/narration/$slug.txt" ] && echo "$slug"; done | paste -sd, -)
+          echo "slugs=$slugs" >> "$GITHUB_OUTPUT"
+
+      # The required check must report on the commit this job pushed.
+      - if: steps.push.outputs.pushed == 'true'
+        run: gh workflow run seo.yml --ref "$HEAD_REF"
+
+      - if: steps.posts.outputs.slugs != ''
+        env:
+          SLUGS: ${{ steps.posts.outputs.slugs }}
+        run: |
+          gh workflow run narration-review.lock.yml --ref main \
+            -f pull_request="$PR" -f reviewed_sha="$HUMAN_SHA" -f posts="$SLUGS" ||
+            echo '::warning::Narration review is not on main yet; merge this pull request by hand.'

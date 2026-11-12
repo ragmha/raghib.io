@@ -9,6 +9,8 @@ knowledge—not marketing, a CV, or company promotion. Posts never name the
 author's employer or its products, and carry no employer disclaimer.
 `tests/no-employer.test.mjs` fails CI on Microsoft, GitHub, Copilot, Azure,
 LinkedIn, VS Code, OpenAI, Bing and similar names outside code blocks and URLs.
+The test's `ALLOWED` map holds the author's per-post exceptions; never add one
+without the author's decision.
 
 When reviewing a post, also flag what the keyword test can't catch:
 

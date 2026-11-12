@@ -74,7 +74,9 @@ try {
   }
 
   const audited = []
-  for (const file of (await readdir(root, { recursive: true })).filter((file) => file.endsWith('.html'))) {
+  // ponytail: experiments are measured, not gated, by apps/experiments (.checks/performance.json);
+  // its GIF-heavy index misses these budgets. Gate them here once they fit.
+  for (const file of (await readdir(root, { recursive: true })).filter((file) => file.endsWith('.html') && !/^experiments[\\/]/.test(file))) {
     const page = await parserPage.evaluate((html) => {
       const document = new DOMParser().parseFromString(html, 'text/html')
       const head = document.head

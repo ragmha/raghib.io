@@ -1,0 +1,96 @@
+/* @theme raghib */
+/* Marp theme for talks. On the site, slides inherit the page's theme tokens;
+   PDF and PPTX exports fall back to the dark palette. Font URLs are relative
+   to /talks/<slug>/, which is also where exports render from dist. */
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../../fonts/jetbrains-mono/JetBrainsMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../../fonts/jetbrains-mono/JetBrainsMono-Bold.woff2") format("woff2");
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../../fonts/jetbrains-mono/JetBrainsMono-Italic.woff2") format("woff2");
+  font-style: italic;
+}
+
+section {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 1280px;
+  height: 720px;
+  padding: 72px 96px;
+  background: var(--theme-bg, #000);
+  color: var(--theme-text, #fff);
+  font: 30px/1.55 "JetBrains Mono", ui-monospace, monospace;
+}
+
+h2 {
+  margin: 0 0 0.7em;
+  font-size: 46px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+p,
+li {
+  margin: 0.35em 0;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding-left: 1.3em;
+}
+
+em {
+  color: var(--theme-muted, #b9b9b9);
+}
+
+table {
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.3em 1.2em 0.3em 0;
+  border-bottom: 1px solid var(--theme-rule, #292929);
+  text-align: left;
+}
+
+a {
+  color: inherit;
+}
+
+code {
+  padding: 0 0.2em;
+  background: var(--theme-surface, #181818);
+  font-family: inherit;
+}
+
+section::after {
+  position: absolute;
+  right: 96px;
+  bottom: 40px;
+  padding: 0;
+  color: var(--theme-faint, #8f8f8f);
+  font-size: 20px;
+  content: attr(data-marpit-pagination);
+}
+
+section.cover h2 {
+  font-size: 64px;
+}
+
+section.cover p {
+  color: var(--theme-muted, #b9b9b9);
+}

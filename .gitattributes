@@ -1,0 +1,6 @@
+.github/workflows/*.lock.yml linguist-generated=true merge=ours
+
+# Preserve distributed asset bytes and upstream license formatting on all OSes.
+apps/experiments/public/** -text
+apps/experiments/public/chess/COPYING.txt whitespace=cr-at-eol
+apps/experiments/public/fonts/jetbrains-mono/OFL.txt whitespace=-trailing-space

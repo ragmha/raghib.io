@@ -1,0 +1,21 @@
+name: Can I view this presentation?
+description: Ask for the slides of a talk on raghib.io.
+title: "Can I view: "
+labels: ["view-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for asking. This issue is public, so leave out contact details and company names. I'll reply here to get the slides to you.
+  - type: input
+    id: talk
+    attributes:
+      label: Talk
+      description: Filled in from the talk page.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: What would you use it for? (optional)
+      description: For example a team discussion, a meetup, or your own learning.

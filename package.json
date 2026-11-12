@@ -3,14 +3,16 @@
   "version": "0.2.0",
   "private": true,
   "type": "module",
+  "workspaces": ["apps/*"],
   "scripts": {
     "dev": "astro dev",
-    "build": "astro check && astro build",
+    "build": "bun run --filter experiments build && astro check && astro build && bun scripts/export-talks.mjs",
     "check": "astro check",
     "theme:diagrams": "node scripts/theme-diagrams.mjs",
     "export:excalidraw": "bun scripts/export-excalidraw.mjs",
     "check:seo": "bun scripts/check-seo.mjs",
     "check:vitals": "bun scripts/check-web-vitals.mjs",
+    "narration:generate": "uv run --python 3.12 --with 'kokoro>=0.9.4' --with soundfile python scripts/generate-narration.py",
     "generate:social-card": "bun scripts/generate-social-card.mjs",
     "preview": "astro preview",
     "sync:projects": "bun scripts/sync-projects.ts"
@@ -24,7 +26,9 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
     "@excalidraw/excalidraw": "^0.18.1",
-    "playwright": "^1.63.0",
+    "@marp-team/marp-cli": "^4.5.1",
+    "@marp-team/marp-core": "^4.4.0",
+    "playwright": "^1.64.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "rehype-mermaid": "^3.0.0",
