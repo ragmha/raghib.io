@@ -24,8 +24,12 @@ export default defineConfig({
   integrations: [
     mdx(),
     sitemap({
-      // Tag and topic archives are noindex: they only repeat post summaries.
-      filter: (page) => !/^\/(about|writing\/(tag|topic))(\/|$)/.test(new URL(page).pathname),
+      // Archives and presentation views repeat content from their primary pages.
+      filter: (page) => {
+        const path = new URL(page).pathname
+        return !/^\/(about|writing\/(tag|topic))(\/|$)/.test(path)
+          && !/^\/talks\/[^/]+\/present\.html$/.test(path)
+      },
       serialize: (item) => ({ ...item, lastmod: postDates.get(new URL(item.url).pathname) ?? item.lastmod }),
     }),
     {

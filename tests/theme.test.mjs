@@ -25,6 +25,7 @@ function createPage({
   const attributes = {}
   let onClick
   let onSystemChange
+  let onStorage
   const toggle = {
     hidden: true,
     querySelector: () => label,
@@ -39,6 +40,7 @@ function createPage({
       querySelectorAll: () => [],
     },
     window: {
+      addEventListener: (_, listener) => { onStorage = listener },
       matchMedia: () => ({
         matches: systemDark,
         addEventListener: (_, listener) => { onSystemChange = listener },
@@ -60,6 +62,7 @@ function createPage({
     root, label, toggle, attributes,
     click: () => onClick(),
     systemChange: (matches) => onSystemChange({ matches }),
+    storageChange: (key, newValue) => onStorage({ key, newValue }),
     stored: () => saved,
   }
 }
@@ -98,6 +101,19 @@ test('toggle updates the theme, accessible label, and persisted choice', () => {
   page.click()
   assert.equal(page.root.dataset.theme, 'dark')
   assert.equal(page.stored(), 'dark')
+})
+
+test('a saved theme change in another page updates embedded slides and controls', () => {
+  const page = createPage()
+  page.storageChange('theme', 'light')
+  assert.equal(page.root.dataset.theme, 'light')
+  assert.equal(page.attributes['aria-label'], 'Switch to dark mode')
+  page.storageChange('unrelated', 'dark')
+  page.storageChange('theme', null)
+  page.storageChange('theme', 'invalid')
+  assert.equal(page.root.dataset.theme, 'light')
+  page.storageChange('theme', 'dark')
+  assert.equal(page.root.dataset.theme, 'dark')
 })
 
 test('explicit system mode follows the OS until the visitor makes a choice', () => {

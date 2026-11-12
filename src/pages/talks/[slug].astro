@@ -60,7 +60,25 @@ const downloads = [
       )}
 
       {showDeck ? (
-        <div class="talk-deck" set:html={deck} />
+        <>
+          <div class="talk-present">
+            <a href={`/talks/${talk.id}/present.html`}>Open presentation</a>
+            <p>Arrow keys to navigate. F for fullscreen. P for presenter notes.</p>
+          </div>
+          <iframe
+            class="talk-player"
+            src={`/talks/${talk.id}/present.html`}
+            title={`${title} slideshow`}
+            width="1280"
+            height="720"
+            allow="fullscreen"
+            allowfullscreen
+          />
+          <details class="talk-handout">
+            <summary>Read all slides</summary>
+            <div class="talk-deck" set:html={deck} />
+          </details>
+        </>
       ) : (
         <section class="talk-locked" aria-labelledby="talk-ask-title">
           <h2 id="talk-ask-title">Presentation preview</h2>
@@ -87,6 +105,44 @@ const downloads = [
 </script>
 
 <style>
+  .talk-present {
+    margin-bottom: 1rem;
+  }
+
+  .talk-present a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-weight: 600;
+  }
+
+  .talk-present p {
+    margin: 0.25rem 0 0;
+    color: var(--ink-muted);
+    font-size: 0.8rem;
+  }
+
+  .talk-player {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--rule);
+  }
+
+  .talk-handout {
+    margin-top: 1.5rem;
+  }
+
+  .talk-handout summary {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
   /* Global: an unlocked deck is created in the browser without Astro's scope attribute. */
   :global(.talk-deck svg[data-marpit-svg]),
   :global(.talk-cover-slide svg[data-marpit-svg]) {

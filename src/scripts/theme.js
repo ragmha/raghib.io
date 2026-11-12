@@ -34,6 +34,14 @@ toggle?.addEventListener('click', () =>
   setTheme(currentTheme() === 'dark' ? 'light' : 'dark')
 )
 
+// Keep embedded presentations and other open pages in the same chosen theme.
+window.addEventListener('storage', ({ key, newValue }) => {
+  if (key !== 'theme' || (newValue !== 'dark' && newValue !== 'light')) return
+  hasThemeChoice = true
+  root.dataset.theme = newValue
+  paintToggle()
+})
+
 // Follow the OS only while the visitor has not made an explicit choice.
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
   if (root.dataset.themeDefault === 'dark' || hasThemeChoice) return
