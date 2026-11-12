@@ -32,12 +32,14 @@ const { Content, headings } = await render(post)
 const readingTime = estimateReadingTime(post.body)
 const minutes = parseInt(readingTime)
 const topicHref = (topic: string) => `/writing/topic/${getTaxonomySlug(topic)}/`
-const published = new Intl.DateTimeFormat('en-US', {
+const factDate = new Intl.DateTimeFormat('en-US', {
   month: 'short',
   day: 'numeric',
   year: 'numeric',
   timeZone: 'UTC',
-}).format(post.data.date)
+})
+const published = factDate.format(post.data.date)
+const updated = post.data.updated && factDate.format(post.data.updated)
 ---
 
 <WritingLayout
@@ -47,6 +49,7 @@ const published = new Intl.DateTimeFormat('en-US', {
   article={{
     headline: post.data.title,
     date: post.data.date,
+    updated: post.data.updated,
     image: post.data.socialImage,
   }}
 >
@@ -83,6 +86,9 @@ const published = new Intl.DateTimeFormat('en-US', {
               : <span>{topic}</span>}</>
           ))}</dd></div>
           <div><dt>Published:</dt><dd><time datetime={post.data.date.toISOString()}>{published}</time></dd></div>
+          {post.data.updated && (
+            <div><dt>Last updated:</dt><dd><time datetime={post.data.updated.toISOString()}>{updated}</time></dd></div>
+          )}
           <div><dt>Reading time:</dt><dd>{minutes} minute{minutes === 1 ? '' : 's'}</dd></div>
           {post.data.tags.length > 0 && (
             <div>

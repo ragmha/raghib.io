@@ -932,6 +932,45 @@ function narrationPress(t) {
   t.label([154, -83, B + 14], 'MERGE GATES', { dy: -80, tone: 'green' })
 }
 
+function statusRadio(t) {
+  t.base(-160, -90, 320, 180)
+
+  // The receiver's display shows state; its controls are separate.
+  t.plate(-138, -70, 276, 140, B, 18, 'lo')
+  t.plate(-120, -54, 150, 106, B + 18, 5, 'mid')
+  t.box(-110, -44, 130, 36, B + 23, 5, 'hi')
+  t.box(-105, -39, 120, 26, B + 28, 2, 'green', { lit: true })
+
+  // Speaker cone and grille.
+  t.cyl(70, -5, 43, B + 18, 13, 'mid', { steps: 36 })
+  t.ring(70, -5, 35, B + 31, 'lo')
+  t.ring(70, -5, 27, B + 32, 'hi')
+  t.ring(70, -5, 17, B + 33, 'lo')
+  t.cyl(70, -5, 8, B + 34, 3, 'mid', { steps: 18 })
+  for (let x = 43; x <= 97; x += 9) {
+    t.bar([x, -23], [x, 13], 1.8, B + 38, 1, 'hi')
+  }
+
+  // Tuning dial, transport keys, and small indicators.
+  t.dial(-86, 34, 14, B + 24, 0.7, 'hi')
+  for (const x of [-48, -18, 12]) {
+    t.plate(x, 22, 20, 22, B + 23, 3, 'mid')
+    t.box(x + 4, 26, 12, 14, B + 26, 2, 'hi')
+  }
+  for (let x = 47; x <= 83; x += 12) {
+    t.cyl(x, 43, 2.5, B + 23, 2, 'blue', { steps: 12 })
+  }
+
+  // A separate shortcut stands for control outside the status-line hook.
+  t.plate(152, -30, 48, 60, B, 8, 'blue')
+  t.plate(160, -22, 32, 44, B + 8, 6, 'mid')
+  t.box(166, -16, 20, 32, B + 14, 2, 'hi')
+
+  t.label([-45, -26, B + 30], 'TRACK STATUS', { dx: -10, dy: -80, tone: 'green' })
+  t.label([176, 0, B + 16], 'KEY SHORTCUT', { dx: 10, dy: -18, tone: 'blue' })
+  t.label([-18, 32, B + 28], 'CONTROL SEPARATE', { dy: 104, tone: 'red' })
+}
+
 export const flowHeroSvg = hero => render(hero.label, hero.art)
 
 // Labels and outcomes paraphrase each article; nothing here adds a claim the post doesn't make.
@@ -946,6 +985,17 @@ export const flowHeroes = {
     ],
     thesis: ['The agent reviews and asks.', 'The gates decide the merge.'],
     note: 'An illustration of the pipeline in the post. It hasn’t run end to end yet.',
+  },
+  'status-radio': {
+    art: statusRadio,
+    label: 'An isometric radio console. A lit display stands for a track shown in the CLI footer. A separate keyboard shortcut represents playback control sent directly to the player, not through the status line.',
+    outputs: [
+      { label: 'TRACK STATUS', tone: 'green' },
+      { label: 'KEY SHORTCUT', tone: 'blue' },
+      { label: 'CONTROL SEPARATE', tone: 'red' },
+    ],
+    thesis: ['Show what matters outside.', 'Keep control separate.'],
+    note: 'An illustration of the idea. The real footer is a single line of text.',
   },
   'card-catalog': {
     art: cardCatalog,

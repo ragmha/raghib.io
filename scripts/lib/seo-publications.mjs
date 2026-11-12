@@ -30,6 +30,10 @@ export function readPublication(source, collection, file) {
   }
   const date = new Date(data.date)
   if (!Number.isFinite(date.getTime())) throw new Error(`${file}: invalid publication date`)
+  const updated = data.updated === undefined ? undefined : new Date(data.updated)
+  if (updated && !(updated >= date)) {
+    throw new Error(`${file}: updated must be a valid date on or after the publication date`)
+  }
   const body = source.slice(match[0].length)
   const hasBodyContent = body.split(/<!--[\s\S]*?-->/).some((part) => part.trim().length > 0)
   if (!hasBodyContent) {
@@ -41,12 +45,13 @@ export function readPublication(source, collection, file) {
     searchTitle: data.seoTitle?.trim() ?? data.title,
     description: data.description,
     datePublished: date.toISOString(),
+    ...(updated && { dateModified: updated.toISOString() }),
   }
 }
 
 export function assertPublicationsMatch(expected, rendered) {
-  const signature = ({ collection, headline, searchTitle, description, datePublished }) =>
-    JSON.stringify([collection, headline, searchTitle, description, datePublished])
+  const signature = ({ collection, headline, searchTitle, description, datePublished, dateModified }) =>
+    JSON.stringify([collection, headline, searchTitle, description, datePublished, dateModified])
   assert.deepEqual(
     rendered.map(signature).sort(),
     expected.map(signature).sort(),

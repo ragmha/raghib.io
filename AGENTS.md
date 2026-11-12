@@ -42,7 +42,8 @@ source code where useful.
 - Posts never name the author's employer or its products (Microsoft, GitHub,
   Copilot, Azure, LinkedIn, VS Code, OpenAI and similar), and carry no
   disclaimer. `tests/no-employer.test.mjs` fails CI on any such name outside
-  code blocks and URLs.
+  code blocks and URLs. Its `ALLOWED` map lists the author's per-post
+  exceptions; add one only when the author decides a post must name the tool.
 - Posts use American English. `seoTitle` must be 44 characters or fewer.
 - Published posts carry static narration in two local Kokoro voices under
   `public/audio/`; `public/audio/narration.json` records which text each file
@@ -50,6 +51,9 @@ source code where useful.
   `.github/workflows/narration.yml` generates and commits it, then dispatches
   the `narration-review` agent, which can dispatch `article-merge`. Locally: `bun run narration:generate`.
   Edit `narration-review.md`, then run `gh aw compile`; never edit its lock file.
+- A revised published post keeps its `date` and sets `updated` to the revision
+  date (shown as "Last updated"). Keep revision history in GitHub rather than
+  adding an in-post changelog.
 
 ## Talks
 

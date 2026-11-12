@@ -27,7 +27,7 @@ def published_articles():
 
 def narration_text(source):
     source = re.sub(r"\A---\s*\n.*?\n---\s*", "", source, count=1, flags=re.DOTALL)
-    source = re.sub(r"(?ms)^(```|~~~)[^\n]*\n.*?^\1\s*$", "", source)
+    source = re.sub(r"(?ms)^[ \t]*(```|~~~)[^\n]*\n.*?^[ \t]*\1\s*$", "", source)
     source = re.sub(r"(?s)<!--.*?-->", "", source)
     source = re.sub(r"(?m)^\s*(?:import|export)\b.*$", "", source)
     # Figures contain visual diagrams and captions, which should stay visual.
@@ -66,6 +66,18 @@ not spoken
 ```
 """
     assert narration_text(sample) == "A heading\nRead this link and inline code."
+    for fence in ("```", "~~~"):
+        for indent in ("   ", "    "):
+            sample = f"""1. Save the script.
+
+{indent}{fence}js
+{indent}const notSpoken = true
+{indent}{fence}
+
+{indent}Run it with `node`.
+"""
+            text = narration_text(sample)
+            assert text == "Save the script.\nRun it with node.", text
 
 
 def outputs():

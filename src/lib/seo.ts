@@ -12,6 +12,7 @@ export function getCanonicalUrl(url: URL, site: URL | undefined): URL {
 export interface ArticleMetadata {
   headline: string
   date: Date
+  updated?: Date
   image?: string
 }
 
@@ -50,6 +51,7 @@ export function getSeoMetadata({
       : `${SITE_NAME}: independent writing on software, AI, and systems.`,
   }
   const datePublished = article && !noindex ? article.date.toISOString() : undefined
+  const dateModified = datePublished && article?.updated ? article.updated.toISOString() : undefined
   const graph = [
     author,
     {
@@ -69,6 +71,7 @@ export function getSeoMetadata({
       headline: article.headline,
       description,
       datePublished,
+      ...(dateModified && { dateModified }),
       inLanguage: 'en',
       image: image.url.href,
       author,
@@ -84,6 +87,7 @@ export function getSeoMetadata({
     image,
     openGraphType: article && !noindex ? 'article' : 'website',
     datePublished,
+    dateModified,
     structuredData: noindex ? undefined : {
       '@context': 'https://schema.org',
       '@graph': graph,

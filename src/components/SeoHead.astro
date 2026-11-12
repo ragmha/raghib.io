@@ -38,6 +38,7 @@ const analyticsToken = import.meta.env.PROD ? import.meta.env.PUBLIC_CF_BEACON_T
 <meta name="twitter:image" content={metadata.image.url.href} />
 <meta name="twitter:image:alt" content={metadata.image.alt} />
 {metadata.datePublished && <meta property="article:published_time" content={metadata.datePublished} />}
+{metadata.dateModified && <meta property="article:modified_time" content={metadata.dateModified} />}
 {metadata.structuredData && (
   <script is:inline type="application/ld+json" set:html={serializeJsonLd(metadata.structuredData)} />
 )}
