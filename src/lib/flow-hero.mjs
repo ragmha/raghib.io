@@ -932,6 +932,54 @@ function narrationPress(t) {
   t.label([154, -83, B + 14], 'MERGE GATES', { dy: -80, tone: 'green' })
 }
 
+function inspectionConveyor(t) {
+  t.base(-280, -120, 560, 240)
+
+  t.plate(-254, -108, 72, 50, B, 8)
+  t.dial(-218, -83, 20, B + 8, 0.6)
+  t.plate(-258, -36, 76, 80, B, 6)
+  for (let i = 0; i < 6; i++) t.box(-250 + i, -28, 58, 60, B + 7 + i * 2, 1.2, i === 5 ? 'hi' : 'lo')
+
+  t.plate(-174, -38, 318, 76, B, 8, 'lo')
+  for (let x = -164; x < 138; x += 16) t.bar([x, -31], [x, 31], 7, B + 8, 4, 'mid')
+  for (const x of [-150, -64, 22]) {
+    t.box(x, -19, 50, 38, B + 12, 1.4, 'hi')
+    t.rule([x + 5, -12], [x + 24, 0], B + 13.4, 'mid')
+    t.rule([x + 24, 0], [x + 45, -12], B + 13.4, 'mid')
+  }
+
+  t.plate(-108, -106, 44, 38, B, 6)
+  t.box(-94, -96, 12, 12, B + 6, 62, 'lo')
+  t.bar([-88, -90], [-48, -5], 5, B + 68, 4, 'mid')
+  t.cyl(-48, -5, 23, B + 60, 8, 'hi', { lit: true })
+  t.ring(-48, -5, 16, B + 68, 'mid')
+  t.lamp([-88, -90, B + 70], 'blue', 4)
+
+  // The lens can inspect an envelope; only the separate press can mark it.
+  t.plate(82, -62, 70, 124, B, 6)
+  for (const y of [-52, 40]) t.box(90, y, 12, 12, B + 6, 58, 'mid')
+  t.bar([96, -46], [96, 46], 14, B + 64, 8, 'hi')
+  t.cyl(112, 0, 7, B + 35, 29, 'mid')
+  t.box(95, -14, 34, 28, B + 28, 7, 'green')
+  t.bar([112, -46], [152, -70], 5, B + 64, 4, 'mid')
+  t.cyl(152, -70, 7, B + 64, 8, 'hi', { steps: 16 })
+  t.rail([[152, 0, B + 1], [184, 0, B + 1]], 'blue')
+  t.tray(184, -38, 76, 76, B, 20, () => {
+    for (let i = 0; i < 3; i++) t.box(194 + i * 2, -24, 50, 44, B + 3 + i * 2, 1.2, 'blue')
+  })
+
+  t.rail([[22, 38, B + 1], [22, 68, B + 1]], 'red', false)
+  t.tray(-14, 68, 72, 40, B, 16, () => {
+    t.box(0, 76, 44, 22, B + 3, 1.2, 'red')
+  }, 'lo')
+
+  t.label([-218, -83, B + 11], 'RECURRING WORK', { dy: -100 })
+  t.label([-48, -5, B + 68], 'INTERPRET', { dy: -130, tone: 'blue' })
+  t.label([112, -46, B + 72], 'BOUNDED OUTPUT', { dy: -100, tone: 'green' })
+  t.label([260, 0, B + 20], 'AWAIT REVIEW', { dx: 60, dy: 0, tone: 'blue' })
+  t.label([22, 108, B + 16], 'WITHHOLD', { dy: 70, tone: 'red' })
+}
+
 function statusRadio(t) {
   t.base(-160, -90, 320, 180)
 
@@ -975,6 +1023,16 @@ export const flowHeroSvg = hero => render(hero.label, hero.art)
 
 // Labels and outcomes paraphrase each article; nothing here adds a claim the post doesn't make.
 export const flowHeroes = {
+  'inspection-conveyor': {
+    art: inspectionConveyor,
+    label: 'An isometric mail-inspection conveyor. A clock feeds recurring envelopes onto rollers beneath a lit inspection lens, representing interpretation. A separate franking press represents a constrained output job. Marked envelopes collect in a blue tray awaiting human review; withheld outputs sit in a red tray. Inspection does not authorize a write, and a marked envelope is not a final decision.',
+    outputs: [
+      { label: 'AWAIT REVIEW', tone: 'blue' },
+      { label: 'WITHHOLD', tone: 'red' },
+    ],
+    thesis: ['Prepare the work repeatedly.', 'Keep authority separate.'],
+    note: 'An illustrative workflow design, not a measured deployment. Review requirements are configured separately.',
+  },
   'narration-press': {
     art: narrationPress,
     label: 'An isometric record-pressing line. A stack of article sheets feeds a sieve that catches diagram cards and drops them into a bin, so diagrams stay visual. The prose reaches a record lathe, the speech model, which cuts the same groove for the same text. A loupe on an arm over the groove is the agent review, the only step that reads. A barrier with its own interlock lamps opens to a tray of finished records; the loupe cannot lift it.',
