@@ -60,8 +60,8 @@ triage). When a post benefits from a hero, give it its own scene.
    `/hero/<name>.svg` and the post in light and dark themes, at 360 px and at
    desktop width. Labels must not overlap each other or the parts they name.
 
-The `decision` hero is a one-off for the reference post. New posts use flow
-heroes.
+The `decision` hero is a one-off for the reference post. When a new post uses
+a hero, use a flow hero.
 
 ## Diagrams
 
