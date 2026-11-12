@@ -1223,6 +1223,38 @@ function statusRadio(t) {
   t.label([-18, 32, B + 28], 'CONTROL SEPARATE', { dy: 104, tone: 'red' })
 }
 
+// ponytail: one signal lamp keeps the illustration focused on the event-to-state mapping.
+function statusRelay(t) {
+  t.base(-230, -105, 440, 210)
+
+  t.plate(-200, -58, 132, 116, B, 8, 'lo')
+  const events = [
+    { y: -32, tone: 'green', active: true },
+    { y: 0, tone: 'red', active: false },
+    { y: 32, tone: 'mid', active: false },
+  ]
+  for (const { y, tone, active } of events) {
+    t.box(-184, y - 9, 100, 18, B + 8, 6, 'mid')
+    t.cyl(-168, y, 5.5, B + 14, 5, tone, { steps: 14 })
+    t.bar([-158, y], [-108, y], 2, B + 14, 1, 'hi')
+    t.rail([[-68, y, B + 1], [-24, y, B + 1]], tone, active)
+  }
+  t.label([-130, -40, B + 19], 'WORK EVENTS', { dx: -74, dy: -46, tone: 'mid' })
+
+  t.plate(-24, -62, 95, 124, B, 8, 'mid')
+  t.box(-12, -48, 71, 96, B + 8, 18, 'lo')
+  t.dial(23, 0, 21, B + 26, 0.7, 'hi')
+  t.label([23, 0, B + 49], 'STATE MAP', { dy: -68, tone: 'blue' })
+
+  t.rail([[71, 0, B + 1], [104, 0, B + 1]], 'green')
+  t.plate(104, -54, 104, 108, B, 8, 'lo')
+  t.box(127, -34, 60, 68, B + 8, 20, 'mid')
+  t.cyl(157, 0, 17, B + 28, 12, 'green', { lit: true })
+  t.lamp([157, 0, B + 41], 'green', 7)
+  t.ring(157, 0, 19, B + 40, 'hi')
+  t.label([157, 0, B + 42], 'STATUS LIGHT', { dx: 68, dy: -34, tone: 'green' })
+}
+
 export const flowHeroSvg = hero => render(hero.label, hero.art)
 
 // Labels and outcomes paraphrase each article; nothing here adds a claim the post doesn't make.
@@ -1388,6 +1420,17 @@ export const flowHeroes = {
     ],
     thesis: ['Access is capability.', 'Submitting is permission.'],
     note: 'An illustrative split of authority. Nothing here was measured.',
+  },
+  'status-relay': {
+    art: statusRelay,
+    label: 'An isometric status relay. Three event buttons feed a state-mapping box and a networked lamp. Prompt submission is the green busy signal, an error is the red alert, and task end is the white idle signal. The lamp reports workflow events, not internal thought.',
+    outputs: [
+      { label: 'BUSY: GREEN', tone: 'green' },
+      { label: 'ERROR: RED', tone: 'red' },
+      { label: 'IDLE: WHITE', tone: 'mid' },
+    ],
+    thesis: ['The light reports an event.', 'It cannot report a thought.'],
+    note: 'An illustrative event-to-state map; concurrent sessions need their own aggregation rule.',
   },
 
   'agent-harness': {
