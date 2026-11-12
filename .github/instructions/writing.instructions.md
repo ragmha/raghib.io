@@ -4,11 +4,13 @@ applyTo: "src/content/writing/**"
 
 # Posts: no employer content
 
-The site is independent writing. Posts never name the author's employer or its
-products, and carry no employer disclaimer. `tests/no-employer.test.mjs` fails
-CI on Microsoft, GitHub, Copilot, Azure, LinkedIn, VS Code, OpenAI, Bing and
-similar names outside code blocks and URLs. The test's `ALLOWED` map holds the
-author's per-post exceptions; never add one without the author's decision.
+The site is independent writing about the author's interests, learning, and
+knowledge—not marketing, a CV, or company promotion. Posts never name the
+author's employer or its products, and carry no employer disclaimer.
+`tests/no-employer.test.mjs` fails CI on Microsoft, GitHub, Copilot, Azure,
+LinkedIn, VS Code, OpenAI, Bing and similar names outside code blocks and URLs.
+The test's `ALLOWED` map holds the author's per-post exceptions; never add one
+without the author's decision.
 
 When reviewing a post, also flag what the keyword test can't catch:
 
@@ -17,20 +19,20 @@ When reviewing a post, also flag what the keyword test can't catch:
 - Measurements, screenshots or examples that come from an employer product.
 - Internal, pre-release, or customer material.
 
-Suggest reframing around the tool-agnostic pattern: the constraint, the design
-that resolves it, and its trade-offs.
+Suggest reframing around the underlying idea when useful. Do not flatten a
+genuine argument into false neutrality: a point of view is welcome when it is
+the author's and its claims are supported.
 
-## Neutrality check
+## Independence check
 
-The goal is no bias: no vendor, the employer included, is favored or
-disfavored. Hiding a name doesn't remove a conflict of interest. For posts and
-experiments, flag work that fails any of these, and leave the decision to the
-author:
+The goal is independent, evidence-led writing, not forced neutrality. Hiding a
+name doesn't remove a conflict of interest. For posts and experiments, flag
+work that fails any of these, and leave the decision to the author:
 
-1. **Does it take a side?** Ranking products by cost, quality, or speed,
-   telling readers which to buy, or measuring on one vendor's product only
-   reads as an endorsement. Describe the pattern and the criteria a reader
-   would apply instead.
+1. **Does it endorse a commercial vendor?** Avoid ranking vendors by cost,
+   quality, or speed, telling readers which to buy, or measuring on one
+   vendor's product only. A supported point of view on ideas, practices, and
+   trade-offs is welcome.
 2. **Is every claim public?** No internal pricing mechanics, roadmap,
    telemetry, or customer material, even reworded.
 3. **Would the vendor publish it?** Using fewer tokens, caching, or routing to

@@ -1,8 +1,9 @@
 # raghib.io
 
 Raghib Hasan's independent writing site about software, AI, systems,
-governance, and technology adoption. Essays link to experiments, projects, and
-source code where useful.
+governance, and technology adoption. It is a place to share interests,
+learning, and knowledge—not a marketing channel, CV, company showcase, or
+content mill. Essays link to experiments, projects, and source code where useful.
 
 ## Audience and positioning
 
@@ -10,10 +11,16 @@ source code where useful.
   including people at AI labs. A post must make sense without knowing the
   author's employer or job.
 - The author writes as an independent practitioner, not as a spokesperson for
-  an employer or product. Lead with the problem and a point of view; the tool
-  used belongs in the method, not the subject.
+  an employer or product. Lead with the subject and a point of view when the
+  material supports one; name a product when it is central to the idea or
+  reader's task, not to promote it.
 - Never invent customers, outcomes, metrics, testimonials, logos, or
-  benchmarks.
+  benchmarks, or attribute opinions, experiences, or conclusions to the author
+  that they did not express.
+- Let the idea and intended reader determine a piece's structure, length, and
+  use of first person, examples, diagrams, or other visuals. Search discovery
+  and SEO support the writing; they do not choose its subject or impose a
+  recurring formula.
 
 ## Stack and constraints
 
@@ -35,10 +42,10 @@ source code where useful.
   - `post-layout` covers the hero machine, diagrams, and companion
     repositories.
   - `publication-preflight` checks a draft or post before review or release.
-- Every post opens with its own isometric hero machine and includes at least
-  one Mermaid or Excalidraw diagram. A tutorial whose code spans more than one
-  file, or more than 150 lines, puts the runnable project in a companion
-  repository. Tests enforce the hero, the diagram, and the 150-line limit.
+- Use an isometric hero machine or Mermaid/Excalidraw diagram when it makes the
+  idea easier to understand; do not add one just to satisfy a formula. A
+  tutorial whose code spans more than one file, or more than 150 lines, puts
+  the runnable project in a companion repository.
 - Posts never name the author's employer or its products (Microsoft, GitHub,
   Copilot, Azure, LinkedIn, VS Code, OpenAI and similar), and carry no
   disclaimer. `tests/no-employer.test.mjs` fails CI on any such name outside

@@ -1,27 +1,25 @@
 ---
 name: post-layout
-description: Lay out a raghib.io post. Invent its isometric hero machine, choose its diagram with diagram-design and draw it in Mermaid or Excalidraw, and move large tutorial code into a companion repository. Use when creating, drafting, restructuring, or publishing any post in src/content/writing/, or when a post needs a hero banner, a diagram, or a companion repo.
+description: Lay out a raghib.io post when its material benefits from a hero or diagram, or when tutorial code needs a companion repository. Use when creating, drafting, restructuring, or publishing a post in src/content/writing/.
 ---
 
 # Post layout
 
-Every post uses the same frame, so the author doesn't have to dictate it each
-time: a hero machine, at least one diagram, and a post short enough to read.
-`src/content/writing/decide-cheaply-generate-carefully.mdx` is the reference
-layout. Words and mode come from the `raghib-editorial-voice` skill; this skill
-covers structure and visuals.
+The material decides whether a hero or diagram helps. Do not add visuals to
+satisfy a template; a clear piece of writing may need neither. When visuals
+help, use this skill for their structure and craft. The `decision` hero in
+`src/content/writing/decide-cheaply-generate-carefully.mdx` is a reference.
+Words and the author's actual point of view come from the
+`raghib-editorial-voice` skill.
 
 ## Order
 
-1. Frontmatter, including `hero`, which the schema requires.
+1. Frontmatter.
 2. No disclaimer: posts never name the employer or its products.
-3. An opening of a few short paragraphs that states the question or
-   observation, before the first `##`.
-4. `##` and `###` sections. Put a diagram wherever the reader would otherwise
-   read a long explanation of a flow, sequence, structure, or state. Use a
-   table to compare options.
-5. A close that fits the mode, such as what is still unknown or what to try
-   next.
+3. Choose an opening, section structure, and close that fit the material; there
+   is no required article formula.
+4. Use a diagram when it explains a flow, sequence, structure, or state more
+   clearly than prose or a table.
 
 ## Hero banner
 
@@ -32,8 +30,7 @@ floating labels. The collection shows the vocabulary: a queue is a marble run,
 an LRU cache is a bookcase, and a Bloom filter is a fruit machine. Heroes
 already on this site include a ticket gate (agent harness), a fuel rig (budget
 fallback), a railway junction (DNS delegation), and a sorting desk (action
-triage). The schema and `tests/flow-hero.test.mjs` require every post to have
-its own scene.
+triage). When a post benefits from a hero, give it its own scene.
 
 1. Write one sentence before drawing anything: "A *machine* where *part* is
    *concept*, and *motion* means *claim*." Map each concept to a part. The
@@ -63,14 +60,13 @@ its own scene.
    `/hero/<name>.svg` and the post in light and dark themes, at 360 px and at
    desktop width. Labels must not overlap each other or the parts they name.
 
-The `decision` hero is a one-off for the reference post. New posts use flow
-heroes.
+The `decision` hero is a one-off for the reference post. When a new post uses
+a hero, use a flow hero.
 
 ## Diagrams
 
-Every post needs at least one Mermaid or Excalidraw diagram, and
-`tests/post-layout.test.mjs` enforces this. The hero is a metaphor; diagrams
-show the post's own system directly.
+When a diagram clarifies the material, use Mermaid or Excalidraw. The hero is
+a metaphor; diagrams show the post's own system directly.
 
 ### Choose the diagram with diagram-design
 
@@ -86,9 +82,9 @@ on GitHub. Use it only to choose and edit the diagram. Skip its style guide,
 onboarding gate, fonts, and HTML output, because this site's theme owns the
 look.
 
-1. Find the claim in the post that a reader would understand faster from a
-   picture than from a paragraph. If a sentence or a table would explain it
-   just as well, pick a different claim.
+1. Find a claim the reader would understand faster from a picture than from a
+   paragraph. If no claim qualifies, skip the diagram; if a sentence or table
+   explains it just as well, use that instead.
 2. If behavior, state, enforcement, or risk carries the meaning, choose a
    semantic pattern from `references/semantic-patterns.md` first. Then pick
    the nearest visual type from its selection table.
@@ -97,9 +93,8 @@ look.
    diagram goes over, split it into an overview and a detail.
 4. Every node, arrow, and label must match something the post says. If the
    text doesn't support it, cut it from the diagram.
-5. Before you draw, tell the author the claim, the pattern and type, the
+5. Before drawing, tell the author the claim, the pattern and type, the
    reference files you read, the medium, and anything the budget forced out.
-   Repeat it in your final message.
 6. Draw it in the medium that suits the type:
    - **Mermaid `flowchart`** for a flowchart, process, data flow,
      architecture, tree, or dependency graph. It's the only Mermaid type the

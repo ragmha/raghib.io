@@ -143,9 +143,10 @@ cover:
   alt: 'What the image shows'
 ```
 
-Every post needs at least one Mermaid or Excalidraw diagram. Choose its type
-with [diagram-design](https://github.com/cathrynlavery/diagram-design), as
-described in `.agents/skills/post-layout/SKILL.md`.
+Use a Mermaid or Excalidraw diagram when it helps readers understand the idea;
+plain writing is enough when it does not. Choose a diagram type with
+[diagram-design](https://github.com/cathrynlavery/diagram-design), as described
+in `.agents/skills/post-layout/SKILL.md`.
 
 Rendered diagrams live in `public/diagrams/`; editable `.excalidraw` sources live
 in `src/assets/diagrams/`. Edit a source in Excalidraw, or write element
@@ -212,13 +213,13 @@ as `/decision-hero.svg` and inlined after load, so it doesn't delay the title.
 To verify it in a browser, start the dev server and run
 `DECISION_HERO_TEST_URL=http://localhost:4329/writing/decide-cheaply-generate-carefully/ node --test tests/decision-hero.browser.mjs`.
 
-Every other post opens with the same cover anatomy: an isometric illustration
-above the title, a two-line thesis and a short note. Each post gets its own
-invented machine whose working is the explanation, drawn by a scene function in
-`src/lib/flow-hero.mjs` from a shared workshop kit and fitted to the frame
-automatically. `hero` is required frontmatter. For a new post, write a new
-scene and add a `flowHeroes` entry that paraphrases the post without adding
-claims, then set `hero: "<name>"`.
+An isometric hero can help explain some posts. When you choose one, its
+illustration appears above the title with a two-line thesis and a short note.
+Give it a unique invented machine whose working explains the idea, drawn by a
+scene function in `src/lib/flow-hero.mjs` from the shared workshop kit and
+fitted to the frame automatically. Add a `flowHeroes` entry that paraphrases
+the post without adding claims, then set `hero: "<name>"` in frontmatter.
+`hero` is optional; omit it when an illustration would not help.
 
 JetBrains Mono uses `font-display: optional` and width-matched fallback text to
 avoid rewrapping content after the first paint. On slow first visits, the system
