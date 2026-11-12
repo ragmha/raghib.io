@@ -167,9 +167,8 @@ need:
          res.end('You can close this tab and go back to the terminal.')
          server.close()
          const got = params.get('code')
-         const error = params.get('error') ?? 'state mismatch'
          if (got && params.get('state') === state) resolve(got)
-         else reject(new Error(`Sign-in failed: ${error}`))
+         else reject(new Error('Sign-in failed. Run login again.'))
        })
        server.on('error', reject).listen(8765, '127.0.0.1', () => {
          const url = `https://accounts.spotify.com/authorize?${query}`
