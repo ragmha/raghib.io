@@ -85,8 +85,15 @@ Check both destinations and reciprocal declarations when updating either side.
 
 `/talks/` lists talks and workshops written as [Marp](https://marp.app) decks
 in `src/content/talks/*.md` (frontmatter: `title`, `description`, `date`,
-`kind: talk | workshop`, optional `locked`). Each deck renders inline in the
-site theme from `src/styles/talk-theme.css`. After `astro build`,
+`kind: talk | workshop`, optional `locked`). Each public deck has an embedded
+slideshow and an **Open presentation** link to `/talks/<slug>/present.html`,
+with arrow-key navigation, fullscreen (`F`), and presenter notes (`P`).
+The standalone presentation's light/dark toggle shares the site's saved preference.
+Slides fade in over 200ms; reduced-motion mode disables the animation.
+PDF and PowerPoint exports stay static.
+**Read all slides** keeps the scrolling handout available. Presentations use
+the site theme from `src/styles/talk-theme.css`; the standalone view is noindex.
+After `astro build`,
 `scripts/export-talks.mjs` writes `<slug>.pdf` and an image-only `<slug>.pptx`
 next to each public deck for the Download menu.
 
