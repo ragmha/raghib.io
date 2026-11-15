@@ -10,6 +10,7 @@ const BANNED = /\b(microsoft|copilot|azure|github|linkedin|vs ?code|work ?iq|dec
 const ALLOWED = {
   'copilot-cli-spotify-status-line.mdx': /\b(github|copilot)\b/gi,
   'talks/self-healing-operations.md': /\b(github|copilot|azure)\b/gi,
+  'security-controls-for-agentic-development.mdx': /\b(github|copilot)\b/gi,
 }
 
 const prose = (text) => text

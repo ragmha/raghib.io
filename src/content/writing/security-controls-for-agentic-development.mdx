@@ -1,0 +1,137 @@
+---
+title: "Security Controls for Agentic Development"
+seoTitle: "Security Controls for Agentic Development"
+description: "As coding agents take on more of development, enterprises need controls that cover package intake, credentials, findings, exceptions, and remediation."
+date: "2026-11-15"
+topics: ["AI Tools", "Business"]
+tags: ["agents", "application-security", "devsecops", "governance", "security"]
+published: true
+---
+
+An agent's pull request is not the whole security event. Before the diff
+appears, it can install dependencies, run package scripts, use credentials
+while testing, and alter build or deployment files. Reviewing the final code
+cannot establish whether those steps respected enterprise policy.
+
+The change is not that development tools can cause harm. They always could.
+It is that one delegated task now crosses package selection, execution, code
+changes, and triage before a reviewer sees the pull request. Security programs
+need to cover that path, not only the final diff.
+
+## The risk starts before the diff
+
+Consider an agent asked to add an integration to an application. It needs a
+client library, credentials for testing, and access to a development
+environment. A reviewer can inspect the integration for unsafe handling of
+user input, but that review cannot undo an installation script that already
+read a credential. The final diff may not show which external services the
+agent contacted while debugging.
+
+These risks existed in developer tooling and build systems before coding
+agents. The useful question is where an existing control runs. Dependency
+policy matters when a package is selected and installed, not only when the
+resulting code is reviewed. Credential protection matters before a value is
+committed or sent elsewhere, as well as in repository scans. Controls that
+apply only after a pull request is opened leave earlier steps outside the
+review.
+
+## A block needs an exception path
+
+A package policy might block a new version. A credential check might reject a
+push. A network restriction might stop a test from reaching an external
+service. Some blocks will be justified; others will need an exception.
+
+The agent should explain the block, preserve the relevant evidence, and route
+the request to someone authorized to decide. It should not remove the check,
+switch to an ungoverned download source, or widen the policy to finish the
+task.
+
+An exception should name what is being allowed, such as a package version or
+destination, and why. It should also have a defined owner and, where useful,
+an end date. Otherwise a temporary workaround can become a permanent gap.
+This is also a test of whether the policy is usable. If an urgent security
+update is blocked by a package-age rule, the answer cannot simply be to wait.
+
+## Findings need a disposition
+
+Agent-generated changes can cross application code, shell scripts,
+infrastructure configuration, and build definitions. Security coverage needs
+to include the parts of that change the organization relies on. A successful
+scan of the application's language says little about a deployment script the
+scanner never examined.
+
+Findings also need an explicit disposition. Some checks block a merge; others
+advise a reviewer. An advisory finding with no owner or review requirement can
+sit beside a passing build without affecting the release decision.
+
+[Reachability analysis][reachability] can help establish whether application
+code calls a vulnerable dependency function. It does not establish whether an
+attacker can exploit that function. A scan that finds no call path does not
+prove the dependency is safe, either. Use those signals with deployment
+exposure, the system's sensitivity, and knowledge of the application. Code
+analysis cannot observe every condition in which an application will operate.
+
+The operational question is whether a finding reaches someone who can make and
+verify a change. Without that connection, another detector mainly adds
+another queue.
+
+## Fixes need independent evidence
+
+An automated fix can shorten the work between an alert and a reviewable patch.
+It also creates a second decision: whether the change actually fixes the issue.
+A scanner no longer reporting an alert is useful evidence, not proof that the
+application still behaves correctly or that the change introduced no other
+vulnerability.
+
+Reviewers need the proposed diff, an explanation of the change, and the checks
+that ran. A test that did not run, an unsupported language, or an exhausted
+analysis budget must not look like a clean result. Missing evidence is a
+reason to investigate, not a passing security check.
+
+## Pilot the control path
+
+An enterprise does not have to replace its security stack simply because it
+starts using agents. It does need to check whether existing controls still
+work when an agent performs the task.
+
+Start with one representative service and a bounded task. Include a dependency
+that policy should reject, a credential exposure that should be caught, a
+finding that needs human review, and a request that needs an exception. Then
+check whether each control ran at the intended point, whether the exception
+reached the right owner, and whether reviewers can tell what changed and what
+was actually checked.
+
+Keep enough evidence to answer those questions without turning logs into
+another store of sensitive data. Task identity, relevant actions, approvals,
+and validation results may be more useful than retaining every prompt and
+tool response. Measure coverage and remediation alongside delivery speed.
+Faster task completion alone is not evidence that broader access is safe.
+
+## Where a platform can help
+
+Security releases around [GitHub Universe 2026][universe-security] touch
+several points in this path. The [package firewall][package-firewall] is in
+public preview and currently supports npm. [Open-source license compliance][license-compliance]
+is generally available for Enterprise Cloud repositories with Code Security.
+[AI-detected push protection][ai-push-protection] is in public preview, is off
+by default, and requires both AI-detected secrets and push protection. [Code
+scanning for AI applications][ai-app-scanning] is in public preview on
+github.com and requires GitHub Advanced Security. [Agentic
+autofix][agentic-autofix] is generally available for Enterprise Cloud
+customers with Code Security or Advanced Security. Their availability and
+prerequisites differ.
+
+For organizations already developing on GitHub, [GitHub Advanced Security][advanced-security]
+is one option to evaluate against these gaps. Existing tools may already cover
+some of them. Check licensing, usage costs, and deployment support feature by
+feature. A product does not replace an exception process, coverage decisions,
+or review of a security fix.
+
+[reachability]: https://docs.github.com/en/code-security/concepts/supply-chain-security/about-reachability-analysis-for-dependabot-alerts
+[universe-security]: https://github.blog/changelog/2026/?label=universe26
+[package-firewall]: https://github.blog/changelog/2026-10-20-github-package-firewall-in-public-preview/
+[license-compliance]: https://github.blog/changelog/2026-10-16-open-source-license-compliance-generally-available/
+[ai-push-protection]: https://github.blog/changelog/2026-10-28-push-protection-beyond-predefined-secret-patterns/
+[ai-app-scanning]: https://github.blog/changelog/2026-10-28-code-scanning-for-ai-applications-in-public-preview/
+[agentic-autofix]: https://github.blog/changelog/2026-10-15-agentic-autofix-for-code-scanning-alerts-general-availability/
+[advanced-security]: https://docs.github.com/en/billing/concepts/product-billing/github-advanced-security
