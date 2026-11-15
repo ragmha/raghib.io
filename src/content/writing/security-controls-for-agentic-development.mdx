@@ -64,7 +64,7 @@ Findings also need an explicit disposition. Some checks block a merge; others
 advise a reviewer. An advisory finding with no owner or review requirement can
 sit beside a passing build without affecting the release decision.
 
-[Reachability analysis][reachability] can help establish whether application
+[Reachability analysis](https://docs.github.com/en/code-security/concepts/supply-chain-security/about-reachability-analysis-for-dependabot-alerts) can help establish whether application
 code calls a vulnerable dependency function. It does not establish whether an
 attacker can exploit that function. A scan that finds no call path does not
 prove the dependency is safe, either. Use those signals with deployment
@@ -109,29 +109,20 @@ Faster task completion alone is not evidence that broader access is safe.
 
 ## Where a platform can help
 
-Security releases around [GitHub Universe 2026][universe-security] touch
-several points in this path. The [package firewall][package-firewall] is in
-public preview and currently supports npm. [Open-source license compliance][license-compliance]
+Security releases around [GitHub Universe 2026](https://github.blog/changelog/2026/?label=universe26) touch
+several points in this path. The [package firewall](https://github.blog/changelog/2026-10-20-github-package-firewall-in-public-preview/) is in
+public preview and currently supports npm. [Open-source license compliance](https://github.blog/changelog/2026-10-16-open-source-license-compliance-generally-available/)
 is generally available for Enterprise Cloud repositories with Code Security.
-[AI-detected push protection][ai-push-protection] is in public preview, is off
+[AI-detected push protection](https://github.blog/changelog/2026-10-28-push-protection-beyond-predefined-secret-patterns/) is in public preview, is off
 by default, and requires both AI-detected secrets and push protection. [Code
-scanning for AI applications][ai-app-scanning] is in public preview on
+scanning for AI applications](https://github.blog/changelog/2026-10-28-code-scanning-for-ai-applications-in-public-preview/) is in public preview on
 github.com and requires GitHub Advanced Security. [Agentic
-autofix][agentic-autofix] is generally available for Enterprise Cloud
+autofix](https://github.blog/changelog/2026-10-15-agentic-autofix-for-code-scanning-alerts-general-availability/) is generally available for Enterprise Cloud
 customers with Code Security or Advanced Security. Their availability and
 prerequisites differ.
 
-For organizations already developing on GitHub, [GitHub Advanced Security][advanced-security]
+For organizations already developing on GitHub, [GitHub Advanced Security](https://docs.github.com/en/billing/concepts/product-billing/github-advanced-security)
 is one option to evaluate against these gaps. Existing tools may already cover
 some of them. Check licensing, usage costs, and deployment support feature by
 feature. A product does not replace an exception process, coverage decisions,
 or review of a security fix.
-
-[reachability]: https://docs.github.com/en/code-security/concepts/supply-chain-security/about-reachability-analysis-for-dependabot-alerts
-[universe-security]: https://github.blog/changelog/2026/?label=universe26
-[package-firewall]: https://github.blog/changelog/2026-10-20-github-package-firewall-in-public-preview/
-[license-compliance]: https://github.blog/changelog/2026-10-16-open-source-license-compliance-generally-available/
-[ai-push-protection]: https://github.blog/changelog/2026-10-28-push-protection-beyond-predefined-secret-patterns/
-[ai-app-scanning]: https://github.blog/changelog/2026-10-28-code-scanning-for-ai-applications-in-public-preview/
-[agentic-autofix]: https://github.blog/changelog/2026-10-15-agentic-autofix-for-code-scanning-alerts-general-availability/
-[advanced-security]: https://docs.github.com/en/billing/concepts/product-billing/github-advanced-security
