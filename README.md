@@ -113,8 +113,8 @@ headings supply the contents list without imposing the same outline on every pos
 Code examples get keyboard-accessible Copy controls using the native clipboard
 API. Success and failure are announced inline; manual selection still works
 without JavaScript or clipboard permission. Diagrams are not copy targets.
-Posts name no employer or employer product and carry no disclaimer;
-`tests/no-employer.test.mjs` enforces it.
+See the [writing instructions](.github/instructions/writing.instructions.md)
+for publication naming rules and author-approved exceptions.
 
 Posts live in `src/content/writing/`. A project can optionally have a longer
 writeup at `/project/<project-name>/writings/`, authored as MDX in
