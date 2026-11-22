@@ -1255,6 +1255,63 @@ function statusRelay(t) {
   t.label([157, 0, B + 42], 'STATUS LIGHT', { dx: 68, dy: -34, tone: 'green' })
 }
 
+function sharedBookmark(t) {
+  t.base(-270, -130, 540, 260)
+
+  // Screen and test controls feed the same state mechanism.
+  t.plate(-248, -96, 92, 76, B, 8, 'lo')
+  t.box(-237, -86, 70, 50, B + 8, 8, 'mid')
+  t.box(-232, -81, 60, 28, B + 16, 2, 'hi')
+  t.text(-202, -67, B + 18, 'SAVE', 7, 'mid')
+  t.cyl(-202, -42, 6, B + 16, 4, 'green', { steps: 14 })
+
+  t.plate(-248, 20, 92, 76, B, 8, 'lo')
+  t.box(-237, 30, 70, 50, B + 8, 8, 'mid')
+  t.box(-232, 35, 60, 28, B + 16, 2, 'hi')
+  t.text(-202, 49, B + 18, 'SAVE', 7, 'blue')
+
+  t.rail([[-156, -55, B + 1], [-110, -55, B + 1], [-75, -20, B + 1], [-58, -20, B + 1]], 'green')
+  t.rail([[-156, 58, B + 1], [-110, 58, B + 1], [-75, 20, B + 1], [-58, 20, B + 1]], 'blue')
+
+  t.plate(-72, -78, 144, 156, B, 10, 'lo')
+  t.cyl(0, 0, 50, B + 10, 24, 'mid')
+  t.ring(0, 0, 42, B + 34, 'hi')
+  for (let i = 0; i < 12; i++) {
+    const a = i * Math.PI / 6
+    t.bar(
+      [Math.cos(a) * 44, Math.sin(a) * 44],
+      [Math.cos(a) * 55, Math.sin(a) * 55],
+      5,
+      B + 34,
+      7,
+      i % 3 === 0 ? 'hi' : 'mid',
+    )
+  }
+  t.cyl(0, 0, 20, B + 34, 13, 'green', { lit: true })
+  t.box(-18, -10, 36, 20, B + 47, 2, 'hi')
+  t.text(0, 1, B + 49, 'YES', 8, 'lo')
+
+  t.rail([[56, -20, B + 1], [96, -20, B + 1], [126, -55, B + 1], [148, -55, B + 1]], 'green')
+  t.rail([[56, 20, B + 1], [96, 20, B + 1], [126, 55, B + 1], [148, 55, B + 1]], 'blue')
+
+  t.plate(148, -92, 102, 72, B, 8, 'mid')
+  t.box(158, -82, 82, 52, B + 8, 8, 'lo')
+  t.box(165, -76, 68, 31, B + 16, 2, 'green')
+  t.text(199, -60, B + 18, 'YES', 8, 'hi')
+
+  t.plate(148, 20, 102, 72, B, 8, 'lo')
+  t.box(158, 30, 82, 52, B + 8, 8, 'mid')
+  t.box(165, 36, 68, 31, B + 16, 2, 'hi')
+  t.text(199, 52, B + 18, 'YES = YES', 6, 'mid')
+  t.cyl(230, 68, 4, B + 16, 3, 'green', { steps: 12 })
+
+  t.label([-202, -67, B + 18], 'SCREEN ACTION', { dx: -60, dy: -70, tone: 'green' })
+  t.label([-202, 49, B + 18], 'TEST ACTION', { dx: -60, dy: 80, tone: 'blue' })
+  t.label([0, 0, B + 47], 'SAVED STATE', { dy: -110, tone: 'green' })
+  t.label([199, -60, B + 18], 'UI', { dx: 40, dy: -65, tone: 'green' })
+  t.label([199, 52, B + 18], 'TEST', { dy: 90, tone: 'blue' })
+}
+
 export const flowHeroSvg = hero => render(hero.label, hero.art)
 
 // Labels and outcomes paraphrase each article; nothing here adds a claim the post doesn't make.
@@ -1510,5 +1567,15 @@ export const flowHeroes = {
     ],
     thesis: ['An alert starts a decision.', 'It doesn’t make one.'],
     note: 'Fictional scenario. Query parameters are not access control, so the gate needs both locks.',
+  },
+  'shared-bookmark': {
+    art: sharedBookmark,
+    label: 'An isometric bookmark press. A screen control and a separate test console send the save action to one lit state mechanism. Its saved state flows to a rendered screen and a test assertion.',
+    outputs: [
+      { label: 'UI RENDERS', tone: 'green' },
+      { label: 'TEST ASSERTS', tone: 'blue' },
+    ],
+    thesis: ['One action changes one state.', 'Two routes can inspect it.'],
+    note: 'An illustrative reading-list action. The behavior path does not verify the rendered interface.',
   },
 }

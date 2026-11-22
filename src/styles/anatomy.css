@@ -247,4 +247,8 @@ html[data-theme='light'] .decision-hero {
     padding: .15rem .4rem;
     background: var(--theme-bg);
   }
+
+  .decision-cover[data-flow-hero='shared-bookmark'] .decision-cover-routes {
+    display: none;
+  }
 }
