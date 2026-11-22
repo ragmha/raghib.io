@@ -92,6 +92,9 @@ const updated = post.data.updated && factDate.format(post.data.updated)
             <div><dt>Last updated:</dt><dd><time datetime={post.data.updated.toISOString()}>{updated}</time></dd></div>
           )}
           <div><dt>Reading time:</dt><dd>{minutes} minute{minutes === 1 ? '' : 's'}</dd></div>
+          {post.data.lab && (
+            <div><dt>Lab:</dt><dd><a href={`/experiments/${post.data.lab}/`}>Explore the experiment</a></dd></div>
+          )}
           {post.data.tags.length > 0 && (
             <div>
               <dt>Tags:</dt>
