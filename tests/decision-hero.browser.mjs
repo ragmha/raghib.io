@@ -5,6 +5,42 @@ import { chromium, webkit } from 'playwright'
 const url = process.env.DECISION_HERO_TEST_URL
 const flowUrl = process.env.FLOW_HERO_TEST_URL
 
+test('bookmark artwork loading preserves the caption position', {
+  skip: !flowUrl,
+}, async () => {
+  const browser = await chromium.launch()
+  try {
+    for (const theme of ['dark', 'light']) {
+      for (const width of [360, 768, 1024]) {
+        const context = await browser.newContext({ viewport: { width, height: 900 } })
+        try {
+          const page = await context.newPage()
+          let release
+          const ready = new Promise(resolve => { release = resolve })
+          await page.route('**/hero/shared-bookmark.svg', async route => {
+            const response = await route.fetch()
+            await ready
+            await route.fulfill({ response })
+          })
+          await page.goto(flowUrl, { waitUntil: 'domcontentloaded' })
+          await page.evaluate(value => document.documentElement.dataset.theme = value, theme)
+          await page.evaluate(() => document.fonts.ready)
+          const caption = page.locator('.decision-cover figcaption')
+          const before = await caption.boundingBox()
+          release()
+          await page.locator('.decision-cover.has-illustration').waitFor()
+          const after = await caption.boundingBox()
+          assert.ok(Math.abs(after.y - before.y) < 1, `${theme} ${width}px: artwork must not move the caption`)
+        } finally {
+          await context.close()
+        }
+      }
+    }
+  } finally {
+    await browser.close()
+  }
+})
+
 test('bookmark outcomes stay outside mobile artwork in both themes', {
   skip: !flowUrl,
 }, async () => {
