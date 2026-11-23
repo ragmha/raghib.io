@@ -218,7 +218,9 @@ the input, small decision model and example routes without requiring JavaScript.
 The hero inherits the site's theme. Because it is about 580 KB, it is served
 as `/decision-hero.svg` and inlined after load, so it doesn't delay the title.
 To verify it in a browser, start the dev server and run
-`DECISION_HERO_TEST_URL=http://localhost:4329/writing/decide-cheaply-generate-carefully/ node --test tests/decision-hero.browser.mjs`.
+`DECISION_HERO_TEST_URL=http://localhost:4329/writing/decide-cheaply-generate-carefully/ FLOW_HERO_TEST_URL=http://localhost:4329/writing/test-app-behavior-without-rendering-ui/ node --test tests/decision-hero.browser.mjs`.
+This also checks the bookmark hero's mobile outcome labels in both themes,
+with artwork loaded or unavailable and with JavaScript disabled.
 
 An isometric hero can help explain some posts. When you choose one, its
 illustration appears above the title with a two-line thesis and a short note.

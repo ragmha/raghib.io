@@ -7,5 +7,7 @@ for (const art of document.querySelectorAll<HTMLElement>('.decision-hero-art[dat
       art.hidden = false
       art.closest('.decision-cover')?.classList.add('has-illustration')
     })
-    .catch(() => {})
+    .catch(() => {
+      art.closest('.decision-cover')?.classList.add('illustration-failed')
+    })
 }
