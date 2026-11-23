@@ -11,6 +11,9 @@ const hero = flowHeroes[Astro.props.name as keyof typeof flowHeroes]
 ---
 
 <figure class="decision-hero decision-cover iso" data-flow-hero={Astro.props.name}>
+  {Astro.props.name === 'shared-bookmark' && (
+    <noscript><style is:inline>.decision-cover[data-flow-hero='shared-bookmark'] { --bookmark-art-space: 0px; }</style></noscript>
+  )}
   <div class="decision-hero-frame">
     <div class="decision-cover-routes">
       {hero.outputs.map((output) => <span data-tone={output.tone}>{output.label}</span>)}

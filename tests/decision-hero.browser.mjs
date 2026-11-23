@@ -67,6 +67,11 @@ test('bookmark outcomes stay outside mobile artwork in both themes', {
           assert.deepEqual(await labels.allTextContents(), ['UI RENDERS', 'TEST ASSERTS'])
           const caption = await hero.locator('figcaption').boundingBox()
           const artwork = await art.boundingBox()
+          if (state !== 'loaded') {
+            const frame = await hero.locator('.decision-hero-frame').boundingBox()
+            const routes = await hero.locator('.decision-cover-routes').boundingBox()
+            assert.ok(frame.height - routes.height < 1, `${theme} ${state}: missing artwork does not leave empty space`)
+          }
           const bounds = []
           for (const label of await labels.all()) {
             assert.equal(await label.isVisible(), true, `${theme} ${state}: outcome is visible`)

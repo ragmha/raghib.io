@@ -252,7 +252,11 @@ html[data-theme='light'] .decision-hero {
     display: flex;
     flex-direction: column;
     aspect-ratio: auto;
-    padding-top: calc(100% * 740 / 1500);
+    padding-top: var(--bookmark-art-space, calc(100% * 740 / 1500));
+  }
+
+  .decision-cover[data-flow-hero='shared-bookmark'].illustration-failed {
+    --bookmark-art-space: 0px;
   }
 
   .decision-cover[data-flow-hero='shared-bookmark'] .decision-hero-art {
