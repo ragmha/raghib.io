@@ -3,6 +3,55 @@ import { test } from 'node:test'
 import { chromium, webkit } from 'playwright'
 
 const url = process.env.DECISION_HERO_TEST_URL
+const flowUrl = process.env.FLOW_HERO_TEST_URL
+
+test('bookmark outcomes stay outside mobile artwork in both themes', {
+  skip: !flowUrl,
+}, async () => {
+  const browser = await chromium.launch()
+  try {
+    for (const theme of ['dark', 'light']) {
+      for (const state of ['loaded', 'unavailable', 'disabled']) {
+        const context = await browser.newContext({
+          viewport: { width: 360, height: 900 },
+          javaScriptEnabled: state !== 'disabled',
+          reducedMotion: 'reduce',
+        })
+        try {
+          const page = await context.newPage()
+          if (state === 'unavailable') {
+            await page.route('**/hero/shared-bookmark.svg', route => route.abort())
+          }
+          await page.goto(flowUrl, { waitUntil: 'networkidle' })
+          await page.evaluate(value => document.documentElement.dataset.theme = value, theme)
+          const hero = page.locator('.decision-cover')
+          const art = hero.locator('.decision-hero-art')
+          assert.equal(await art.isVisible(), state === 'loaded', `${theme} ${state}`)
+          const labels = hero.locator('.decision-cover-routes span')
+          assert.deepEqual(await labels.allTextContents(), ['UI RENDERS', 'TEST ASSERTS'])
+          const caption = await hero.locator('figcaption').boundingBox()
+          const artwork = await art.boundingBox()
+          const bounds = []
+          for (const label of await labels.all()) {
+            assert.equal(await label.isVisible(), true, `${theme} ${state}: outcome is visible`)
+            const box = await label.boundingBox()
+            assert.ok(box.x >= 0 && box.x + box.width <= 360, 'Outcome fits the mobile viewport')
+            assert.ok(box.y + box.height <= caption.y, 'Outcome does not overlap the caption')
+            if (artwork) assert.ok(box.y >= artwork.y + artwork.height, 'Outcome is below the artwork')
+            bounds.push(box)
+          }
+          const [left, right] = bounds
+          assert.ok(left.x + left.width <= right.x || left.y + left.height <= right.y, 'Outcomes do not overlap')
+          assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true)
+        } finally {
+          await context.close()
+        }
+      }
+    }
+  } finally {
+    await browser.close()
+  }
+})
 
 test('decision hero follows the site theme and fits desktop and mobile', {
   skip: !url,

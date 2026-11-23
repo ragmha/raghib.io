@@ -248,7 +248,20 @@ html[data-theme='light'] .decision-hero {
     background: var(--theme-bg);
   }
 
+  .decision-cover[data-flow-hero='shared-bookmark'] .decision-hero-frame {
+    display: flex;
+    flex-direction: column;
+    aspect-ratio: auto;
+  }
+
+  .decision-cover[data-flow-hero='shared-bookmark'] .decision-hero-art {
+    position: relative;
+    aspect-ratio: 1500 / 740;
+  }
+
   .decision-cover[data-flow-hero='shared-bookmark'] .decision-cover-routes {
-    display: none;
+    position: static;
+    order: 1;
+    padding-inline: 1.25rem;
   }
 }
